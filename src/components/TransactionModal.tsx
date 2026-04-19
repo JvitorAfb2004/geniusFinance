@@ -88,29 +88,48 @@ export function TransactionModal({
         </div>
         
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-3">
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Tipo</label>
-              <select 
-                value={type} 
-                onChange={e => setType(e.target.value as TransactionType)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2"
-              >
-                <option value="INCOME">Entrada (+)</option>
-                <option value="EXPENSE">Saída (-)</option>
-                <option value="CREDIT_CARD">Cartão de Crédito</option>
-              </select>
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { id: 'INCOME', label: 'Entrada (+)', colorClasses: type === 'INCOME' ? 'bg-emerald-50 text-emerald-700 border-emerald-500' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50' },
+                  { id: 'EXPENSE', label: 'Saída (-)', colorClasses: type === 'EXPENSE' ? 'bg-rose-50 text-rose-700 border-rose-500' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50' },
+                  { id: 'CREDIT_CARD', label: 'Cartão', colorClasses: type === 'CREDIT_CARD' ? 'bg-blue-50 text-blue-700 border-blue-500' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50' }
+                ].map(opt => (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    onClick={() => setType(opt.id as TransactionType)}
+                    className={`py-2 px-1 sm:px-2 text-[0.75rem] font-bold rounded-lg border-2 transition-colors cursor-pointer ${opt.colorClasses}`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
             </div>
+
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</label>
-              <select 
-                value={status} 
-                onChange={e => setStatus(e.target.value as TransactionStatus)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2"
-              >
-                <option value="PAID">Pago / Recebido</option>
-                <option value="PENDING">Pendente</option>
-              </select>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { id: 'PAID', label: 'Pago / Recebido' },
+                  { id: 'PENDING', label: 'Pendente' }
+                ].map(opt => (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    onClick={() => setStatus(opt.id as TransactionStatus)}
+                    className={`py-2 px-3 text-[0.8rem] font-bold rounded-lg border-2 transition-colors cursor-pointer ${
+                      status === opt.id
+                        ? 'border-[#3b82f6] bg-[#eff6ff] text-[#1d4ed8]'
+                        : 'border-gray-200 text-gray-600 hover:bg-gray-50 bg-white'
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
@@ -132,6 +151,7 @@ export function TransactionModal({
               <input 
                 required
                 type="text" 
+                inputMode="numeric"
                 placeholder="0,00"
                 value={amountStr}
                 onChange={handleAmountChange}
