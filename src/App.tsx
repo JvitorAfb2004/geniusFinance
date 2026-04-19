@@ -44,7 +44,7 @@ function MainApp() {
           <div className="w-16 h-16 bg-[#eff6ff] text-[#3b82f6] rounded-xl flex items-center justify-center mx-auto mb-6">
             <PieChart className="w-8 h-8" />
           </div>
-          <h1 className="text-2xl font-extrabold text-[#1e293b] mb-2 font-sans tracking-tight">FinanceiroCore.</h1>
+          <h1 className="text-2xl font-extrabold text-[#1e293b] mb-2 font-sans tracking-tight">GeniusFinance<span className="text-[#3b82f6]">.</span></h1>
           <p className="text-[#64748b] mb-8">Faça login para acessar os seus dados financeiros de forma segura na nuvem.</p>
           <button 
             onClick={signInWithGoogle}
@@ -58,6 +58,11 @@ function MainApp() {
             </svg>
             Entrar com Google
           </button>
+          <div className="mt-8 pt-6 border-t border-gray-100">
+            <p className="text-xs text-gray-400 font-medium tracking-wide">
+              Desenvolvido por <a href="https://geniusweb.online" target="_blank" rel="noopener noreferrer" className="text-[#3b82f6] hover:underline">geniusweb.online</a>
+            </p>
+          </div>
         </div>
       </div>
     );
@@ -78,11 +83,14 @@ function MainApp() {
         "fixed inset-y-0 left-0 z-50 w-[240px] bg-[#1e293b] text-white flex flex-col py-6 transform transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 w-64 shrink-0",
         isSidebarOpen ? "translate-x-0" : "-translate-x-full"
       )}>
-        <div className="px-6 pb-6 font-extrabold text-[1.2rem] tracking-tight border-b border-white/10 mb-6 flex items-center justify-between">
-          FinanceiroCore.
-          <button className="lg:hidden text-white/70 hover:text-white" onClick={() => setIsSidebarOpen(false)}>
-            <X className="w-5 h-5"/>
-          </button>
+        <div className="px-6 pb-6 border-b border-white/10 mb-6 flex flex-col gap-1">
+          <div className="flex items-center justify-between font-extrabold text-[1.2rem] tracking-tight">
+            <span>GeniusFinance<span className="text-[#3b82f6]">.</span></span>
+            <button className="lg:hidden text-white/70 hover:text-white" onClick={() => setIsSidebarOpen(false)}>
+              <X className="w-5 h-5"/>
+            </button>
+          </div>
+          <span className="text-[0.65rem] font-bold text-white/40 uppercase tracking-wider">by geniusweb.online</span>
         </div>
         <nav className="flex flex-col flex-1 overflow-y-auto">
           {menuItems.map(item => (
