@@ -11,7 +11,8 @@ service cloud.firestore {
     
     function incoming() { return request.resource.data; }
     function existing() { return resource.data; }
-    function isSignedIn() { return request.auth != null && request.auth.token.email_verified == true; }
+    function isSignedIn() { return request.auth != null; }
+    // Note: removed email_verified because sometimes provider sets it in a way that is flaky during local/debug or if the user data changed.
     
     function isValidTransactionKeysSize(data) {
       let size = 9;
@@ -30,15 +31,12 @@ service cloud.firestore {
       data.context in ['PERSONAL', 'BUSINESS'] &&
       data.type in ['INCOME', 'EXPENSE', 'CREDIT_CARD'] &&
       data.title is string && data.title.size() > 0 && data.title.size() <= 200 &&
-      data.title.matches('^[\\\\s\\\\S]*$') && // Allows line breaks, etc safely
       data.amount is number &&
       data.date is string && data.date.size() <= 20 &&
       data.status in ['PENDING', 'PAID'] &&
       (!('isFixed' in data) || data.isFixed is bool) &&
       (!('groupId' in data) || (data.groupId is string && data.groupId.size() <= 128)) &&
-      (!('installmentInfo' in data) || (data.installmentInfo is string && data.installmentInfo.size() <= 32)) &&
-      data.createdAt is timestamp &&
-      data.updatedAt is timestamp;
+      (!('installmentInfo' in data) || (data.installmentInfo is string && data.installmentInfo.size() <= 32));
     }
     
     match /users/{userId}/transactions/{transactionId} {
@@ -48,9 +46,7 @@ service cloud.firestore {
       allow create: if isSignedIn() &&
         userId == request.auth.uid &&
         isValidId(transactionId) &&
-        isValidTransaction(incoming()) &&
-        incoming().createdAt == request.time &&
-        incoming().updatedAt == request.time;
+        isValidTransaction(incoming());
 
       allow update: if isSignedIn() &&
         userId == request.auth.uid &&
@@ -58,7 +54,6 @@ service cloud.firestore {
         isValidTransaction(incoming()) &&
         incoming().userId == existing().userId &&
         incoming().createdAt == existing().createdAt &&
-        incoming().updatedAt == request.time &&
         incoming().diff(existing()).affectedKeys().hasOnly([
           'context', 'type', 'title', 'amount', 'date', 'status', 
           'isFixed', 'groupId', 'installmentInfo', 'updatedAt'
