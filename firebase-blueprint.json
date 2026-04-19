@@ -1,0 +1,71 @@
+{
+  "entities": {
+    "Transaction": {
+      "title": "Transaction",
+      "description": "A financial transaction",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Owner of the transaction"
+        },
+        "context": {
+          "type": "string",
+          "enum": ["PERSONAL", "BUSINESS"]
+        },
+        "type": {
+          "type": "string",
+          "enum": ["INCOME", "EXPENSE", "CREDIT_CARD"]
+        },
+        "title": {
+          "type": "string"
+        },
+        "amount": {
+          "type": "number"
+        },
+        "date": {
+          "type": "string",
+          "format": "date"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["PENDING", "PAID"]
+        },
+        "isFixed": {
+          "type": "boolean"
+        },
+        "groupId": {
+          "type": "string"
+        },
+        "installmentInfo": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string"
+        },
+        "updatedAt": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "userId",
+        "context",
+        "type",
+        "title",
+        "amount",
+        "date",
+        "status",
+        "createdAt",
+        "updatedAt"
+      ]
+    }
+  },
+  "firestore": {
+    "users/{userId}/transactions/{transactionId}": {
+      "schema": {
+        "$ref": "#/entities/Transaction"
+      },
+      "description": "User's financial transactions"
+    }
+  }
+}
