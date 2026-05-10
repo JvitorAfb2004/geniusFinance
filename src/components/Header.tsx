@@ -9,7 +9,7 @@ export function Header({ onOpenMenu }: { onOpenMenu?: () => void }) {
   const { activeContext, setActiveContext, selectedMonth, setSelectedMonth } = useFinance();
 
   return (
-    <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center px-4 sm:px-6 py-4 sm:py-5 shrink-0 w-full bg-[#f4f6f8] gap-4">
+    <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center px-4 sm:px-6 py-4 sm:py-5 shrink-0 w-full bg-bg gap-4">
       <div className="flex items-center gap-3 sm:gap-6 w-full sm:w-auto">
         <button 
           onClick={onOpenMenu}
@@ -17,37 +17,37 @@ export function Header({ onOpenMenu }: { onOpenMenu?: () => void }) {
         >
           <Menu className="w-6 h-6" />
         </button>
-        <h1 className="text-[1.3rem] sm:text-[1.8rem] font-bold text-[#1e293b] tracking-tight">Visão Geral</h1>
+        <h1 className="text-[1.3rem] sm:text-[1.8rem] font-bold text-text-primary tracking-tight">Visão Geral</h1>
         
         {/* Month Selector */}
-        <div className="flex items-center gap-2 sm:gap-3 text-sm font-medium bg-white/40 px-2 py-1 rounded-lg border border-[#e2e8f0] ml-auto sm:ml-0">
-          <button 
+        <div className="flex items-center gap-2 sm:gap-3 text-sm font-medium bg-white/40 px-2 py-1 rounded-lg border border-border ml-auto sm:ml-0">
+          <button
             onClick={() => setSelectedMonth(subMonths(selectedMonth, 1))}
-            className="p-1 text-[#64748b] hover:text-[#1e293b] rounded-md transition-colors border-none bg-transparent cursor-pointer hidden sm:block"
+            className="p-1 text-text-secondary hover:text-text-primary rounded-md transition-colors border-none bg-transparent cursor-pointer hidden sm:block"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
-          <span className="w-20 sm:w-24 text-center capitalize text-[#1e293b] font-semibold text-[0.85rem]">
+          <span className="w-20 sm:w-24 text-center capitalize text-text-primary font-semibold text-[0.85rem]">
             {format(selectedMonth, 'MMM/yyyy', { locale: ptBR })}
           </span>
-          <button 
+          <button
             onClick={() => setSelectedMonth(addMonths(selectedMonth, 1))}
-            className="p-1 text-[#64748b] hover:text-[#1e293b] rounded-md transition-colors border-none bg-transparent cursor-pointer hidden sm:block"
+            className="p-1 text-text-secondary hover:text-text-primary rounded-md transition-colors border-none bg-transparent cursor-pointer hidden sm:block"
           >
             <ChevronRight className="w-4 h-4" />
           </button>
         </div>
       </div>
 
-      <div className="flex gap-1 p-1 bg-white border border-[#e2e8f0] rounded-lg w-full sm:w-auto justify-center">
+      <div className="flex gap-1 p-1 bg-surface border border-border rounded-xl w-full sm:w-auto justify-center">
         {(['PERSONAL', 'BUSINESS'] as ContextType[]).map((ctx) => (
           <button
             key={ctx}
             onClick={() => setActiveContext(ctx)}
-            className={`flex-1 sm:flex-none px-4 py-1.5 rounded-md text-[0.85rem] font-semibold transition-all border-none cursor-pointer ${
-              activeContext === ctx 
-                ? 'bg-[#3b82f6] text-white shadow-sm' 
-                : 'bg-transparent text-[#64748b] hover:bg-[#f4f6f8]'
+            className={`flex-1 sm:flex-none px-4 py-1.5 rounded-lg text-[0.85rem] font-semibold transition-all border-none cursor-pointer ${
+              activeContext === ctx
+                ? 'bg-primary text-surface shadow-sm'
+                : 'bg-transparent text-text-secondary hover:bg-bg'
             }`}
           >
             {ctx === 'PERSONAL' ? 'Pessoal' : 'Empresa'}

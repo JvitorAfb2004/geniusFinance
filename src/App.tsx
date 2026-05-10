@@ -8,7 +8,14 @@ import { CreditCardsView } from './components/CreditCardsView';
 import { FixedMonthlyView } from './components/FixedMonthlyView';
 import { ReportsView } from './components/ReportsView';
 import { SettingsView } from './components/SettingsView';
-import { PieChart, List, CreditCard, Calendar, Settings, FileBarChart, Menu, X } from 'lucide-react';
+import DREView from './components/DREView';
+import BudgetView from './components/BudgetView';
+import SalesView from './components/SalesView';
+import ImportView from './components/ImportView';
+import ChatBot from './components/ChatBot';
+import GoalsView from './components/GoalsView';
+import CommercialView from './components/CommercialView';
+import { PieChart, List, CreditCard, Calendar, Settings, FileBarChart, Menu, X, Calculator, TrendingUp, Target, Upload, Users } from 'lucide-react';
 import { ViewType } from './types';
 import { cn } from './lib/utils';
 
@@ -16,12 +23,28 @@ function MainApp() {
   const { currentView, setCurrentView, user, loading, signInWithGoogle, signOut } = useFinance();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  const menuItems: { id: ViewType; label: string; icon: React.ElementType }[] = [
-    { id: 'DASHBOARD', label: 'Dashboard', icon: PieChart },
-    { id: 'TRANSACTIONS', label: 'Entradas / Saídas', icon: List },
-    { id: 'CREDIT_CARDS', label: 'Cartões de Crédito', icon: CreditCard },
-    { id: 'FIXED_MONTHLY', label: 'Fixos Mensais', icon: Calendar },
-    { id: 'REPORTS', label: 'Relatórios Anuais', icon: FileBarChart },
+  const menuSections: { label: string; items: { id: ViewType; label: string; icon: React.ElementType }[] }[] = [
+    {
+      label: 'Financeiro',
+      items: [
+        { id: 'DASHBOARD', label: 'Dashboard', icon: PieChart },
+        { id: 'TRANSACTIONS', label: 'Entradas / Saídas', icon: List },
+        { id: 'FIXED_MONTHLY', label: 'Fixos Mensais', icon: Calendar },
+        { id: 'CREDIT_CARDS', label: 'Cartões de Crédito', icon: CreditCard },
+        { id: 'DRE', label: 'DRE', icon: Calculator },
+        { id: 'BUDGET', label: 'Orçamento', icon: TrendingUp },
+        { id: 'SALES', label: 'Vendas', icon: Target },
+        { id: 'GOALS', label: 'Metas', icon: Target },
+        { id: 'REPORTS', label: 'Relatórios Anuais', icon: FileBarChart },
+        { id: 'IMPORT', label: 'Importar', icon: Upload },
+      ],
+    },
+    {
+      label: 'Comercial',
+      items: [
+        { id: 'COMMERCIAL', label: 'Leads', icon: Users },
+      ],
+    },
   ];
 
   const handleNav = (view: ViewType) => {
@@ -31,24 +54,26 @@ function MainApp() {
 
   if (loading) {
     return (
-      <div className="flex h-[100dvh] items-center justify-center bg-[#f4f6f8]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#3b82f6]"></div>
+      <div className="flex h-[100dvh] items-center justify-center bg-bg">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     );
   }
 
   if (!user) {
     return (
-      <div className="flex flex-col h-[100dvh] items-center justify-center bg-[#f4f6f8] px-4">
-        <div className="bg-white p-8 rounded-2xl shadow-sm border border-[#e2e8f0] text-center max-w-md w-full">
-          <div className="w-16 h-16 bg-[#eff6ff] text-[#3b82f6] rounded-xl flex items-center justify-center mx-auto mb-6">
+      <div className="flex flex-col h-[100dvh] items-center justify-center bg-gradient-to-br from-bg to-primary/5 px-4 relative overflow-hidden">
+        <div className="absolute -top-24 -right-24 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
+        <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-success/5 rounded-full blur-3xl" />
+        <div className="bg-surface p-8 rounded-2xl shadow-lg border border-border text-center max-w-md w-full relative z-10">
+          <div className="w-16 h-16 bg-gradient-to-br from-primary to-blue-400 text-surface rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-md">
             <PieChart className="w-8 h-8" />
           </div>
-          <h1 className="text-2xl font-extrabold text-[#1e293b] mb-2 font-sans tracking-tight">GeniusFinance<span className="text-[#3b82f6]">.</span></h1>
-          <p className="text-[#64748b] mb-8">Faça login para acessar os seus dados financeiros de forma segura na nuvem.</p>
+          <h1 className="text-2xl font-extrabold text-text-primary mb-2 font-sans tracking-tight">GeniusFinance<span className="text-primary">.</span></h1>
+          <p className="text-text-secondary mb-8">Faça login para acessar os seus dados financeiros de forma segura na nuvem.</p>
           <button 
             onClick={signInWithGoogle}
-            className="w-full bg-[#1e293b] hover:bg-[#0f172a] text-white font-medium py-3 px-4 rounded-xl transition-all flex items-center justify-center gap-3"
+            className="w-full bg-text-primary hover:bg-[#0f172a] text-surface font-medium py-3 px-4 rounded-xl transition-all flex items-center justify-center gap-3 shadow-sm hover:shadow-md"
           >
             <svg viewBox="0 0 24 24" className="w-5 h-5 text-white" fill="currentColor">
               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -58,8 +83,8 @@ function MainApp() {
             </svg>
             Entrar com Google
           </button>
-          <div className="mt-8 pt-6 border-t border-gray-100">
-            <p className="text-xs text-gray-400 font-medium tracking-wide">
+          <div className="mt-8 pt-6 border-t border-border">
+            <p className="text-xs text-text-muted font-medium tracking-wide">
               Desenvolvido por <a href="https://geniusweb.online" target="_blank" rel="noopener noreferrer" className="text-[#3b82f6] hover:underline">geniusweb.online</a>
             </p>
           </div>
@@ -69,23 +94,23 @@ function MainApp() {
   }
 
   return (
-    <div className="flex h-[100dvh] bg-[#f4f6f8] overflow-hidden text-[#1e293b]">
+    <div className="flex h-[100dvh] bg-bg overflow-hidden text-text-primary">
       {/* Mobile overlay */}
       {isSidebarOpen && (
         <div 
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40 lg:hidden"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
 
       {/* Sidebar */}
       <aside className={cn(
-        "fixed inset-y-0 left-0 z-50 w-[240px] bg-[#1e293b] text-white flex flex-col py-6 transform transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 w-64 shrink-0",
+        "fixed inset-y-0 left-0 z-50 w-60 bg-text-primary text-surface flex flex-col py-6 transform transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 shrink-0",
         isSidebarOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         <div className="px-6 pb-6 border-b border-white/10 mb-6 flex flex-col gap-1">
           <div className="flex items-center justify-between font-extrabold text-[1.2rem] tracking-tight">
-            <span>GeniusFinance<span className="text-[#3b82f6]">.</span></span>
+            <span>GeniusFinance<span className="text-primary">.</span></span>
             <button className="lg:hidden text-white/70 hover:text-white" onClick={() => setIsSidebarOpen(false)}>
               <X className="w-5 h-5"/>
             </button>
@@ -93,20 +118,27 @@ function MainApp() {
           <span className="text-[0.65rem] font-bold text-white/40 uppercase tracking-wider">by geniusweb.online</span>
         </div>
         <nav className="flex flex-col flex-1 overflow-y-auto">
-          {menuItems.map(item => (
-            <button
-              key={item.id}
-              onClick={() => handleNav(item.id)}
-              className={cn(
-                "px-6 py-3 text-[0.9rem] flex items-center gap-3 cursor-pointer transition-colors text-left border-l-4 w-full",
-                currentView === item.id 
-                  ? "text-white bg-white/5 border-[#3b82f6]" 
-                  : "text-white/70 hover:text-white hover:bg-white/5 border-transparent"
-              )}
-            >
-              <item.icon className="w-4 h-4 opacity-70" />
-              {item.label}
-            </button>
+          {menuSections.map((section) => (
+            <div key={section.label} className="mb-2">
+              <div className="px-6 py-1.5 text-[0.6rem] font-bold text-white/30 uppercase tracking-widest">
+                {section.label}
+              </div>
+              {section.items.map(item => (
+                <button
+                  key={item.id}
+                  onClick={() => handleNav(item.id)}
+                  className={cn(
+                    "px-6 py-2.5 text-[0.85rem] flex items-center gap-3 cursor-pointer transition-colors text-left border-l-4 w-full",
+                    currentView === item.id
+                      ? "text-surface bg-white/5 border-primary"
+                      : "text-white/70 hover:text-surface hover:bg-white/5 border-transparent"
+                  )}
+                >
+                  <item.icon className="w-4 h-4 opacity-70" />
+                  {item.label}
+                </button>
+              ))}
+            </div>
           ))}
         </nav>
         <div className="mt-auto">
@@ -115,8 +147,8 @@ function MainApp() {
             className={cn(
               "px-6 py-3 text-[0.9rem] flex items-center gap-3 cursor-pointer transition-colors text-left border-l-4 w-full",
               currentView === 'SETTINGS' 
-                ? "text-white bg-white/5 border-[#3b82f6]" 
-                : "text-white/70 hover:text-white hover:bg-white/5 border-transparent"
+                ? "text-surface bg-white/5 border-primary"
+                : "text-white/70 hover:text-surface hover:bg-white/5 border-transparent"
             )}
           >
             <Settings className="w-4 h-4 opacity-70" />
@@ -124,7 +156,7 @@ function MainApp() {
           </button>
           <button
             onClick={() => { signOut(); setIsSidebarOpen(false); }}
-            className="px-6 py-3 text-[0.9rem] flex items-center gap-3 cursor-pointer transition-colors text-left border-l-4 border-transparent text-[#ef4444] hover:bg-white/5 w-full mt-2"
+            className="px-6 py-3 text-[0.9rem] flex items-center gap-3 cursor-pointer transition-colors text-left border-l-4 border-transparent text-danger hover:bg-white/5 w-full mt-2"
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 opacity-70"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
             Sair
@@ -150,6 +182,13 @@ function MainApp() {
             </>
           )}
 
+          {currentView === 'DRE' && <DREView />}
+          {currentView === 'BUDGET' && <BudgetView />}
+          {currentView === 'SALES' && <SalesView />}
+          {currentView === 'IMPORT' && <ImportView />}
+          {currentView === 'GOALS' && <GoalsView />}
+          {currentView === 'COMMERCIAL' && <CommercialView />}
+
           {currentView === 'TRANSACTIONS' && (
             <div className="flex flex-col h-full bg-white rounded-xl shadow-sm border border-[#e2e8f0]">
               <div className="p-6 border-b border-[#e2e8f0]">
@@ -168,6 +207,7 @@ function MainApp() {
           {currentView === 'SETTINGS' && <SettingsView />}
         </main>
       </div>
+      <ChatBot />
     </div>
   );
 }

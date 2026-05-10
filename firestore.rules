@@ -8,18 +8,20 @@ service cloud.firestore {
     function isValidId(id) {
       return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
     }
-    
+
     function incoming() { return request.resource.data; }
     function existing() { return resource.data; }
     function isSignedIn() { return request.auth != null; }
-    // Note: removed email_verified because sometimes provider sets it in a way that is flaky during local/debug or if the user data changed.
-    
+
     function isValidTransactionKeysSize(data) {
       let size = 9;
       let s1 = size + ('isFixed' in data ? 1 : 0);
       let s2 = s1 + ('groupId' in data ? 1 : 0);
       let s3 = s2 + ('installmentInfo' in data ? 1 : 0);
-      return data.keys().size() == s3;
+      let s4 = s3 + ('categoryId' in data ? 1 : 0);
+      let s5 = s4 + ('endDate' in data ? 1 : 0);
+      let s6 = s5 + ('tagIds' in data ? 1 : 0);
+      return data.keys().size() == s6;
     }
 
     function isValidTransaction(data) {
@@ -36,13 +38,35 @@ service cloud.firestore {
       data.status in ['PENDING', 'PAID'] &&
       (!('isFixed' in data) || data.isFixed is bool) &&
       (!('groupId' in data) || (data.groupId is string && data.groupId.size() <= 128)) &&
-      (!('installmentInfo' in data) || (data.installmentInfo is string && data.installmentInfo.size() <= 32));
+      (!('installmentInfo' in data) || (data.installmentInfo is string && data.installmentInfo.size() <= 32)) &&
+      (!('categoryId' in data) || (data.categoryId is string && data.categoryId.size() <= 128)) &&
+      (!('endDate' in data) || (data.endDate is string && data.endDate.size() <= 20));
     }
-    
+
+    function isValidCategory(data) {
+      return data.keys().hasAll(['userId', 'name', 'section', 'order', 'isDefault']) &&
+        data.keys().size() == 5 &&
+        data.userId is string && data.userId == request.auth.uid &&
+        data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
+        data.section in ['RECEITA', 'CUSTOS', 'DESPESAS'] &&
+        data.order is number &&
+        data.isDefault is bool;
+    }
+
+    function isValidBudget(data) {
+      return data.keys().hasAll(['userId', 'context', 'year', 'month', 'categoryId', 'plannedAmount', 'createdAt', 'updatedAt']) &&
+        data.keys().size() == 8 &&
+        data.userId is string && data.userId == request.auth.uid &&
+        data.context in ['PERSONAL', 'BUSINESS'] &&
+        data.year is number && data.year >= 2020 &&
+        data.month is number && data.month >= 1 && data.month <= 12 &&
+        data.categoryId is string && data.categoryId.size() <= 128 &&
+        data.plannedAmount is number;
+    }
+
     match /users/{userId}/transactions/{transactionId} {
-      // 8th Pillar: Secure List Queries
-      allow read: if isSignedIn() && userId == request.auth.uid && resource.data.userId == request.auth.uid; 
-      
+      allow read: if isSignedIn() && userId == request.auth.uid && resource.data.userId == request.auth.uid;
+
       allow create: if isSignedIn() &&
         userId == request.auth.uid &&
         isValidId(transactionId) &&
@@ -55,10 +79,135 @@ service cloud.firestore {
         incoming().userId == existing().userId &&
         incoming().createdAt == existing().createdAt &&
         incoming().diff(existing()).affectedKeys().hasOnly([
-          'context', 'type', 'title', 'amount', 'date', 'status', 
-          'isFixed', 'groupId', 'installmentInfo', 'updatedAt'
+          'context', 'type', 'title', 'amount', 'date', 'status',
+          'isFixed', 'groupId', 'installmentInfo', 'categoryId', 'endDate', 'tagIds', 'updatedAt'
         ]);
-        
+
+      allow delete: if isSignedIn() && userId == request.auth.uid;
+    }
+
+    match /users/{userId}/categories/{categoryId} {
+      allow read: if isSignedIn() && userId == request.auth.uid && resource.data.userId == request.auth.uid;
+
+      allow create: if isSignedIn() &&
+        userId == request.auth.uid &&
+        isValidCategory(incoming());
+
+      allow update: if isSignedIn() &&
+        userId == request.auth.uid &&
+        isValidCategory(incoming()) &&
+        incoming().userId == existing().userId;
+
+      allow delete: if isSignedIn() &&
+        userId == request.auth.uid &&
+        existing().isDefault == false;
+    }
+
+    function isValidSalesTarget(data) {
+      let size = 7; // userId, context, year, month, targetAmount, createdAt, updatedAt
+      let s1 = size + ('channel' in data ? 1 : 0);
+      let s2 = s1 + ('seller' in data ? 1 : 0);
+      return data.keys().hasAll(['userId', 'context', 'year', 'month', 'targetAmount', 'createdAt', 'updatedAt']) &&
+        data.keys().size() == s2 &&
+        data.userId is string && data.userId == request.auth.uid &&
+        data.context in ['PERSONAL', 'BUSINESS'] &&
+        data.year is number && data.year >= 2020 &&
+        data.month is number && data.month >= 1 && data.month <= 12 &&
+        data.targetAmount is number &&
+        (!('channel' in data) || data.channel is string) &&
+        (!('seller' in data) || data.seller is string);
+    }
+
+    match /users/{userId}/goals/{goalId} {
+      allow read: if isSignedIn() && userId == request.auth.uid && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && userId == request.auth.uid &&
+        incoming().keys().hasAll(['userId', 'name', 'targetAmount', 'currentAmount', 'deadline', 'category', 'color', 'createdAt', 'updatedAt']) &&
+        incoming().userId is string && incoming().userId == request.auth.uid &&
+        incoming().name is string && incoming().name.size() > 0 &&
+        incoming().targetAmount is number && incoming().currentAmount is number &&
+        incoming().deadline is string && incoming().category is string && incoming().color is string;
+      allow update: if isSignedIn() && userId == request.auth.uid && incoming().userId == existing().userId;
+      allow delete: if isSignedIn() && userId == request.auth.uid;
+    }
+
+    match /users/{userId}/tags/{tagId} {
+      allow read: if isSignedIn() && userId == request.auth.uid && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && userId == request.auth.uid &&
+        incoming().keys().hasAll(['userId', 'name', 'color']) && incoming().keys().size() == 3 &&
+        incoming().userId is string && incoming().userId == request.auth.uid &&
+        incoming().name is string && incoming().name.size() > 0 && incoming().name.size() <= 50 &&
+        incoming().color is string && incoming().color.size() <= 20;
+      allow update: if isSignedIn() && userId == request.auth.uid && incoming().userId == existing().userId;
+      allow delete: if isSignedIn() && userId == request.auth.uid;
+    }
+
+    match /users/{userId}/sales-targets/{targetId} {
+      allow read: if isSignedIn() && userId == request.auth.uid && resource.data.userId == request.auth.uid;
+
+      allow create: if isSignedIn() &&
+        userId == request.auth.uid &&
+        isValidSalesTarget(incoming());
+
+      allow update: if isSignedIn() &&
+        userId == request.auth.uid &&
+        isValidSalesTarget(incoming()) &&
+        incoming().userId == existing().userId &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().diff(existing()).affectedKeys().hasOnly(['targetAmount', 'updatedAt']);
+
+      allow delete: if isSignedIn() && userId == request.auth.uid;
+    }
+
+    match /users/{userId}/leads/{leadId} {
+      allow read: if isSignedIn() && userId == request.auth.uid && resource.data.userId == request.auth.uid;
+
+      allow create: if isSignedIn() &&
+        userId == request.auth.uid &&
+        isValidId(leadId) &&
+        incoming().keys().hasAll(['userId', 'clientName', 'createdAt', 'updatedAt']) &&
+        incoming().userId is string && incoming().userId == request.auth.uid &&
+        incoming().clientName is string && incoming().clientName.size() > 0 && incoming().clientName.size() <= 200;
+
+      allow update: if isSignedIn() &&
+        userId == request.auth.uid &&
+        incoming().userId == existing().userId;
+
+      allow delete: if isSignedIn() && userId == request.auth.uid;
+    }
+
+    match /users/{userId}/lead-options/{optionId} {
+      allow read: if isSignedIn() && userId == request.auth.uid && resource.data.userId == request.auth.uid;
+
+      allow create: if isSignedIn() &&
+        userId == request.auth.uid &&
+        incoming().keys().hasAll(['userId', 'field', 'value', 'order', 'isDefault']) &&
+        incoming().userId is string && incoming().userId == request.auth.uid &&
+        incoming().value is string && incoming().value.size() > 0 && incoming().value.size() <= 100 &&
+        incoming().order is number &&
+        incoming().isDefault is bool &&
+        (incoming().field == 'status' || incoming().field == 'source' || incoming().field == 'service');
+
+      allow update: if isSignedIn() &&
+        userId == request.auth.uid &&
+        incoming().userId == existing().userId;
+
+      allow delete: if isSignedIn() && userId == request.auth.uid;
+    }
+
+    match /users/{userId}/budgets/{budgetId} {
+      allow read: if isSignedIn() && userId == request.auth.uid && resource.data.userId == request.auth.uid;
+
+      allow create: if isSignedIn() &&
+        userId == request.auth.uid &&
+        isValidBudget(incoming());
+
+      allow update: if isSignedIn() &&
+        userId == request.auth.uid &&
+        isValidBudget(incoming()) &&
+        incoming().userId == existing().userId &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().diff(existing()).affectedKeys().hasOnly(['plannedAmount', 'updatedAt']);
+
       allow delete: if isSignedIn() && userId == request.auth.uid;
     }
   }

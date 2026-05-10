@@ -7,6 +7,24 @@ import {
 import { format, parseISO, startOfMonth, endOfMonth, addMonths } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
+function CustomTooltip({ active, payload, label }: any) {
+  if (!active || !payload || !payload.length) return null;
+  return (
+    <div className="bg-surface border border-border rounded-xl shadow-lg px-3 py-2.5 text-xs">
+      <p className="font-semibold text-text-primary mb-1">{label}</p>
+      {payload.map((entry: any) => (
+        <div key={entry.name} className="flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }} />
+          <span className="text-text-secondary">{entry.name}:</span>
+          <span className="font-mono font-bold text-text-primary">
+            R$ {Number(entry.value).toFixed(2)}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export function DashboardCharts() {
   const { transactions, activeContext, selectedMonth } = useFinance();
 
@@ -82,41 +100,60 @@ export function DashboardCharts() {
 
   return (
     <div className="flex flex-col gap-5 flex-1 min-h-0">
-      <div className="bg-white rounded-xl border border-[#e2e8f0] flex flex-col min-h-0 flex-1">
-        <div className="p-4 border-b border-[#e2e8f0] font-bold text-[#1e293b]">
+      <div className="bg-surface rounded-xl border border-border flex flex-col min-h-0 flex-1">
+        <div className="p-4 border-b border-border font-bold text-text-primary">
           Receitas vs Despesas (Ano)
         </div>
-        <div className="flex-1 p-4 overflow-hidden min-h-[140px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={monthlyData} margin={{ top: 5, right: 0, left: -20, bottom: 0 }} barSize={16}>
+        <div className="flex-1 p-4 overflow-hidden" style={{ minHeight: 140 }}>
+          <ResponsiveContainer width="100%" height={140}>
+            <BarChart data={monthlyData} margin={{ top: 5, right: 0, left: -20, bottom: 0 }} barSize={20}>
+              <defs>
+                <linearGradient id="incomeGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#10b981" stopOpacity={0.9} />
+                  <stop offset="100%" stopColor="#10b981" stopOpacity={0.4} />
+                </linearGradient>
+                <linearGradient id="expenseGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#ef4444" stopOpacity={0.9} />
+                  <stop offset="100%" stopColor="#ef4444" stopOpacity={0.4} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f4f6f8" vertical={false} />
               <XAxis dataKey="name" axisLine={false} tickLine={false} fontSize={10} tickMargin={8} tick={{fill: '#64748b'}} />
               <YAxis axisLine={false} tickLine={false} fontSize={10} tickFormatter={(val) => `R$${val/1000}k`} tick={{fill: '#64748b'}} />
-              <RechartsTooltip 
-                formatter={(value) => `R$ ${Number(value).toFixed(2)}`} 
-                cursor={{fill: '#f4f6f8'}}
-                contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '12px' }}
-              />
-              <Bar dataKey="receitas" name="Receitas" fill="#10b981" radius={[2, 2, 0, 0]} />
-              <Bar dataKey="despesas" name="Despesas" fill="#ef4444" radius={[2, 2, 0, 0]} />
+              <RechartsTooltip content={<CustomTooltip />} cursor={{fill: '#f4f6f8'}} />
+              <Bar dataKey="receitas" name="Receitas" fill="url(#incomeGrad)" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="despesas" name="Despesas" fill="url(#expenseGrad)" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-[#e2e8f0] flex flex-col min-h-0 flex-1">
-        <div className="p-4 border-b border-[#e2e8f0] font-bold text-[#1e293b]">
+      <div className="bg-surface rounded-xl border border-border flex flex-col min-h-0 flex-1">
+        <div className="p-4 border-b border-border font-bold text-text-primary">
           Previsão de Saldo Acumulado
         </div>
-        <div className="flex-1 p-4 overflow-hidden min-h-[140px]">
-          <ResponsiveContainer width="100%" height="100%">
+        <div className="flex-1 p-4 overflow-hidden" style={{ minHeight: 140 }}>
+          <ResponsiveContainer width="100%" height={140}>
             <LineChart data={forecastData} margin={{ top: 5, right: 0, left: -20, bottom: 0 }}>
+              <defs>
+                <linearGradient id="lineGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.15} />
+                  <stop offset="100%" stopColor="#3b82f6" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f4f6f8" vertical={false} />
               <XAxis dataKey="name" axisLine={false} tickLine={false} fontSize={10} tickMargin={8} tick={{fill: '#64748b'}} />
               <YAxis axisLine={false} tickLine={false} fontSize={10} tickFormatter={(val) => `R$${val/1000}k`} tick={{fill: '#64748b'}} />
-              <RechartsTooltip 
-                formatter={(value) => `R$ ${Number(value).toFixed(2)}`} 
-                contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '12px' }}
+              <RechartsTooltip content={<CustomTooltip />} />
+              <Line
+                type="monotone"
+                dataKey="saldoAcumulado"
+                name="Saldo Previsto"
+                stroke="#3b82f6"
+                strokeWidth={3}
+                dot={{ r: 4, fill: '#3b82f6', strokeWidth: 2, stroke: '#fff' }}
+                activeDot={{ r: 6, fill: '#3b82f6', strokeWidth: 2, stroke: '#fff' }}
               />
-              <Line type="monotone" dataKey="saldoAcumulado" name="Saldo Previsto" stroke="#3b82f6" strokeWidth={3} dot={{ r: 3, fill: '#3b82f6', strokeWidth: 2, stroke: '#fff' }} />
             </LineChart>
           </ResponsiveContainer>
         </div>

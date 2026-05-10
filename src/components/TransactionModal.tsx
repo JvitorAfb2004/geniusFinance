@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { useFinance } from '../hooks/useFinance.tsx';
-import { TransactionType, TransactionStatus, Transaction } from '../types';
+import { TransactionType, TransactionStatus, Transaction, DRESection } from '../types';
 import { format } from 'date-fns';
-import { X } from 'lucide-react';
+import { SECTION_LABELS } from '../lib/categories';
+import { X, Search, Plus, ArrowUpCircle, ArrowDownCircle, CreditCard, CheckCircle, Clock, Check } from 'lucide-react';
+import { motion } from 'motion/react';
 
 export function TransactionModal({ 
   onClose, 
@@ -11,7 +13,9 @@ export function TransactionModal({
   onClose: () => void;
   initialData?: Transaction;
 }) {
-  const { addTransaction, updateTransaction, activeContext } = useFinance();
+  const { addTransaction, updateTransaction, activeContext, categories, addCategory, selectedMonth, tags } = useFinance();
+  const [submitting, setSubmitting] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
   
   const [title, setTitle] = useState(initialData?.title || '');
   const [amountStr, setAmountStr] = useState(() => {
@@ -20,13 +24,64 @@ export function TransactionModal({
     }
     return '';
   });
-  const [date, setDate] = useState(initialData ? initialData.date : format(new Date(), 'yyyy-MM-dd'));
+  const [date, setDate] = useState(() => {
+    if (initialData) return initialData.date;
+    return format(selectedMonth, 'yyyy-MM-dd');
+  });
   const [type, setType] = useState<TransactionType>(initialData?.type || 'EXPENSE');
   const [status, setStatus] = useState<TransactionStatus>(initialData?.status || 'PAID');
   
+  const [categoryId, setCategoryId] = useState(initialData?.categoryId || '');
+  const [categorySearch, setCategorySearch] = useState('');
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+  const [showNewCategory, setShowNewCategory] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
+  const [newCategorySection, setNewCategorySection] = useState<DRESection>('DESPESAS');
+  const categoryDropdownRef = useRef<HTMLDivElement>(null);
+  const categoryInputRef = useRef<HTMLInputElement>(null);
+
   const [recurrenceConfig, setRecurrenceConfig] = useState<'ONE_TIME' | 'FIXED' | 'INSTALLMENTS'>('ONE_TIME');
   const [installmentsCount, setInstallmentsCount] = useState(1);
+  const [endDate, setEndDate] = useState(initialData?.endDate || '');
+  const [hasEndDate, setHasEndDate] = useState(!!initialData?.endDate);
+  const [selectedTagIds, setSelectedTagIds] = useState<string[]>(initialData?.tagIds || []);
   const [applyToFuture, setApplyToFuture] = useState(false);
+
+  const selectedCatName = categories.find((c) => c.id === categoryId)?.name || '';
+
+  const filteredCategories = useMemo(() => {
+    if (!categorySearch) return categories;
+    const q = categorySearch.toLowerCase();
+    return categories.filter((c) => c.name.toLowerCase().includes(q));
+  }, [categories, categorySearch]);
+
+  const groupedCategories = useMemo(() => {
+    const sections: DRESection[] = ['RECEITA', 'CUSTOS', 'DESPESAS'];
+    return sections.map((section) => ({
+      section,
+      label: SECTION_LABELS[section],
+      items: filteredCategories
+        .filter((c) => c.section === section)
+        .sort((a, b) => a.order - b.order),
+    }));
+  }, [filteredCategories]);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (categoryDropdownRef.current && !categoryDropdownRef.current.contains(e.target as Node)) {
+        setShowCategoryDropdown(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleAddCategory = async () => {
+    if (!newCategoryName.trim()) return;
+    await addCategory(newCategoryName.trim(), newCategorySection);
+    setNewCategoryName('');
+    setShowNewCategory(false);
+  };
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const numericValue = e.target.value.replace(/\D/g, '');
@@ -46,133 +101,329 @@ export function TransactionModal({
     return parseFloat(amountStr.replace(/\./g, '').replace(',', '.'));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const val = getNumericAmount();
     if (isNaN(val) || val <= 0) return alert('Valor inválido');
 
-    const baseTx = {
-      title,
-      amount: val,
-      date,
-      type,
-      status,
-      context: activeContext
-    };
+    setSubmitting(true);
+    try {
+      const baseTx: Record<string, unknown> = {
+        title,
+        amount: val,
+        date,
+        type,
+        status,
+        context: activeContext,
+      };
+      if (categoryId) baseTx.categoryId = categoryId;
+      if (hasEndDate && endDate) baseTx.endDate = endDate;
+      if (selectedTagIds.length > 0) baseTx.tagIds = selectedTagIds;
 
-    if (initialData) {
-      updateTransaction(initialData.id, baseTx, applyToFuture);
-    } else {
-      if (recurrenceConfig === 'ONE_TIME') {
-        addTransaction(baseTx);
-      } else if (recurrenceConfig === 'FIXED') {
-        addTransaction(baseTx, 'FIXED');
-      } else if (recurrenceConfig === 'INSTALLMENTS') {
-        addTransaction(baseTx, 'INSTALLMENTS', installmentsCount);
+      if (initialData) {
+        await updateTransaction(initialData.id, baseTx, applyToFuture);
+      } else {
+        if (recurrenceConfig === 'ONE_TIME') {
+          await addTransaction(baseTx);
+        } else if (recurrenceConfig === 'FIXED') {
+          await addTransaction(baseTx, 'FIXED');
+        } else if (recurrenceConfig === 'INSTALLMENTS') {
+          await addTransaction(baseTx, 'INSTALLMENTS', installmentsCount);
+        }
       }
+
+      setShowSuccess(true);
+      setTimeout(() => onClose(), 800);
+    } catch {
+      // Error handled by handleFirestoreError
+    } finally {
+      setSubmitting(false);
     }
-    
-    onClose();
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 flex flex-col items-center justify-center p-4">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-        <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-          <h3 className="text-lg font-bold font-sans text-gray-900">
-            {initialData ? 'Editar Lançamento' : 'Novo Lançamento'}
-          </h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
-            <X className="w-5 h-5"/>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm flex flex-col items-center justify-center p-4"
+      onClick={onClose}
+    >
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 20 }}
+        transition={{ type: 'spring', duration: 0.3 }}
+        className="bg-surface rounded-xl shadow-xl w-full max-w-lg overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="px-6 py-5 flex justify-between items-center">
+          <div>
+            <h3 className="text-lg font-bold font-sans text-text-primary">
+              {initialData ? 'Editar Lançamento' : 'Novo Lançamento'}
+            </h3>
+            <p className="text-xs text-text-secondary mt-0.5">
+              {initialData ? 'Atualize os dados do lançamento' : 'Registre uma nova movimentação financeira'}
+            </p>
+          </div>
+          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-lg text-text-muted hover:text-text-primary hover:bg-bg transition-colors cursor-pointer">
+            <X className="w-4 h-4"/>
           </button>
         </div>
-        
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          <div className="space-y-3">
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Tipo</label>
-              <div className="grid grid-cols-3 gap-2">
-                {[
-                  { id: 'INCOME', label: 'Entrada (+)', colorClasses: type === 'INCOME' ? 'bg-emerald-50 text-emerald-700 border-emerald-500' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50' },
-                  { id: 'EXPENSE', label: 'Saída (-)', colorClasses: type === 'EXPENSE' ? 'bg-rose-50 text-rose-700 border-rose-500' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50' },
-                  { id: 'CREDIT_CARD', label: 'Cartão', colorClasses: type === 'CREDIT_CARD' ? 'bg-blue-50 text-blue-700 border-blue-500' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50' }
-                ].map(opt => (
-                  <button
-                    key={opt.id}
-                    type="button"
-                    onClick={() => setType(opt.id as TransactionType)}
-                    className={`py-2 px-1 sm:px-2 text-[0.75rem] font-bold rounded-lg border-2 transition-colors cursor-pointer ${opt.colorClasses}`}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
-            </div>
+        <div className="border-b border-border mx-6" />
 
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</label>
-              <div className="grid grid-cols-2 gap-2">
-                {[
-                  { id: 'PAID', label: 'Pago / Recebido' },
-                  { id: 'PENDING', label: 'Pendente' }
-                ].map(opt => (
-                  <button
-                    key={opt.id}
-                    type="button"
-                    onClick={() => setStatus(opt.id as TransactionStatus)}
-                    className={`py-2 px-3 text-[0.8rem] font-bold rounded-lg border-2 transition-colors cursor-pointer ${
-                      status === opt.id
-                        ? 'border-[#3b82f6] bg-[#eff6ff] text-[#1d4ed8]'
-                        : 'border-gray-200 text-gray-600 hover:bg-gray-50 bg-white'
-                    }`}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
+        <form onSubmit={handleSubmit} className="p-6 space-y-4 relative">
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider">Tipo</label>
+            <div className="grid grid-cols-3 gap-2">
+              {[
+                { id: 'INCOME', label: 'Entrada', icon: ArrowUpCircle, activeClass: 'border-emerald-400 bg-emerald-50 text-emerald-700' },
+                { id: 'EXPENSE', label: 'Saída', icon: ArrowDownCircle, activeClass: 'border-red-400 bg-red-50 text-red-700' },
+                { id: 'CREDIT_CARD', label: 'Crédito', icon: CreditCard, activeClass: 'border-purple-400 bg-purple-50 text-purple-700' },
+              ].map(opt => (
+                <button
+                  key={opt.id}
+                  type="button"
+                  onClick={() => setType(opt.id as TransactionType)}
+                  className={`py-2.5 px-3 text-sm font-medium rounded-lg border-2 cursor-pointer transition-all flex flex-col items-center gap-1 ${
+                    type === opt.id
+                      ? opt.activeClass
+                      : 'border-border text-text-secondary hover:bg-bg bg-surface'
+                  }`}
+                >
+                  <opt.icon className="w-4 h-4" />
+                  {opt.label}
+                </button>
+              ))}
             </div>
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Descrição</label>
-            <input 
+            <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider">Status</label>
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                { id: 'PAID', label: 'Pago / Recebido', icon: CheckCircle, activeClass: 'border-emerald-400 bg-emerald-50 text-emerald-700' },
+                { id: 'PENDING', label: 'Pendente', icon: Clock, activeClass: 'border-amber-400 bg-amber-50 text-amber-700' },
+              ].map(opt => (
+                <button
+                  key={opt.id}
+                  type="button"
+                  onClick={() => setStatus(opt.id as TransactionStatus)}
+                  className={`py-2.5 px-3 text-sm font-medium rounded-lg border-2 cursor-pointer transition-all flex items-center justify-center gap-2 ${
+                    status === opt.id
+                      ? opt.activeClass
+                      : 'border-border text-text-secondary hover:bg-bg bg-surface'
+                  }`}
+                >
+                  <opt.icon className="w-4 h-4" />
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {categories.length > 0 && (
+            <div className="space-y-1.5" ref={categoryDropdownRef}>
+              <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider">Categoria (DRE)</label>
+              <div className="relative">
+                <div className="flex items-center border border-border rounded-lg focus-within:ring-2 focus-within:ring-primary/30 focus-within:border-primary transition-all bg-surface">
+                  <Search className="w-4 h-4 text-gray-400 ml-3 flex-shrink-0" />
+                  <input
+                    ref={categoryInputRef}
+                    type="text"
+                    placeholder={selectedCatName || 'Buscar ou selecionar categoria...'}
+                    value={showCategoryDropdown ? categorySearch : (selectedCatName || '')}
+                    onChange={(e) => {
+                      setCategorySearch(e.target.value);
+                      if (!showCategoryDropdown) setShowCategoryDropdown(true);
+                    }}
+                    onFocus={() => {
+                      setShowCategoryDropdown(true);
+                      setCategorySearch('');
+                    }}
+                    className="w-full px-3 py-2.5 outline-none text-sm bg-transparent"
+                  />
+                  {categoryId && (
+                    <button
+                      type="button"
+                      onClick={() => { setCategoryId(''); setCategorySearch(''); }}
+                      className="text-gray-400 hover:text-gray-600 pr-3 cursor-pointer"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+
+                {showCategoryDropdown && (
+                  <div className="absolute z-20 mt-1 w-full bg-surface border border-border rounded-xl shadow-lg max-h-56 overflow-y-auto">
+                    {/* New category button */}
+                    {!showNewCategory ? (
+                      <button
+                        type="button"
+                        onClick={() => setShowNewCategory(true)}
+                        className="w-full px-3 py-2 text-sm text-blue-600 hover:bg-blue-50 flex items-center gap-2 border-b border-gray-100 cursor-pointer font-medium"
+                      >
+                        <Plus className="w-4 h-4" />
+                        Nova categoria
+                      </button>
+                    ) : (
+                      <div className="p-3 border-b border-gray-100 bg-gray-50 space-y-2">
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            placeholder="Nome da categoria"
+                            value={newCategoryName}
+                            onChange={(e) => setNewCategoryName(e.target.value)}
+                            className="flex-1 px-3 py-1.5 border border-gray-300 rounded text-sm outline-none focus:ring-1 focus:ring-blue-400"
+                            autoFocus
+                            onKeyDown={(e) => { if (e.key === 'Enter') handleAddCategory(); if (e.key === 'Escape') setShowNewCategory(false); }}
+                          />
+                          <select
+                            value={newCategorySection}
+                            onChange={(e) => setNewCategorySection(e.target.value as DRESection)}
+                            className="px-2 py-1.5 border border-gray-300 rounded text-xs outline-none"
+                          >
+                            <option value="RECEITA">Receita</option>
+                            <option value="CUSTOS">Custos</option>
+                            <option value="DESPESAS">Despesas</option>
+                          </select>
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={handleAddCategory}
+                            disabled={!newCategoryName.trim()}
+                            className="text-xs px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 cursor-pointer"
+                          >
+                            Adicionar
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setShowNewCategory(false)}
+                            className="text-xs px-3 py-1 text-gray-500 hover:text-gray-700 cursor-pointer"
+                          >
+                            Cancelar
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {categoryId && (
+                      <button
+                        type="button"
+                        onClick={() => { setCategoryId(''); setCategorySearch(''); setShowCategoryDropdown(false); }}
+                        className="w-full px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 text-left border-b border-gray-100 cursor-pointer"
+                      >
+                        Limpar seleção
+                      </button>
+                    )}
+
+                    {groupedCategories.map((group) =>
+                      group.items.length > 0 ? (
+                        <div key={group.section}>
+                          <div className="px-3 py-1.5 text-xs font-semibold text-gray-400 uppercase bg-gray-50">
+                            {group.label}
+                          </div>
+                          {group.items.map((cat) => (
+                            <button
+                              key={cat.id}
+                              type="button"
+                              onClick={() => {
+                                setCategoryId(cat.id);
+                                setCategorySearch('');
+                                setShowCategoryDropdown(false);
+                              }}
+                              className={`w-full px-3 py-2 text-sm text-left hover:bg-blue-50 cursor-pointer transition-colors ${
+                                categoryId === cat.id ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-700'
+                              }`}
+                            >
+                              {cat.name}
+                              {cat.isDefault ? '' : ' *'}
+                            </button>
+                          ))}
+                        </div>
+                      ) : null
+                    )}
+
+                    {filteredCategories.length === 0 && categorySearch && (
+                      <div className="px-3 py-3 text-sm text-gray-400 text-center">
+                        Nenhuma categoria encontrada.
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {tags.length > 0 && (
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Tags</label>
+              <div className="flex flex-wrap gap-1.5">
+                {tags.map((tag) => {
+                  const active = selectedTagIds.includes(tag.id);
+                  return (
+                    <button
+                      key={tag.id}
+                      type="button"
+                      onClick={() => setSelectedTagIds((prev) =>
+                        active ? prev.filter((id) => id !== tag.id) : [...prev, tag.id]
+                      )}
+                      className={`px-2.5 py-1 rounded-full text-xs font-medium border-2 transition-colors cursor-pointer ${
+                        active
+                          ? 'border-transparent text-white'
+                          : 'border-slate-200 text-slate-500 hover:border-slate-300'
+                      }`}
+                      style={active ? { backgroundColor: tag.color } : {}}
+                    >
+                      {tag.name}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider">Descrição</label>
+            <input
               required
-              type="text" 
+              type="text"
               placeholder="Ex: Salário, Aluguel, Supermercado..."
               value={title}
               onChange={e => setTitle(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all placeholder:text-gray-400"
+              className="w-full border border-border rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition-all placeholder:text-text-muted bg-surface"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Valor (R$)</label>
-              <input 
+              <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider">Valor (R$)</label>
+              <input
                 required
-                type="text" 
+                type="text"
                 inputMode="numeric"
                 placeholder="0,00"
                 value={amountStr}
                 onChange={handleAmountChange}
-                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                className="w-full border border-border rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition-all placeholder:text-text-muted bg-surface"
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Data Base</label>
-              <input 
+              <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider">Data Base</label>
+              <input
                 required
-                type="date" 
+                type="date"
                 value={date}
                 onChange={e => setDate(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-border rounded-lg px-4 py-2.5 outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary bg-surface transition-all"
               />
             </div>
           </div>
 
           {!initialData ? (
             <div className="space-y-3 pt-2">
-              <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Recorrência</label>
+              <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider">Recorrência</label>
               <div className="grid grid-cols-3 gap-2">
                 {[
                   { id: 'ONE_TIME', label: 'Única' },
@@ -183,10 +434,10 @@ export function TransactionModal({
                     key={opt.id}
                     type="button"
                     onClick={() => setRecurrenceConfig(opt.id as any)}
-                    className={`py-2 px-3 text-[0.8rem] font-medium rounded-lg border cursor-pointer ${
-                      recurrenceConfig === opt.id 
-                        ? 'border-[#3b82f6] bg-[#eff6ff] text-[#1d4ed8]' 
-                        : 'border-[#e2e8f0] text-[#64748b] hover:bg-[#f8fafc]'
+                    className={`py-2.5 px-3 text-sm font-medium rounded-lg border-2 cursor-pointer transition-all ${
+                      recurrenceConfig === opt.id
+                        ? 'border-primary bg-primary-light text-primary-dark'
+                        : 'border-border text-text-secondary hover:bg-bg bg-surface'
                     }`}
                   >
                     {opt.label}
@@ -202,19 +453,37 @@ export function TransactionModal({
                     min="2" max="48"
                     value={installmentsCount}
                     onChange={e => setInstallmentsCount(parseInt(e.target.value) || 2)}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2"
+                    className="w-full border border-border rounded-lg px-4 py-2.5 bg-surface focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition-all"
                   />
-                  <p className="mt-1 text-xs text-gray-500">
+                  <p className="mt-1 text-xs text-text-secondary">
                     O valor total de R$ {amountStr || '0,00'} será dividido em {installmentsCount} vezes de R$ {(getNumericAmount() / installmentsCount).toFixed(2).replace('.', ',')}.
                   </p>
                 </div>
               )}
               
                {recurrenceConfig === 'FIXED' && (
-                <div className="pt-1">
-                  <p className="text-xs text-blue-600 bg-blue-50 p-2 rounded border border-blue-100">
-                    Um lançamento será criado para os próximos meses automaticamente.
+                <div className="pt-1 space-y-2">
+                  <p className="text-xs bg-primary-light/50 text-primary-dark p-2.5 rounded-lg border border-primary/20">
+                    Um lançamento será criado para os próximos meses.
                   </p>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={hasEndDate}
+                      onChange={(e) => setHasEndDate(e.target.checked)}
+                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="text-xs text-gray-600">Definir data fim</span>
+                  </label>
+                  {hasEndDate && (
+                    <input
+                      type="date"
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.target.value)}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-400"
+                      min={date}
+                    />
+                  )}
                 </div>
               )}
             </div>
@@ -236,16 +505,47 @@ export function TransactionModal({
             )
           )}
 
+          {initialData && (
+            <div className="text-xs text-gray-400 space-y-0.5 pt-2">
+              <p>Criado em: {format(new Date(initialData.createdAt), "dd/MM/yyyy 'as' HH:mm")}</p>
+              <p>Alterado em: {format(new Date(initialData.updatedAt), "dd/MM/yyyy 'as' HH:mm")}</p>
+            </div>
+          )}
+
           <div className="pt-6 pb-2">
-            <button 
+            <button
               type="submit"
-              className="w-full bg-[#3b82f6] hover:bg-[#2563eb] border-none text-white font-semibold py-3 rounded-xl shadow-sm transition-all focus:ring-4 focus:ring-blue-500/20 active:scale-[0.98] cursor-pointer"
+              disabled={submitting}
+              className="w-full bg-gradient-to-r from-primary to-primary-hover hover:from-primary-hover hover:to-primary disabled:opacity-60 disabled:cursor-not-allowed border-none text-surface font-semibold py-3.5 rounded-xl shadow-md hover:shadow-lg transition-all focus:ring-4 focus:ring-primary/20 active:scale-[0.97] cursor-pointer flex items-center justify-center gap-2"
             >
-              Salvar Lançamento
+              {submitting && (
+                <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+              )}
+              {submitting ? 'Salvando...' : 'Salvar Lançamento'}
             </button>
           </div>
+
+          {showSuccess && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.5 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="absolute inset-0 bg-surface/90 backdrop-blur-[2px] rounded-xl flex items-center justify-center z-10"
+            >
+              <motion.div
+                initial={{ scale: 0, rotate: -90 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ type: 'spring', stiffness: 200, damping: 15 }}
+                className="w-16 h-16 bg-success rounded-full flex items-center justify-center shadow-lg"
+              >
+                <Check className="w-8 h-8 text-white" />
+              </motion.div>
+            </motion.div>
+          )}
         </form>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

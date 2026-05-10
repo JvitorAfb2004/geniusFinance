@@ -5,6 +5,7 @@ import { ptBR } from 'date-fns/locale';
 import { formatCurrency, cn } from '../lib/utils';
 import { Trash2, Pencil, Search } from 'lucide-react';
 import { TransactionModal } from './TransactionModal';
+import ConfirmModal from './ConfirmModal';
 import { Transaction } from '../types';
 
 export function TransactionTable({ 
@@ -16,23 +17,39 @@ export function TransactionTable({
   forceFilter?: 'ALL' | 'INCOME' | 'EXPENSE' | 'CREDIT_CARD';
   fixedOnly?: boolean;
 }) {
-  const { transactions, activeContext, selectedMonth, toggleStatus, deleteTransaction } = useFinance();
+  const { transactions, activeContext, selectedMonth, toggleStatus, deleteTransaction, categories, tags } = useFinance();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTx, setEditingTx] = useState<Transaction | undefined>(undefined);
   const [filterType, setFilterType] = useState<'ALL' | 'INCOME' | 'EXPENSE' | 'CREDIT_CARD'>('ALL');
   const [searchTerm, setSearchTerm] = useState('');
+  const [categoryFilterId, setCategoryFilterId] = useState('');
+  const [confirmDelete, setConfirmDelete] = useState<{ tx: Transaction; future: boolean } | null>(null);
 
   const visibleTransactions = transactions
     .filter(t => t.context === activeContext)
     .filter(t => isSameMonth(parseISO(t.date), selectedMonth))
     .filter(t => forceFilter ? t.type === forceFilter : (filterType === 'ALL' || t.type === filterType))
     .filter(t => fixedOnly ? t.isFixed : true)
+    .filter(t => categoryFilterId ? t.categoryId === categoryFilterId : true)
     .filter(t => t.title.toLowerCase().includes(searchTerm.toLowerCase()))
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   const handleEdit = (tx: Transaction) => {
     setEditingTx(tx);
     setIsModalOpen(true);
+  };
+
+  const getCategoryName = (catId?: string) => {
+    if (!catId) return txTypeLabel(null);
+    const cat = categories.find((c) => c.id === catId);
+    return cat ? cat.name : txTypeLabel(null);
+  };
+
+  const txTypeLabel = (type: string | null) => {
+    if (type === 'INCOME') return 'Entrada';
+    if (type === 'EXPENSE') return 'Fixo/Avulso';
+    if (type === 'CREDIT_CARD') return 'Cartao';
+    return 'Geral';
   };
 
   const handleCreate = () => {
@@ -42,7 +59,7 @@ export function TransactionTable({
 
   return (
     <div className="bg-white rounded-xl border border-[#e2e8f0] flex flex-col flex-1 min-h-[300px]">
-      <div className="p-4 border-b border-[#e2e8f0] flex flex-col md:flex-row items-start md:items-center justify-between shadow-sm z-10 gap-4 flex-wrap">
+      <div className="p-4 border-b border-[#e2e8f0] flex flex-col md:flex-row items-start md:items-center justify-between z-10 gap-4 flex-wrap">
         {!hideHeaderTitle && <span className="text-[#1e293b] font-bold">Transações Recentes</span>}
         
         <div className="flex items-center gap-3 w-full md:w-auto ml-auto">
@@ -58,17 +75,29 @@ export function TransactionTable({
           </div>
 
           {!forceFilter && (
-            <select 
-              className="text-[0.75rem] border-[#e2e8f0] rounded-md focus:border-[#3b82f6] px-2 py-1.5 border bg-white outline-none font-medium text-[#64748b]"
+            <select
+              className="text-[0.75rem] border-[#e2e8f0] rounded-md focus:border-[#3b82f6] px-2 py-1.5 border bg-white outline-none font-medium text-[#64748b] cursor-pointer"
               value={filterType}
               onChange={(e) => setFilterType(e.target.value as any)}
             >
               <option value="ALL">Todas</option>
               <option value="INCOME">Entradas</option>
               <option value="EXPENSE">Despesas</option>
-              <option value="CREDIT_CARD">Cartão</option>
+              <option value="CREDIT_CARD">Cartao</option>
             </select>
           )}
+          <select
+            className="text-[0.75rem] border-[#e2e8f0] rounded-md focus:border-[#3b82f6] px-2 py-1.5 border bg-white outline-none font-medium text-[#64748b] cursor-pointer max-w-[140px]"
+            value={categoryFilterId}
+            onChange={(e) => setCategoryFilterId(e.target.value)}
+          >
+            <option value="">Todas categorias</option>
+            {categories
+              .sort((a, b) => a.order - b.order)
+              .map((cat) => (
+                <option key={cat.id} value={cat.id}>{cat.name}</option>
+              ))}
+          </select>
           <button 
             onClick={handleCreate}
             className="text-[0.75rem] text-[#3b82f6] border-none bg-transparent cursor-pointer font-bold hover:underline whitespace-nowrap"
@@ -104,6 +133,19 @@ export function TransactionTable({
                 </td>
                 <td className="py-2.5 px-4 border-b border-[#e2e8f0] font-sans font-medium text-[#1e293b]">
                   {tx.title}
+                  {(tx.tagIds && tx.tagIds.length > 0) && (
+                    <span className="flex flex-wrap gap-1 mt-1">
+                      {tx.tagIds.map((tid) => {
+                        const tag = tags.find((t) => t.id === tid);
+                        if (!tag) return null;
+                        return (
+                          <span key={tid} className="text-[0.6rem] px-1.5 py-0.5 rounded-full text-white font-medium" style={{ backgroundColor: tag.color }}>
+                            {tag.name}
+                          </span>
+                        );
+                      })}
+                    </span>
+                  )}
                   {tx.installmentInfo && (
                     <span className="ml-2 text-[0.7rem] font-normal text-[#64748b] bg-[#e2e8f0] px-1.5 py-0.5 rounded">
                       {tx.installmentInfo}
@@ -111,7 +153,7 @@ export function TransactionTable({
                   )}
                 </td>
                 <td className="py-2.5 px-4 border-b border-[#e2e8f0] font-sans text-[#64748b]">
-                  {tx.type === 'INCOME' ? 'Entrada' : tx.type === 'EXPENSE' ? 'Fixo/Avulso' : 'Cartão'}
+                  {getCategoryName(tx.categoryId)}
                 </td>
                 <td className="py-2.5 px-4 border-b border-[#e2e8f0] text-right">
                   <span className={cn(
@@ -142,13 +184,12 @@ export function TransactionTable({
                   >
                     <Pencil className="w-4 h-4" />
                   </button>
-                  <button 
+                  <button
                     onClick={() => {
                       if (tx.groupId && tx.isFixed) {
-                        const delFuture = window.confirm("Excluir apenas este mês ou este e os próximos?");
-                        deleteTransaction(tx.id, delFuture);
+                        setConfirmDelete({ tx, future: false });
                       } else {
-                        deleteTransaction(tx.id);
+                        setConfirmDelete({ tx, future: false });
                       }
                     }}
                     className="text-[#64748b] hover:text-[#ef4444] transition-colors p-1 bg-transparent border-none cursor-pointer ml-1"
@@ -162,6 +203,29 @@ export function TransactionTable({
         </table>
       </div>
       {isModalOpen && <TransactionModal initialData={editingTx} onClose={() => setIsModalOpen(false)} />}
+
+      {confirmDelete && !confirmDelete.tx.groupId && (
+        <ConfirmModal
+          title="Excluir lancamento"
+          message={`Deseja excluir "${confirmDelete.tx.title}"? Esta acao nao pode ser desfeita.`}
+          confirmLabel="Excluir"
+          variant="danger"
+          onConfirm={() => { deleteTransaction(confirmDelete.tx.id); setConfirmDelete(null); }}
+          onCancel={() => setConfirmDelete(null)}
+        />
+      )}
+
+      {confirmDelete && confirmDelete.tx.groupId && confirmDelete.tx.isFixed && (
+        <ConfirmModal
+          title="Excluir recorrencia"
+          message={`Deseja excluir apenas "${confirmDelete.tx.title}" deste mes ou este e os proximos meses?`}
+          confirmLabel="Este e proximos"
+          cancelLabel="Apenas este"
+          variant="warning"
+          onConfirm={() => { deleteTransaction(confirmDelete.tx.id, true); setConfirmDelete(null); }}
+          onCancel={() => { deleteTransaction(confirmDelete.tx.id, false); setConfirmDelete(null); }}
+        />
+      )}
     </div>
   );
 }

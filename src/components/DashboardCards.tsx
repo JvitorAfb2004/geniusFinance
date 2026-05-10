@@ -1,44 +1,140 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useFinance } from '../hooks/useFinance.tsx';
 import { formatCurrency, cn } from '../lib/utils';
 import { isSameMonth, parseISO } from 'date-fns';
+import { Settings2, Wallet, TrendingUp, TrendingDown, CreditCard, DollarSign, Percent } from 'lucide-react';
+
+const DEFAULT_WIDGETS = ['balance', 'income', 'expense', 'credit_card'];
+
+function loadWidgets(): string[] {
+  try { const saved = localStorage.getItem('dashboard_widgets'); return saved ? JSON.parse(saved) : DEFAULT_WIDGETS; }
+  catch { return DEFAULT_WIDGETS; }
+}
+
+function saveWidgets(ids: string[]) { localStorage.setItem('dashboard_widgets', JSON.stringify(ids)); }
+
+const ALL_WIDGETS = [
+  { id: 'balance', label: 'Saldo Disponivel' },
+  { id: 'income', label: 'Receitas (Mes)' },
+  { id: 'expense', label: 'Despesas (Mes)' },
+  { id: 'credit_card', label: 'Cartao (Mes)' },
+  { id: 'net_profit', label: 'Lucro Liquido' },
+  { id: 'margin', label: 'Margem Liquida' },
+];
 
 export function DashboardCards() {
-  const { transactions, activeContext, selectedMonth } = useFinance();
+  const { transactions, categories, budgets, activeContext, selectedMonth } = useFinance();
+  const [widgets, setWidgets] = useState<string[]>(loadWidgets);
+  const [editing, setEditing] = useState(false);
 
-  const currentMonthTxs = transactions.filter(
-    t => t.context === activeContext && isSameMonth(parseISO(t.date), selectedMonth)
+  const currentMonthTxs = transactions.filter((t) =>
+    t.context === activeContext && isSameMonth(parseISO(t.date), selectedMonth)
   );
 
-  const calculateTotal = (filterFn: (t: typeof transactions[0]) => boolean) => 
-    currentMonthTxs.filter(filterFn).reduce((acc, t) => acc + t.amount, 0);
+  const incomes = currentMonthTxs.filter((t) => t.type === 'INCOME').reduce((s, t) => s + t.amount, 0);
+  const expenses = currentMonthTxs.filter((t) => t.type === 'EXPENSE').reduce((s, t) => s + t.amount, 0);
+  const creditCard = currentMonthTxs.filter((t) => t.type === 'CREDIT_CARD').reduce((s, t) => s + t.amount, 0);
+  const confirmedIncomes = currentMonthTxs.filter((t) => t.type === 'INCOME' && t.status === 'PAID').reduce((s, t) => s + t.amount, 0);
+  const totalExpenses = expenses + creditCard;
 
-  const confirmedIncomes = currentMonthTxs.filter(t => t.type === 'INCOME' && t.status === 'PAID').reduce((acc, t) => acc + t.amount, 0);
-  const incomes = calculateTotal(t => t.type === 'INCOME');
-  const expenses = calculateTotal(t => t.type === 'EXPENSE');
-  const creditCard = calculateTotal(t => t.type === 'CREDIT_CARD');
-  
-  const balance = confirmedIncomes - (expenses + creditCard);
+  const toggleWidget = (id: string) => {
+    const next = widgets.includes(id) ? widgets.filter((w) => w !== id) : [...widgets, id];
+    setWidgets(next); saveWidgets(next);
+  };
 
-  const cards = [
-    { title: 'Saldo Disponível', amount: balance, color: 'text-[#1e293b]' },
-    { title: 'Receitas (Mês)', amount: incomes, color: 'text-[#10b981]' },
-    { title: 'Despesas (Mês)', amount: expenses, color: 'text-[#ef4444]' },
-    { title: 'Cartão (Mês)', amount: creditCard, color: 'text-[#f59e0b]' },
-  ];
+  function getCard(id: string) {
+    switch (id) {
+      case 'balance': return {
+        title: 'Saldo Disponível', value: confirmedIncomes - totalExpenses,
+        color: 'text-text-primary', icon: Wallet,
+        iconBg: 'bg-primary-light', iconColor: 'text-primary',
+        accentBar: 'bg-gradient-to-r from-primary to-blue-400'
+      };
+      case 'income': return {
+        title: 'Receitas (Mês)', value: incomes,
+        color: 'text-success', icon: TrendingUp,
+        iconBg: 'bg-success-light', iconColor: 'text-success',
+        accentBar: 'bg-gradient-to-r from-success to-emerald-400'
+      };
+      case 'expense': return {
+        title: 'Despesas (Mês)', value: totalExpenses,
+        color: 'text-danger', icon: TrendingDown,
+        iconBg: 'bg-danger-light', iconColor: 'text-danger',
+        accentBar: 'bg-gradient-to-r from-danger to-rose-400'
+      };
+      case 'credit_card': return {
+        title: 'Cartão (Mês)', value: creditCard,
+        color: 'text-warning', icon: CreditCard,
+        iconBg: 'bg-warning-light', iconColor: 'text-warning',
+        accentBar: 'bg-gradient-to-r from-warning to-amber-400'
+      };
+      case 'net_profit': return {
+        title: 'Lucro Líquido', value: incomes - totalExpenses,
+        color: incomes - totalExpenses >= 0 ? 'text-success' : 'text-danger',
+        icon: DollarSign,
+        iconBg: incomes - totalExpenses >= 0 ? 'bg-success-light' : 'bg-danger-light',
+        iconColor: incomes - totalExpenses >= 0 ? 'text-success' : 'text-danger',
+        accentBar: incomes - totalExpenses >= 0
+          ? 'bg-gradient-to-r from-success to-emerald-400'
+          : 'bg-gradient-to-r from-danger to-rose-400'
+      };
+      case 'margin': return {
+        title: 'Margem Líquida', value: incomes > 0 ? ((incomes - totalExpenses) / incomes) * 100 : 0,
+        color: 'text-purple-600', isPercent: true,
+        icon: Percent,
+        iconBg: 'bg-purple-50', iconColor: 'text-purple-600',
+        accentBar: 'bg-gradient-to-r from-purple-500 to-violet-400'
+      };
+      default: return null;
+    }
+  }
+
+  const cards = widgets.map(getCard).filter(Boolean) as { title: string; value: number; color: string; isPercent?: boolean; icon: React.ElementType; iconBg: string; iconColor: string; accentBar: string }[];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-      {cards.map((card, i) => (
-        <div key={i} className="bg-white p-4 rounded-xl border border-[#e2e8f0]">
-          <div className="text-[0.75rem] text-[#64748b] uppercase tracking-wider mb-2 font-semibold">
-            {card.title}
-          </div>
-          <div className={cn("text-[1.4rem] font-bold font-mono", card.color)}>
-            {formatCurrency(card.amount)}
-          </div>
+    <div>
+      <button
+        onClick={() => setEditing(!editing)}
+        className="text-xs text-text-muted hover:text-text-secondary cursor-pointer flex items-center gap-1 mb-2 ml-auto"
+      >
+        <Settings2 className="w-3 h-3" />
+        {editing ? 'Concluir' : 'Personalizar'}
+      </button>
+
+      {editing && (
+        <div className="flex flex-wrap gap-2 mb-3 p-3 bg-surface border border-border rounded-xl">
+          {ALL_WIDGETS.map((w) => (
+            <button
+              key={w.id}
+              onClick={() => toggleWidget(w.id)}
+              className={`text-xs px-3 py-1 rounded-full border cursor-pointer transition-colors ${
+                widgets.includes(w.id) ? 'bg-primary text-surface border-primary' : 'bg-surface text-text-secondary border-border hover:border-primary/50'
+              }`}
+            >
+              {w.label}
+            </button>
+          ))}
         </div>
-      ))}
+      )}
+
+      <div className={`grid gap-4 ${cards.length <= 2 ? 'grid-cols-1 md:grid-cols-2' : cards.length === 3 ? 'grid-cols-1 md:grid-cols-3' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4'}`}>
+        {cards.map((card) => (
+          <div key={card.title} className="bg-surface p-4 rounded-xl border border-border transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 relative overflow-hidden group">
+            <div className={`absolute top-0 left-0 right-0 h-0.5 ${card.accentBar}`} />
+            <div className="flex items-start justify-between">
+              <div className="flex-1 min-w-0">
+                <div className="text-xs text-text-secondary uppercase tracking-wider mb-1.5 font-semibold">{card.title}</div>
+                <div className={cn('text-2xl font-bold font-mono tracking-tight', card.color)}>
+                  {card.isPercent ? `${card.value.toFixed(1)}%` : formatCurrency(card.value)}
+                </div>
+              </div>
+              <div className={`w-10 h-10 rounded-xl ${card.iconBg} flex items-center justify-center flex-shrink-0`}>
+                <card.icon className={`w-5 h-5 ${card.iconColor}`} />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
