@@ -1,5 +1,5 @@
 // @ts-ignore - injected by Vite define
-const AI_PROXY = (typeof process !== 'undefined' && process.env.VITE_AI_PROXY) || 'http://localhost:3001/api/ai/chat';
+const AI_PROXY = process.env.VITE_AI_PROXY || 'http://localhost:3001/api/ai/chat';
 
 interface ChatOptions {
   maxTokens?: number;
