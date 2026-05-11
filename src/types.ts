@@ -3,8 +3,9 @@ import { User } from 'firebase/auth';
 export type ContextType = 'PERSONAL' | 'BUSINESS';
 export type TransactionType = 'INCOME' | 'EXPENSE' | 'CREDIT_CARD';
 export type TransactionStatus = 'PENDING' | 'PAID';
-export type ViewType = 'DASHBOARD' | 'TRANSACTIONS' | 'CREDIT_CARDS' | 'FIXED_MONTHLY' | 'REPORTS' | 'SETTINGS' | 'DRE' | 'BUDGET' | 'SALES' | 'IMPORT' | 'CALCULATORS' | 'GOALS' | 'COMMERCIAL';
+export type ViewType = 'DASHBOARD' | 'TRANSACTIONS' | 'CREDIT_CARDS' | 'FIXED_MONTHLY' | 'REPORTS' | 'SETTINGS' | 'DRE' | 'BUDGET' | 'SALES' | 'IMPORT' | 'CALCULATORS' | 'GOALS' | 'COMMERCIAL' | 'PROJECTS' | 'SERVICE_TYPES';
 
+export type ProjectStatus = 'BACKLOG' | 'IN_PROGRESS' | 'REVIEW' | 'DONE' | 'CANCELLED';
 export type DRESection = 'RECEITA' | 'CUSTOS' | 'DESPESAS';
 
 export interface Category {
@@ -89,6 +90,54 @@ export interface Lead {
   updatedAt: string;
 }
 
+export interface ServiceTypeStep {
+  order: number;
+  title: string;
+}
+
+export interface CustomFieldDef {
+  key: string;
+  label: string;
+}
+
+export interface ServiceType {
+  id: string;
+  userId: string;
+  name: string;
+  steps: ServiceTypeStep[];
+  customFieldDefs: CustomFieldDef[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface StepStatus {
+  stepIndex: number;
+  done: boolean;
+  notes?: string;
+}
+
+export interface CustomFieldValue {
+  key: string;
+  value: string;
+}
+
+export interface Project {
+  id: string;
+  userId: string;
+  title: string;
+  serviceTypeId?: string;
+  leadId?: string;
+  clientName: string;
+  description: string;
+  status: ProjectStatus;
+  stepStatuses: StepStatus[];
+  customFieldValues: CustomFieldValue[];
+  dueDate?: string;
+  price?: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface DRERow {
   label: string;
   section: DRESection | 'TOTAL';
@@ -109,7 +158,7 @@ export interface Transaction {
   amount: number; // Stored as positive absolute value
   date: string; // ISO date string YYYY-MM-DD
   status: TransactionStatus;
-  
+
   // For recurring / installments
   isFixed?: boolean;
   groupId?: string;
@@ -138,6 +187,8 @@ export interface FinanceContextState {
   goals: FinancialGoal[];
   leads: Lead[];
   leadOptions: LeadOption[];
+  serviceTypes: ServiceType[];
+  projects: Project[];
   activeContext: ContextType;
   selectedMonth: Date;
   currentView: ViewType;
@@ -171,4 +222,10 @@ export interface FinanceContextState {
   updateLeadOption: (id: string, updates: Partial<Pick<LeadOption, 'value' | 'color'>>) => Promise<void>;
   deleteLeadOption: (id: string) => Promise<void>;
   seedDefaultLeadOptions: () => Promise<void>;
+  addServiceType: (data: Omit<ServiceType, 'id' | 'userId' | 'createdAt' | 'updatedAt'>) => Promise<void>;
+  updateServiceType: (id: string, updates: Partial<ServiceType>) => Promise<void>;
+  deleteServiceType: (id: string) => Promise<void>;
+  addProject: (data: Omit<Project, 'id' | 'userId' | 'createdAt' | 'updatedAt'>) => Promise<void>;
+  updateProject: (id: string, updates: Partial<Project>) => Promise<void>;
+  deleteProject: (id: string) => Promise<void>;
 }

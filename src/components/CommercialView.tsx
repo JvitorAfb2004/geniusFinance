@@ -3,9 +3,10 @@ import { useFinance } from '../hooks/useFinance';
 import { format, parseISO, isAfter, isBefore, isToday } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '../lib/utils';
-import { Trash2, Pencil, Search, Plus, Sparkles, Users, Phone, Mail, ExternalLink, FilterX } from 'lucide-react';
+import { Trash2, Pencil, Search, Plus, Sparkles, Users, Phone, Mail, ExternalLink, FilterX, FolderKanban } from 'lucide-react';
 import ConfirmModal from './ConfirmModal';
 import LeadModal from './LeadModal';
+import ProjectModal from './ProjectModal';
 import type { Lead, LeadOption } from '../types';
 
 export default function CommercialView() {
@@ -16,6 +17,7 @@ export default function CommercialView() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [sourceFilter, setSourceFilter] = useState('');
+  const [convertLead, setConvertLead] = useState<Lead | undefined>(undefined);
 
   const statusOptions = useMemo(
     () => leadOptions.filter((o) => o.field === 'status').sort((a, b) => a.order - b.order),
@@ -246,6 +248,15 @@ export default function CommercialView() {
                               <Phone className="w-3.5 h-3.5" />
                             </a>
                           )}
+                          {lead.status === 'Fechado (Ganho)' && (
+                            <button
+                              onClick={() => setConvertLead(lead)}
+                              className="p-1.5 text-gray-400 hover:text-emerald-500 rounded transition-colors cursor-pointer"
+                              title="Converter em projeto"
+                            >
+                              <FolderKanban className="w-3.5 h-3.5" />
+                            </button>
+                          )}
                           <button
                             onClick={() => handleEdit(lead)}
                             className="p-1.5 text-gray-400 hover:text-[#3b82f6] rounded transition-colors cursor-pointer"
@@ -285,6 +296,13 @@ export default function CommercialView() {
             setConfirmDelete(null);
           }}
           onCancel={() => setConfirmDelete(null)}
+        />
+      )}
+
+      {convertLead && (
+        <ProjectModal
+          lead={convertLead}
+          onClose={() => setConvertLead(undefined)}
         />
       )}
     </div>

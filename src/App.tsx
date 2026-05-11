@@ -15,7 +15,9 @@ import ImportView from './components/ImportView';
 import ChatBot from './components/ChatBot';
 import GoalsView from './components/GoalsView';
 import CommercialView from './components/CommercialView';
-import { PieChart, List, CreditCard, Calendar, Settings, FileBarChart, Menu, X, Calculator, TrendingUp, Target, Upload, Users } from 'lucide-react';
+import ProjectsView from './components/ProjectsView';
+import ServiceTypesView from './components/ServiceTypesView';
+import { PieChart, List, CreditCard, Calendar, Settings, FileBarChart, Menu, X, Calculator, TrendingUp, Target, Upload, Users, Kanban, Layers } from 'lucide-react';
 import { ViewType } from './types';
 import { cn } from './lib/utils';
 
@@ -45,6 +47,13 @@ function MainApp() {
         { id: 'COMMERCIAL', label: 'Leads', icon: Users },
       ],
     },
+    {
+      label: 'Projetos',
+      items: [
+        { id: 'PROJECTS', label: 'Projetos', icon: Kanban },
+        { id: 'SERVICE_TYPES', label: 'Tipos de Serviço', icon: Layers },
+      ],
+    },
   ];
 
   const handleNav = (view: ViewType) => {
@@ -69,8 +78,8 @@ function MainApp() {
           <div className="w-16 h-16 bg-gradient-to-br from-primary to-blue-400 text-surface rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-md">
             <PieChart className="w-8 h-8" />
           </div>
-          <h1 className="text-2xl font-extrabold text-text-primary mb-2 font-sans tracking-tight">GeniusFinance<span className="text-primary">.</span></h1>
-          <p className="text-text-secondary mb-8">Faça login para acessar os seus dados financeiros de forma segura na nuvem.</p>
+          <h1 className="text-2xl font-extrabold text-text-primary mb-2 font-sans tracking-tight">GeniusHub<span className="text-primary">.</span></h1>
+          <p className="text-text-secondary mb-8">Faça login para acessar seus dados de forma segura na nuvem.</p>
           <button 
             onClick={signInWithGoogle}
             className="w-full bg-text-primary hover:bg-[#0f172a] text-surface font-medium py-3 px-4 rounded-xl transition-all flex items-center justify-center gap-3 shadow-sm hover:shadow-md"
@@ -110,7 +119,7 @@ function MainApp() {
       )}>
         <div className="px-6 pb-6 border-b border-white/10 mb-6 flex flex-col gap-1">
           <div className="flex items-center justify-between font-extrabold text-[1.2rem] tracking-tight">
-            <span>GeniusFinance<span className="text-primary">.</span></span>
+            <span>GeniusHub<span className="text-primary">.</span></span>
             <button className="lg:hidden text-white/70 hover:text-white" onClick={() => setIsSidebarOpen(false)}>
               <X className="w-5 h-5"/>
             </button>
@@ -188,6 +197,8 @@ function MainApp() {
           {currentView === 'IMPORT' && <ImportView />}
           {currentView === 'GOALS' && <GoalsView />}
           {currentView === 'COMMERCIAL' && <CommercialView />}
+          {currentView === 'PROJECTS' && <ProjectsView />}
+          {currentView === 'SERVICE_TYPES' && <ServiceTypesView />}
 
           {currentView === 'TRANSACTIONS' && (
             <div className="flex flex-col h-full bg-white rounded-xl shadow-sm border border-[#e2e8f0]">

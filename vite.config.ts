@@ -13,9 +13,9 @@ export default defineConfig(({mode}) => {
       VitePWA({
         registerType: 'autoUpdate',
         manifest: {
-          name: 'Financeiro Core',
-          short_name: 'Financeiro',
-          description: 'Seu gerenciador financeiro completo e pratico.',
+          name: 'Genius Hub',
+          short_name: 'GeniusHub',
+          description: 'Hub completo para gestão financeira, comercial e de projetos.',
           theme_color: '#1e293b',
           background_color: '#f4f6f8',
           display: 'standalone',

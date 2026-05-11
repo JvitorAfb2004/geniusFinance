@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { addMonths, format, parseISO } from 'date-fns';
-import { ContextType, FinanceContextState, Transaction, ViewType, Category, Budget, DRESection, SalesTarget, Tag, FinancialGoal, Lead, LeadOption } from '../types';
+import { ContextType, FinanceContextState, Transaction, ViewType, Category, Budget, DRESection, SalesTarget, Tag, FinancialGoal, Lead, LeadOption, ServiceType, Project } from '../types';
 import { auth, db, signInWithGoogle, signOut } from '../lib/firebase';
 import { handleFirestoreError } from '../lib/handleFirestoreError';
 import { DEFAULT_CATEGORIES } from '../lib/categories';
@@ -25,6 +25,8 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
   const [goals, setGoals] = useState<FinancialGoal[]>([]);
   const [leads, setLeads] = useState<Lead[]>([]);
   const [leadOptions, setLeadOptions] = useState<LeadOption[]>([]);
+  const [serviceTypes, setServiceTypes] = useState<ServiceType[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [categoriesLoaded, setCategoriesLoaded] = useState(false);
   const [leadOptionsLoaded, setLeadOptionsLoaded] = useState(false);
 
@@ -45,6 +47,8 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
         setGoals([]);
         setLeads([]);
         setLeadOptions([]);
+        setServiceTypes([]);
+        setProjects([]);
         setCategoriesLoaded(false);
         setLeadOptionsLoaded(false);
         setLoading(false);
@@ -57,13 +61,13 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!user) return;
     setLoading(true);
-    
+
     // We listen to all transactions for the user. In real-world, might want to limit by date range.
     const q = query(
       collection(db, `users/${user.uid}/transactions`),
       where('userId', '==', user.uid)
     );
-    
+
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const txs: Transaction[] = snapshot.docs.map(docSnap => {
         const data = docSnap.data();
@@ -284,6 +288,67 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
     return () => unsubscribe();
   }, [user]);
 
+  // Service types listener
+  useEffect(() => {
+    if (!user) return;
+    const q = query(
+      collection(db, `users/${user.uid}/service-types`),
+      where('userId', '==', user.uid)
+    );
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const st: ServiceType[] = snapshot.docs.map((docSnap) => {
+        const data = docSnap.data();
+        return {
+          id: docSnap.id,
+          userId: data.userId,
+          name: data.name,
+          steps: data.steps || [],
+          customFieldDefs: data.customFieldDefs || [],
+          createdAt: data.createdAt?.toDate?.().toISOString() || new Date().toISOString(),
+          updatedAt: data.updatedAt?.toDate?.().toISOString() || new Date().toISOString(),
+        } as ServiceType;
+      });
+      setServiceTypes(st);
+    }, (err) => {
+      handleFirestoreError(err, 'list', `users/${user.uid}/service-types`, user);
+    });
+    return () => unsubscribe();
+  }, [user]);
+
+  // Projects listener
+  useEffect(() => {
+    if (!user) return;
+    const q = query(
+      collection(db, `users/${user.uid}/projects`),
+      where('userId', '==', user.uid)
+    );
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const p: Project[] = snapshot.docs.map((docSnap) => {
+        const data = docSnap.data();
+        return {
+          id: docSnap.id,
+          userId: data.userId,
+          title: data.title,
+          serviceTypeId: data.serviceTypeId || undefined,
+          leadId: data.leadId || undefined,
+          clientName: data.clientName || '',
+          description: data.description || '',
+          status: data.status || 'BACKLOG',
+          stepStatuses: data.stepStatuses || [],
+          customFieldValues: data.customFieldValues || [],
+          dueDate: data.dueDate || undefined,
+          price: data.price || undefined,
+          createdAt: data.createdAt?.toDate?.().toISOString() || new Date().toISOString(),
+          updatedAt: data.updatedAt?.toDate?.().toISOString() || new Date().toISOString(),
+        } as Project;
+      });
+      setProjects(p);
+    }, (err) => {
+      handleFirestoreError(err, 'list', `users/${user.uid}/projects`, user);
+    });
+    return () => unsubscribe();
+  }, [user]);
+
   // Auto-seed lead options on first access
   useEffect(() => {
     if (!user || !leadOptionsLoaded) return;
@@ -301,8 +366,8 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
   }, [user, categoriesLoaded, categories.length]);
 
   const addTransaction = async (
-    txData: Omit<Transaction, 'id' | 'userId' | 'createdAt' | 'updatedAt'>, 
-    generateMultiple?: 'INSTALLMENTS' | 'FIXED', 
+    txData: Omit<Transaction, 'id' | 'userId' | 'createdAt' | 'updatedAt'>,
+    generateMultiple?: 'INSTALLMENTS' | 'FIXED',
     count: number = 1
   ) => {
     if (!user) return;
@@ -379,7 +444,7 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
           const docRef = doc(db, `users/${user.uid}/transactions/${ft.id}`);
           const toUpdate = { ...updates };
           // Do not override their date if they are future recurrences!
-          delete toUpdate.date; 
+          delete toUpdate.date;
           batch.update(docRef, { ...toUpdate, updatedAt: serverTimestamp() });
         }
       } else {
@@ -759,6 +824,96 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  // Service Type CRUD
+  const addServiceType = async (data: Omit<ServiceType, 'id' | 'userId' | 'createdAt' | 'updatedAt'>) => {
+    if (!user) return;
+    try {
+      const docRef = doc(collection(db, `users/${user.uid}/service-types`));
+      const batch = writeBatch(db);
+      batch.set(docRef, {
+        ...data,
+        userId: user.uid,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
+      await batch.commit();
+    } catch (error) {
+      handleFirestoreError(error, 'create', `users/${user.uid}/service-types`, user);
+    }
+  };
+
+  const updateServiceType = async (id: string, updates: Partial<ServiceType>) => {
+    if (!user) return;
+    try {
+      const docRef = doc(db, `users/${user.uid}/service-types/${id}`);
+      const batch = writeBatch(db);
+      batch.update(docRef, { ...updates, updatedAt: serverTimestamp() });
+      await batch.commit();
+    } catch (error) {
+      handleFirestoreError(error, 'update', `users/${user.uid}/service-types/${id}`, user);
+    }
+  };
+
+  const deleteServiceType = async (id: string) => {
+    if (!user) return;
+    try {
+      const docRef = doc(db, `users/${user.uid}/service-types/${id}`);
+      const batch = writeBatch(db);
+      batch.delete(docRef);
+      await batch.commit();
+    } catch (error) {
+      handleFirestoreError(error, 'delete', `users/${user.uid}/service-types/${id}`, user);
+    }
+  };
+
+  // Project CRUD
+  const addProject = async (data: Omit<Project, 'id' | 'userId' | 'createdAt' | 'updatedAt'>) => {
+    if (!user) return;
+    try {
+      const docRef = doc(collection(db, `users/${user.uid}/projects`));
+      const batch = writeBatch(db);
+      const cleanData = Object.fromEntries(
+        Object.entries(data).filter(([, v]) => v !== undefined)
+      );
+      batch.set(docRef, {
+        ...cleanData,
+        userId: user.uid,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
+      await batch.commit();
+    } catch (error) {
+      handleFirestoreError(error, 'create', `users/${user.uid}/projects`, user);
+    }
+  };
+
+  const updateProject = async (id: string, updates: Partial<Project>) => {
+    if (!user) return;
+    try {
+      const docRef = doc(db, `users/${user.uid}/projects/${id}`);
+      const batch = writeBatch(db);
+      const cleanUpdates = Object.fromEntries(
+        Object.entries(updates).filter(([, v]) => v !== undefined)
+      );
+      batch.update(docRef, { ...cleanUpdates, updatedAt: serverTimestamp() });
+      await batch.commit();
+    } catch (error) {
+      handleFirestoreError(error, 'update', `users/${user.uid}/projects/${id}`, user);
+    }
+  };
+
+  const deleteProject = async (id: string) => {
+    if (!user) return;
+    try {
+      const docRef = doc(db, `users/${user.uid}/projects/${id}`);
+      const batch = writeBatch(db);
+      batch.delete(docRef);
+      await batch.commit();
+    } catch (error) {
+      handleFirestoreError(error, 'delete', `users/${user.uid}/projects/${id}`, user);
+    }
+  };
+
   return (
     <FinanceContext.Provider value={{
       user,
@@ -773,6 +928,8 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       goals,
       leads,
       leadOptions,
+      serviceTypes,
+      projects,
       activeContext,
       selectedMonth,
       currentView,
@@ -803,6 +960,12 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       updateLeadOption,
       deleteLeadOption,
       seedDefaultLeadOptions,
+      addServiceType,
+      updateServiceType,
+      deleteServiceType,
+      addProject,
+      updateProject,
+      deleteProject,
     }}>
       {children}
     </FinanceContext.Provider>

@@ -210,5 +210,76 @@ service cloud.firestore {
 
       allow delete: if isSignedIn() && userId == request.auth.uid;
     }
+
+    function isValidServiceType(data) {
+      return data.keys().hasAll(['userId', 'name', 'steps', 'customFieldDefs', 'createdAt', 'updatedAt']) &&
+        data.keys().size() == 6 &&
+        data.userId is string && data.userId == request.auth.uid &&
+        data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
+        data.steps is list &&
+        data.customFieldDefs is list;
+    }
+
+    match /users/{userId}/service-types/{serviceTypeId} {
+      allow read: if isSignedIn() && userId == request.auth.uid && resource.data.userId == request.auth.uid;
+
+      allow create: if isSignedIn() &&
+        userId == request.auth.uid &&
+        isValidId(serviceTypeId) &&
+        isValidServiceType(incoming());
+
+      allow update: if isSignedIn() &&
+        userId == request.auth.uid &&
+        isValidServiceType(incoming()) &&
+        incoming().userId == existing().userId &&
+        incoming().createdAt == existing().createdAt;
+
+      allow delete: if isSignedIn() && userId == request.auth.uid;
+    }
+
+    function isValidProjectKeysSize(data) {
+      let size = 8; // userId, title, clientName, status, stepStatuses, customFieldValues, createdAt, updatedAt
+      let s1 = size + ('serviceTypeId' in data ? 1 : 0);
+      let s2 = s1 + ('leadId' in data ? 1 : 0);
+      let s3 = s2 + ('dueDate' in data ? 1 : 0);
+      let s4 = s3 + ('price' in data ? 1 : 0);
+      let s5 = s4 + ('description' in data ? 1 : 0);
+      return data.keys().size() == s5;
+    }
+
+    function isValidProject(data) {
+      return data.keys().hasAll([
+        'userId', 'title', 'clientName', 'status', 'stepStatuses', 'customFieldValues', 'createdAt', 'updatedAt'
+      ]) &&
+      isValidProjectKeysSize(data) &&
+      data.userId is string && data.userId == request.auth.uid &&
+      data.title is string && data.title.size() > 0 && data.title.size() <= 200 &&
+      data.clientName is string && data.clientName.size() <= 200 &&
+      data.status in ['BACKLOG', 'IN_PROGRESS', 'REVIEW', 'DONE', 'CANCELLED'] &&
+      data.stepStatuses is list &&
+      data.customFieldValues is list &&
+      (!('serviceTypeId' in data) || (data.serviceTypeId is string && data.serviceTypeId.size() <= 128)) &&
+      (!('leadId' in data) || (data.leadId is string && data.leadId.size() <= 128)) &&
+      (!('dueDate' in data) || (data.dueDate is string && data.dueDate.size() <= 20)) &&
+      (!('price' in data) || data.price is number) &&
+      (!('description' in data) || (data.description is string && data.description.size() <= 2000));
+    }
+
+    match /users/{userId}/projects/{projectId} {
+      allow read: if isSignedIn() && userId == request.auth.uid && resource.data.userId == request.auth.uid;
+
+      allow create: if isSignedIn() &&
+        userId == request.auth.uid &&
+        isValidId(projectId) &&
+        isValidProject(incoming());
+
+      allow update: if isSignedIn() &&
+        userId == request.auth.uid &&
+        isValidProject(incoming()) &&
+        incoming().userId == existing().userId &&
+        incoming().createdAt == existing().createdAt;
+
+      allow delete: if isSignedIn() && userId == request.auth.uid;
+    }
   }
 }

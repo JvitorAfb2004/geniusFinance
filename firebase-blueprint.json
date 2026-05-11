@@ -5,67 +5,71 @@
       "description": "A financial transaction",
       "type": "object",
       "properties": {
-        "userId": {
-          "type": "string",
-          "description": "Owner of the transaction"
-        },
-        "context": {
-          "type": "string",
-          "enum": ["PERSONAL", "BUSINESS"]
-        },
-        "type": {
-          "type": "string",
-          "enum": ["INCOME", "EXPENSE", "CREDIT_CARD"]
-        },
-        "title": {
-          "type": "string"
-        },
-        "amount": {
-          "type": "number"
-        },
-        "date": {
-          "type": "string",
-          "format": "date"
-        },
-        "status": {
-          "type": "string",
-          "enum": ["PENDING", "PAID"]
-        },
-        "isFixed": {
-          "type": "boolean"
-        },
-        "groupId": {
-          "type": "string"
-        },
-        "installmentInfo": {
-          "type": "string"
-        },
-        "createdAt": {
-          "type": "string"
-        },
-        "updatedAt": {
-          "type": "string"
-        }
+        "userId": { "type": "string", "description": "Owner of the transaction" },
+        "context": { "type": "string", "enum": ["PERSONAL", "BUSINESS"] },
+        "type": { "type": "string", "enum": ["INCOME", "EXPENSE", "CREDIT_CARD"] },
+        "title": { "type": "string" },
+        "amount": { "type": "number" },
+        "date": { "type": "string", "format": "date" },
+        "status": { "type": "string", "enum": ["PENDING", "PAID"] },
+        "isFixed": { "type": "boolean" },
+        "groupId": { "type": "string" },
+        "installmentInfo": { "type": "string" },
+        "categoryId": { "type": "string" },
+        "tagIds": { "type": "array" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
       },
-      "required": [
-        "userId",
-        "context",
-        "type",
-        "title",
-        "amount",
-        "date",
-        "status",
-        "createdAt",
-        "updatedAt"
-      ]
+      "required": ["userId", "context", "type", "title", "amount", "date", "status", "createdAt", "updatedAt"]
+    },
+    "ServiceType": {
+      "title": "ServiceType",
+      "description": "Template for a service type with process steps and custom fields",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "name": { "type": "string" },
+        "steps": { "type": "array", "items": { "type": "object", "properties": { "order": { "type": "number" }, "title": { "type": "string" } } } },
+        "customFieldDefs": { "type": "array", "items": { "type": "object", "properties": { "key": { "type": "string" }, "label": { "type": "string" } } } },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["userId", "name", "steps", "customFieldDefs", "createdAt", "updatedAt"]
+    },
+    "Project": {
+      "title": "Project",
+      "description": "A service project with checklist and kanban status",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "title": { "type": "string" },
+        "serviceTypeId": { "type": "string" },
+        "leadId": { "type": "string" },
+        "clientName": { "type": "string" },
+        "description": { "type": "string" },
+        "status": { "type": "string", "enum": ["BACKLOG", "IN_PROGRESS", "REVIEW", "DONE", "CANCELLED"] },
+        "stepStatuses": { "type": "array" },
+        "customFieldValues": { "type": "array" },
+        "dueDate": { "type": "string", "format": "date" },
+        "price": { "type": "number" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["userId", "title", "clientName", "status", "stepStatuses", "customFieldValues", "createdAt", "updatedAt"]
     }
   },
   "firestore": {
     "users/{userId}/transactions/{transactionId}": {
-      "schema": {
-        "$ref": "#/entities/Transaction"
-      },
+      "schema": { "$ref": "#/entities/Transaction" },
       "description": "User's financial transactions"
+    },
+    "users/{userId}/service-types/{serviceTypeId}": {
+      "schema": { "$ref": "#/entities/ServiceType" },
+      "description": "Service type templates with process steps and custom field definitions"
+    },
+    "users/{userId}/projects/{projectId}": {
+      "schema": { "$ref": "#/entities/Project" },
+      "description": "Service projects with checklist progress and kanban status"
     }
   }
 }
