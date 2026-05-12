@@ -8,6 +8,7 @@ import type { Transaction } from '../types';
 import ConfirmModal from './ConfirmModal';
 
 const ALERTS_KEY = 'dashboard_alerts_enabled';
+const DISMISSED_ALERTS_KEY = 'dashboard_alerts_dismissed_ids';
 
 function alertsEnabled() {
   try {
@@ -20,7 +21,15 @@ function alertsEnabled() {
 
 export function DashboardAlerts({ valuesVisible = true }: { valuesVisible?: boolean }) {
   const { transactions, activeContext, toggleStatus, setCurrentView } = useFinance();
-  const [dismissedIds, setDismissedIds] = useState<string[]>([]);
+  const [dismissedIds, setDismissedIds] = useState<string[]>(() => {
+    try {
+      const raw = localStorage.getItem(DISMISSED_ALERTS_KEY);
+      const parsed = raw ? JSON.parse(raw) : [];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  });
   const [closingIds, setClosingIds] = useState<string[]>([]);
   const [confirmAction, setConfirmAction] = useState<{ tx: Transaction; label: 'pagamento' | 'recebimento' } | null>(null);
 
@@ -38,7 +47,7 @@ export function DashboardAlerts({ valuesVisible = true }: { valuesVisible?: bool
       .filter((tx) => tx.type !== 'INCOME')
       .filter((tx) => {
         const txDate = startOfDay(parseISO(tx.date));
-        return (isSameDay(txDate, today) || (txDate > today && txDate <= upcomingLimit));
+        return txDate <= upcomingLimit;
       })
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
@@ -59,7 +68,11 @@ export function DashboardAlerts({ valuesVisible = true }: { valuesVisible?: bool
     if (closingIds.includes(id)) return;
     setClosingIds((prev) => [...prev, id]);
     setTimeout(() => {
-      setDismissedIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
+      setDismissedIds((prev) => {
+        const next = prev.includes(id) ? prev : [...prev, id];
+        localStorage.setItem(DISMISSED_ALERTS_KEY, JSON.stringify(next));
+        return next;
+      });
       setClosingIds((prev) => prev.filter((value) => value !== id));
     }, 260);
   };
@@ -93,7 +106,8 @@ export function DashboardAlerts({ valuesVisible = true }: { valuesVisible?: bool
                 <div className="min-w-0">
                   <p className="text-sm font-semibold text-slate-800 truncate">{tx.title}</p>
                   <p className="text-xs text-slate-500">
-                    Vence em {format(parseISO(tx.date), "dd/MM/yyyy (EEE)", { locale: ptBR })}
+                    {parseISO(tx.date) < startOfDay(new Date()) ? 'Atrasada desde' : 'Vence em'}{' '}
+                    {format(parseISO(tx.date), "dd/MM/yyyy (EEE)", { locale: ptBR })}
                   </p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
