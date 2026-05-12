@@ -22,9 +22,19 @@ import { PieChart, List, CreditCard, Calendar, Settings, FileBarChart, X, Calcul
 import { ViewType } from './types';
 import { cn } from './lib/utils';
 
+const DASHBOARD_VALUES_KEY = 'dashboard_values_visible';
+
 function MainApp() {
   const { currentView, setCurrentView, user, loading, signInWithGoogle, signOut } = useFinance();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [dashboardValuesVisible, setDashboardValuesVisible] = useState<boolean>(() => {
+    try {
+      const raw = localStorage.getItem(DASHBOARD_VALUES_KEY);
+      return raw ? JSON.parse(raw) !== false : true;
+    } catch {
+      return true;
+    }
+  });
 
   const menuSections: { label: string; items: { id: ViewType; label: string; icon: React.ElementType }[] }[] = [
     {
@@ -60,6 +70,12 @@ function MainApp() {
   const handleNav = (view: ViewType) => {
     setCurrentView(view);
     setIsSidebarOpen(false);
+  };
+
+  const handleToggleDashboardValues = () => {
+    const next = !dashboardValuesVisible;
+    setDashboardValuesVisible(next);
+    localStorage.setItem(DASHBOARD_VALUES_KEY, JSON.stringify(next));
   };
 
   if (loading) {
@@ -176,12 +192,16 @@ function MainApp() {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
-        <Header onOpenMenu={() => setIsSidebarOpen(true)} />
+        <Header
+          onOpenMenu={() => setIsSidebarOpen(true)}
+          dashboardValuesVisible={dashboardValuesVisible}
+          onToggleDashboardValues={handleToggleDashboardValues}
+        />
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 flex flex-col gap-5">
           {currentView === 'DASHBOARD' && (
             <>
-              <DashboardCards />
-              <DashboardAlerts />
+              <DashboardCards valuesVisible={dashboardValuesVisible} />
+              <DashboardAlerts valuesVisible={dashboardValuesVisible} />
               <div className="grid grid-cols-1 xl:grid-cols-3 gap-5 flex-1 min-h-[400px]">
                 <div className="xl:col-span-2 flex flex-col min-w-0">
                   <TransactionTable />

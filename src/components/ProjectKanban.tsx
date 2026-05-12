@@ -120,8 +120,8 @@ export default function ProjectKanban({ searchTerm, serviceTypeFilter }: Props) 
   React.useEffect(() => {
     if (!contextMenu) return;
     const handler = () => closeMenu();
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
+    document.addEventListener('click', handler);
+    return () => document.removeEventListener('click', handler);
   }, [contextMenu]);
 
   const totalProjects = filteredProjects.length;

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useFinance } from '../hooks/useFinance.tsx';
 import { formatCurrency, cn } from '../lib/utils';
 import { isSameMonth, parseISO } from 'date-fns';
@@ -22,7 +22,7 @@ const ALL_WIDGETS = [
   { id: 'margin', label: 'Margem Liquida' },
 ];
 
-export function DashboardCards() {
+export function DashboardCards({ valuesVisible = true }: { valuesVisible?: boolean }) {
   const { transactions, categories, budgets, activeContext, selectedMonth } = useFinance();
   const [widgets, setWidgets] = useState<string[]>(loadWidgets);
   const [editing, setEditing] = useState(false);
@@ -90,6 +90,33 @@ export function DashboardCards() {
   }
 
   const cards = widgets.map(getCard).filter(Boolean) as { title: string; value: number; color: string; isPercent?: boolean; icon: React.ElementType; iconBg: string; iconColor: string; accentBar: string }[];
+  const [animatedValues, setAnimatedValues] = useState<number[]>(cards.map(() => 0));
+
+  useEffect(() => {
+    setAnimatedValues(cards.map((card) => (valuesVisible ? card.value : 0)));
+  }, [cards.length]);
+
+  useEffect(() => {
+    if (!valuesVisible) {
+      setAnimatedValues(cards.map(() => 0));
+      return;
+    }
+
+    let rafId = 0;
+    const duration = 650;
+    const start = performance.now();
+    const targets = cards.map((card) => card.value);
+
+    const tick = (now: number) => {
+      const progress = Math.min(1, (now - start) / duration);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setAnimatedValues(targets.map((target) => target * eased));
+      if (progress < 1) rafId = requestAnimationFrame(tick);
+    };
+
+    rafId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafId);
+  }, [valuesVisible, transactions, activeContext, selectedMonth, widgets.join('|')]);
 
   return (
     <div>
@@ -118,14 +145,16 @@ export function DashboardCards() {
       )}
 
       <div className={`grid gap-4 ${cards.length <= 2 ? 'grid-cols-1 md:grid-cols-2' : cards.length === 3 ? 'grid-cols-1 md:grid-cols-3' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4'}`}>
-        {cards.map((card) => (
+        {cards.map((card, index) => (
           <div key={card.title} className="bg-surface p-4 rounded-xl border border-border transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 relative overflow-hidden group">
             <div className={`absolute top-0 left-0 right-0 h-0.5 ${card.accentBar}`} />
             <div className="flex items-start justify-between">
               <div className="flex-1 min-w-0">
                 <div className="text-xs text-text-secondary uppercase tracking-wider mb-1.5 font-semibold">{card.title}</div>
                 <div className={cn('text-2xl font-bold font-mono tracking-tight', card.color)}>
-                  {card.isPercent ? `${card.value.toFixed(1)}%` : formatCurrency(card.value)}
+                  {valuesVisible
+                    ? (card.isPercent ? `${(animatedValues[index] ?? 0).toFixed(1)}%` : formatCurrency(animatedValues[index] ?? 0))
+                    : '••••••'}
                 </div>
               </div>
               <div className={`w-10 h-10 rounded-xl ${card.iconBg} flex items-center justify-center flex-shrink-0`}>

@@ -1,11 +1,19 @@
 import React from 'react';
 import { useFinance } from '../hooks/useFinance.tsx';
 import { ContextType } from '../types';
-import { ChevronLeft, ChevronRight, Menu } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Eye, EyeOff, Menu } from 'lucide-react';
 import { format, addMonths, subMonths } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
-export function Header({ onOpenMenu }: { onOpenMenu?: () => void }) {
+export function Header({
+  onOpenMenu,
+  dashboardValuesVisible = true,
+  onToggleDashboardValues,
+}: {
+  onOpenMenu?: () => void;
+  dashboardValuesVisible?: boolean;
+  onToggleDashboardValues?: () => void;
+}) {
   const { activeContext, setActiveContext, selectedMonth, setSelectedMonth } = useFinance();
 
   return (
@@ -39,20 +47,30 @@ export function Header({ onOpenMenu }: { onOpenMenu?: () => void }) {
         </div>
       </div>
 
-      <div className="flex gap-1 p-1 bg-surface border border-border rounded-xl w-full sm:w-auto justify-center">
-        {(['PERSONAL', 'BUSINESS'] as ContextType[]).map((ctx) => (
-          <button
-            key={ctx}
-            onClick={() => setActiveContext(ctx)}
-            className={`flex-1 sm:flex-none px-4 py-1.5 rounded-lg text-[0.85rem] font-semibold transition-all border-none cursor-pointer ${
-              activeContext === ctx
-                ? 'bg-primary text-surface shadow-sm'
-                : 'bg-transparent text-text-secondary hover:bg-bg'
-            }`}
-          >
-            {ctx === 'PERSONAL' ? 'Pessoal' : 'Empresa'}
-          </button>
-        ))}
+      <div className="flex gap-2 w-full sm:w-auto items-center">
+        <div className="flex gap-1 p-1 bg-surface border border-border rounded-xl flex-1 sm:flex-none justify-center">
+          {(['PERSONAL', 'BUSINESS'] as ContextType[]).map((ctx) => (
+            <button
+              key={ctx}
+              onClick={() => setActiveContext(ctx)}
+              className={`flex-1 sm:flex-none px-4 py-1.5 rounded-lg text-[0.85rem] font-semibold transition-all border-none cursor-pointer ${
+                activeContext === ctx
+                  ? 'bg-primary text-surface shadow-sm'
+                  : 'bg-transparent text-text-secondary hover:bg-bg'
+              }`}
+            >
+              {ctx === 'PERSONAL' ? 'Pessoal' : 'Empresa'}
+            </button>
+          ))}
+        </div>
+        <button
+          onClick={onToggleDashboardValues}
+          className="h-10 px-3 bg-surface border border-border rounded-xl text-xs font-semibold text-text-secondary hover:text-text-primary hover:bg-white/70 transition-colors cursor-pointer inline-flex items-center gap-1.5"
+          title={dashboardValuesVisible ? 'Ocultar valores do dashboard' : 'Mostrar valores do dashboard'}
+        >
+          {dashboardValuesVisible ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+          {dashboardValuesVisible ? 'Ocultar valores' : 'Mostrar valores'}
+        </button>
       </div>
     </header>
   );

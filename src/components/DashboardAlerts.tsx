@@ -17,9 +17,10 @@ function alertsEnabled() {
   }
 }
 
-export function DashboardAlerts() {
+export function DashboardAlerts({ valuesVisible = true }: { valuesVisible?: boolean }) {
   const { transactions, activeContext, toggleStatus } = useFinance();
   const [dismissedIds, setDismissedIds] = useState<string[]>([]);
+  const [closingIds, setClosingIds] = useState<string[]>([]);
 
   const { paymentAlerts, todayIncomeAlerts } = useMemo(() => {
     if (!alertsEnabled()) return { paymentAlerts: [] as Transaction[], todayIncomeAlerts: [] as Transaction[] };
@@ -52,6 +53,15 @@ export function DashboardAlerts() {
 
   if (paymentAlerts.length === 0 && todayIncomeAlerts.length === 0) return null;
 
+  const closeWithEffect = (id: string) => {
+    if (closingIds.includes(id)) return;
+    setClosingIds((prev) => [...prev, id]);
+    setTimeout(() => {
+      setDismissedIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
+      setClosingIds((prev) => prev.filter((value) => value !== id));
+    }, 260);
+  };
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
       {paymentAlerts.length > 0 && (
@@ -62,7 +72,13 @@ export function DashboardAlerts() {
           </div>
           <div className="space-y-2">
             {paymentAlerts.map((tx) => (
-              <div key={tx.id} className="bg-white border border-amber-100 rounded-lg px-3 py-2 flex items-center justify-between gap-3">
+              <div
+                key={tx.id}
+                className={cn(
+                  "bg-white border border-amber-100 rounded-lg px-3 py-2 flex items-center justify-between gap-3 transition-all duration-300",
+                  closingIds.includes(tx.id) ? "opacity-0 -translate-y-1 scale-[0.98] max-h-0 overflow-hidden py-0 px-0 border-transparent" : "opacity-100 max-h-32"
+                )}
+              >
                 <div className="min-w-0">
                   <p className="text-sm font-semibold text-slate-800 truncate">{tx.title}</p>
                   <p className="text-xs text-slate-500">
@@ -70,8 +86,8 @@ export function DashboardAlerts() {
                   </p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                  <span className="text-sm font-bold text-red-600">{formatCurrency(tx.amount)}</span>
-                  <button onClick={() => setDismissedIds((prev) => [...prev, tx.id])} className="text-slate-400 hover:text-slate-600 cursor-pointer">
+                  <span className="text-sm font-bold text-red-600">{valuesVisible ? formatCurrency(tx.amount) : '••••••'}</span>
+                  <button onClick={() => closeWithEffect(tx.id)} className="text-slate-400 hover:text-slate-600 cursor-pointer">
                     <X className="w-4 h-4" />
                   </button>
                 </div>
@@ -89,20 +105,29 @@ export function DashboardAlerts() {
           </div>
           <div className="space-y-2">
             {todayIncomeAlerts.map((tx) => (
-              <div key={tx.id} className="bg-white border border-emerald-100 rounded-lg px-3 py-2 flex items-center justify-between gap-3">
+              <div
+                key={tx.id}
+                className={cn(
+                  "bg-white border border-emerald-100 rounded-lg px-3 py-2 flex items-center justify-between gap-3 transition-all duration-300",
+                  closingIds.includes(tx.id) ? "opacity-0 -translate-y-1 scale-[0.98] max-h-0 overflow-hidden py-0 px-0 border-transparent" : "opacity-100 max-h-32"
+                )}
+              >
                 <div className="min-w-0">
                   <p className="text-sm font-semibold text-slate-800 truncate">{tx.title}</p>
-                  <p className="text-xs text-slate-500">Hoje • {formatCurrency(tx.amount)}</p>
+                  <p className="text-xs text-slate-500">Hoje • {valuesVisible ? formatCurrency(tx.amount) : '••••••'}</p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <button
-                    onClick={() => toggleStatus(tx.id)}
+                    onClick={async () => {
+                      await toggleStatus(tx.id);
+                      closeWithEffect(tx.id);
+                    }}
                     className={cn("px-2.5 py-1 text-xs rounded-md border border-emerald-300 text-emerald-700 hover:bg-emerald-100 cursor-pointer flex items-center gap-1")}
                   >
                     <CheckCircle2 className="w-3.5 h-3.5" />
                     Confirmar
                   </button>
-                  <button onClick={() => setDismissedIds((prev) => [...prev, tx.id])} className="text-slate-400 hover:text-slate-600 cursor-pointer">
+                  <button onClick={() => closeWithEffect(tx.id)} className="text-slate-400 hover:text-slate-600 cursor-pointer">
                     <X className="w-4 h-4" />
                   </button>
                 </div>
