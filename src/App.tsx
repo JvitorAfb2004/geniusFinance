@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { FinanceProvider, useFinance } from './hooks/useFinance.tsx';
 import { Header } from './components/Header';
 import { DashboardCards } from './components/DashboardCards';
+import { DashboardAlerts } from './components/DashboardAlerts';
 import { DashboardCharts } from './components/DashboardCharts';
 import { TransactionTable } from './components/TransactionTable';
 import { CreditCardsView } from './components/CreditCardsView';
@@ -17,7 +18,7 @@ import GoalsView from './components/GoalsView';
 import CommercialView from './components/CommercialView';
 import ProjectsView from './components/ProjectsView';
 import ServiceTypesView from './components/ServiceTypesView';
-import { PieChart, List, CreditCard, Calendar, Settings, FileBarChart, Menu, X, Calculator, TrendingUp, Target, Upload, Users, Kanban, Layers } from 'lucide-react';
+import { PieChart, List, CreditCard, Calendar, Settings, FileBarChart, X, Calculator, TrendingUp, Target, Upload, Users, Kanban, Layers } from 'lucide-react';
 import { ViewType } from './types';
 import { cn } from './lib/utils';
 
@@ -35,7 +36,7 @@ function MainApp() {
         { id: 'CREDIT_CARDS', label: 'Cartões de Crédito', icon: CreditCard },
         { id: 'DRE', label: 'DRE', icon: Calculator },
         { id: 'BUDGET', label: 'Orçamento', icon: TrendingUp },
-        { id: 'SALES', label: 'Vendas', icon: Target },
+        { id: 'SALES', label: 'Vendas', icon: TrendingUp },
         { id: 'GOALS', label: 'Metas', icon: Target },
         { id: 'REPORTS', label: 'Relatórios Anuais', icon: FileBarChart },
         { id: 'IMPORT', label: 'Importar', icon: Upload },
@@ -180,6 +181,7 @@ function MainApp() {
           {currentView === 'DASHBOARD' && (
             <>
               <DashboardCards />
+              <DashboardAlerts />
               <div className="grid grid-cols-1 xl:grid-cols-3 gap-5 flex-1 min-h-[400px]">
                 <div className="xl:col-span-2 flex flex-col min-w-0">
                   <TransactionTable />

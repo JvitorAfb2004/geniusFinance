@@ -17,9 +17,12 @@ REGRAS:
 1. Use os valores da seção "VALORES CALCULADOS" — eles já estão corretos.
 2. Para renda mensal, use "Média de renda mensal".
 3. Para gastos, use "Maiores gastos mensais".
-4. Responda em português brasileiro, tom profissional e amigável.
-5. Seja DIRETO. Máximo 2-3 parágrafos.
-6. Formato: R$ X.XXX,XX.`;
+4. Se o usuário pedir faturamento/receita do ano completo, use "Total de receitas no ano (completo/cadastrado)".
+5. Se pedir faturamento realizado até hoje, use "Total de receitas no ano (realizado)".
+6. Não invente valores. Se faltar dado, diga claramente.
+7. Responda em português brasileiro, tom profissional e amigável.
+8. Seja DIRETO. Máximo 2-3 parágrafos.
+9. Formato: R$ X.XXX,XX.`;
 
 const SUGGESTIONS = [
   { icon: TrendingUp, text: 'Qual foi minha renda esse mês?' },
@@ -106,7 +109,10 @@ export default function ChatBot() {
       .slice(0, 5);
 
     const futureMonths = monthlyBreakdown.filter((m) => !m.isPast);
-    const totalYearIncome = monthlyBreakdown.filter((m) => m.isPast).reduce((s, m) => s + m.inc, 0);
+    const totalYearIncomeRealized = monthlyBreakdown.filter((m) => m.isPast).reduce((s, m) => s + m.inc, 0);
+    const totalYearIncomeFull = monthlyBreakdown.reduce((s, m) => s + m.inc, 0);
+    const totalYearExpenseRealized = monthlyBreakdown.filter((m) => m.isPast).reduce((s, m) => s + m.exp, 0);
+    const totalYearExpenseFull = monthlyBreakdown.reduce((s, m) => s + m.exp, 0);
 
     return `=== DADOS FINANCEIROS ===
 Mês atual: ${format(selectedMonth, 'MMMM/yyyy')} | Tipo: ${activeContext === 'PERSONAL' ? 'Pessoal' : 'Empresa'}
@@ -118,7 +124,10 @@ ${futureMonths.length > 0 ? `FUTURO (nao incluir em medias):\n${futureMonths.map
 
 VALORES CALCULADOS (use estes numeros exatos):
 - Media de renda mensal: ${formatCurrency(avgIncome)} (${pastIncomeMonths.length} meses com receita)
-- Total de receitas no ano: ${formatCurrency(totalYearIncome)}
+- Total de receitas no ano (realizado): ${formatCurrency(totalYearIncomeRealized)}
+- Total de receitas no ano (completo/cadastrado): ${formatCurrency(totalYearIncomeFull)}
+- Total de despesas no ano (realizado): ${formatCurrency(totalYearExpenseRealized)}
+- Total de despesas no ano (completo/cadastrado): ${formatCurrency(totalYearExpenseFull)}
 - Maiores gastos mensais:
 ${sortedMonthlyExpenses.map((e) => `  ${e.name}: ${formatCurrency(e.monthly)}/mes (${e.months}x no ano)`).join('\n') || '  nenhum'}`;
   }, [transactions, budgets, categories, activeContext, selectedMonth]);
@@ -153,7 +162,7 @@ ${sortedMonthlyExpenses.map((e) => `  ${e.name}: ${formatCurrency(e.monthly)}/me
             return updated;
           });
         },
-        { temperature: 0.7, maxTokens: 1024 },
+        { temperature: 0.2, maxTokens: 1024 },
       );
 
       setMessages((prev) => {

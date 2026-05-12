@@ -1,6 +1,6 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useFinance } from '../hooks/useFinance';
-import { LogOut, User, Shield, DownloadCloud, Pencil, Trash2, Plus, X, Check, Users } from 'lucide-react';
+import { LogOut, User, Shield, DownloadCloud, Pencil, Trash2, Plus, X, Check, Users, BellRing } from 'lucide-react';
 import ConfirmModal from './ConfirmModal';
 import type { Category, DRESection, LeadOption } from '../types';
 import { SECTION_LABELS } from '../lib/categories';
@@ -9,6 +9,7 @@ type SettingsTab = 'geral' | 'comercial' | 'categorias' | 'tags';
 
 const STATUS_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#84cc16'];
 const TAG_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#84cc16'];
+const DASHBOARD_ALERTS_KEY = 'dashboard_alerts_enabled';
 
 export function SettingsView() {
   const {
@@ -38,6 +39,22 @@ export function SettingsView() {
   const [showNewOption, setShowNewOption] = useState<LeadOption['field'] | null>(null);
   const [newOptionValue, setNewOptionValue] = useState('');
   const [newOptionColor, setNewOptionColor] = useState('#3b82f6');
+  const [showDashboardAlerts, setShowDashboardAlerts] = useState(true);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(DASHBOARD_ALERTS_KEY);
+      setShowDashboardAlerts(raw ? JSON.parse(raw) !== false : true);
+    } catch {
+      setShowDashboardAlerts(true);
+    }
+  }, []);
+
+  const handleToggleDashboardAlerts = () => {
+    const next = !showDashboardAlerts;
+    setShowDashboardAlerts(next);
+    localStorage.setItem(DASHBOARD_ALERTS_KEY, JSON.stringify(next));
+  };
 
   const statusOptions = useMemo(() => leadOptions.filter((o) => o.field === 'status').sort((a, b) => a.order - b.order), [leadOptions]);
   const sourceOptions = useMemo(() => leadOptions.filter((o) => o.field === 'source').sort((a, b) => a.order - b.order), [leadOptions]);
@@ -207,6 +224,26 @@ export function SettingsView() {
                   </div>
                 </div>
                 <span className="text-xs font-bold bg-green-100 text-green-700 px-2 py-1 rounded">Seguro</span>
+              </div>
+
+              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-100">
+                <div className="flex items-center gap-3">
+                  <BellRing className="text-amber-500 w-5 h-5 shrink-0" />
+                  <div>
+                    <p className="font-semibold text-gray-700">Alertas do dashboard inicial</p>
+                    <p className="text-xs text-gray-500">Mostra avisos de pagamentos próximos e recebimentos do dia.</p>
+                  </div>
+                </div>
+                <button
+                  onClick={handleToggleDashboardAlerts}
+                  className={`text-xs font-bold px-3 py-1 rounded cursor-pointer border ${
+                    showDashboardAlerts
+                      ? 'bg-emerald-100 text-emerald-700 border-emerald-200'
+                      : 'bg-gray-100 text-gray-500 border-gray-200'
+                  }`}
+                >
+                  {showDashboardAlerts ? 'Ativado' : 'Desativado'}
+                </button>
               </div>
 
               <button onClick={signOut}
