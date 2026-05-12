@@ -1,10 +1,11 @@
 import React, { useMemo, useState } from 'react';
 import { addDays, format, isEqual, isSameDay, parseISO, startOfDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { AlertTriangle, CalendarClock, CheckCircle2, X } from 'lucide-react';
+import { AlertTriangle, CalendarClock, CheckCircle2, Settings, X } from 'lucide-react';
 import { useFinance } from '../hooks/useFinance';
 import { cn, formatCurrency } from '../lib/utils';
 import type { Transaction } from '../types';
+import ConfirmModal from './ConfirmModal';
 
 const ALERTS_KEY = 'dashboard_alerts_enabled';
 
@@ -18,9 +19,10 @@ function alertsEnabled() {
 }
 
 export function DashboardAlerts({ valuesVisible = true }: { valuesVisible?: boolean }) {
-  const { transactions, activeContext, toggleStatus } = useFinance();
+  const { transactions, activeContext, toggleStatus, setCurrentView } = useFinance();
   const [dismissedIds, setDismissedIds] = useState<string[]>([]);
   const [closingIds, setClosingIds] = useState<string[]>([]);
+  const [confirmAction, setConfirmAction] = useState<{ tx: Transaction; label: 'pagamento' | 'recebimento' } | null>(null);
 
   const { paymentAlerts, todayIncomeAlerts } = useMemo(() => {
     if (!alertsEnabled()) return { paymentAlerts: [] as Transaction[], todayIncomeAlerts: [] as Transaction[] };
@@ -66,9 +68,18 @@ export function DashboardAlerts({ valuesVisible = true }: { valuesVisible?: bool
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
       {paymentAlerts.length > 0 && (
         <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
-          <div className="flex items-center gap-2 text-amber-800 mb-3">
-            <AlertTriangle className="w-4 h-4" />
-            <h3 className="text-sm font-bold">Despesas/Custos próximos do pagamento</h3>
+          <div className="flex items-center justify-between gap-2 text-amber-800 mb-3">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4" />
+              <h3 className="text-sm font-bold">Despesas/Custos próximos do pagamento</h3>
+            </div>
+            <button
+              onClick={() => setCurrentView('SETTINGS')}
+              className="text-amber-700 hover:text-amber-900 cursor-pointer"
+              title="Abrir configurações"
+            >
+              <Settings className="w-4 h-4" />
+            </button>
           </div>
           <div className="space-y-2">
             {paymentAlerts.map((tx) => (
@@ -87,6 +98,12 @@ export function DashboardAlerts({ valuesVisible = true }: { valuesVisible?: bool
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <span className="text-sm font-bold text-red-600">{valuesVisible ? formatCurrency(tx.amount) : '••••••'}</span>
+                  <button
+                    onClick={() => setConfirmAction({ tx, label: 'pagamento' })}
+                    className="px-2.5 py-1 text-xs rounded-md border border-amber-300 text-amber-800 hover:bg-amber-100 cursor-pointer"
+                  >
+                    Confirmar pagamento
+                  </button>
                   <button onClick={() => closeWithEffect(tx.id)} className="text-slate-400 hover:text-slate-600 cursor-pointer">
                     <X className="w-4 h-4" />
                   </button>
@@ -99,9 +116,18 @@ export function DashboardAlerts({ valuesVisible = true }: { valuesVisible?: bool
 
       {todayIncomeAlerts.length > 0 && (
         <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
-          <div className="flex items-center gap-2 text-emerald-800 mb-3">
-            <CalendarClock className="w-4 h-4" />
-            <h3 className="text-sm font-bold">Recebimentos para hoje</h3>
+          <div className="flex items-center justify-between gap-2 text-emerald-800 mb-3">
+            <div className="flex items-center gap-2">
+              <CalendarClock className="w-4 h-4" />
+              <h3 className="text-sm font-bold">Recebimentos para hoje</h3>
+            </div>
+            <button
+              onClick={() => setCurrentView('SETTINGS')}
+              className="text-emerald-700 hover:text-emerald-900 cursor-pointer"
+              title="Abrir configurações"
+            >
+              <Settings className="w-4 h-4" />
+            </button>
           </div>
           <div className="space-y-2">
             {todayIncomeAlerts.map((tx) => (
@@ -118,10 +144,7 @@ export function DashboardAlerts({ valuesVisible = true }: { valuesVisible?: bool
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <button
-                    onClick={async () => {
-                      await toggleStatus(tx.id);
-                      closeWithEffect(tx.id);
-                    }}
+                    onClick={() => setConfirmAction({ tx, label: 'recebimento' })}
                     className={cn("px-2.5 py-1 text-xs rounded-md border border-emerald-300 text-emerald-700 hover:bg-emerald-100 cursor-pointer flex items-center gap-1")}
                   >
                     <CheckCircle2 className="w-3.5 h-3.5" />
@@ -135,6 +158,22 @@ export function DashboardAlerts({ valuesVisible = true }: { valuesVisible?: bool
             ))}
           </div>
         </div>
+      )}
+
+      {confirmAction && (
+        <ConfirmModal
+          title={`Confirmar ${confirmAction.label}`}
+          message={`Deseja confirmar ${confirmAction.label} de "${confirmAction.tx.title}"?`}
+          confirmLabel="Confirmar"
+          cancelLabel="Cancelar"
+          variant={confirmAction.label === 'pagamento' ? 'warning' : 'info'}
+          onConfirm={async () => {
+            await toggleStatus(confirmAction.tx.id);
+            closeWithEffect(confirmAction.tx.id);
+            setConfirmAction(null);
+          }}
+          onCancel={() => setConfirmAction(null)}
+        />
       )}
     </div>
   );

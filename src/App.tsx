@@ -223,7 +223,7 @@ function MainApp() {
           {currentView === 'SERVICE_TYPES' && <ServiceTypesView />}
 
           {currentView === 'TRANSACTIONS' && (
-            <div className="flex flex-col h-full bg-white rounded-xl shadow-sm border border-[#e2e8f0]">
+            <div className="flex flex-col h-full bg-white rounded-xl border border-[#e2e8f0]">
               <div className="p-6 border-b border-[#e2e8f0]">
                 <h2 className="text-xl font-bold font-sans text-gray-900">Entradas / Saídas</h2>
                 <p className="text-sm text-gray-500 mt-1">Gerencie todas as transações, filtre e edite informações facilmente.</p>
