@@ -13,6 +13,7 @@ import {
 import { ptBR } from 'date-fns/locale';
 import { Target, TrendingUp, Zap, Percent, Plus, Trash2, Users, Tag } from 'lucide-react';
 import SalesTargetModal from './SalesTargetModal';
+import { useAnimatedValue } from '../hooks/useAnimatedValue';
 
 export default function SalesView() {
   const { transactions, salesTargets, categories, activeContext, selectedMonth, deleteSalesTarget } = useFinance();
@@ -152,7 +153,7 @@ export default function SalesView() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <SalesCard
           title="Total de Vendas"
-          value={formatCurrency(totalSales)}
+          value={totalSales}
           icon={<TrendingUp className="w-4 h-4" />}
           color="text-emerald-600"
           bg="bg-emerald-50"
@@ -160,7 +161,8 @@ export default function SalesView() {
         />
         <SalesCard
           title="Meta do Mes"
-          value={mainTarget > 0 ? formatCurrency(mainTarget) : '--'}
+          value={mainTarget}
+          fallback={mainTarget <= 0 ? '--' : undefined}
           icon={<Target className="w-4 h-4" />}
           color="text-blue-600"
           bg="bg-blue-50"
@@ -168,7 +170,7 @@ export default function SalesView() {
         />
         <SalesCard
           title="Ritmo Diario"
-          value={formatCurrency(dailyPace)}
+          value={dailyPace}
           icon={<Zap className="w-4 h-4" />}
           color={paceColor}
           bg={paceBg}
@@ -176,7 +178,9 @@ export default function SalesView() {
         />
         <SalesCard
           title="% Atingido"
-          value={mainTarget > 0 ? `${targetPct.toFixed(1)}%` : '--'}
+          value={targetPct}
+          isPercent
+          fallback={mainTarget <= 0 ? '--' : undefined}
           icon={<Percent className="w-4 h-4" />}
           color={targetPct >= 100 ? 'text-emerald-600' : targetPct >= 75 ? 'text-blue-600' : 'text-amber-600'}
           bg={targetPct >= 100 ? 'bg-emerald-50' : targetPct >= 75 ? 'bg-blue-50' : 'bg-amber-50'}
@@ -373,10 +377,12 @@ export default function SalesView() {
 }
 
 function SalesCard({
-  title, value, icon, color, bg, subtitle,
+  title, value, icon, color, bg, subtitle, isPercent, fallback,
 }: {
-  title: string; value: string; icon: React.ReactNode; color: string; bg: string; subtitle: string;
+  title: string; value: number; icon: React.ReactNode; color: string; bg: string; subtitle: string; isPercent?: boolean; fallback?: string;
 }) {
+  const animValue = useAnimatedValue(value);
+
   return (
     <div className="bg-white rounded-xl border border-slate-200 p-4">
       <div className="flex items-center gap-2 mb-2">
@@ -385,7 +391,9 @@ function SalesCard({
         </div>
         <span className="text-xs font-medium text-slate-500">{title}</span>
       </div>
-      <p className={`text-lg font-bold font-mono ${color}`}>{value}</p>
+      <p className={`text-lg font-bold font-mono ${color}`}>
+        {fallback !== undefined ? fallback : isPercent ? `${animValue.toFixed(1)}%` : formatCurrency(animValue)}
+      </p>
       <p className="text-xs text-slate-400 mt-1">{subtitle}</p>
     </div>
   );

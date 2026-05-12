@@ -12,6 +12,7 @@ import {
 import { isSameMonth, parseISO, startOfYear, endOfYear, eachMonthOfInterval, format, addMonths, subMonths } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { TrendingUp, TrendingDown, DollarSign, Percent, ArrowUpRight, ArrowDownRight, Lightbulb, Loader2 } from 'lucide-react';
+import { useAnimatedValue } from '../hooks/useAnimatedValue';
 
 const COLORS = ['#ef4444', '#f59e0b', '#3b82f6', '#10b981', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'];
 
@@ -223,8 +224,9 @@ function DRECard({
   showSign?: boolean;
   isPercent?: boolean;
 }) {
-  const displayValue = isCost ? Math.abs(value) : value;
-  const formatted = isPercent ? `${value >= 0 ? '' : '-'}${Math.abs(value).toFixed(1)}%` : formatCurrency(displayValue);
+  const animValue = useAnimatedValue(value);
+  const displayValue = isCost ? Math.abs(animValue) : animValue;
+  const formatted = isPercent ? `${value >= 0 ? '' : '-'}${Math.abs(animValue).toFixed(1)}%` : formatCurrency(displayValue);
   const prefix = showSign && value > 0 ? '+' : '';
 
   return (
@@ -316,6 +318,11 @@ function ForecastSection() {
     };
   }, [forecastData]);
 
+  const animReceita = useAnimatedValue(yearTotals.receita);
+  const animCustos = useAnimatedValue(yearTotals.custos);
+  const animLucro = useAnimatedValue(yearTotals.lucro);
+  const animMargem = useAnimatedValue(yearTotals.margem);
+
   const hasBudgetData = budgets.some((b) => b.context === activeContext && b.year === year);
 
   if (!hasBudgetData) {
@@ -334,22 +341,22 @@ function ForecastSection() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <div className="bg-white rounded-xl border border-slate-200 p-4">
           <p className="text-xs text-slate-500 mb-1">Receita Projetada</p>
-          <p className="text-lg font-bold font-mono text-emerald-600">{formatCurrency(yearTotals.receita)}</p>
+          <p className="text-lg font-bold font-mono text-emerald-600">{formatCurrency(animReceita)}</p>
         </div>
         <div className="bg-white rounded-xl border border-slate-200 p-4">
           <p className="text-xs text-slate-500 mb-1">Custos Projetados</p>
-          <p className="text-lg font-bold font-mono text-amber-600">{formatCurrency(yearTotals.custos)}</p>
+          <p className="text-lg font-bold font-mono text-amber-600">{formatCurrency(animCustos)}</p>
         </div>
         <div className="bg-white rounded-xl border border-slate-200 p-4">
           <p className="text-xs text-slate-500 mb-1">Lucro Projetado</p>
           <p className={`text-lg font-bold font-mono ${yearTotals.lucro >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
-            {formatCurrency(yearTotals.lucro)}
+            {formatCurrency(animLucro)}
           </p>
         </div>
         <div className="bg-white rounded-xl border border-slate-200 p-4">
           <p className="text-xs text-slate-500 mb-1">Margem Projetada</p>
           <p className={`text-lg font-bold font-mono ${yearTotals.margem >= 0 ? 'text-purple-600' : 'text-red-600'}`}>
-            {yearTotals.margem.toFixed(1)}%
+            {animMargem.toFixed(1)}%
           </p>
         </div>
       </div>

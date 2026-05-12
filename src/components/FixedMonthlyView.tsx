@@ -5,6 +5,7 @@ import { TrendingUp, TrendingDown, Sparkles } from 'lucide-react';
 import { formatCurrency } from '../lib/utils';
 import { detectRecurring } from '../lib/recurrenceDetector';
 import { isSameMonth, parseISO } from 'date-fns';
+import { useAnimatedValue } from '../hooks/useAnimatedValue';
 
 export function FixedMonthlyView() {
   const { transactions, activeContext, selectedMonth, addTransaction } = useFinance();
@@ -18,6 +19,9 @@ export function FixedMonthlyView() {
 
   const totalFixedIncomes = currentTxs.filter((t) => t.type === 'INCOME').reduce((acc, t) => acc + t.amount, 0);
   const totalFixedExpenses = currentTxs.filter((t) => t.type === 'EXPENSE' || t.type === 'CREDIT_CARD').reduce((acc, t) => acc + t.amount, 0);
+
+  const animIncomes = useAnimatedValue(totalFixedIncomes);
+  const animExpenses = useAnimatedValue(totalFixedExpenses);
 
   const suggestions = useMemo(() => {
     const filtered = transactions.filter((t) => t.context === activeContext);
@@ -39,14 +43,14 @@ export function FixedMonthlyView() {
           <div className="p-3 bg-emerald-50 text-emerald-600 rounded-lg"><TrendingUp className="w-6 h-6" /></div>
           <div>
             <p className="text-sm text-gray-500 font-medium">Lançamentos Fixos (Receitas)</p>
-            <p className="text-xl font-bold text-gray-900">{formatCurrency(totalFixedIncomes)}</p>
+            <p className="text-xl font-bold text-gray-900">{formatCurrency(animIncomes)}</p>
           </div>
         </div>
         <div className="bg-white rounded-xl border border-[#e2e8f0] p-5 flex items-center gap-4">
           <div className="p-3 bg-rose-50 text-rose-600 rounded-lg"><TrendingDown className="w-6 h-6" /></div>
           <div>
             <p className="text-sm text-gray-500 font-medium">Lançamentos Fixos (Despesas)</p>
-            <p className="text-xl font-bold text-gray-900">{formatCurrency(totalFixedExpenses)}</p>
+            <p className="text-xl font-bold text-gray-900">{formatCurrency(animExpenses)}</p>
           </div>
         </div>
       </div>

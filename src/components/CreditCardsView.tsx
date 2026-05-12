@@ -4,6 +4,7 @@ import { TransactionTable } from './TransactionTable';
 import { CreditCard } from 'lucide-react';
 import { formatCurrency } from '../lib/utils';
 import { isSameMonth, parseISO } from 'date-fns';
+import { useAnimatedValue } from '../hooks/useAnimatedValue';
 
 export function CreditCardsView() {
   const { transactions, activeContext, selectedMonth } = useFinance();
@@ -18,6 +19,10 @@ export function CreditCardsView() {
   const totalPaid = currentTxs.filter(t => t.status === 'PAID').reduce((acc, t) => acc + t.amount, 0);
   const total = totalPending + totalPaid;
 
+  const animTotal = useAnimatedValue(total);
+  const animPending = useAnimatedValue(totalPending);
+  const animPaid = useAnimatedValue(totalPaid);
+
   return (
     <div className="flex flex-col h-full gap-5">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -25,21 +30,21 @@ export function CreditCardsView() {
           <div className="p-3 bg-blue-50 text-blue-600 rounded-lg"><CreditCard className="w-6 h-6" /></div>
           <div>
             <p className="text-sm text-gray-500 font-medium">Fatura Total (Mês)</p>
-            <p className="text-xl font-bold text-gray-900">{formatCurrency(total)}</p>
+            <p className="text-xl font-bold text-gray-900">{formatCurrency(animTotal)}</p>
           </div>
         </div>
         <div className="bg-white rounded-xl border border-[#e2e8f0] p-5 flex items-center gap-4">
           <div className="p-3 bg-yellow-50 text-yellow-600 rounded-lg"><CreditCard className="w-6 h-6" /></div>
           <div>
             <p className="text-sm text-gray-500 font-medium">Aberto / Pendente</p>
-            <p className="text-xl font-bold text-gray-900">{formatCurrency(totalPending)}</p>
+            <p className="text-xl font-bold text-gray-900">{formatCurrency(animPending)}</p>
           </div>
         </div>
         <div className="bg-white rounded-xl border border-[#e2e8f0] p-5 flex items-center gap-4">
           <div className="p-3 bg-green-50 text-green-600 rounded-lg"><CreditCard className="w-6 h-6" /></div>
           <div>
             <p className="text-sm text-gray-500 font-medium">Pago</p>
-            <p className="text-xl font-bold text-gray-900">{formatCurrency(totalPaid)}</p>
+            <p className="text-xl font-bold text-gray-900">{formatCurrency(animPaid)}</p>
           </div>
         </div>
       </div>
