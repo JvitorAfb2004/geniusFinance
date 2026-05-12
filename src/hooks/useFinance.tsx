@@ -1,16 +1,39 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { addMonths, format, parseISO } from 'date-fns';
-import { ContextType, FinanceContextState, Transaction, ViewType, Category, Budget, DRESection, SalesTarget, Tag, FinancialGoal, Lead, LeadOption, ServiceType, Project } from '../types';
+import { ContextType, FinanceContextState, Transaction, ViewType, Category, Budget, DRESection, SalesTarget, Tag, FinancialGoal, Lead, LeadOption, ServiceType, Project, ActiveScope, Account, AccountMember, AccountInvite, AccountRole } from '../types';
 import { auth, db, signInWithGoogle, signOut } from '../lib/firebase';
 import { handleFirestoreError } from '../lib/handleFirestoreError';
 import { DEFAULT_CATEGORIES } from '../lib/categories';
 import { ALL_DEFAULT_LEAD_OPTIONS } from '../lib/leadDefaults';
+import { resolveDataPath } from '../lib/pathAdapter';
+import type { FinanceCollectionName } from '../lib/pathAdapter';
+import { createAccount, getUserAccounts, getAccountMembers, getAccountInvites, migrateUserToAccount, createInvite, getPendingInvites, acceptInvite as acceptInviteSvc } from '../lib/accountService';
 import { User, onAuthStateChanged } from 'firebase/auth';
 import {
   collection, query, onSnapshot, doc, writeBatch, serverTimestamp,
   getDocs, where
 } from 'firebase/firestore';
+
+const ACTIVE_SCOPE_KEY = 'gh_active_scope';
+
+function loadSavedScope(): ActiveScope | null {
+  try {
+    const raw = localStorage.getItem(ACTIVE_SCOPE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (parsed && typeof parsed.type === 'string') {
+      return parsed as ActiveScope;
+    }
+  } catch {}
+  return null;
+}
+
+function saveScope(scope: ActiveScope) {
+  try {
+    localStorage.setItem(ACTIVE_SCOPE_KEY, JSON.stringify(scope));
+  } catch {}
+}
 
 const FinanceContext = createContext<FinanceContextState | undefined>(undefined);
 
@@ -30,7 +53,11 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
   const [categoriesLoaded, setCategoriesLoaded] = useState(false);
   const [leadOptionsLoaded, setLeadOptionsLoaded] = useState(false);
 
-  const [activeContext, setActiveContext] = useState<ContextType>('PERSONAL');
+  const [activeScope, setActiveScope] = useState<ActiveScope>({ type: 'PERSONAL', userId: '' });
+  const [accounts, setAccounts] = useState<Account[]>([]);
+  const [accountMembers, setAccountMembers] = useState<AccountMember[]>([]);
+  const [accountInvites, setAccountInvites] = useState<AccountInvite[]>([]);
+  const [pendingInvites, setPendingInvites] = useState<AccountInvite[]>([]);
   const [selectedMonth, setSelectedMonth] = useState<Date>(new Date());
   const [currentView, setCurrentView] = useState<ViewType>('DASHBOARD');
 
@@ -49,24 +76,82 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
         setLeadOptions([]);
         setServiceTypes([]);
         setProjects([]);
+        setAccounts([]);
+        setAccountMembers([]);
+        setAccountInvites([]);
+        setPendingInvites([]);
         setCategoriesLoaded(false);
         setLeadOptionsLoaded(false);
+        setActiveScope({ type: 'PERSONAL', userId: '' });
         setLoading(false);
+      } else {
+        const saved = loadSavedScope();
+        if (saved) {
+          // Restore saved scope, updating userId for PERSONAL
+          if (saved.type === 'PERSONAL') {
+            setActiveScope({ type: 'PERSONAL', userId: u.uid });
+          } else {
+            setActiveScope(saved);
+          }
+        } else {
+          setActiveScope({ type: 'PERSONAL', userId: u.uid });
+        }
       }
     });
     return () => unsubscribe();
   }, []);
+
+  // Persist activeScope to localStorage
+  useEffect(() => {
+    if (activeScope.type === 'PERSONAL' && !activeScope.userId) return; // skip initial empty
+    saveScope(activeScope);
+  }, [activeScope]);
+
+  // Load user accounts on login
+  useEffect(() => {
+    if (!user) return;
+    getUserAccounts(user.uid).then((result) => {
+      setAccounts(result.map((r) => r.account));
+    }).catch(() => {});
+    // Load pending invites for this user's email
+    if (user.email) {
+      getPendingInvites(user.email).then((invites) => {
+        setPendingInvites(invites);
+      }).catch((err) => {
+        console.error('Erro ao carregar convites pendentes:', err);
+      });
+    }
+  }, [user]);
+
+  // Load members and invites when account scope is active
+  useEffect(() => {
+    if (!user || activeScope.type !== 'ACCOUNT') {
+      setAccountMembers([]);
+      setAccountInvites([]);
+      return;
+    }
+    getAccountMembers(activeScope.accountId).then(setAccountMembers).catch(() => {});
+    getAccountInvites(activeScope.accountId).then(setAccountInvites).catch(() => {});
+  }, [user, activeScope.type === 'ACCOUNT' ? activeScope.accountId : null]);
+
+  // Build query for the active scope (personal or account)
+  const buildQuery = useCallback((collectionName: FinanceCollectionName) => {
+    if (!user) return null;
+    const dataPath = resolveDataPath(activeScope, user.uid, collectionName);
+    const colRef = collection(db, dataPath);
+    if (activeScope.type === 'PERSONAL') {
+      return query(colRef, where('userId', '==', user.uid));
+    }
+    return query(colRef);
+  }, [user, activeScope]);
 
   // Data sync listener
   useEffect(() => {
     if (!user) return;
     setLoading(true);
 
-    // We listen to all transactions for the user. In real-world, might want to limit by date range.
-    const q = query(
-      collection(db, `users/${user.uid}/transactions`),
-      where('userId', '==', user.uid)
-    );
+    const q = buildQuery('transactions');
+    if (!q) return;
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const txs: Transaction[] = snapshot.docs.map(docSnap => {
@@ -93,20 +178,18 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       setTransactions(txs);
       setLoading(false);
     }, (err) => {
-      handleFirestoreError(err, 'list', `users/${user.uid}/transactions`, user);
+      handleFirestoreError(err, 'list', resolveDataPath(activeScope, user.uid, 'transactions'), user);
       setLoading(false);
     });
 
     return () => unsubscribe();
-  }, [user]);
+  }, [user, activeScope]);
 
   // Categories listener
   useEffect(() => {
     if (!user) return;
-    const q = query(
-      collection(db, `users/${user.uid}/categories`),
-      where('userId', '==', user.uid)
-    );
+    const q = buildQuery('categories');
+    if (!q) return;
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const cats: Category[] = snapshot.docs.map((docSnap) => {
         const data = docSnap.data();
@@ -122,18 +205,16 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       setCategories(cats);
       setCategoriesLoaded(true);
     }, (err) => {
-      handleFirestoreError(err, 'list', `users/${user.uid}/categories`, user);
+      handleFirestoreError(err, 'list', resolveDataPath(activeScope, user.uid, 'categories'), user);
     });
     return () => unsubscribe();
-  }, [user]);
+  }, [user, activeScope]);
 
   // Budgets listener
   useEffect(() => {
     if (!user) return;
-    const q = query(
-      collection(db, `users/${user.uid}/budgets`),
-      where('userId', '==', user.uid)
-    );
+    const q = buildQuery('budgets');
+    if (!q) return;
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const buds: Budget[] = snapshot.docs.map((docSnap) => {
         const data = docSnap.data();
@@ -151,18 +232,16 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       });
       setBudgets(buds);
     }, (err) => {
-      handleFirestoreError(err, 'list', `users/${user.uid}/budgets`, user);
+      handleFirestoreError(err, 'list', resolveDataPath(activeScope, user.uid, 'budgets'), user);
     });
     return () => unsubscribe();
-  }, [user]);
+  }, [user, activeScope]);
 
   // Sales targets listener
   useEffect(() => {
     if (!user) return;
-    const q = query(
-      collection(db, `users/${user.uid}/sales-targets`),
-      where('userId', '==', user.uid)
-    );
+    const q = buildQuery('sales-targets');
+    if (!q) return;
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const targets: SalesTarget[] = snapshot.docs.map((docSnap) => {
         const data = docSnap.data();
@@ -181,18 +260,16 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       });
       setSalesTargets(targets);
     }, (err) => {
-      handleFirestoreError(err, 'list', `users/${user.uid}/sales-targets`, user);
+      handleFirestoreError(err, 'list', resolveDataPath(activeScope, user.uid, 'sales-targets'), user);
     });
     return () => unsubscribe();
-  }, [user]);
+  }, [user, activeScope]);
 
   // Tags listener
   useEffect(() => {
     if (!user) return;
-    const q = query(
-      collection(db, `users/${user.uid}/tags`),
-      where('userId', '==', user.uid)
-    );
+    const q = buildQuery('tags');
+    if (!q) return;
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const t: Tag[] = snapshot.docs.map((docSnap) => {
         const data = docSnap.data();
@@ -200,15 +277,16 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       });
       setTags(t);
     }, (err) => {
-      handleFirestoreError(err, 'list', `users/${user.uid}/tags`, user);
+      handleFirestoreError(err, 'list', resolveDataPath(activeScope, user.uid, 'tags'), user);
     });
     return () => unsubscribe();
-  }, [user]);
+  }, [user, activeScope]);
 
   // Goals listener
   useEffect(() => {
     if (!user) return;
-    const q = query(collection(db, `users/${user.uid}/goals`), where('userId', '==', user.uid));
+    const q = buildQuery('goals');
+    if (!q) return;
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const g: FinancialGoal[] = snapshot.docs.map((docSnap) => {
         const data = docSnap.data();
@@ -221,17 +299,15 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
         } as FinancialGoal;
       });
       setGoals(g);
-    }, (err) => { handleFirestoreError(err, 'list', `users/${user.uid}/goals`, user); });
+    }, (err) => { handleFirestoreError(err, 'list', resolveDataPath(activeScope, user.uid, 'goals'), user); });
     return () => unsubscribe();
-  }, [user]);
+  }, [user, activeScope]);
 
   // Leads listener
   useEffect(() => {
     if (!user) return;
-    const q = query(
-      collection(db, `users/${user.uid}/leads`),
-      where('userId', '==', user.uid)
-    );
+    const q = buildQuery('leads');
+    if (!q) return;
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const l: Lead[] = snapshot.docs.map((docSnap) => {
         const data = docSnap.data();
@@ -255,18 +331,16 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       });
       setLeads(l);
     }, (err) => {
-      handleFirestoreError(err, 'list', `users/${user.uid}/leads`, user);
+      handleFirestoreError(err, 'list', resolveDataPath(activeScope, user.uid, 'leads'), user);
     });
     return () => unsubscribe();
-  }, [user]);
+  }, [user, activeScope]);
 
   // Lead options listener
   useEffect(() => {
     if (!user) return;
-    const q = query(
-      collection(db, `users/${user.uid}/lead-options`),
-      where('userId', '==', user.uid)
-    );
+    const q = buildQuery('lead-options');
+    if (!q) return;
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const opts: LeadOption[] = snapshot.docs.map((docSnap) => {
         const data = docSnap.data();
@@ -283,18 +357,16 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       setLeadOptions(opts);
       setLeadOptionsLoaded(true);
     }, (err) => {
-      handleFirestoreError(err, 'list', `users/${user.uid}/lead-options`, user);
+      handleFirestoreError(err, 'list', resolveDataPath(activeScope, user.uid, 'lead-options'), user);
     });
     return () => unsubscribe();
-  }, [user]);
+  }, [user, activeScope]);
 
   // Service types listener
   useEffect(() => {
     if (!user) return;
-    const q = query(
-      collection(db, `users/${user.uid}/service-types`),
-      where('userId', '==', user.uid)
-    );
+    const q = buildQuery('service-types');
+    if (!q) return;
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const st: ServiceType[] = snapshot.docs.map((docSnap) => {
         const data = docSnap.data();
@@ -310,18 +382,16 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       });
       setServiceTypes(st);
     }, (err) => {
-      handleFirestoreError(err, 'list', `users/${user.uid}/service-types`, user);
+      handleFirestoreError(err, 'list', resolveDataPath(activeScope, user.uid, 'service-types'), user);
     });
     return () => unsubscribe();
-  }, [user]);
+  }, [user, activeScope]);
 
   // Projects listener
   useEffect(() => {
     if (!user) return;
-    const q = query(
-      collection(db, `users/${user.uid}/projects`),
-      where('userId', '==', user.uid)
-    );
+    const q = buildQuery('projects');
+    if (!q) return;
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const p: Project[] = snapshot.docs.map((docSnap) => {
         const data = docSnap.data();
@@ -344,10 +414,10 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       });
       setProjects(p);
     }, (err) => {
-      handleFirestoreError(err, 'list', `users/${user.uid}/projects`, user);
+      handleFirestoreError(err, 'list', resolveDataPath(activeScope, user.uid, 'projects'), user);
     });
     return () => unsubscribe();
-  }, [user]);
+  }, [user, activeScope]);
 
   // Auto-seed lead options on first access
   useEffect(() => {
@@ -375,7 +445,8 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       const batch = writeBatch(db);
       const groupId = uuidv4();
       const baseDate = parseISO(txData.date);
-      const collectionRef = collection(db, `users/${user.uid}/transactions`);
+      const colPath = resolveDataPath(activeScope, user.uid, 'transactions');
+      const collectionRef = collection(db, colPath);
 
       if (generateMultiple === 'INSTALLMENTS') {
         const installmentAmount = txData.amount / count;
@@ -397,10 +468,9 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
         const maxMonths = endDate
           ? Math.max(1, Math.ceil((new Date(endDate).getTime() - baseDate.getTime()) / (1000 * 60 * 60 * 24 * 30)) + 1)
           : 24;
-        const count = Math.min(maxMonths, 120); // Cap at 10 years
+        const count = Math.min(maxMonths, 120);
         for (let i = 0; i < count; i++) {
           const docDate = addMonths(baseDate, i);
-          // Stop if we passed endDate
           if (endDate && docDate > new Date(endDate)) break;
           const docRef = doc(collectionRef);
           batch.set(docRef, {
@@ -425,7 +495,7 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
 
       await batch.commit();
     } catch (error) {
-      handleFirestoreError(error, 'create', `users/${user.uid}/transactions`, user);
+      handleFirestoreError(error, 'create', resolveDataPath(activeScope, user.uid, 'transactions'), user);
     }
   };
 
@@ -436,25 +506,24 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       if (!tx) return;
 
       const batch = writeBatch(db);
+      const colPath = resolveDataPath(activeScope, user.uid, 'transactions');
 
       if (applyToFuture && tx.groupId && tx.isFixed) {
-        // Find all related future ones in memory (or via query)
         const futureTxs = transactions.filter(t => t.groupId === tx.groupId && new Date(t.date) >= new Date(tx.date));
         for (const ft of futureTxs) {
-          const docRef = doc(db, `users/${user.uid}/transactions/${ft.id}`);
+          const docRef = doc(db, colPath, ft.id);
           const toUpdate = { ...updates };
-          // Do not override their date if they are future recurrences!
           delete toUpdate.date;
           batch.update(docRef, { ...toUpdate, updatedAt: serverTimestamp() });
         }
       } else {
-        const docRef = doc(db, `users/${user.uid}/transactions/${id}`);
+        const docRef = doc(db, colPath, id);
         batch.update(docRef, { ...updates, updatedAt: serverTimestamp() });
       }
 
       await batch.commit();
     } catch (error) {
-       handleFirestoreError(error, 'update', `users/${user.uid}/transactions/${id}`, user);
+       handleFirestoreError(error, 'update', `${resolveDataPath(activeScope, user.uid, 'transactions')}/${id}`, user);
     }
   };
 
@@ -465,21 +534,22 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       if (!tx) return;
 
       const batch = writeBatch(db);
+      const colPath = resolveDataPath(activeScope, user.uid, 'transactions');
 
       if (deleteFuture && tx.groupId) {
         const futureTxs = transactions.filter(t => t.groupId === tx.groupId && new Date(t.date) >= new Date(tx.date));
         for (const ft of futureTxs) {
-          const docRef = doc(db, `users/${user.uid}/transactions/${ft.id}`);
+          const docRef = doc(db, colPath, ft.id);
           batch.delete(docRef);
         }
       } else {
-        const docRef = doc(db, `users/${user.uid}/transactions/${id}`);
+        const docRef = doc(db, colPath, id);
         batch.delete(docRef);
       }
 
       await batch.commit();
     } catch (error) {
-       handleFirestoreError(error, 'delete', `users/${user.uid}/transactions/${id}`, user);
+       handleFirestoreError(error, 'delete', `${resolveDataPath(activeScope, user.uid, 'transactions')}/${id}`, user);
     }
   };
 
@@ -488,7 +558,6 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
     const tx = transactions.find(t => t.id === id);
     if (!tx) return;
     try {
-      const docRef = doc(db, `users/${user.uid}/transactions/${id}`);
       await updateTransaction(id, { status: tx.status === 'PAID' ? 'PENDING' : 'PAID' });
     } catch (error) {
       console.error(error);
@@ -500,21 +569,24 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
     try {
       const year = selectedMonth.getFullYear();
       const month = selectedMonth.getMonth() + 1;
+      const contextValue: ContextType = activeScope.type === 'PERSONAL' ? 'PERSONAL' : 'BUSINESS';
       const existing = budgets.find(
-        (b) => b.categoryId === categoryId && b.year === year && b.month === month && b.context === activeContext
+        (b) => b.categoryId === categoryId && b.year === year && b.month === month && b.context === contextValue
       );
 
+      const colPath = resolveDataPath(activeScope, user.uid, 'budgets');
+
       if (existing) {
-        const docRef = doc(db, `users/${user.uid}/budgets/${existing.id}`);
+        const docRef = doc(db, colPath, existing.id);
         const batch = writeBatch(db);
         batch.update(docRef, { plannedAmount, updatedAt: serverTimestamp() });
         await batch.commit();
       } else {
-        const docRef = doc(collection(db, `users/${user.uid}/budgets`));
+        const docRef = doc(collection(db, colPath));
         const batch = writeBatch(db);
         batch.set(docRef, {
           userId: user.uid,
-          context: activeContext,
+          context: contextValue,
           year,
           month,
           categoryId,
@@ -525,7 +597,7 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
         await batch.commit();
       }
     } catch (error) {
-      handleFirestoreError(error, 'create', `users/${user.uid}/budgets`, user);
+      handleFirestoreError(error, 'create', resolveDataPath(activeScope, user.uid, 'budgets'), user);
     }
   };
 
@@ -533,7 +605,8 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
     if (!user) return;
     try {
       const batch = writeBatch(db);
-      const collectionRef = collection(db, `users/${user.uid}/categories`);
+      const colPath = resolveDataPath(activeScope, user.uid, 'categories');
+      const collectionRef = collection(db, colPath);
 
       for (const cat of DEFAULT_CATEGORIES) {
         const docRef = doc(collectionRef);
@@ -548,7 +621,7 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
 
       await batch.commit();
     } catch (error) {
-      handleFirestoreError(error, 'create', `users/${user.uid}/categories`, user);
+      handleFirestoreError(error, 'create', resolveDataPath(activeScope, user.uid, 'categories'), user);
     }
   };
 
@@ -556,7 +629,8 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
     if (!user) return;
     try {
       const maxOrder = categories.reduce((max, c) => Math.max(max, c.order), 0);
-      const docRef = doc(collection(db, `users/${user.uid}/categories`));
+      const colPath = resolveDataPath(activeScope, user.uid, 'categories');
+      const docRef = doc(collection(db, colPath));
       const batch = writeBatch(db);
       batch.set(docRef, {
         userId: user.uid,
@@ -567,19 +641,20 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       });
       await batch.commit();
     } catch (error) {
-      handleFirestoreError(error, 'create', `users/${user.uid}/categories`, user);
+      handleFirestoreError(error, 'create', resolveDataPath(activeScope, user.uid, 'categories'), user);
     }
   };
 
   const updateCategory = async (id: string, updates: Partial<Pick<Category, 'name' | 'section' | 'order'>>) => {
     if (!user) return;
     try {
-      const docRef = doc(db, `users/${user.uid}/categories/${id}`);
+      const colPath = resolveDataPath(activeScope, user.uid, 'categories');
+      const docRef = doc(db, colPath, id);
       const batch = writeBatch(db);
       batch.update(docRef, updates);
       await batch.commit();
     } catch (error) {
-      handleFirestoreError(error, 'update', `users/${user.uid}/categories/${id}`, user);
+      handleFirestoreError(error, 'update', `${resolveDataPath(activeScope, user.uid, 'categories')}/${id}`, user);
     }
   };
 
@@ -588,12 +663,13 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
     const cat = categories.find((c) => c.id === id);
     if (!cat || cat.isDefault) return;
     try {
-      const docRef = doc(db, `users/${user.uid}/categories/${id}`);
+      const colPath = resolveDataPath(activeScope, user.uid, 'categories');
+      const docRef = doc(db, colPath, id);
       const batch = writeBatch(db);
       batch.delete(docRef);
       await batch.commit();
     } catch (error) {
-      handleFirestoreError(error, 'delete', `users/${user.uid}/categories/${id}`, user);
+      handleFirestoreError(error, 'delete', `${resolveDataPath(activeScope, user.uid, 'categories')}/${id}`, user);
     }
   };
 
@@ -609,13 +685,15 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
           t.seller === target.seller
       );
 
+      const colPath = resolveDataPath(activeScope, user.uid, 'sales-targets');
+
       if (existing) {
-        const docRef = doc(db, `users/${user.uid}/sales-targets/${existing.id}`);
+        const docRef = doc(db, colPath, existing.id);
         const batch = writeBatch(db);
         batch.update(docRef, { targetAmount: target.targetAmount, updatedAt: serverTimestamp() });
         await batch.commit();
       } else {
-        const docRef = doc(collection(db, `users/${user.uid}/sales-targets`));
+        const docRef = doc(collection(db, colPath));
         const batch = writeBatch(db);
         const docData: Record<string, unknown> = {
           userId: user.uid,
@@ -632,93 +710,101 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
         await batch.commit();
       }
     } catch (error) {
-      handleFirestoreError(error, 'create', `users/${user.uid}/sales-targets`, user);
+      handleFirestoreError(error, 'create', resolveDataPath(activeScope, user.uid, 'sales-targets'), user);
     }
   };
 
   const deleteSalesTarget = async (id: string) => {
     if (!user) return;
     try {
-      const docRef = doc(db, `users/${user.uid}/sales-targets/${id}`);
+      const colPath = resolveDataPath(activeScope, user.uid, 'sales-targets');
+      const docRef = doc(db, colPath, id);
       const batch = writeBatch(db);
       batch.delete(docRef);
       await batch.commit();
     } catch (error) {
-      handleFirestoreError(error, 'delete', `users/${user.uid}/sales-targets/${id}`, user);
+      handleFirestoreError(error, 'delete', `${resolveDataPath(activeScope, user.uid, 'sales-targets')}/${id}`, user);
     }
   };
 
   const addTag = async (name: string, color: string) => {
     if (!user) return;
     try {
-      const docRef = doc(collection(db, `users/${user.uid}/tags`));
+      const colPath = resolveDataPath(activeScope, user.uid, 'tags');
+      const docRef = doc(collection(db, colPath));
       const batch = writeBatch(db);
       batch.set(docRef, { userId: user.uid, name, color });
       await batch.commit();
     } catch (error) {
-      handleFirestoreError(error, 'create', `users/${user.uid}/tags`, user);
+      handleFirestoreError(error, 'create', resolveDataPath(activeScope, user.uid, 'tags'), user);
     }
   };
 
   const updateTag = async (id: string, updates: Partial<Pick<Tag, 'name' | 'color'>>) => {
     if (!user) return;
     try {
-      const docRef = doc(db, `users/${user.uid}/tags/${id}`);
+      const colPath = resolveDataPath(activeScope, user.uid, 'tags');
+      const docRef = doc(db, colPath, id);
       const batch = writeBatch(db);
       batch.update(docRef, updates);
       await batch.commit();
     } catch (error) {
-      handleFirestoreError(error, 'update', `users/${user.uid}/tags/${id}`, user);
+      handleFirestoreError(error, 'update', `${resolveDataPath(activeScope, user.uid, 'tags')}/${id}`, user);
     }
   };
 
   const deleteTag = async (id: string) => {
     if (!user) return;
     try {
-      const docRef = doc(db, `users/${user.uid}/tags/${id}`);
+      const colPath = resolveDataPath(activeScope, user.uid, 'tags');
+      const docRef = doc(db, colPath, id);
       const batch = writeBatch(db);
       batch.delete(docRef);
       await batch.commit();
     } catch (error) {
-      handleFirestoreError(error, 'delete', `users/${user.uid}/tags/${id}`, user);
+      handleFirestoreError(error, 'delete', `${resolveDataPath(activeScope, user.uid, 'tags')}/${id}`, user);
     }
   };
 
   const addGoal = async (goal: Omit<FinancialGoal, 'id' | 'userId' | 'createdAt' | 'updatedAt'>) => {
     if (!user) return;
     try {
-      const docRef = doc(collection(db, `users/${user.uid}/goals`));
+      const colPath = resolveDataPath(activeScope, user.uid, 'goals');
+      const docRef = doc(collection(db, colPath));
       const batch = writeBatch(db);
       batch.set(docRef, { ...goal, userId: user.uid, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
       await batch.commit();
-    } catch (error) { handleFirestoreError(error, 'create', `users/${user.uid}/goals`, user); }
+    } catch (error) { handleFirestoreError(error, 'create', resolveDataPath(activeScope, user.uid, 'goals'), user); }
   };
 
   const updateGoal = async (id: string, updates: Partial<FinancialGoal>) => {
     if (!user) return;
     try {
-      const docRef = doc(db, `users/${user.uid}/goals/${id}`);
+      const colPath = resolveDataPath(activeScope, user.uid, 'goals');
+      const docRef = doc(db, colPath, id);
       const batch = writeBatch(db);
       batch.update(docRef, { ...updates, updatedAt: serverTimestamp() });
       await batch.commit();
-    } catch (error) { handleFirestoreError(error, 'update', `users/${user.uid}/goals/${id}`, user); }
+    } catch (error) { handleFirestoreError(error, 'update', `${resolveDataPath(activeScope, user.uid, 'goals')}/${id}`, user); }
   };
 
   const deleteGoal = async (id: string) => {
     if (!user) return;
     try {
-      const docRef = doc(db, `users/${user.uid}/goals/${id}`);
+      const colPath = resolveDataPath(activeScope, user.uid, 'goals');
+      const docRef = doc(db, colPath, id);
       const batch = writeBatch(db);
       batch.delete(docRef);
       await batch.commit();
-    } catch (error) { handleFirestoreError(error, 'delete', `users/${user.uid}/goals/${id}`, user); }
+    } catch (error) { handleFirestoreError(error, 'delete', `${resolveDataPath(activeScope, user.uid, 'goals')}/${id}`, user); }
   };
 
   // Lead CRUD
   const addLead = async (leadData: Omit<Lead, 'id' | 'userId' | 'createdAt' | 'updatedAt'>) => {
     if (!user) return;
     try {
-      const docRef = doc(collection(db, `users/${user.uid}/leads`));
+      const colPath = resolveDataPath(activeScope, user.uid, 'leads');
+      const docRef = doc(collection(db, colPath));
       const batch = writeBatch(db);
       batch.set(docRef, {
         ...leadData,
@@ -728,31 +814,33 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       });
       await batch.commit();
     } catch (error) {
-      handleFirestoreError(error, 'create', `users/${user.uid}/leads`, user);
+      handleFirestoreError(error, 'create', resolveDataPath(activeScope, user.uid, 'leads'), user);
     }
   };
 
   const updateLead = async (id: string, updates: Partial<Lead>) => {
     if (!user) return;
     try {
-      const docRef = doc(db, `users/${user.uid}/leads/${id}`);
+      const colPath = resolveDataPath(activeScope, user.uid, 'leads');
+      const docRef = doc(db, colPath, id);
       const batch = writeBatch(db);
       batch.update(docRef, { ...updates, updatedAt: serverTimestamp() });
       await batch.commit();
     } catch (error) {
-      handleFirestoreError(error, 'update', `users/${user.uid}/leads/${id}`, user);
+      handleFirestoreError(error, 'update', `${resolveDataPath(activeScope, user.uid, 'leads')}/${id}`, user);
     }
   };
 
   const deleteLead = async (id: string) => {
     if (!user) return;
     try {
-      const docRef = doc(db, `users/${user.uid}/leads/${id}`);
+      const colPath = resolveDataPath(activeScope, user.uid, 'leads');
+      const docRef = doc(db, colPath, id);
       const batch = writeBatch(db);
       batch.delete(docRef);
       await batch.commit();
     } catch (error) {
-      handleFirestoreError(error, 'delete', `users/${user.uid}/leads/${id}`, user);
+      handleFirestoreError(error, 'delete', `${resolveDataPath(activeScope, user.uid, 'leads')}/${id}`, user);
     }
   };
 
@@ -761,7 +849,8 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
     if (!user) return;
     try {
       const batch = writeBatch(db);
-      const collectionRef = collection(db, `users/${user.uid}/lead-options`);
+      const colPath = resolveDataPath(activeScope, user.uid, 'lead-options');
+      const collectionRef = collection(db, colPath);
       for (const opt of ALL_DEFAULT_LEAD_OPTIONS) {
         const docRef = doc(collectionRef);
         batch.set(docRef, {
@@ -775,7 +864,7 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       }
       await batch.commit();
     } catch (error) {
-      handleFirestoreError(error, 'create', `users/${user.uid}/lead-options`, user);
+      handleFirestoreError(error, 'create', resolveDataPath(activeScope, user.uid, 'lead-options'), user);
     }
   };
 
@@ -783,7 +872,8 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
     if (!user) return;
     try {
       const maxOrder = leadOptions.filter(o => o.field === field).reduce((max, o) => Math.max(max, o.order), -1);
-      const docRef = doc(collection(db, `users/${user.uid}/lead-options`));
+      const colPath = resolveDataPath(activeScope, user.uid, 'lead-options');
+      const docRef = doc(collection(db, colPath));
       const batch = writeBatch(db);
       const data: Record<string, unknown> = {
         userId: user.uid,
@@ -796,31 +886,33 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       batch.set(docRef, data);
       await batch.commit();
     } catch (error) {
-      handleFirestoreError(error, 'create', `users/${user.uid}/lead-options`, user);
+      handleFirestoreError(error, 'create', resolveDataPath(activeScope, user.uid, 'lead-options'), user);
     }
   };
 
   const updateLeadOption = async (id: string, updates: Partial<Pick<LeadOption, 'value' | 'color'>>) => {
     if (!user) return;
     try {
-      const docRef = doc(db, `users/${user.uid}/lead-options/${id}`);
+      const colPath = resolveDataPath(activeScope, user.uid, 'lead-options');
+      const docRef = doc(db, colPath, id);
       const batch = writeBatch(db);
       batch.update(docRef, updates);
       await batch.commit();
     } catch (error) {
-      handleFirestoreError(error, 'update', `users/${user.uid}/lead-options/${id}`, user);
+      handleFirestoreError(error, 'update', `${resolveDataPath(activeScope, user.uid, 'lead-options')}/${id}`, user);
     }
   };
 
   const deleteLeadOption = async (id: string) => {
     if (!user) return;
     try {
-      const docRef = doc(db, `users/${user.uid}/lead-options/${id}`);
+      const colPath = resolveDataPath(activeScope, user.uid, 'lead-options');
+      const docRef = doc(db, colPath, id);
       const batch = writeBatch(db);
       batch.delete(docRef);
       await batch.commit();
     } catch (error) {
-      handleFirestoreError(error, 'delete', `users/${user.uid}/lead-options/${id}`, user);
+      handleFirestoreError(error, 'delete', `${resolveDataPath(activeScope, user.uid, 'lead-options')}/${id}`, user);
     }
   };
 
@@ -828,7 +920,8 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
   const addServiceType = async (data: Omit<ServiceType, 'id' | 'userId' | 'createdAt' | 'updatedAt'>) => {
     if (!user) return;
     try {
-      const docRef = doc(collection(db, `users/${user.uid}/service-types`));
+      const colPath = resolveDataPath(activeScope, user.uid, 'service-types');
+      const docRef = doc(collection(db, colPath));
       const batch = writeBatch(db);
       batch.set(docRef, {
         ...data,
@@ -838,31 +931,33 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       });
       await batch.commit();
     } catch (error) {
-      handleFirestoreError(error, 'create', `users/${user.uid}/service-types`, user);
+      handleFirestoreError(error, 'create', resolveDataPath(activeScope, user.uid, 'service-types'), user);
     }
   };
 
   const updateServiceType = async (id: string, updates: Partial<ServiceType>) => {
     if (!user) return;
     try {
-      const docRef = doc(db, `users/${user.uid}/service-types/${id}`);
+      const colPath = resolveDataPath(activeScope, user.uid, 'service-types');
+      const docRef = doc(db, colPath, id);
       const batch = writeBatch(db);
       batch.update(docRef, { ...updates, updatedAt: serverTimestamp() });
       await batch.commit();
     } catch (error) {
-      handleFirestoreError(error, 'update', `users/${user.uid}/service-types/${id}`, user);
+      handleFirestoreError(error, 'update', `${resolveDataPath(activeScope, user.uid, 'service-types')}/${id}`, user);
     }
   };
 
   const deleteServiceType = async (id: string) => {
     if (!user) return;
     try {
-      const docRef = doc(db, `users/${user.uid}/service-types/${id}`);
+      const colPath = resolveDataPath(activeScope, user.uid, 'service-types');
+      const docRef = doc(db, colPath, id);
       const batch = writeBatch(db);
       batch.delete(docRef);
       await batch.commit();
     } catch (error) {
-      handleFirestoreError(error, 'delete', `users/${user.uid}/service-types/${id}`, user);
+      handleFirestoreError(error, 'delete', `${resolveDataPath(activeScope, user.uid, 'service-types')}/${id}`, user);
     }
   };
 
@@ -870,7 +965,8 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
   const addProject = async (data: Omit<Project, 'id' | 'userId' | 'createdAt' | 'updatedAt'>) => {
     if (!user) return;
     try {
-      const docRef = doc(collection(db, `users/${user.uid}/projects`));
+      const colPath = resolveDataPath(activeScope, user.uid, 'projects');
+      const docRef = doc(collection(db, colPath));
       const batch = writeBatch(db);
       const cleanData = Object.fromEntries(
         Object.entries(data).filter(([, v]) => v !== undefined)
@@ -883,14 +979,15 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       });
       await batch.commit();
     } catch (error) {
-      handleFirestoreError(error, 'create', `users/${user.uid}/projects`, user);
+      handleFirestoreError(error, 'create', resolveDataPath(activeScope, user.uid, 'projects'), user);
     }
   };
 
   const updateProject = async (id: string, updates: Partial<Project>) => {
     if (!user) return;
     try {
-      const docRef = doc(db, `users/${user.uid}/projects/${id}`);
+      const colPath = resolveDataPath(activeScope, user.uid, 'projects');
+      const docRef = doc(db, colPath, id);
       const batch = writeBatch(db);
       const cleanUpdates = Object.fromEntries(
         Object.entries(updates).filter(([, v]) => v !== undefined)
@@ -898,19 +995,67 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       batch.update(docRef, { ...cleanUpdates, updatedAt: serverTimestamp() });
       await batch.commit();
     } catch (error) {
-      handleFirestoreError(error, 'update', `users/${user.uid}/projects/${id}`, user);
+      handleFirestoreError(error, 'update', `${resolveDataPath(activeScope, user.uid, 'projects')}/${id}`, user);
     }
   };
 
   const deleteProject = async (id: string) => {
     if (!user) return;
     try {
-      const docRef = doc(db, `users/${user.uid}/projects/${id}`);
+      const colPath = resolveDataPath(activeScope, user.uid, 'projects');
+      const docRef = doc(db, colPath, id);
       const batch = writeBatch(db);
       batch.delete(docRef);
       await batch.commit();
     } catch (error) {
-      handleFirestoreError(error, 'delete', `users/${user.uid}/projects/${id}`, user);
+      handleFirestoreError(error, 'delete', `${resolveDataPath(activeScope, user.uid, 'projects')}/${id}`, user);
+    }
+  };
+
+  const createAccountFn = async (name: string) => {
+    if (!user) return;
+    const accountId = await createAccount(user, name);
+    // Set state directly — avoids collectionGroup query that rules may reject
+    const newAccount: Account = {
+      id: accountId,
+      name,
+      ownerId: user.uid,
+      status: 'ACTIVE',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    setAccounts((prev) => [...prev, newAccount]);
+    setActiveScope({
+      type: 'ACCOUNT',
+      accountId,
+      accountName: name,
+      role: 'owner',
+    });
+  };
+
+  const migrateToAccountFn = async (accountId: string) => {
+    if (!user) return [];
+    return migrateUserToAccount(user.uid, accountId);
+  };
+
+  const inviteMemberFn = async (email: string, role: Exclude<AccountRole, 'owner'>) => {
+    if (!user || activeScope.type !== 'ACCOUNT') return;
+    const accountName = activeScope.accountName;
+    await createInvite(activeScope.accountId, email, role, user.uid, accountName);
+    // Refresh account invites list
+    const invites = await getAccountInvites(activeScope.accountId);
+    setAccountInvites(invites);
+  };
+
+  const acceptInviteFn = async (inviteId: string, accountId: string) => {
+    if (!user) return;
+    await acceptInviteSvc(inviteId, accountId, user);
+    // Refresh accounts and pending invites
+    const result = await getUserAccounts(user.uid);
+    setAccounts(result.map((r) => r.account));
+    if (user.email) {
+      const invites = await getPendingInvites(user.email);
+      setPendingInvites(invites);
     }
   };
 
@@ -930,12 +1075,21 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       leadOptions,
       serviceTypes,
       projects,
-      activeContext,
+      accounts,
+      accountMembers,
+      accountInvites,
+      activeScope,
+      activeContext: (activeScope.type === 'PERSONAL' ? 'PERSONAL' : 'BUSINESS') as ContextType,
       selectedMonth,
       currentView,
-      setActiveContext,
+      setActiveScope,
       setSelectedMonth,
       setCurrentView,
+      createAccount: createAccountFn,
+      migrateToAccount: migrateToAccountFn,
+      inviteMember: inviteMemberFn,
+      acceptInvite: acceptInviteFn,
+      pendingInvites,
       addTransaction,
       updateTransaction,
       deleteTransaction,

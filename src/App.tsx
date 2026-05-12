@@ -24,8 +24,30 @@ import { cn } from './lib/utils';
 
 const DASHBOARD_VALUES_KEY = 'dashboard_values_visible';
 
+function ScopeBadge() {
+  const { activeScope } = useFinance();
+  const label = activeScope.type === 'PERSONAL'
+    ? 'Pessoal'
+    : activeScope.accountName;
+  const roleLabel = activeScope.type === 'ACCOUNT'
+    ? (activeScope.role === 'owner' ? 'Dono' : activeScope.role === 'admin' ? 'Admin' : 'Membro')
+    : '';
+
+  return (
+    <div className="mt-2 flex items-center gap-2 px-2 py-1.5 rounded-lg bg-white/5 border border-white/10">
+      <div className="w-2 h-2 rounded-full bg-primary shrink-0" />
+      <div className="min-w-0">
+        <p className="text-[0.7rem] font-semibold text-white/90 truncate">{label}</p>
+        {roleLabel && (
+          <p className="text-[0.55rem] text-white/40 uppercase tracking-wider">{roleLabel}</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function MainApp() {
-  const { currentView, setCurrentView, user, loading, signInWithGoogle, signOut } = useFinance();
+  const { currentView, setCurrentView, user, loading, signInWithGoogle, signOut, pendingInvites } = useFinance();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [dashboardValuesVisible, setDashboardValuesVisible] = useState<boolean>(() => {
     try {
@@ -142,6 +164,7 @@ function MainApp() {
             </button>
           </div>
           <span className="text-[0.65rem] font-bold text-white/40 uppercase tracking-wider">by geniusweb.online</span>
+          <ScopeBadge />
         </div>
         <nav className="flex flex-col flex-1 overflow-y-auto">
           {menuSections.map((section) => (
@@ -179,6 +202,11 @@ function MainApp() {
           >
             <Settings className="w-4 h-4 opacity-70" />
             Configurações
+            {pendingInvites.length > 0 && (
+              <span className="ml-auto bg-red-500 text-white text-[0.65rem] font-bold px-1.5 py-0.5 rounded-full min-w-[1.25rem] text-center leading-none">
+                {pendingInvites.length}
+              </span>
+            )}
           </button>
           <button
             onClick={() => { signOut(); setIsSidebarOpen(false); }}

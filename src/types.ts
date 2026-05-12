@@ -4,9 +4,42 @@ export type ContextType = 'PERSONAL' | 'BUSINESS';
 export type TransactionType = 'INCOME' | 'EXPENSE' | 'CREDIT_CARD';
 export type TransactionStatus = 'PENDING' | 'PAID';
 export type ViewType = 'DASHBOARD' | 'TRANSACTIONS' | 'CREDIT_CARDS' | 'FIXED_MONTHLY' | 'REPORTS' | 'SETTINGS' | 'DRE' | 'BUDGET' | 'SALES' | 'IMPORT' | 'CALCULATORS' | 'GOALS' | 'COMMERCIAL' | 'PROJECTS' | 'SERVICE_TYPES';
+export type AccountRole = 'owner' | 'admin' | 'member';
+export type ActiveScope =
+  | { type: 'PERSONAL'; userId: string }
+  | { type: 'ACCOUNT'; accountId: string; accountName: string; role: AccountRole };
 
 export type ProjectStatus = 'BACKLOG' | 'IN_PROGRESS' | 'REVIEW' | 'DONE' | 'CANCELLED';
 export type DRESection = 'RECEITA' | 'CUSTOS' | 'DESPESAS';
+
+export interface Account {
+  id: string;
+  name: string;
+  ownerId: string;
+  status: 'ACTIVE' | 'ARCHIVED';
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AccountMember {
+  uid: string;
+  email: string;
+  role: AccountRole;
+  invitedBy: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AccountInvite {
+  id: string;
+  accountId: string;
+  email: string;
+  role: Exclude<AccountRole, 'owner'>;
+  status: 'PENDING' | 'ACCEPTED' | 'REVOKED' | 'EXPIRED';
+  createdBy: string;
+  expiresAt: string;
+  createdAt: string;
+}
 
 export interface Category {
   id: string;
@@ -189,13 +222,22 @@ export interface FinanceContextState {
   leadOptions: LeadOption[];
   serviceTypes: ServiceType[];
   projects: Project[];
-  activeContext: ContextType;
+  accounts: Account[];
+  accountMembers: AccountMember[];
+  accountInvites: AccountInvite[];
+  activeScope: ActiveScope;
   selectedMonth: Date;
   currentView: ViewType;
 
-  setActiveContext: (ctx: ContextType) => void;
+  activeContext: ContextType;
+  setActiveScope: (scope: ActiveScope) => void;
   setSelectedMonth: (date: Date) => void;
   setCurrentView: (view: ViewType) => void;
+  createAccount: (name: string) => Promise<void>;
+  migrateToAccount: (accountId: string) => Promise<{ collection: string; migrated: number; skipped: number; errors: number }[]>;
+  inviteMember: (email: string, role: Exclude<AccountRole, 'owner'>) => Promise<void>;
+  acceptInvite: (inviteId: string, accountId: string) => Promise<void>;
+  pendingInvites: AccountInvite[];
   addTransaction: (tx: Omit<Transaction, 'id' | 'userId' | 'createdAt' | 'updatedAt'>, generateMultiple?: 'INSTALLMENTS' | 'FIXED', count?: number) => Promise<void>;
   updateTransaction: (id: string, updates: Partial<Transaction>, applyToFuture?: boolean) => Promise<void>;
   deleteTransaction: (id: string, deleteFuture?: boolean) => Promise<void>;

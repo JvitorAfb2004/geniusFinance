@@ -1,11 +1,11 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useFinance } from '../hooks/useFinance';
-import { LogOut, User, Shield, DownloadCloud, Pencil, Trash2, Plus, X, Check, Users, BellRing } from 'lucide-react';
+import { LogOut, User, Shield, DownloadCloud, Pencil, Trash2, Plus, X, Check, Users, BellRing, Building2, Mail, UserPlus } from 'lucide-react';
 import ConfirmModal from './ConfirmModal';
-import type { Category, DRESection, LeadOption } from '../types';
+import type { Category, DRESection, LeadOption, AccountRole } from '../types';
 import { SECTION_LABELS } from '../lib/categories';
 
-type SettingsTab = 'geral' | 'comercial' | 'categorias' | 'tags';
+type SettingsTab = 'geral' | 'conta' | 'comercial' | 'categorias' | 'tags';
 
 const STATUS_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#84cc16'];
 const TAG_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#84cc16'];
@@ -13,10 +13,12 @@ const DASHBOARD_ALERTS_KEY = 'dashboard_alerts_enabled';
 
 export function SettingsView() {
   const {
-    user, transactions, categories, tags, leadOptions, activeContext,
+    user, transactions, categories, tags, leadOptions, activeContext, activeScope,
+    accounts, accountMembers, accountInvites, pendingInvites,
     signOut, addCategory, updateCategory, deleteCategory,
     addTag, deleteTag,
     addLeadOption, updateLeadOption, deleteLeadOption,
+    createAccount, migrateToAccount, inviteMember, acceptInvite,
   } = useFinance();
 
   const [activeTab, setActiveTab] = useState<SettingsTab>('geral');
@@ -40,6 +42,19 @@ export function SettingsView() {
   const [newOptionValue, setNewOptionValue] = useState('');
   const [newOptionColor, setNewOptionColor] = useState('#3b82f6');
   const [showDashboardAlerts, setShowDashboardAlerts] = useState(true);
+
+  // Account state
+  const [showNewAccount, setShowNewAccount] = useState(false);
+  const [newAccountName, setNewAccountName] = useState('');
+  const [creatingAccount, setCreatingAccount] = useState(false);
+  const [migrating, setMigrating] = useState(false);
+  const [migrationResult, setMigrationResult] = useState<{ collection: string; migrated: number; skipped: number; errors: number }[] | null>(null);
+
+  // Invite state
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteRole, setInviteRole] = useState<Exclude<AccountRole, 'owner'>>('member');
+  const [sendingInvite, setSendingInvite] = useState(false);
+  const [inviteDone, setInviteDone] = useState(false);
 
   useEffect(() => {
     try {
@@ -152,6 +167,7 @@ export function SettingsView() {
 
   const tabs: { id: SettingsTab; label: string }[] = [
     { id: 'geral', label: 'Geral' },
+    { id: 'conta', label: 'Conta' },
     { id: 'comercial', label: 'Comercial' },
     { id: 'categorias', label: 'Categorias' },
     { id: 'tags', label: 'Tags' },
@@ -251,6 +267,290 @@ export function SettingsView() {
                 <LogOut className="w-5 h-5" />
                 Sair do Aplicativo
               </button>
+            </div>
+          )}
+
+          {activeTab === 'conta' && (
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Building2 className="w-4 h-4 text-[#3b82f6]" />
+                <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">Gestão de Conta Empresarial</h3>
+              </div>
+
+              {/* Current scope info */}
+              <div className="p-4 bg-blue-50 rounded-lg border border-blue-100">
+                <p className="text-sm font-medium text-blue-800">
+                  Contexto atual: <strong>{activeScope.type === 'PERSONAL' ? 'Pessoal' : activeScope.accountName}</strong>
+                </p>
+                <p className="text-xs text-blue-600 mt-1">
+                  {activeScope.type === 'PERSONAL'
+                    ? 'Você está visualizando seus dados pessoais. Crie ou selecione uma conta empresarial para começar a compartilhar.'
+                    : `Papel: ${activeScope.role === 'owner' ? 'Dono' : activeScope.role === 'admin' ? 'Administrador' : 'Membro'}`}
+                </p>
+              </div>
+
+              {/* My Accounts */}
+              <div className="border border-gray-100 rounded-lg overflow-hidden">
+                <div className="px-3 py-2 bg-gray-50 flex items-center justify-between">
+                  <span className="text-xs font-semibold text-gray-500 uppercase">Minhas Empresas</span>
+                  <button
+                    onClick={() => { setShowNewAccount(!showNewAccount); setNewAccountName(''); }}
+                    className="text-xs text-blue-600 hover:text-blue-700 font-medium cursor-pointer flex items-center gap-1"
+                  >
+                    <Plus className="w-3 h-3" /> Nova Empresa
+                  </button>
+                </div>
+
+                {showNewAccount && (
+                  <div className="px-3 py-2 bg-blue-50 border-b border-blue-100 flex items-center gap-2">
+                    <input
+                      type="text"
+                      placeholder="Nome da empresa"
+                      value={newAccountName}
+                      onChange={(e) => setNewAccountName(e.target.value)}
+                      className="flex-1 px-2 py-1 border border-gray-200 rounded text-sm outline-none"
+                      autoFocus
+                      onKeyDown={async (e) => {
+                        if (e.key === 'Enter' && newAccountName.trim()) {
+                          setCreatingAccount(true);
+                          await createAccount(newAccountName.trim());
+                          setNewAccountName('');
+                          setShowNewAccount(false);
+                          setCreatingAccount(false);
+                        }
+                        if (e.key === 'Escape') { setShowNewAccount(false); setNewAccountName(''); }
+                      }}
+                    />
+                    <button
+                      onClick={async () => {
+                        if (!newAccountName.trim()) return;
+                        setCreatingAccount(true);
+                        await createAccount(newAccountName.trim());
+                        setNewAccountName('');
+                        setShowNewAccount(false);
+                        setCreatingAccount(false);
+                      }}
+                      disabled={!newAccountName.trim() || creatingAccount}
+                      className="px-2 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700 disabled:opacity-50 cursor-pointer"
+                    >
+                      {creatingAccount ? '...' : <Check className="w-3.5 h-3.5" />}
+                    </button>
+                  </div>
+                )}
+
+                {accounts.length === 0 ? (
+                  <div className="px-3 py-4 text-sm text-gray-400 text-center">
+                    Nenhuma conta empresarial. Crie uma para começar a compartilhar dados com sua equipe.
+                  </div>
+                ) : (
+                  accounts.map((acc) => (
+                    <div key={acc.id} className="px-3 py-2.5 flex items-center justify-between border-t border-gray-50 hover:bg-gray-50/50">
+                      <div className="flex items-center gap-2">
+                        <Building2 className="w-4 h-4 text-gray-400" />
+                        <span className="text-sm text-gray-700 font-medium">{acc.name}</span>
+                        {acc.ownerId === user?.uid && (
+                          <span className="text-[0.6rem] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-semibold uppercase">Dono</span>
+                        )}
+                      </div>
+                      <span className={`text-[0.65rem] font-semibold uppercase px-2 py-0.5 rounded ${
+                        acc.status === 'ACTIVE' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
+                      }`}>
+                        {acc.status === 'ACTIVE' ? 'Ativo' : 'Arquivado'}
+                      </span>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              {/* Migration — only for owned accounts */}
+              {activeScope.type === 'ACCOUNT' && activeScope.role === 'owner' && (
+                <div className="border border-amber-200 rounded-lg overflow-hidden bg-amber-50">
+                  <div className="px-3 py-2 bg-amber-100 flex items-center justify-between">
+                    <span className="text-xs font-semibold text-amber-800 uppercase">Migração de Dados</span>
+                  </div>
+                  <div className="px-4 py-3">
+                    <p className="text-xs text-amber-700 mb-3">
+                      Migre seus registros marcados como "Empresa" do seu espaço pessoal para esta conta empresarial.
+                      A migração é segura e não remove os dados originais.
+                    </p>
+                    {migrationResult ? (
+                      <div className="space-y-1 mb-3">
+                        {migrationResult.map((r) => (
+                          <div key={r.collection} className="flex items-center justify-between text-xs">
+                            <span className="text-gray-700 font-medium">{r.collection}</span>
+                            <span className="text-gray-500">
+                              {r.migrated > 0 && <span className="text-emerald-600 mr-2">{r.migrated} migrados</span>}
+                              {r.skipped > 0 && <span className="text-gray-400 mr-2">{r.skipped} pulados</span>}
+                              {r.errors > 0 && <span className="text-red-500">{r.errors} erros</span>}
+                              {r.migrated === 0 && r.skipped === 0 && r.errors === 0 && <span className="text-gray-400">vazio</span>}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : null}
+                    <button
+                      onClick={async () => {
+                        if (!activeScope || activeScope.type !== 'ACCOUNT') return;
+                        setMigrating(true);
+                        setMigrationResult(null);
+                        const result = await migrateToAccount(activeScope.accountId);
+                        setMigrationResult(result);
+                        setMigrating(false);
+                      }}
+                      disabled={migrating}
+                      className="text-xs font-bold bg-amber-600 text-white px-4 py-2 rounded-lg hover:bg-amber-700 disabled:opacity-50 cursor-pointer transition-colors"
+                    >
+                      {migrating ? 'Migrando...' : migrationResult ? 'Re-executar Migração' : 'Migrar Dados Empresariais'}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Members (only when an account scope is active) */}
+              {activeScope.type === 'ACCOUNT' && (
+                <div className="border border-gray-100 rounded-lg overflow-hidden">
+                  <div className="px-3 py-2 bg-gray-50 flex items-center justify-between">
+                    <span className="text-xs font-semibold text-gray-500 uppercase">
+                      Membros ({accountMembers.length})
+                    </span>
+                  </div>
+                  {accountMembers.length === 0 ? (
+                    <div className="px-3 py-4 text-sm text-gray-400 text-center">
+                      Nenhum membro encontrado.
+                    </div>
+                  ) : (
+                    accountMembers.map((m) => (
+                      <div key={m.uid} className="px-3 py-2.5 flex items-center justify-between border-t border-gray-50 hover:bg-gray-50/50">
+                        <div className="flex items-center gap-2">
+                          <div className="w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center">
+                            <User className="w-3.5 h-3.5 text-gray-500" />
+                          </div>
+                          <div>
+                            <p className="text-sm text-gray-700">{m.email}</p>
+                            <p className="text-[0.6rem] text-gray-400 uppercase">ID: {m.uid.slice(0, 8)}...</p>
+                          </div>
+                        </div>
+                        <span className={`text-[0.65rem] font-semibold uppercase px-2 py-0.5 rounded ${
+                          m.role === 'owner' ? 'bg-blue-100 text-blue-700' :
+                          m.role === 'admin' ? 'bg-purple-100 text-purple-700' :
+                          'bg-gray-100 text-gray-600'
+                        }`}>
+                          {m.role === 'owner' ? 'Dono' : m.role === 'admin' ? 'Admin' : 'Membro'}
+                        </span>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+
+              {/* Invite member form (only for owner/admin viewing their account) */}
+              {activeScope.type === 'ACCOUNT' && (activeScope.role === 'owner' || activeScope.role === 'admin') && (
+                <div className="border border-gray-100 rounded-lg overflow-hidden">
+                  <div className="px-3 py-2 bg-gray-50">
+                    <span className="text-xs font-semibold text-gray-500 uppercase">Convidar Membro</span>
+                  </div>
+                  <div className="px-3 py-3 flex flex-col sm:flex-row gap-2">
+                    <input
+                      type="email"
+                      placeholder="Email do usuário"
+                      value={inviteEmail}
+                      onChange={(e) => { setInviteEmail(e.target.value); setInviteDone(false); }}
+                      className="flex-1 px-3 py-1.5 border border-gray-200 rounded text-sm outline-none"
+                      onKeyDown={async (e) => {
+                        if (e.key === 'Enter' && inviteEmail.trim()) {
+                          setSendingInvite(true);
+                          await inviteMember(inviteEmail.trim(), inviteRole);
+                          setSendingInvite(false);
+                          setInviteDone(true);
+                          setInviteEmail('');
+                        }
+                      }}
+                    />
+                    <select
+                      value={inviteRole}
+                      onChange={(e) => setInviteRole(e.target.value as Exclude<AccountRole, 'owner'>)}
+                      className="px-2 py-1.5 border border-gray-200 rounded text-xs outline-none cursor-pointer"
+                    >
+                      <option value="admin">Admin</option>
+                      <option value="member">Membro</option>
+                    </select>
+                    <button
+                      onClick={async () => {
+                        if (!inviteEmail.trim()) return;
+                        setSendingInvite(true);
+                        await inviteMember(inviteEmail.trim(), inviteRole);
+                        setSendingInvite(false);
+                        setInviteDone(true);
+                        setInviteEmail('');
+                      }}
+                      disabled={!inviteEmail.trim() || sendingInvite}
+                      className="px-4 py-1.5 bg-blue-600 text-white rounded text-xs font-medium hover:bg-blue-700 disabled:opacity-50 cursor-pointer whitespace-nowrap inline-flex items-center gap-1"
+                    >
+                      <UserPlus className="w-3.5 h-3.5" />
+                      {sendingInvite ? '...' : 'Convidar'}
+                    </button>
+                  </div>
+                  {inviteDone && (
+                    <div className="px-3 pb-2 text-xs text-emerald-600 font-medium">Convite enviado com sucesso.</div>
+                  )}
+                </div>
+              )}
+
+              {/* Pending invites for this account */}
+              {activeScope.type === 'ACCOUNT' && accountInvites.length > 0 && (
+                <div className="border border-gray-100 rounded-lg overflow-hidden">
+                  <div className="px-3 py-2 bg-gray-50">
+                    <span className="text-xs font-semibold text-gray-500 uppercase">Convites Pendentes ({accountInvites.length})</span>
+                  </div>
+                  {accountInvites.map((inv) => (
+                    <div key={inv.id} className="px-3 py-2.5 flex items-center justify-between border-t border-gray-50">
+                      <div className="flex items-center gap-2">
+                        <Mail className="w-3.5 h-3.5 text-gray-400" />
+                        <div>
+                          <p className="text-sm text-gray-700">{inv.email}</p>
+                          <p className="text-[0.6rem] text-gray-400">
+                            {inv.role === 'admin' ? 'Admin' : 'Membro'} &middot; expira {new Date(inv.expiresAt).toLocaleDateString('pt-BR')}
+                          </p>
+                        </div>
+                      </div>
+                      <span className="text-[0.6rem] font-semibold uppercase px-2 py-0.5 rounded bg-amber-100 text-amber-700">
+                        Pendente
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Pending invites received by current user (any tab) */}
+          {pendingInvites.length > 0 && (
+            <div className="border border-green-200 rounded-lg overflow-hidden bg-green-50">
+              <div className="px-3 py-2 bg-green-100 flex items-center justify-between">
+                <span className="text-xs font-semibold text-green-800 uppercase">
+                  Convites Recebidos ({pendingInvites.length})
+                </span>
+              </div>
+              {pendingInvites.map((inv) => (
+                <div key={inv.id} className="px-4 py-3 flex items-center justify-between border-t border-green-100">
+                  <div>
+                    <p className="text-sm font-medium text-gray-800">
+                      Convite para entrar em uma empresa
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      Como <strong>{inv.role === 'admin' ? 'Administrador' : 'Membro'}</strong> &middot; {inv.email}
+                    </p>
+                  </div>
+                  <button
+                    onClick={async () => {
+                      await acceptInvite(inv.id, inv.accountId);
+                    }}
+                    className="px-4 py-1.5 bg-emerald-600 text-white rounded text-xs font-bold hover:bg-emerald-700 cursor-pointer"
+                  >
+                    Aceitar
+                  </button>
+                </div>
+              ))}
             </div>
           )}
 
