@@ -145,13 +145,13 @@ export function ReportsView() {
         </div>
       </div>
 
-      {/* AI Analysis */}
+      {/* Analysis */}
       <div className="bg-white rounded-xl border border-[#e2e8f0] p-6">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h2 className="text-lg font-bold text-gray-900">Análise com IA</h2>
-            <p className="text-sm text-gray-500 mt-1">Análise financeira gerada por IA com base nos seus dados.</p>
-            <p className="text-xs text-gray-400 mt-0.5">O conteúdo gerado por IA pode conter imprecisões. Verifique as informações antes de tomar decisões.</p>
+            <h2 className="text-lg font-bold text-gray-900">Análise financeira</h2>
+            <p className="text-sm text-gray-500 mt-1">Resumo financeiro com base nos seus dados.</p>
+            <p className="text-xs text-gray-400 mt-0.5">Revise as informações antes de tomar decisões.</p>
           </div>
           {!aiReport && (
             <button
@@ -162,7 +162,7 @@ export function ReportsView() {
               {aiLoading ? (
                 <><Loader2 className="w-4 h-4 animate-spin" /> Gerando...</>
               ) : (
-                <><Sparkles className="w-4 h-4" /> Gerar Análise</>
+                <><Sparkles className="w-4 h-4" /> Gerar resumo</>
               )}
             </button>
           )}
@@ -170,7 +170,7 @@ export function ReportsView() {
         {aiLoading && (
           <div className="flex items-center gap-3 text-slate-500 py-8 justify-center">
             <Loader2 className="w-6 h-6 animate-spin text-purple-500" />
-            <span>IA analisando dados financeiros...</span>
+            <span>Analisando dados financeiros...</span>
           </div>
         )}
         {aiError && (

@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { useFinance } from '../hooks/useFinance';
 import { parseTransactions as aiParseTransactions } from '../lib/ai';
 import { formatCurrency } from '../lib/utils';
-import { Upload, FileSpreadsheet, FileText, Trash2, Pencil, Check, X, Loader2, Sparkles, Plus } from 'lucide-react';
+import { Upload, FileSpreadsheet, FileText, Trash2, Pencil, Check, X, Loader2, Plus } from 'lucide-react';
 import * as XLSX from 'xlsx';
 
 interface ParsedTx {
@@ -223,8 +223,8 @@ export default function ImportView() {
     <div className="space-y-5">
       <div>
         <h2 className="text-lg font-bold text-slate-800">Importar Dados</h2>
-        <p className="text-sm text-slate-500">Envie um arquivo (Excel, CSV) ou cole texto. A IA extrai as transações.</p>
-        <p className="text-xs text-slate-400 mt-0.5">A extração por IA pode conter imprecisões. Revise os dados antes de importar.</p>
+        <p className="text-sm text-slate-500">Envie um arquivo (Excel, CSV) ou cole texto para extrair as transações.</p>
+        <p className="text-xs text-slate-400 mt-0.5">Revise os dados antes de importar.</p>
       </div>
 
       {/* Input section */}
@@ -259,7 +259,7 @@ export default function ImportView() {
               disabled={!inputText.trim()}
               className="self-end px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 cursor-pointer flex items-center gap-2 text-sm font-medium"
             >
-              <Sparkles className="w-4 h-4" /> Processar com IA
+              Processar dados
             </button>
           </div>
         </div>
@@ -269,7 +269,7 @@ export default function ImportView() {
       {loading && (
         <div className="bg-white rounded-xl border border-slate-200 p-12 text-center space-y-3">
           <Loader2 className="w-8 h-8 text-blue-500 animate-spin mx-auto" />
-          <p className="text-slate-600 font-medium">IA analisando os dados...</p>
+          <p className="text-slate-600 font-medium">Analisando os dados...</p>
           <p className="text-sm text-slate-400">{fileName}</p>
         </div>
       )}

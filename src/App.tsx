@@ -13,7 +13,6 @@ import DREView from './components/DREView';
 import BudgetView from './components/BudgetView';
 import SalesView from './components/SalesView';
 import ImportView from './components/ImportView';
-import ChatBot from './components/ChatBot';
 import GoalsView from './components/GoalsView';
 import CommercialView from './components/CommercialView';
 import ProjectsView from './components/ProjectsView';
@@ -268,7 +267,6 @@ function MainApp() {
           {currentView === 'SETTINGS' && <SettingsView />}
         </main>
       </div>
-      <ChatBot />
     </div>
   );
 }

@@ -3,7 +3,7 @@ import { useFinance } from '../hooks/useFinance';
 import { format, parseISO, isAfter, isBefore, isToday } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '../lib/utils';
-import { Trash2, Pencil, Search, Plus, Sparkles, Users, Phone, Mail, ExternalLink, FilterX, FolderKanban } from 'lucide-react';
+import { Trash2, Pencil, Search, Plus, Users, Phone, Mail, ExternalLink, FilterX, FolderKanban } from 'lucide-react';
 import ConfirmModal from './ConfirmModal';
 import LeadModal from './LeadModal';
 import ProjectModal from './ProjectModal';
@@ -94,17 +94,6 @@ export default function CommercialView() {
             <Plus className="w-4 h-4" />
             Novo Lead
           </button>
-          <button
-            onClick={() => {
-              setEditingLead(undefined);
-              setIsModalOpen(true);
-            }}
-            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 transition-colors font-medium text-sm cursor-pointer"
-            title="Adicionar lead com IA"
-          >
-            <Sparkles className="w-4 h-4" />
-            IA
-          </button>
         </div>
       </div>
 
@@ -165,7 +154,7 @@ export default function CommercialView() {
                 {leads.length === 0 ? 'Nenhum lead cadastrado' : 'Nenhum lead encontrado com esses filtros'}
               </p>
               <p className="text-xs mt-1">
-                {leads.length === 0 ? 'Clique em "Novo Lead" ou "IA" para começar' : 'Tente ajustar os filtros'}
+                {leads.length === 0 ? 'Clique em "Novo Lead" para começar' : 'Tente ajustar os filtros'}
               </p>
             </div>
           ) : (

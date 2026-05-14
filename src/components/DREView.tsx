@@ -427,7 +427,7 @@ function SavingsPanel() {
     return (
       <div className="bg-white rounded-xl border border-slate-200 p-5 flex items-center gap-3">
         <Loader2 className="w-5 h-5 animate-spin text-amber-500" />
-        <span className="text-sm text-slate-600">Analisando gastos com IA...</span>
+        <span className="text-sm text-slate-600">Analisando gastos...</span>
       </div>
     );
   }
@@ -438,7 +438,7 @@ function SavingsPanel() {
         <div className="flex items-center gap-2"><Lightbulb className="w-5 h-5 text-amber-500" /><h3 className="font-semibold text-slate-800">Oportunidades de Economia</h3></div>
         <button onClick={() => setSavings([])} className="text-xs text-slate-400 hover:text-slate-600 cursor-pointer">Fechar</button>
       </div>
-      <p className="text-xs text-slate-400 -mt-2 mb-1">Sugestões geradas por IA, podem conter imprecisões.</p>
+      <p className="text-xs text-slate-400 -mt-2 mb-1">Sugestões automáticas, podem conter imprecisões.</p>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
         {savings.map((s, i) => (
           <div key={i} className="border border-amber-200 bg-amber-50/30 rounded-lg p-3 space-y-2">

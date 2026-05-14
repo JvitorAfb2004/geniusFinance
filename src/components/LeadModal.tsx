@@ -1,18 +1,14 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { useFinance } from '../hooks/useFinance';
 import { format, parseISO } from 'date-fns';
-import { X, Plus, Sparkles, Loader2, Pencil, Trash2, Check, Search } from 'lucide-react';
-import { parseLead, type ParsedLeadData } from '../lib/ai';
+import { X, Plus, Pencil, Trash2, Check, Search } from 'lucide-react';
 import type { Lead, LeadOption } from '../types';
 
 const STATUS_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#84cc16'];
 
-type Mode = 'manual' | 'ai';
-
 export default function LeadModal({ lead, onClose }: { lead?: Lead; onClose: () => void }) {
   const { addLead, updateLead, leadOptions, addLeadOption, updateLeadOption, deleteLeadOption } = useFinance();
 
-  const [mode, setMode] = useState<Mode>(lead ? 'manual' : 'ai');
   const [submitting, setSubmitting] = useState(false);
 
   // Form fields
@@ -27,12 +23,6 @@ export default function LeadModal({ lead, onClose }: { lead?: Lead; onClose: () 
   const [link, setLink] = useState(lead?.link || '');
   const [additionalField, setAdditionalField] = useState(lead?.additionalField || '');
   const [proposalDate, setProposalDate] = useState(lead?.proposalDate || format(new Date(), 'yyyy-MM-dd'));
-
-  // AI mode
-  const [aiText, setAiText] = useState('');
-  const [aiLoading, setAiLoading] = useState(false);
-  const [aiError, setAiError] = useState('');
-  const [parsedData, setParsedData] = useState<ParsedLeadData | null>(null);
 
   // Inline option editing state
   const [editingOptionId, setEditingOptionId] = useState<string | null>(null);
@@ -56,31 +46,6 @@ export default function LeadModal({ lead, onClose }: { lead?: Lead; onClose: () 
   );
 
   const isEdit = !!lead;
-
-  const handleAiParse = async () => {
-    if (!aiText.trim()) return;
-    setAiLoading(true);
-    setAiError('');
-    try {
-      const data = await parseLead(aiText);
-      setParsedData(data);
-      // Pre-fill form
-      setClientName(data.clientName);
-      setResponsible(data.responsible);
-      setEmail(data.email);
-      setPhone(data.phone);
-      setService(data.service);
-      setDescription(data.description);
-      setSource(data.source);
-      setLink(data.link);
-      setAdditionalField(data.additionalField);
-      if (data.proposalDate) setProposalDate(data.proposalDate);
-    } catch (err: unknown) {
-      setAiError(err instanceof Error ? err.message : 'Erro ao processar com IA');
-    } finally {
-      setAiLoading(false);
-    }
-  };
 
   const handleSubmit = async () => {
     if (!clientName.trim()) return;
@@ -304,7 +269,7 @@ export default function LeadModal({ lead, onClose }: { lead?: Lead; onClose: () 
               {isEdit ? 'Editar Lead' : 'Novo Lead'}
             </h2>
             <p className="text-xs text-gray-400 mt-0.5">
-              {isEdit ? 'Atualize as informações do lead' : 'Preencha os dados ou use IA para extrair automaticamente'}
+              {isEdit ? 'Atualize as informações do lead' : 'Preencha os dados do lead'}
             </p>
           </div>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 cursor-pointer">
@@ -312,82 +277,8 @@ export default function LeadModal({ lead, onClose }: { lead?: Lead; onClose: () 
           </button>
         </div>
 
-        {/* Mode tabs (only for new leads) */}
-        {!isEdit && (
-          <div className="flex border-b border-[#e2e8f0] px-6 shrink-0">
-            <button
-              onClick={() => setMode('ai')}
-              className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors cursor-pointer flex items-center gap-1.5 ${
-                mode === 'ai' ? 'border-[#3b82f6] text-[#3b82f6]' : 'border-transparent text-gray-400 hover:text-gray-600'
-              }`}
-            >
-              <Sparkles className="w-4 h-4" />
-              Com IA
-            </button>
-            <button
-              onClick={() => setMode('manual')}
-              className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors cursor-pointer ${
-                mode === 'manual' ? 'border-[#3b82f6] text-[#3b82f6]' : 'border-transparent text-gray-400 hover:text-gray-600'
-              }`}
-            >
-              Manual
-            </button>
-          </div>
-        )}
-
         {/* Body */}
         <div className="flex-1 overflow-y-auto p-6 space-y-4">
-          {/* AI Mode */}
-          {mode === 'ai' && !isEdit && (
-            <div className="space-y-4">
-              <div>
-                <label className="text-xs font-medium text-gray-500 mb-1 block">
-                  Descreva o lead em texto livre
-                </label>
-                <textarea
-                  value={aiText}
-                  onChange={(e) => setAiText(e.target.value)}
-                  placeholder="Ex: João da Silva, da Empresa XPTO, me ligou hoje querendo um site institucional. Orçamento em torno de R$ 5mil. Contato: joao@xpto.com.br / (11) 98765-4321. Veio do Instagram."
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:border-[#3b82f6] resize-none h-32"
-                  disabled={aiLoading}
-                />
-                <p className="text-xs text-gray-400 mt-1">A extração de dados é feita por IA e pode conter imprecisões. Revise os campos antes de salvar.</p>
-              </div>
-
-              {aiError && (
-                <div className="p-3 bg-red-50 border border-red-100 rounded-lg text-sm text-red-600">
-                  {aiError}
-                </div>
-              )}
-
-              <button
-                onClick={handleAiParse}
-                disabled={!aiText.trim() || aiLoading}
-                className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl hover:from-purple-700 hover:to-blue-700 disabled:opacity-50 transition-all font-medium text-sm cursor-pointer"
-              >
-                {aiLoading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Processando...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="w-4 h-4" />
-                    Extrair dados com IA
-                  </>
-                )}
-              </button>
-
-              {parsedData && !aiLoading && (
-                <div className="p-3 bg-emerald-50 border border-emerald-100 rounded-lg">
-                  <p className="text-xs font-medium text-emerald-700 mb-2">
-                    Dados extraídos! Confira abaixo e ajuste se necessário antes de salvar.
-                  </p>
-                </div>
-              )}
-            </div>
-          )}
-
           {/* Form fields */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Client Name - full width on mobile */}
