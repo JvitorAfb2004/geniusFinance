@@ -1,6 +1,6 @@
 import React from 'react';
 import { useFinance } from '../hooks/useFinance.tsx';
-import { ActiveScope, ContextType } from '../types';
+import { ActiveScope } from '../types';
 import { ChevronLeft, ChevronRight, Eye, EyeOff, Menu, Building2, User } from 'lucide-react';
 import { format, addMonths, subMonths } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -14,18 +14,18 @@ export function Header({
   dashboardValuesVisible?: boolean;
   onToggleDashboardValues?: () => void;
 }) {
-  const { activeContext, activeScope, setActiveScope, accounts, user, selectedMonth, setSelectedMonth } = useFinance();
+  const { activeScope, setActiveScope, accounts, user, selectedMonth, setSelectedMonth } = useFinance();
 
   const scopeOptions: { label: string; scope: ActiveScope; role?: string }[] = [
     { label: 'Pessoal', scope: { type: 'PERSONAL', userId: user?.uid || '' } },
   ];
 
   for (const acc of accounts) {
-    const member = null; // role comes from activeScope when selected
+    const role: 'owner' | 'admin' | 'member' = acc.memberRole || (acc.ownerId === user?.uid ? 'owner' : 'member');
     scopeOptions.push({
       label: acc.name,
-      scope: { type: 'ACCOUNT', accountId: acc.id, accountName: acc.name, role: acc.ownerId === user?.uid ? 'owner' : 'member' },
-      role: acc.ownerId === user?.uid ? 'owner' : 'member',
+      scope: { type: 'ACCOUNT', accountId: acc.id, accountName: acc.name, role },
+      role,
     });
   }
 
@@ -104,4 +104,3 @@ export function Header({
     </header>
   );
 }
-

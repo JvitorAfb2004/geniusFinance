@@ -196,6 +196,7 @@ Para cada sugestão, retorne um array JSON com este formato exato:
 
 Regras CRÍTICAS:
 - Use EXATAMENTE os valores fornecidos nos dados. Não invente, não arredonde para milhares, não extrapole.
+- Considere também o campo "sampleDescriptions" de cada categoria para entender o contexto real do gasto.
 - O projectedSaving DEVE ser exatamente currentSpending * suggestedReduction / 100. Faça a conta corretamente.
 - Se o gasto mensal é 150 reais e sugerir 20% de redução, o projectedSaving é 30 reais (150 * 0.20 = 30). SIMPLES.
 - NUNCA sugira valores de economia maiores que o próprio gasto mensal.

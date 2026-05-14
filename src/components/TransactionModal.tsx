@@ -13,7 +13,7 @@ export function TransactionModal({
   onClose: () => void;
   initialData?: Transaction;
 }) {
-  const { addTransaction, updateTransaction, activeContext, categories, addCategory, selectedMonth, tags } = useFinance();
+  const { addTransaction, updateTransaction, activeContext, categories, addCategory, selectedMonth, tags, activeScope, transactions } = useFinance();
   const [submitting, setSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   
@@ -48,6 +48,43 @@ export function TransactionModal({
   const [applyToFuture, setApplyToFuture] = useState(false);
 
   const selectedCatName = categories.find((c) => c.id === categoryId)?.name || '';
+  const suggestedCategoryId = useMemo(() => {
+    const description = title.trim().toLowerCase();
+    if (description.length < 3) return '';
+    const words = description
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .split(/\s+/)
+      .filter((w) => w.length >= 3);
+    if (words.length === 0) return '';
+
+    const pointsByCategory = new Map<string, number>();
+    const contextTxs = transactions.filter((t) => t.context === activeContext && t.categoryId && t.title);
+    for (const tx of contextTxs) {
+      const normalizedTxTitle = tx.title
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '');
+      let points = 0;
+      for (const word of words) {
+        if (normalizedTxTitle.includes(word)) points += 1;
+      }
+      if (points > 0 && tx.categoryId) {
+        pointsByCategory.set(tx.categoryId, (pointsByCategory.get(tx.categoryId) || 0) + points);
+      }
+    }
+
+    let bestCategoryId = '';
+    let bestScore = 0;
+    for (const [candidateId, score] of pointsByCategory.entries()) {
+      if (score > bestScore) {
+        bestScore = score;
+        bestCategoryId = candidateId;
+      }
+    }
+    return bestCategoryId;
+  }, [title, transactions, activeContext]);
+  const suggestedCategoryName = categories.find((c) => c.id === suggestedCategoryId)?.name || '';
 
   const filteredCategories = useMemo(() => {
     if (!categorySearch) return categories;
@@ -106,10 +143,16 @@ export function TransactionModal({
     const val = getNumericAmount();
     if (isNaN(val) || val <= 0) return alert('Valor inválido');
 
+    if (activeScope.type === 'ACCOUNT') {
+      if (title.trim().length < 5) return alert('No modo Empresa, use uma descrição mais clara (mínimo 5 caracteres).');
+      if (!categoryId) return alert('No modo Empresa, selecione uma categoria (DRE).');
+      if (selectedTagIds.length === 0) return alert('No modo Empresa, selecione ao menos 1 tag.');
+    }
+
     setSubmitting(true);
     try {
       const baseTx: Record<string, unknown> = {
-        title,
+        title: title.trim(),
         amount: val,
         date,
         type,
@@ -147,7 +190,6 @@ export function TransactionModal({
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       className="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm flex flex-col items-center justify-center p-4"
-      onClick={onClose}
     >
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -353,6 +395,21 @@ export function TransactionModal({
                   </div>
                 )}
               </div>
+            </div>
+          )}
+
+          {!categoryId && suggestedCategoryId && suggestedCategoryName && (
+            <div className="-mt-1 rounded-lg border border-blue-100 bg-blue-50 px-3 py-2 flex items-center justify-between">
+              <p className="text-xs text-blue-700">
+                Sugestão pela descrição: <strong>{suggestedCategoryName}</strong>
+              </p>
+              <button
+                type="button"
+                onClick={() => setCategoryId(suggestedCategoryId)}
+                className="text-xs font-semibold text-blue-700 hover:text-blue-800 cursor-pointer"
+              >
+                Aplicar
+              </button>
             </div>
           )}
 

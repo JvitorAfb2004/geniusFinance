@@ -12,12 +12,11 @@ import { SettingsView } from './components/SettingsView';
 import DREView from './components/DREView';
 import BudgetView from './components/BudgetView';
 import SalesView from './components/SalesView';
-import ImportView from './components/ImportView';
 import GoalsView from './components/GoalsView';
 import CommercialView from './components/CommercialView';
 import ProjectsView from './components/ProjectsView';
 import ServiceTypesView from './components/ServiceTypesView';
-import { PieChart, List, CreditCard, Calendar, Settings, FileBarChart, X, Calculator, TrendingUp, Target, Upload, Users, Kanban, Layers } from 'lucide-react';
+import { PieChart, List, CreditCard, Calendar, Settings, FileBarChart, X, Calculator, TrendingUp, Target, Users, Kanban, Layers } from 'lucide-react';
 import { ViewType } from './types';
 import { cn } from './lib/utils';
 
@@ -70,7 +69,6 @@ function MainApp() {
         { id: 'SALES', label: 'Vendas', icon: TrendingUp },
         { id: 'GOALS', label: 'Metas', icon: Target },
         { id: 'REPORTS', label: 'Relatórios Anuais', icon: FileBarChart },
-        { id: 'IMPORT', label: 'Importar', icon: Upload },
       ],
     },
     {
@@ -243,7 +241,6 @@ function MainApp() {
           {currentView === 'DRE' && <DREView />}
           {currentView === 'BUDGET' && <BudgetView />}
           {currentView === 'SALES' && <SalesView />}
-          {currentView === 'IMPORT' && <ImportView />}
           {currentView === 'GOALS' && <GoalsView />}
           {currentView === 'COMMERCIAL' && <CommercialView />}
           {currentView === 'PROJECTS' && <ProjectsView />}

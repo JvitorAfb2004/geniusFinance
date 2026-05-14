@@ -18,7 +18,7 @@ export function SettingsView() {
     signOut, addCategory, updateCategory, deleteCategory,
     addTag, deleteTag,
     addLeadOption, updateLeadOption, deleteLeadOption,
-    createAccount, migrateToAccount, inviteMember, acceptInvite,
+    createAccount, deleteAccount, migrateToAccount, inviteMember, acceptInvite,
   } = useFinance();
 
   const [activeTab, setActiveTab] = useState<SettingsTab>('geral');
@@ -49,6 +49,7 @@ export function SettingsView() {
   const [creatingAccount, setCreatingAccount] = useState(false);
   const [migrating, setMigrating] = useState(false);
   const [migrationResult, setMigrationResult] = useState<{ collection: string; migrated: number; skipped: number; errors: number }[] | null>(null);
+  const [confirmDeleteAccount, setConfirmDeleteAccount] = useState<{ id: string; name: string } | null>(null);
 
   // Invite state
   const [inviteEmail, setInviteEmail] = useState('');
@@ -357,6 +358,15 @@ export function SettingsView() {
                       }`}>
                         {acc.status === 'ACTIVE' ? 'Ativo' : 'Arquivado'}
                       </span>
+                      {acc.ownerId === user?.uid && (
+                        <button
+                          onClick={() => setConfirmDeleteAccount({ id: acc.id, name: acc.name })}
+                          className="ml-2 text-gray-400 hover:text-red-500 cursor-pointer"
+                          title="Apagar empresa"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
                     </div>
                   ))
                 )}
@@ -695,6 +705,20 @@ export function SettingsView() {
           variant="danger"
           onConfirm={() => { deleteCategory(confirmDeleteCat.id); setConfirmDeleteCat(null); }}
           onCancel={() => setConfirmDeleteCat(null)}
+        />
+      )}
+
+      {confirmDeleteAccount && (
+        <ConfirmModal
+          title="Apagar empresa"
+          message={`Deseja apagar a empresa "${confirmDeleteAccount.name}"? Esta ação remove o acesso da lista de empresas ativas.`}
+          confirmLabel="Apagar empresa"
+          variant="danger"
+          onConfirm={async () => {
+            await deleteAccount(confirmDeleteAccount.id);
+            setConfirmDeleteAccount(null);
+          }}
+          onCancel={() => setConfirmDeleteAccount(null)}
         />
       )}
     </div>

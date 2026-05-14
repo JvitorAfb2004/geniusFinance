@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useFinance } from '../hooks/useFinance.tsx';
 import { formatCurrency, cn } from '../lib/utils';
-import { isSameMonth, parseISO } from 'date-fns';
-import { Settings2, Wallet, TrendingUp, TrendingDown, CreditCard, DollarSign, Percent } from 'lucide-react';
+import { addDays, endOfDay, isSameMonth, isWithinInterval, parseISO, startOfDay } from 'date-fns';
+import { Settings2, Wallet, TrendingUp, TrendingDown, CreditCard, DollarSign, Percent, ArrowDownToLine, ArrowUpToLine } from 'lucide-react';
 
-const DEFAULT_WIDGETS = ['balance', 'income', 'expense', 'credit_card'];
+const DEFAULT_WIDGETS = ['month_balance', 'income', 'expense', 'payable_7d', 'receivable_7d'];
 
 function loadWidgets(): string[] {
   try { const saved = localStorage.getItem('dashboard_widgets'); return saved ? JSON.parse(saved) : DEFAULT_WIDGETS; }
@@ -14,18 +14,22 @@ function loadWidgets(): string[] {
 function saveWidgets(ids: string[]) { localStorage.setItem('dashboard_widgets', JSON.stringify(ids)); }
 
 const ALL_WIDGETS = [
+  { id: 'month_balance', label: 'Saldo do Mes' },
   { id: 'balance', label: 'Saldo Disponivel' },
   { id: 'income', label: 'Receitas (Mes)' },
   { id: 'expense', label: 'Despesas (Mes)' },
   { id: 'credit_card', label: 'Cartao (Mes)' },
+  { id: 'payable_7d', label: 'A pagar (7 dias)' },
+  { id: 'receivable_7d', label: 'A receber (7 dias)' },
   { id: 'net_profit', label: 'Lucro Liquido' },
   { id: 'margin', label: 'Margem Liquida' },
 ];
 
 export function DashboardCards({ valuesVisible = true }: { valuesVisible?: boolean }) {
-  const { transactions, categories, budgets, activeContext, selectedMonth } = useFinance();
+  const { transactions, activeContext, selectedMonth, activeScope } = useFinance();
   const [widgets, setWidgets] = useState<string[]>(loadWidgets);
   const [editing, setEditing] = useState(false);
+  const scopeLabel = activeScope.type === 'PERSONAL' ? 'Pessoal' : 'Empresa';
 
   const currentMonthTxs = transactions.filter((t) =>
     t.context === activeContext && isSameMonth(parseISO(t.date), selectedMonth)
@@ -36,6 +40,17 @@ export function DashboardCards({ valuesVisible = true }: { valuesVisible?: boole
   const creditCard = currentMonthTxs.filter((t) => t.type === 'CREDIT_CARD').reduce((s, t) => s + t.amount, 0);
   const confirmedIncomes = currentMonthTxs.filter((t) => t.type === 'INCOME' && t.status === 'PAID').reduce((s, t) => s + t.amount, 0);
   const totalExpenses = expenses + creditCard;
+  const monthBalance = incomes - totalExpenses;
+
+  const today = startOfDay(new Date());
+  const nextWeek = endOfDay(addDays(today, 7));
+  const upcomingTxs = transactions.filter((t) =>
+    t.context === activeContext &&
+    t.status === 'PENDING' &&
+    isWithinInterval(parseISO(t.date), { start: today, end: nextWeek })
+  );
+  const payable7d = upcomingTxs.filter((t) => t.type !== 'INCOME').reduce((sum, t) => sum + t.amount, 0);
+  const receivable7d = upcomingTxs.filter((t) => t.type === 'INCOME').reduce((sum, t) => sum + t.amount, 0);
 
   const toggleWidget = (id: string) => {
     const next = widgets.includes(id) ? widgets.filter((w) => w !== id) : [...widgets, id];
@@ -44,8 +59,17 @@ export function DashboardCards({ valuesVisible = true }: { valuesVisible?: boole
 
   function getCard(id: string) {
     switch (id) {
+      case 'month_balance': return {
+        title: `Saldo do Mês (${scopeLabel})`, value: monthBalance,
+        color: monthBalance >= 0 ? 'text-success' : 'text-danger', icon: Wallet,
+        iconBg: monthBalance >= 0 ? 'bg-success-light' : 'bg-danger-light',
+        iconColor: monthBalance >= 0 ? 'text-success' : 'text-danger',
+        accentBar: monthBalance >= 0
+          ? 'bg-gradient-to-r from-success to-emerald-400'
+          : 'bg-gradient-to-r from-danger to-rose-400'
+      };
       case 'balance': return {
-        title: 'Saldo Disponível', value: confirmedIncomes - totalExpenses,
+        title: `Saldo Disponível (${scopeLabel})`, value: confirmedIncomes - totalExpenses,
         color: 'text-text-primary', icon: Wallet,
         iconBg: 'bg-primary-light', iconColor: 'text-primary',
         accentBar: 'bg-gradient-to-r from-primary to-blue-400'
@@ -67,6 +91,18 @@ export function DashboardCards({ valuesVisible = true }: { valuesVisible?: boole
         color: 'text-warning', icon: CreditCard,
         iconBg: 'bg-warning-light', iconColor: 'text-warning',
         accentBar: 'bg-gradient-to-r from-warning to-amber-400'
+      };
+      case 'payable_7d': return {
+        title: 'A pagar (7 dias)', value: payable7d,
+        color: 'text-danger', icon: ArrowDownToLine,
+        iconBg: 'bg-danger-light', iconColor: 'text-danger',
+        accentBar: 'bg-gradient-to-r from-danger to-rose-400'
+      };
+      case 'receivable_7d': return {
+        title: 'A receber (7 dias)', value: receivable7d,
+        color: 'text-success', icon: ArrowUpToLine,
+        iconBg: 'bg-success-light', iconColor: 'text-success',
+        accentBar: 'bg-gradient-to-r from-success to-emerald-400'
       };
       case 'net_profit': return {
         title: 'Lucro Líquido', value: incomes - totalExpenses,
@@ -116,7 +152,7 @@ export function DashboardCards({ valuesVisible = true }: { valuesVisible?: boole
 
     rafId = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(rafId);
-  }, [valuesVisible, transactions, activeContext, selectedMonth, widgets.join('|')]);
+  }, [valuesVisible, transactions, activeContext, selectedMonth, widgets.join('|'), scopeLabel]);
 
   return (
     <div>

@@ -16,6 +16,7 @@ export interface Account {
   id: string;
   name: string;
   ownerId: string;
+  memberRole?: AccountRole;
   status: 'ACTIVE' | 'ARCHIVED';
   createdAt: string;
   updatedAt: string;
@@ -234,6 +235,7 @@ export interface FinanceContextState {
   setSelectedMonth: (date: Date) => void;
   setCurrentView: (view: ViewType) => void;
   createAccount: (name: string) => Promise<void>;
+  deleteAccount: (accountId: string) => Promise<void>;
   migrateToAccount: (accountId: string) => Promise<{ collection: string; migrated: number; skipped: number; errors: number }[]>;
   inviteMember: (email: string, role: Exclude<AccountRole, 'owner'>) => Promise<void>;
   acceptInvite: (inviteId: string, accountId: string) => Promise<void>;

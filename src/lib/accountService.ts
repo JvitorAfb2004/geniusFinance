@@ -156,6 +156,7 @@ export async function getUserAccounts(
           id: accountSnap.id,
           name: data.name,
           ownerId: data.ownerId,
+          memberRole: mData.role as AccountRole,
           status: data.status,
           createdAt: data.createdAt?.toDate?.().toISOString() || new Date().toISOString(),
           updatedAt: data.updatedAt?.toDate?.().toISOString() || new Date().toISOString(),
@@ -251,6 +252,9 @@ export async function acceptInvite(
 ): Promise<void> {
   const batch = writeBatch(db);
   const normalizedEmail = user.email?.toLowerCase().trim() || '';
+  const inviteRef = doc(db, `accounts/${accountId}/invites`, inviteId);
+  const inviteSnap = await getDoc(inviteRef);
+  const inviteRole = inviteSnap.exists() && inviteSnap.data().role === 'admin' ? 'admin' as AccountRole : 'member' as AccountRole;
 
   // 1. Update invite status in account
   const accountInviteRef = doc(db, `accounts/${accountId}/invites`, inviteId);
@@ -265,7 +269,7 @@ export async function acceptInvite(
   batch.set(memberRef, {
     uid: user.uid,
     email: normalizedEmail,
-    role: 'member' as AccountRole,
+    role: inviteRole,
     invitedBy: inviteId,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
@@ -281,7 +285,7 @@ export async function acceptInvite(
   batch.set(membershipRef, {
     accountId,
     accountName,
-    role: 'member' as AccountRole,
+    role: inviteRole,
     createdAt: serverTimestamp(),
   });
 
@@ -319,5 +323,15 @@ export async function removeMember(accountId: string, uid: string): Promise<void
   const batch = writeBatch(db);
   const ref = doc(db, `accounts/${accountId}/members/${uid}`);
   batch.delete(ref);
+  await batch.commit();
+}
+
+export async function archiveAccount(accountId: string): Promise<void> {
+  const ref = doc(db, 'accounts', accountId);
+  const batch = writeBatch(db);
+  batch.update(ref, {
+    status: 'ARCHIVED',
+    updatedAt: serverTimestamp(),
+  });
   await batch.commit();
 }

@@ -393,18 +393,22 @@ function SavingsPanel() {
       const monthTxs = transactions.filter(
         (t) => t.context === activeContext && isSameMonth(parseISO(t.date), selectedMonth) && t.type !== 'INCOME'
       );
-      const byCategory: Record<string, { monthly: number; count: number }> = {};
+      const byCategory: Record<string, { monthly: number; count: number; sampleDescriptions: string[] }> = {};
       for (const t of monthTxs) {
         const cat = categories.find((c) => c.id === t.categoryId);
         const key = cat?.name || t.title;
-        if (!byCategory[key]) byCategory[key] = { monthly: 0, count: 0 };
+        if (!byCategory[key]) byCategory[key] = { monthly: 0, count: 0, sampleDescriptions: [] };
         byCategory[key].monthly += t.amount;
         byCategory[key].count += 1;
+        if (t.title && !byCategory[key].sampleDescriptions.includes(t.title) && byCategory[key].sampleDescriptions.length < 5) {
+          byCategory[key].sampleDescriptions.push(t.title);
+        }
       }
       const gastos = Object.entries(byCategory).map(([name, data]) => ({
         category: name,
         monthlySpending: data.monthly,
         transactionCount: data.count,
+        sampleDescriptions: data.sampleDescriptions,
       }));
       const result = await suggestSavings({ gastos, mes: format(selectedMonth, 'MM/yyyy'), totalGastoMes: monthTxs.reduce((s, t) => s + t.amount, 0) });
       setSavings(result);

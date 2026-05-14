@@ -8,7 +8,7 @@ import { DEFAULT_CATEGORIES } from '../lib/categories';
 import { ALL_DEFAULT_LEAD_OPTIONS } from '../lib/leadDefaults';
 import { resolveDataPath } from '../lib/pathAdapter';
 import type { FinanceCollectionName } from '../lib/pathAdapter';
-import { createAccount, getUserAccounts, getAccountMembers, getAccountInvites, migrateUserToAccount, createInvite, getPendingInvites, acceptInvite as acceptInviteSvc } from '../lib/accountService';
+import { createAccount, getUserAccounts, getAccountMembers, getAccountInvites, migrateUserToAccount, createInvite, getPendingInvites, acceptInvite as acceptInviteSvc, archiveAccount } from '../lib/accountService';
 import { User, onAuthStateChanged } from 'firebase/auth';
 import {
   collection, query, onSnapshot, doc, writeBatch, serverTimestamp,
@@ -1020,6 +1020,7 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       id: accountId,
       name,
       ownerId: user.uid,
+      memberRole: 'owner',
       status: 'ACTIVE',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -1036,6 +1037,17 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
   const migrateToAccountFn = async (accountId: string) => {
     if (!user) return [];
     return migrateUserToAccount(user.uid, accountId);
+  };
+
+  const deleteAccountFn = async (accountId: string) => {
+    if (!user) return;
+    const account = accounts.find((a) => a.id === accountId);
+    if (!account || account.ownerId !== user.uid) return;
+    await archiveAccount(accountId);
+    setAccounts((prev) => prev.filter((a) => a.id !== accountId));
+    if (activeScope.type === 'ACCOUNT' && activeScope.accountId === accountId) {
+      setActiveScope({ type: 'PERSONAL', userId: user.uid });
+    }
   };
 
   const inviteMemberFn = async (email: string, role: Exclude<AccountRole, 'owner'>) => {
@@ -1086,6 +1098,7 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       setSelectedMonth,
       setCurrentView,
       createAccount: createAccountFn,
+      deleteAccount: deleteAccountFn,
       migrateToAccount: migrateToAccountFn,
       inviteMember: inviteMemberFn,
       acceptInvite: acceptInviteFn,
