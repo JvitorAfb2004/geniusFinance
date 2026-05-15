@@ -852,6 +852,54 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  // ── PUT /api/admin/members/:uid/permissions ──
+  if (req.method === "PUT" && req.url.startsWith("/api/admin/members/") && req.url.endsWith("/permissions")) {
+    const authUser = await authRequired(req, res);
+    if (!authUser) return;
+
+    try {
+      const urlPath = req.url.split("/api/admin/members/")[1];
+      const memberUid = urlPath.split("/")[0];
+      const body = await readJsonBody(req);
+      const { accountId, permissions } = body;
+
+      if (!accountId || !permissions) {
+        res.writeHead(400, { ...corsHeaders(), "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: "accountId e permissions obrigatorios" }));
+        return;
+      }
+
+      const { firestore } = require("./services/firebase-admin.cjs");
+      const memberRef = firestore().collection("accounts").doc(accountId).collection("members").doc(memberUid);
+      const memberDoc = await memberRef.get();
+      if (!memberDoc.exists) {
+        res.writeHead(404, { ...corsHeaders(), "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: "membro nao encontrado" }));
+        return;
+      }
+
+      // Verifica se o usuário atual é owner/admin da conta
+      const callerMember = await firestore().collection("accounts").doc(accountId).collection("members").doc(authUser.uid).get();
+      if (!callerMember.exists || !['owner', 'admin'].includes(callerMember.data().role)) {
+        res.writeHead(403, { ...corsHeaders(), "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: "sem permissao para alterar permissoes" }));
+        return;
+      }
+
+      await memberRef.update({
+        permissions,
+        updatedAt: new Date().toISOString(),
+      });
+
+      res.writeHead(200, { ...corsHeaders(), "Content-Type": "application/json" });
+      res.end(JSON.stringify({ success: true }));
+    } catch (err) {
+      res.writeHead(500, { ...corsHeaders(), "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: err.message }));
+    }
+    return;
+  }
+
   // ── POST /api/ai/chat ──
   if (req.method === "POST" && req.url === "/api/ai/chat") {
     try {

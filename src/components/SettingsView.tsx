@@ -2,7 +2,9 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { useFinance } from '../hooks/useFinance';
 import { LogOut, User, Shield, DownloadCloud, Pencil, Trash2, Plus, X, Check, Users, BellRing, Building2, Mail, UserPlus } from 'lucide-react';
 import ConfirmModal from './ConfirmModal';
-import type { Category, DRESection, LeadOption, AccountRole } from '../types';
+import type { Category, DRESection, LeadOption, AccountRole, AccountMember, MemberPermissions } from '../types';
+import { PermissionsModal } from './PermissionsModal';
+import { auth } from '../lib/firebase';
 import { SECTION_LABELS } from '../lib/categories';
 
 type SettingsTab = 'geral' | 'conta' | 'comercial' | 'categorias' | 'tags';
@@ -56,6 +58,7 @@ export function SettingsView() {
   const [inviteRole, setInviteRole] = useState<Exclude<AccountRole, 'owner'>>('member');
   const [sendingInvite, setSendingInvite] = useState(false);
   const [inviteDone, setInviteDone] = useState(false);
+  const [permissionTarget, setPermissionTarget] = useState<AccountMember | null>(null);
 
   useEffect(() => {
     try {
@@ -447,6 +450,14 @@ export function SettingsView() {
                         }`}>
                           {m.role === 'owner' ? 'Dono' : m.role === 'admin' ? 'Admin' : 'Membro'}
                         </span>
+                        {(activeScope.role === 'owner' || activeScope.role === 'admin') && m.role !== 'owner' && (
+                          <button
+                            onClick={() => setPermissionTarget(m)}
+                            className="text-xs font-medium text-[#3b82f6] hover:text-[#2563eb] cursor-pointer ml-2 shrink-0"
+                          >
+                            Permissões
+                          </button>
+                        )}
                       </div>
                     ))
                   )}
@@ -696,6 +707,23 @@ export function SettingsView() {
           )}
         </div>
       </div>
+
+      {permissionTarget && (
+        <PermissionsModal
+          memberEmail={permissionTarget.email}
+          currentPermissions={(permissionTarget.permissions || {}) as MemberPermissions}
+          onSave={async (newPerms) => {
+            const token = await auth.currentUser?.getIdToken();
+            await fetch(`/api/admin/members/${permissionTarget.uid}/permissions`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+              body: JSON.stringify({ accountId: activeScope.type === 'ACCOUNT' ? activeScope.accountId : '', permissions: newPerms }),
+            });
+            setPermissionTarget(null);
+          }}
+          onClose={() => setPermissionTarget(null)}
+        />
+      )}
 
       {confirmDeleteCat && (
         <ConfirmModal

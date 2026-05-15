@@ -22,11 +22,21 @@ export interface Account {
   updatedAt: string;
 }
 
+export type ModuleAction = 'view' | 'create' | 'edit' | 'delete';
+
+export type ModuleName =
+  | 'dashboard' | 'transactions' | 'fixed_monthly' | 'credit_cards'
+  | 'dre' | 'budget' | 'sales' | 'goals' | 'reports'
+  | 'leads' | 'projects' | 'service_types';
+
+export type MemberPermissions = Record<ModuleName, ModuleAction[]>;
+
 export interface AccountMember {
   uid: string;
   email: string;
   role: AccountRole;
   invitedBy: string;
+  permissions?: MemberPermissions;
   createdAt: string;
   updatedAt: string;
 }
