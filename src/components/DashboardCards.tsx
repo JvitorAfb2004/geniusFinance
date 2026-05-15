@@ -63,7 +63,6 @@ export function DashboardCards({ valuesVisible = true }: { valuesVisible?: boole
   const expensesPending = currentMonthTxs
     .filter((t) => t.type !== 'INCOME' && t.status === 'PENDING')
     .reduce((sum, t) => sum + t.amount, 0);
-  const confirmedIncomes = currentMonthTxs.filter((t) => t.type === 'INCOME' && t.status === 'PAID').reduce((s, t) => s + t.amount, 0);
   const totalExpenses = expenses + creditCard;
   const monthBalance = incomes - totalExpenses;
 
@@ -106,7 +105,7 @@ export function DashboardCards({ valuesVisible = true }: { valuesVisible?: boole
           : 'bg-gradient-to-r from-danger to-rose-400'
       };
       case 'balance': return {
-        title: `Saldo Disponível (${scopeLabel})`, value: confirmedIncomes - totalExpenses,
+        title: `Saldo Disponível (${scopeLabel})`, value: incomesReceived - expensesPaid,
         color: 'text-text-primary', icon: Wallet,
         iconBg: 'bg-primary-light', iconColor: 'text-primary',
         accentBar: 'bg-gradient-to-r from-primary to-blue-400'
