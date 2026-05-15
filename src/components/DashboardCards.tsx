@@ -2,9 +2,17 @@ import React, { useEffect, useState } from 'react';
 import { useFinance } from '../hooks/useFinance.tsx';
 import { formatCurrency, cn } from '../lib/utils';
 import { addDays, endOfDay, isSameMonth, isWithinInterval, parseISO, startOfDay } from 'date-fns';
-import { Settings2, Wallet, TrendingUp, TrendingDown, CreditCard, DollarSign, Percent, ArrowDownToLine, ArrowUpToLine } from 'lucide-react';
+import { Settings2, Wallet, TrendingUp, TrendingDown, CreditCard, DollarSign, Percent, ArrowDownToLine, ArrowUpToLine, CalendarDays, CheckCircle2, Clock3 } from 'lucide-react';
 
-const DEFAULT_WIDGETS = ['month_balance', 'income', 'expense', 'payable_7d', 'receivable_7d'];
+const DEFAULT_WIDGETS = [
+  'month_balance',
+  'income_received',
+  'income_pending',
+  'expense_paid',
+  'expense_pending',
+  'payable_7d',
+  'receivable_7d',
+];
 
 function loadWidgets(): string[] {
   try { const saved = localStorage.getItem('dashboard_widgets'); return saved ? JSON.parse(saved) : DEFAULT_WIDGETS; }
@@ -17,7 +25,11 @@ const ALL_WIDGETS = [
   { id: 'month_balance', label: 'Saldo do Mes' },
   { id: 'balance', label: 'Saldo Disponivel' },
   { id: 'income', label: 'Receitas (Mes)' },
+  { id: 'income_received', label: 'Recebidos (Mes)' },
+  { id: 'income_pending', label: 'Nao recebidos (Mes)' },
   { id: 'expense', label: 'Despesas (Mes)' },
+  { id: 'expense_paid', label: 'Pagos (Mes)' },
+  { id: 'expense_pending', label: 'Nao pagos (Mes)' },
   { id: 'credit_card', label: 'Cartao (Mes)' },
   { id: 'payable_7d', label: 'A pagar (7 dias)' },
   { id: 'receivable_7d', label: 'A receber (7 dias)' },
@@ -38,6 +50,18 @@ export function DashboardCards({ valuesVisible = true }: { valuesVisible?: boole
   const incomes = currentMonthTxs.filter((t) => t.type === 'INCOME').reduce((s, t) => s + t.amount, 0);
   const expenses = currentMonthTxs.filter((t) => t.type === 'EXPENSE').reduce((s, t) => s + t.amount, 0);
   const creditCard = currentMonthTxs.filter((t) => t.type === 'CREDIT_CARD').reduce((s, t) => s + t.amount, 0);
+  const incomesReceived = currentMonthTxs
+    .filter((t) => t.type === 'INCOME' && t.status === 'PAID')
+    .reduce((sum, t) => sum + t.amount, 0);
+  const incomesPending = currentMonthTxs
+    .filter((t) => t.type === 'INCOME' && t.status === 'PENDING')
+    .reduce((sum, t) => sum + t.amount, 0);
+  const expensesPaid = currentMonthTxs
+    .filter((t) => t.type !== 'INCOME' && t.status === 'PAID')
+    .reduce((sum, t) => sum + t.amount, 0);
+  const expensesPending = currentMonthTxs
+    .filter((t) => t.type !== 'INCOME' && t.status === 'PENDING')
+    .reduce((sum, t) => sum + t.amount, 0);
   const confirmedIncomes = currentMonthTxs.filter((t) => t.type === 'INCOME' && t.status === 'PAID').reduce((s, t) => s + t.amount, 0);
   const totalExpenses = expenses + creditCard;
   const monthBalance = incomes - totalExpenses;
@@ -80,11 +104,35 @@ export function DashboardCards({ valuesVisible = true }: { valuesVisible?: boole
         iconBg: 'bg-success-light', iconColor: 'text-success',
         accentBar: 'bg-gradient-to-r from-success to-emerald-400'
       };
+      case 'income_received': return {
+        title: 'Já recebidos (Mês)', value: incomesReceived,
+        color: 'text-success', icon: ArrowUpToLine,
+        iconBg: 'bg-success-light', iconColor: 'text-success',
+        accentBar: 'bg-gradient-to-r from-success to-emerald-400'
+      };
+      case 'income_pending': return {
+        title: 'Não recebidos (Mês)', value: incomesPending,
+        color: 'text-warning', icon: CalendarDays,
+        iconBg: 'bg-warning-light', iconColor: 'text-warning',
+        accentBar: 'bg-gradient-to-r from-warning to-amber-400'
+      };
       case 'expense': return {
         title: 'Despesas (Mês)', value: totalExpenses,
         color: 'text-danger', icon: TrendingDown,
         iconBg: 'bg-danger-light', iconColor: 'text-danger',
         accentBar: 'bg-gradient-to-r from-danger to-rose-400'
+      };
+      case 'expense_paid': return {
+        title: 'Já pagos (Mês)', value: expensesPaid,
+        color: 'text-danger', icon: CheckCircle2,
+        iconBg: 'bg-danger-light', iconColor: 'text-danger',
+        accentBar: 'bg-gradient-to-r from-danger to-rose-400'
+      };
+      case 'expense_pending': return {
+        title: 'Não pagos (Mês)', value: expensesPending,
+        color: 'text-warning', icon: Clock3,
+        iconBg: 'bg-warning-light', iconColor: 'text-warning',
+        accentBar: 'bg-gradient-to-r from-warning to-amber-400'
       };
       case 'credit_card': return {
         title: 'Cartão (Mês)', value: creditCard,
