@@ -17,6 +17,9 @@ import CommercialView from './components/CommercialView';
 import ProjectsView from './components/ProjectsView';
 import ServiceTypesView from './components/ServiceTypesView';
 import { PieChart, List, CreditCard, Calendar, Settings, FileBarChart, X, Calculator, TrendingUp, Target, Users, Kanban, Layers } from 'lucide-react';
+import LegalModal from './components/LegalModal';
+import { TERMOS_DE_USO } from './lib/termos-de-uso';
+import { POLITICA_PRIVACIDADE } from './lib/politica-privacidade';
 import { ViewType } from './types';
 import { cn } from './lib/utils';
 
@@ -55,6 +58,12 @@ function MainApp() {
       return true;
     }
   });
+
+  const TERMS_KEY = 'gh_terms_accepted';
+  const [termsAccepted, setTermsAccepted] = useState(() => {
+    try { return localStorage.getItem(TERMS_KEY) === 'true'; } catch { return false; }
+  });
+  const [legalModal, setLegalModal] = useState<'terms' | 'privacy' | null>(null);
 
   const menuSections: { label: string; items: { id: ViewType; label: string; icon: React.ElementType }[] }[] = [
     {
@@ -115,10 +124,40 @@ function MainApp() {
             <PieChart className="w-8 h-8" />
           </div>
           <h1 className="text-2xl font-extrabold text-text-primary mb-2 font-sans tracking-tight">GeniusHub<span className="text-primary">.</span></h1>
-          <p className="text-text-secondary mb-8">Faça login para acessar seus dados de forma segura na nuvem.</p>
-          <button 
-            onClick={signInWithGoogle}
-            className="w-full bg-text-primary hover:bg-[#0f172a] text-surface font-medium py-3 px-4 rounded-xl transition-all flex items-center justify-center gap-3 shadow-sm hover:shadow-md"
+          <p className="text-text-secondary mb-6">Faça login para acessar seus dados de forma segura na nuvem.</p>
+          <label className="flex items-start gap-2 mb-4 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={termsAccepted}
+              onChange={() => setTermsAccepted(!termsAccepted)}
+              className="mt-0.5 w-4 h-4 rounded border-gray-300 text-[#3b82f6] focus:ring-[#3b82f6] cursor-pointer shrink-0"
+            />
+            <span className="text-xs text-text-secondary leading-relaxed select-none">
+              Li e concordo com os{' '}
+              <button
+                type="button"
+                onClick={() => setLegalModal('terms')}
+                className="text-[#3b82f6] hover:underline font-medium cursor-pointer"
+              >
+                Termos de Uso
+              </button>
+              {' '}e a{' '}
+              <button
+                type="button"
+                onClick={() => setLegalModal('privacy')}
+                className="text-[#3b82f6] hover:underline font-medium cursor-pointer"
+              >
+                Política de Privacidade
+              </button>
+            </span>
+          </label>
+          <button
+            onClick={() => {
+              localStorage.setItem(TERMS_KEY, 'true');
+              signInWithGoogle();
+            }}
+            disabled={!termsAccepted}
+            className="w-full bg-text-primary hover:bg-[#0f172a] text-surface font-medium py-3 px-4 rounded-xl transition-all flex items-center justify-center gap-3 shadow-sm hover:shadow-md disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <svg viewBox="0 0 24 24" className="w-5 h-5 text-white" fill="currentColor">
               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -134,6 +173,21 @@ function MainApp() {
             </p>
           </div>
         </div>
+
+        {legalModal === 'terms' && (
+          <LegalModal
+            title="Termos de Uso"
+            content={TERMOS_DE_USO}
+            onClose={() => setLegalModal(null)}
+          />
+        )}
+        {legalModal === 'privacy' && (
+          <LegalModal
+            title="Política de Privacidade"
+            content={POLITICA_PRIVACIDADE}
+            onClose={() => setLegalModal(null)}
+          />
+        )}
       </div>
     );
   }
@@ -206,7 +260,7 @@ function MainApp() {
             )}
           </button>
           <button
-            onClick={() => { signOut(); setIsSidebarOpen(false); }}
+            onClick={() => { signOut(); setIsSidebarOpen(false); localStorage.removeItem(TERMS_KEY); setTermsAccepted(false); }}
             className="px-6 py-3 text-[0.9rem] flex items-center gap-3 cursor-pointer transition-colors text-left border-l-4 border-transparent text-danger hover:bg-white/5 w-full mt-2"
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 opacity-70"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
