@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FinanceProvider, useFinance } from './hooks/useFinance.tsx';
 import { Header } from './components/Header';
 import { DashboardCards } from './components/DashboardCards';
@@ -16,8 +16,10 @@ import GoalsView from './components/GoalsView';
 import CommercialView from './components/CommercialView';
 import ProjectsView from './components/ProjectsView';
 import ServiceTypesView from './components/ServiceTypesView';
-import { PieChart, List, CreditCard, Calendar, Settings, FileBarChart, X, Calculator, TrendingUp, Target, Users, Kanban, Layers, ShoppingCart } from 'lucide-react';
+import { PieChart, List, CreditCard, Calendar, Settings, FileBarChart, X, Calculator, TrendingUp, Target, Users, Kanban, Layers, ShoppingCart, ShieldCheck } from 'lucide-react';
 import { SubscriptionView } from './components/SubscriptionView';
+import { AdminPlansView } from './components/AdminPlansView';
+import { AdminSubscriptionsView } from './components/AdminSubscriptionsView';
 import LegalModal from './components/LegalModal';
 import { LoginEmailForm } from './components/LoginEmailForm';
 import { TERMOS_DE_USO } from './lib/termos-de-uso';
@@ -52,6 +54,14 @@ function ScopeBadge() {
 function MainApp() {
   const { currentView, setCurrentView, user, loading, signInWithGoogle, signOut, pendingInvites } = useFinance();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSuperadmin, setIsSuperadmin] = useState(false);
+
+  useEffect(() => {
+    if (!user) { setIsSuperadmin(false); return; }
+    user.getIdTokenResult().then((result) => {
+      setIsSuperadmin(result.claims.role === 'superadmin');
+    }).catch(() => {});
+  }, [user]);
   const [dashboardValuesVisible, setDashboardValuesVisible] = useState<boolean>(() => {
     try {
       const raw = localStorage.getItem(DASHBOARD_VALUES_KEY);
@@ -101,6 +111,13 @@ function MainApp() {
         { id: 'SERVICE_TYPES', label: 'Tipos de Serviço', icon: Layers },
       ],
     },
+    ...(isSuperadmin ? [{
+      label: 'Admin',
+      items: [
+        { id: 'ADMIN_PLANS' as ViewType, label: 'Planos', icon: ShieldCheck },
+        { id: 'ADMIN_SUBS' as ViewType, label: 'Assinaturas', icon: Users },
+      ],
+    }] : []),
   ];
 
   const handleNav = (view: ViewType) => {
@@ -324,6 +341,8 @@ function MainApp() {
           )}
 
           {currentView === 'SUBSCRIPTION' && <SubscriptionView />}
+          {currentView === 'ADMIN_PLANS' && <AdminPlansView />}
+          {currentView === 'ADMIN_SUBS' && <AdminSubscriptionsView />}
           {currentView === 'CREDIT_CARDS' && <CreditCardsView />}
           {currentView === 'FIXED_MONTHLY' && <FixedMonthlyView />}
           {currentView === 'REPORTS' && <ReportsView />}

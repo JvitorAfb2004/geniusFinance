@@ -613,6 +613,245 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  // ── Admin: Plans CRUD ──
+
+  function superadminRequired(authUser) {
+    return authUser && authUser.role === 'superadmin';
+  }
+
+  // GET /api/admin/plans
+  if (req.method === "GET" && req.url === "/api/admin/plans") {
+    const authUser = await authRequired(req, res);
+    if (!authUser) return;
+    if (!superadminRequired(authUser)) {
+      res.writeHead(403, { ...corsHeaders(), "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: "acesso restrito a superadmins" }));
+      return;
+    }
+
+    try {
+      const { firestore } = require("./services/firebase-admin.cjs");
+      const snap = await firestore().collection("plans").orderBy("createdAt", "desc").get();
+      const plans = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      res.writeHead(200, { ...corsHeaders(), "Content-Type": "application/json" });
+      res.end(JSON.stringify({ success: true, data: plans }));
+    } catch (err) {
+      res.writeHead(500, { ...corsHeaders(), "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: err.message }));
+    }
+    return;
+  }
+
+  // POST /api/admin/plans
+  if (req.method === "POST" && req.url === "/api/admin/plans") {
+    const authUser = await authRequired(req, res);
+    if (!authUser) return;
+    if (!superadminRequired(authUser)) {
+      res.writeHead(403, { ...corsHeaders(), "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: "acesso restrito a superadmins" }));
+      return;
+    }
+
+    try {
+      const body = await readJsonBody(req);
+      const { firestore } = require("./services/firebase-admin.cjs");
+      const docRef = await firestore().collection("plans").add({
+        name: body.name,
+        basePrice: Number(body.basePrice || 0),
+        type: body.type || 'PERSONAL',
+        abacateProductId: body.abacateProductId || '',
+        isPublic: body.isPublic !== false,
+        assignedTo: body.assignedTo || null,
+        createdBy: authUser.uid,
+        createdAt: new Date().toISOString(),
+      });
+      res.writeHead(201, { ...corsHeaders(), "Content-Type": "application/json" });
+      res.end(JSON.stringify({ success: true, data: { id: docRef.id } }));
+    } catch (err) {
+      res.writeHead(500, { ...corsHeaders(), "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: err.message }));
+    }
+    return;
+  }
+
+  // PUT /api/admin/plans/:id
+  if (req.method === "PUT" && req.url.startsWith("/api/admin/plans/")) {
+    const authUser = await authRequired(req, res);
+    if (!authUser) return;
+    if (!superadminRequired(authUser)) {
+      res.writeHead(403, { ...corsHeaders(), "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: "acesso restrito a superadmins" }));
+      return;
+    }
+
+    try {
+      const planId = req.url.split("/api/admin/plans/")[1];
+      const body = await readJsonBody(req);
+      const { firestore } = require("./services/firebase-admin.cjs");
+      const update = {};
+      if (body.name !== undefined) update.name = body.name;
+      if (body.basePrice !== undefined) update.basePrice = Number(body.basePrice);
+      if (body.type !== undefined) update.type = body.type;
+      if (body.abacateProductId !== undefined) update.abacateProductId = body.abacateProductId;
+      if (body.isPublic !== undefined) update.isPublic = body.isPublic;
+      if (body.assignedTo !== undefined) update.assignedTo = body.assignedTo;
+
+      await firestore().collection("plans").doc(planId).update(update);
+      res.writeHead(200, { ...corsHeaders(), "Content-Type": "application/json" });
+      res.end(JSON.stringify({ success: true }));
+    } catch (err) {
+      res.writeHead(500, { ...corsHeaders(), "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: err.message }));
+    }
+    return;
+  }
+
+  // DELETE /api/admin/plans/:id
+  if (req.method === "DELETE" && req.url.startsWith("/api/admin/plans/")) {
+    const authUser = await authRequired(req, res);
+    if (!authUser) return;
+    if (!superadminRequired(authUser)) {
+      res.writeHead(403, { ...corsHeaders(), "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: "acesso restrito a superadmins" }));
+      return;
+    }
+
+    try {
+      const planId = req.url.split("/api/admin/plans/")[1];
+      const { firestore } = require("./services/firebase-admin.cjs");
+      await firestore().collection("plans").doc(planId).delete();
+      res.writeHead(200, { ...corsHeaders(), "Content-Type": "application/json" });
+      res.end(JSON.stringify({ success: true }));
+    } catch (err) {
+      res.writeHead(500, { ...corsHeaders(), "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: err.message }));
+    }
+    return;
+  }
+
+  // ── Admin: Subscriptions ──
+
+  // GET /api/admin/subscriptions
+  if (req.method === "GET" && req.url === "/api/admin/subscriptions") {
+    const authUser = await authRequired(req, res);
+    if (!authUser) return;
+    if (!superadminRequired(authUser)) {
+      res.writeHead(403, { ...corsHeaders(), "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: "acesso restrito a superadmins" }));
+      return;
+    }
+
+    try {
+      const subs = await getAllSubscriptions();
+      res.writeHead(200, { ...corsHeaders(), "Content-Type": "application/json" });
+      res.end(JSON.stringify({ success: true, data: subs }));
+    } catch (err) {
+      res.writeHead(500, { ...corsHeaders(), "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: err.message }));
+    }
+    return;
+  }
+
+  // POST /api/admin/subscriptions/assign
+  if (req.method === "POST" && req.url === "/api/admin/subscriptions/assign") {
+    const authUser = await authRequired(req, res);
+    if (!authUser) return;
+    if (!superadminRequired(authUser)) {
+      res.writeHead(403, { ...corsHeaders(), "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: "acesso restrito a superadmins" }));
+      return;
+    }
+
+    try {
+      const body = await readJsonBody(req);
+      const targetEmail = String(body.targetEmail || "").trim().toLowerCase();
+      const planId = String(body.planId || "").trim();
+      const indefinite = body.indefinite === true;
+      const durationMonths = Number(body.durationMonths || 0);
+      const endDate = body.endDate || null;
+
+      if (!targetEmail || !planId) {
+        res.writeHead(400, { ...corsHeaders(), "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: "targetEmail e planId sao obrigatorios" }));
+        return;
+      }
+
+      const { firestore } = require("./services/firebase-admin.cjs");
+      const planDoc = await firestore().collection("plans").doc(planId).get();
+      if (!planDoc.exists) {
+        res.writeHead(404, { ...corsHeaders(), "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: "plano nao encontrado" }));
+        return;
+      }
+      const plan = planDoc.data();
+
+      let periodEnd;
+      if (indefinite) {
+        periodEnd = new Date(Date.now() + 100 * 365 * 24 * 60 * 60 * 1000).toISOString();
+      } else if (endDate) {
+        periodEnd = new Date(endDate).toISOString();
+      } else if (durationMonths > 0) {
+        periodEnd = new Date(Date.now() + durationMonths * 30 * 24 * 60 * 60 * 1000).toISOString();
+      } else {
+        periodEnd = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+      }
+
+      const now = new Date().toISOString();
+      await setSubscriptionByEmail(targetEmail, {
+        status: "active",
+        paymentMethod: null,
+        items: [{ planId, quantity: 1, unitPrice: plan.basePrice }],
+        totalAmount: plan.basePrice,
+        currentPeriodStart: now,
+        currentPeriodEnd: periodEnd,
+        updatedAt: now,
+      });
+
+      res.writeHead(200, { ...corsHeaders(), "Content-Type": "application/json" });
+      res.end(JSON.stringify({ success: true }));
+    } catch (err) {
+      res.writeHead(500, { ...corsHeaders(), "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: err.message }));
+    }
+    return;
+  }
+
+  // POST /api/admin/subscriptions/revoke
+  if (req.method === "POST" && req.url === "/api/admin/subscriptions/revoke") {
+    const authUser = await authRequired(req, res);
+    if (!authUser) return;
+    if (!superadminRequired(authUser)) {
+      res.writeHead(403, { ...corsHeaders(), "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: "acesso restrito a superadmins" }));
+      return;
+    }
+
+    try {
+      const body = await readJsonBody(req);
+      const targetEmail = String(body.targetEmail || "").trim().toLowerCase();
+      const sub = await getSubscriptionByEmail(targetEmail);
+      if (!sub) {
+        res.writeHead(404, { ...corsHeaders(), "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: "assinatura nao encontrada" }));
+        return;
+      }
+
+      await setSubscriptionByEmail(targetEmail, {
+        ...sub,
+        status: "cancelled",
+        canceledAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
+
+      res.writeHead(200, { ...corsHeaders(), "Content-Type": "application/json" });
+      res.end(JSON.stringify({ success: true }));
+    } catch (err) {
+      res.writeHead(500, { ...corsHeaders(), "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: err.message }));
+    }
+    return;
+  }
+
   // ── POST /api/ai/chat ──
   if (req.method === "POST" && req.url === "/api/ai/chat") {
     try {
