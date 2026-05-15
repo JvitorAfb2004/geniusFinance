@@ -900,6 +900,139 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  // ── Reports ──
+
+  // POST /api/reports
+  if (req.method === "POST" && req.url === "/api/reports") {
+    const authUser = await authRequired(req, res);
+    if (!authUser) return;
+    try {
+      const body = await readJsonBody(req);
+      const { firestore } = require("./services/firebase-admin.cjs");
+      const docRef = await firestore().collection("reports").add({
+        type: body.type || 'bug',
+        title: body.title || '',
+        description: body.description || '',
+        severity: body.type === 'bug' ? (body.severity || 'medium') : null,
+        screenshot: body.screenshot || null,
+        module: body.module || null,
+        reporterId: authUser.uid,
+        reporterEmail: authUser.email,
+        reporterName: authUser.displayName || authUser.email,
+        status: 'open',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
+
+      // Notifica superadmin se configurado
+      const superadminEmail = process.env.SUPERADMIN_EMAIL;
+      if (superadminEmail && RESEND_API_KEY) {
+        fetch("https://api.resend.com/emails", {
+          method: "POST",
+          headers: { "Authorization": `Bearer ${RESEND_API_KEY}`, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            from: RESEND_FROM,
+            to: [superadminEmail],
+            subject: `Novo Report: ${body.title || 'Sem título'}`,
+            html: `<p><strong>Tipo:</strong> ${body.type}</p><p><strong>Título:</strong> ${body.title}</p><p>${body.description}</p><p>Por: ${authUser.email}</p>`,
+          }),
+        }).catch(() => {});
+      }
+
+      res.writeHead(201, { ...corsHeaders(), "Content-Type": "application/json" });
+      res.end(JSON.stringify({ success: true, data: { id: docRef.id } }));
+    } catch (err) {
+      res.writeHead(500, { ...corsHeaders(), "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: err.message }));
+    }
+    return;
+  }
+
+  // GET /api/reports (próprios reports)
+  if (req.method === "GET" && req.url === "/api/reports") {
+    const authUser = await authRequired(req, res);
+    if (!authUser) return;
+    try {
+      const { firestore } = require("./services/firebase-admin.cjs");
+      const snap = await firestore().collection("reports")
+        .where("reporterId", "==", authUser.uid)
+        .orderBy("createdAt", "desc").get();
+      const reports = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      res.writeHead(200, { ...corsHeaders(), "Content-Type": "application/json" });
+      res.end(JSON.stringify({ success: true, data: reports }));
+    } catch (err) {
+      res.writeHead(500, { ...corsHeaders(), "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: err.message }));
+    }
+    return;
+  }
+
+  // GET /api/admin/reports
+  if (req.method === "GET" && req.url === "/api/admin/reports") {
+    const authUser = await authRequired(req, res);
+    if (!authUser || authUser.role !== 'superadmin') {
+      res.writeHead(403, { ...corsHeaders(), "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: "acesso restrito" }));
+      return;
+    }
+    try {
+      const { firestore } = require("./services/firebase-admin.cjs");
+      const snap = await firestore().collection("reports").orderBy("createdAt", "desc").get();
+      const reports = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      res.writeHead(200, { ...corsHeaders(), "Content-Type": "application/json" });
+      res.end(JSON.stringify({ success: true, data: reports }));
+    } catch (err) {
+      res.writeHead(500, { ...corsHeaders(), "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: err.message }));
+    }
+    return;
+  }
+
+  // PUT /api/admin/reports/:id
+  if (req.method === "PUT" && req.url.startsWith("/api/admin/reports/")) {
+    const authUser = await authRequired(req, res);
+    if (!authUser || authUser.role !== 'superadmin') {
+      res.writeHead(403, { ...corsHeaders(), "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: "acesso restrito" }));
+      return;
+    }
+    try {
+      const reportId = req.url.split("/api/admin/reports/")[1];
+      const body = await readJsonBody(req);
+      const { firestore } = require("./services/firebase-admin.cjs");
+      const update = { updatedAt: new Date().toISOString() };
+      if (body.status) update.status = body.status;
+      if (body.adminNotes !== undefined) update.adminNotes = body.adminNotes;
+
+      await firestore().collection("reports").doc(reportId).update(update);
+
+      // Notifica o reporter sobre mudança de status
+      if (body.status) {
+        const snap = await firestore().collection("reports").doc(reportId).get();
+        if (snap.exists && RESEND_API_KEY) {
+          const report = snap.data();
+          fetch("https://api.resend.com/emails", {
+            method: "POST",
+            headers: { "Authorization": `Bearer ${RESEND_API_KEY}`, "Content-Type": "application/json" },
+            body: JSON.stringify({
+              from: RESEND_FROM,
+              to: [report.reporterEmail],
+              subject: `Report atualizado: ${body.status}`,
+              html: `<p>Seu report <strong>"${report.title}"</strong> foi atualizado para: <strong>${body.status}</strong></p>`,
+            }),
+          }).catch(() => {});
+        }
+      }
+
+      res.writeHead(200, { ...corsHeaders(), "Content-Type": "application/json" });
+      res.end(JSON.stringify({ success: true }));
+    } catch (err) {
+      res.writeHead(500, { ...corsHeaders(), "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: err.message }));
+    }
+    return;
+  }
+
   // ── POST /api/ai/chat ──
   if (req.method === "POST" && req.url === "/api/ai/chat") {
     try {

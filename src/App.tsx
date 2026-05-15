@@ -16,10 +16,12 @@ import GoalsView from './components/GoalsView';
 import CommercialView from './components/CommercialView';
 import ProjectsView from './components/ProjectsView';
 import ServiceTypesView from './components/ServiceTypesView';
-import { PieChart, List, CreditCard, Calendar, Settings, FileBarChart, X, Calculator, TrendingUp, Target, Users, Kanban, Layers, ShoppingCart, ShieldCheck } from 'lucide-react';
+import { PieChart, List, CreditCard, Calendar, Settings, FileBarChart, X, Calculator, TrendingUp, Target, Users, Kanban, Layers, ShoppingCart, ShieldCheck, Bug } from 'lucide-react';
 import { SubscriptionView } from './components/SubscriptionView';
 import { AdminPlansView } from './components/AdminPlansView';
 import { AdminSubscriptionsView } from './components/AdminSubscriptionsView';
+import { AdminReportsView } from './components/AdminReportsView';
+import { ReportIssueView } from './components/ReportIssueView';
 import LegalModal from './components/LegalModal';
 import { LoginEmailForm } from './components/LoginEmailForm';
 import { TERMOS_DE_USO } from './lib/termos-de-uso';
@@ -99,6 +101,12 @@ function MainApp() {
       ],
     },
     {
+      label: 'Suporte',
+      items: [
+        { id: 'REPORT_ISSUE' as ViewType, label: 'Reportar Problema', icon: Bug },
+      ],
+    },
+    {
       label: 'Comercial',
       items: [
         { id: 'COMMERCIAL', label: 'Leads', icon: Users },
@@ -116,6 +124,7 @@ function MainApp() {
       items: [
         { id: 'ADMIN_PLANS' as ViewType, label: 'Planos', icon: ShieldCheck },
         { id: 'ADMIN_SUBS' as ViewType, label: 'Assinaturas', icon: Users },
+        { id: 'ADMIN_REPORTS' as ViewType, label: 'Reports', icon: Bug },
       ],
     }] : []),
   ];
@@ -343,6 +352,8 @@ function MainApp() {
           {currentView === 'SUBSCRIPTION' && <SubscriptionView />}
           {currentView === 'ADMIN_PLANS' && <AdminPlansView />}
           {currentView === 'ADMIN_SUBS' && <AdminSubscriptionsView />}
+          {currentView === 'ADMIN_REPORTS' && <AdminReportsView />}
+          {currentView === 'REPORT_ISSUE' && <ReportIssueView />}
           {currentView === 'CREDIT_CARDS' && <CreditCardsView />}
           {currentView === 'FIXED_MONTHLY' && <FixedMonthlyView />}
           {currentView === 'REPORTS' && <ReportsView />}
