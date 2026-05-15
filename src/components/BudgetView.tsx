@@ -86,7 +86,7 @@ export default function BudgetView() {
     const r = sectionTotal('RECEITA', monthIndex, 'actual');
     const c = sectionTotal('CUSTOS', monthIndex, 'actual');
     const d = sectionTotal('DESPESAS', monthIndex, 'actual');
-    return r - c - d;
+    return r + c + d;
   }
 
   function netMarginMonth(monthIndex: number) {
@@ -232,7 +232,7 @@ export default function BudgetView() {
                 </td>
                 {months.map((_, i) => {
                   const np = netProfitMonth(i);
-                  const planned = sectionTotal('RECEITA', i, 'planned') - sectionTotal('CUSTOS', i, 'planned') - sectionTotal('DESPESAS', i, 'planned');
+                  const planned = sectionTotal('RECEITA', i, 'planned') + sectionTotal('CUSTOS', i, 'planned') + sectionTotal('DESPESAS', i, 'planned');
                   return (
                     <td key={i} className="px-2 py-2 text-center font-mono font-bold">
                       <span className={planned > 0 ? 'text-slate-500' : 'text-slate-300'}>{formatCurrency(planned)}</span>

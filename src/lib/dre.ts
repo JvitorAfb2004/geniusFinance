@@ -71,7 +71,8 @@ export function computeDRE(
   const custosTotal = custos[custos.length - 1];
   const despesasTotal = despesas[despesas.length - 1];
 
-  const netProfit = receitaLiq.actual - custosTotal.actual - despesasTotal.actual;
+  // custos/despesas já entram negativos no acumulado
+  const netProfit = receitaLiq.actual + custosTotal.actual + despesasTotal.actual;
   const netMargin = receitaLiq.actual !== 0 ? (netProfit / receitaLiq.actual) * 100 : 0;
 
   const totalRow: DRERow = {
@@ -80,7 +81,7 @@ export function computeDRE(
     indent: 0,
     isBold: true,
     isSubtotal: true,
-    planned: receitaLiq.planned - custosTotal.planned - despesasTotal.planned,
+    planned: receitaLiq.planned + custosTotal.planned + despesasTotal.planned,
     actual: netProfit,
     months: [],
   };
