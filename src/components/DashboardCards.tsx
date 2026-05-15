@@ -41,6 +41,7 @@ export function DashboardCards({ valuesVisible = true }: { valuesVisible?: boole
   const { transactions, activeContext, selectedMonth, activeScope } = useFinance();
   const [widgets, setWidgets] = useState<string[]>(loadWidgets);
   const [editing, setEditing] = useState(false);
+  const [draggingWidgetId, setDraggingWidgetId] = useState<string | null>(null);
   const scopeLabel = activeScope.type === 'PERSONAL' ? 'Pessoal' : 'Empresa';
 
   const currentMonthTxs = transactions.filter((t) =>
@@ -79,6 +80,18 @@ export function DashboardCards({ valuesVisible = true }: { valuesVisible?: boole
   const toggleWidget = (id: string) => {
     const next = widgets.includes(id) ? widgets.filter((w) => w !== id) : [...widgets, id];
     setWidgets(next); saveWidgets(next);
+  };
+
+  const reorderWidgets = (draggedId: string, targetId: string) => {
+    if (draggedId === targetId) return;
+    const fromIndex = widgets.indexOf(draggedId);
+    const toIndex = widgets.indexOf(targetId);
+    if (fromIndex === -1 || toIndex === -1) return;
+    const next = [...widgets];
+    const [moved] = next.splice(fromIndex, 1);
+    next.splice(toIndex, 0, moved);
+    setWidgets(next);
+    saveWidgets(next);
   };
 
   function getCard(id: string) {
@@ -173,7 +186,12 @@ export function DashboardCards({ valuesVisible = true }: { valuesVisible?: boole
     }
   }
 
-  const cards = widgets.map(getCard).filter(Boolean) as { title: string; value: number; color: string; isPercent?: boolean; icon: React.ElementType; iconBg: string; iconColor: string; accentBar: string }[];
+  const cards = widgets
+    .map((id) => {
+      const card = getCard(id);
+      return card ? { id, ...card } : null;
+    })
+    .filter(Boolean) as { id: string; title: string; value: number; color: string; isPercent?: boolean; icon: React.ElementType; iconBg: string; iconColor: string; accentBar: string }[];
   const [animatedValues, setAnimatedValues] = useState<number[]>(cards.map(() => 0));
 
   useEffect(() => {
@@ -230,7 +248,22 @@ export function DashboardCards({ valuesVisible = true }: { valuesVisible?: boole
 
       <div className={`grid gap-4 ${cards.length <= 2 ? 'grid-cols-1 md:grid-cols-2' : cards.length === 3 ? 'grid-cols-1 md:grid-cols-3' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4'}`}>
         {cards.map((card, index) => (
-          <div key={card.title} className="bg-surface p-4 rounded-xl border border-border transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 relative overflow-hidden group">
+          <div
+            key={card.id}
+            draggable
+            onDragStart={() => setDraggingWidgetId(card.id)}
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={() => {
+              if (draggingWidgetId) reorderWidgets(draggingWidgetId, card.id);
+              setDraggingWidgetId(null);
+            }}
+            onDragEnd={() => setDraggingWidgetId(null)}
+            className={cn(
+              "bg-surface p-4 rounded-xl border border-border transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 relative overflow-hidden group",
+              "cursor-grab active:cursor-grabbing",
+              draggingWidgetId === card.id && "opacity-60"
+            )}
+          >
             <div className={`absolute top-0 left-0 right-0 h-0.5 ${card.accentBar}`} />
             <div className="flex items-start justify-between">
               <div className="flex-1 min-w-0">
