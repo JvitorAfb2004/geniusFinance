@@ -172,6 +172,29 @@ export interface Project {
   updatedAt: string;
 }
 
+export type TaskPriority = 'LOW' | 'MEDIUM' | 'HIGH';
+
+export interface Subtask {
+  id: string;
+  title: string;
+  done: boolean;
+}
+
+export interface Task {
+  id: string;
+  projectId: string;
+  title: string;
+  done: boolean;
+  dueDate?: string;
+  priority: TaskPriority;
+  assignee?: string;
+  description?: string;
+  subtasks: Subtask[];
+  order: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface DRERow {
   label: string;
   section: DRESection | 'TOTAL';
@@ -223,6 +246,9 @@ export interface FinanceContextState {
   leadOptions: LeadOption[];
   serviceTypes: ServiceType[];
   projects: Project[];
+  tasksMap: Record<string, Task[]>;
+  loadTasks: (projectId: string) => void;
+  unloadTasks: (projectId: string) => void;
   accounts: Account[];
   accountMembers: AccountMember[];
   accountInvites: AccountInvite[];
@@ -272,4 +298,7 @@ export interface FinanceContextState {
   addProject: (data: Omit<Project, 'id' | 'userId' | 'createdAt' | 'updatedAt'>) => Promise<void>;
   updateProject: (id: string, updates: Partial<Project>) => Promise<void>;
   deleteProject: (id: string) => Promise<void>;
+  addTask: (projectId: string, data: Omit<Task, 'id' | 'projectId' | 'createdAt' | 'updatedAt'>) => Promise<void>;
+  updateTask: (projectId: string, taskId: string, updates: Partial<Task>) => Promise<void>;
+  deleteTask: (projectId: string, taskId: string) => Promise<void>;
 }

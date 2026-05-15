@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useFinance } from '../hooks/useFinance';
 import { cn } from '../lib/utils';
-import { X, Check, Plus, Search } from 'lucide-react';
-import type { Project, ServiceType, Lead, StepStatus, CustomFieldValue } from '../types';
+import { X, Check, Plus, Search, ChevronDown, ChevronRight, Trash2, GripVertical } from 'lucide-react';
+import type { Project, ServiceType, Lead, StepStatus, CustomFieldValue, Task, TaskPriority, Subtask } from '../types';
 
 interface Props {
   project?: Project;
@@ -11,8 +11,9 @@ interface Props {
 }
 
 export default function ProjectModal({ project, lead, onClose }: Props) {
-  const { serviceTypes, leads, addProject, updateProject } = useFinance();
+  const { serviceTypes, leads, addProject, updateProject, tasksMap, loadTasks, unloadTasks, addTask, updateTask, deleteTask, accountMembers } = useFinance();
   const isEdit = !!project;
+  const tasks = project ? (tasksMap[project.id] || []) : [];
 
   const [title, setTitle] = useState('');
   const [clientName, setClientName] = useState('');
@@ -26,6 +27,21 @@ export default function ProjectModal({ project, lead, onClose }: Props) {
   const [stepStatuses, setStepStatuses] = useState<StepStatus[]>([]);
   const [customFieldValues, setCustomFieldValues] = useState<CustomFieldValue[]>([]);
   const [submitting, setSubmitting] = useState(false);
+
+  // Task state
+  const [newTaskTitle, setNewTaskTitle] = useState('');
+  const [newTaskPriority, setNewTaskPriority] = useState<TaskPriority>('MEDIUM');
+  const [expandedTaskId, setExpandedTaskId] = useState<string | null>(null);
+  const [editingSubtask, setEditingSubtask] = useState<{ taskId: string; text: string } | null>(null);
+  const [taskDeleteConfirm, setTaskDeleteConfirm] = useState<string | null>(null);
+
+  // Load/unload tasks when modal opens/closes for an existing project
+  useEffect(() => {
+    if (project) {
+      loadTasks(project.id);
+      return () => { unloadTasks(project.id); };
+    }
+  }, [project?.id]);
 
   // Dropdown state
   const [serviceTypeOpen, setServiceTypeOpen] = useState(false);
@@ -123,6 +139,83 @@ export default function ProjectModal({ project, lead, onClose }: Props) {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  // Task handlers
+  const handleAddTask = async () => {
+    if (!newTaskTitle.trim() || !project) return;
+    await addTask(project.id, {
+      title: newTaskTitle.trim(),
+      done: false,
+      priority: newTaskPriority,
+      subtasks: [],
+      order: tasks.length,
+    });
+    setNewTaskTitle('');
+    setNewTaskPriority('MEDIUM');
+  };
+
+  const handleTaskKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleAddTask();
+    }
+  };
+
+  const toggleTaskDone = (task: Task) => {
+    if (!project) return;
+    updateTask(project.id, task.id, { done: !task.done });
+  };
+
+  const addSubtask = async (taskId: string, title: string) => {
+    if (!project || !title.trim()) return;
+    const task = tasks.find(t => t.id === taskId);
+    if (!task) return;
+    const newSubtask: Subtask = { id: crypto.randomUUID(), title: title.trim(), done: false };
+    await updateTask(project.id, taskId, { subtasks: [...task.subtasks, newSubtask] });
+  };
+
+  const toggleSubtask = async (taskId: string, subtaskId: string) => {
+    if (!project) return;
+    const task = tasks.find(t => t.id === taskId);
+    if (!task) return;
+    const updated = task.subtasks.map(s => s.id === subtaskId ? { ...s, done: !s.done } : s);
+    await updateTask(project.id, taskId, { subtasks: updated });
+  };
+
+  const deleteSubtask = async (taskId: string, subtaskId: string) => {
+    if (!project) return;
+    const task = tasks.find(t => t.id === taskId);
+    if (!task) return;
+    await updateTask(project.id, taskId, { subtasks: task.subtasks.filter(s => s.id !== subtaskId) });
+  };
+
+  const handleDeleteTask = async (taskId: string) => {
+    if (!project) return;
+    await deleteTask(project.id, taskId);
+    setTaskDeleteConfirm(null);
+  };
+
+  const getPriorityLabel = (p: TaskPriority) => {
+    switch (p) {
+      case 'HIGH': return 'Alta';
+      case 'MEDIUM': return 'Média';
+      case 'LOW': return 'Baixa';
+    }
+  };
+
+  const getPriorityColor = (p: TaskPriority) => {
+    switch (p) {
+      case 'HIGH': return { bg: 'bg-red-100', text: 'text-red-700', dot: 'bg-red-500' };
+      case 'MEDIUM': return { bg: 'bg-amber-100', text: 'text-amber-700', dot: 'bg-amber-500' };
+      case 'LOW': return { bg: 'bg-blue-100', text: 'text-blue-700', dot: 'bg-blue-500' };
+    }
+  };
+
+  const getAssigneeEmail = (uid?: string) => {
+    if (!uid) return null;
+    const member = accountMembers.find(m => m.uid === uid);
+    return member?.email || uid;
   };
 
   const formatPriceDisplay = (raw: string): string => {
@@ -404,6 +497,273 @@ export default function ProjectModal({ project, lead, onClose }: Props) {
                   );
                 })}
               </div>
+            </div>
+          )}
+
+          {/* Tasks Section (only for existing projects) */}
+          {isEdit && project && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Tarefas
+                <span className="ml-2 text-xs text-gray-400 font-normal">
+                  ({tasks.filter(t => !t.done).length} pendente{tasks.filter(t => !t.done).length !== 1 ? 's' : ''})
+                </span>
+              </label>
+
+              {/* Quick add */}
+              <div className="flex items-center gap-2 mb-3">
+                <input
+                  type="text"
+                  value={newTaskTitle}
+                  onChange={(e) => setNewTaskTitle(e.target.value)}
+                  onKeyDown={handleTaskKeyDown}
+                  placeholder="Nova tarefa..."
+                  className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-[#3b82f6] transition-colors"
+                />
+                <select
+                  value={newTaskPriority}
+                  onChange={(e) => setNewTaskPriority(e.target.value as TaskPriority)}
+                  className="px-2 py-2 border border-gray-200 rounded-lg text-xs outline-none focus:border-[#3b82f6] cursor-pointer bg-white"
+                >
+                  <option value="LOW">Baixa</option>
+                  <option value="MEDIUM">Média</option>
+                  <option value="HIGH">Alta</option>
+                </select>
+                <button
+                  onClick={handleAddTask}
+                  disabled={!newTaskTitle.trim()}
+                  className="px-3 py-2 bg-[#3b82f6] text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 cursor-pointer transition-colors shrink-0"
+                >
+                  <Plus className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Task list */}
+              {tasks.length === 0 ? (
+                <p className="text-xs text-gray-400 text-center py-4 bg-gray-50 rounded-lg">
+                  Nenhuma tarefa ainda. Adicione a primeira acima.
+                </p>
+              ) : (
+                <div className="space-y-1.5">
+                  {tasks.map(task => {
+                    const isExpanded = expandedTaskId === task.id;
+                    const priorityColors = getPriorityColor(task.priority);
+                    const doneSubtasks = task.subtasks.filter(s => s.done).length;
+                    const totalSubtasks = task.subtasks.length;
+                    const isOverdue = task.dueDate && new Date(task.dueDate) < new Date() && !task.done;
+
+                    return (
+                      <div
+                        key={task.id}
+                        className={cn(
+                          'bg-gray-50 rounded-lg border transition-colors',
+                          task.done ? 'border-gray-100 opacity-60' : 'border-gray-100 hover:border-gray-200'
+                        )}
+                      >
+                        {/* Task row */}
+                        <div className="flex items-center gap-2 p-2.5">
+                          <input
+                            type="checkbox"
+                            checked={task.done}
+                            onChange={() => toggleTaskDone(task)}
+                            className="w-4 h-4 rounded border-gray-300 text-[#3b82f6] focus:ring-[#3b82f6] cursor-pointer shrink-0"
+                          />
+                          <span
+                            className={cn(
+                              'text-sm flex-1 cursor-pointer select-none',
+                              task.done ? 'text-gray-400 line-through' : 'text-gray-800'
+                            )}
+                            onClick={() => setExpandedTaskId(isExpanded ? null : task.id)}
+                          >
+                            {task.title}
+                          </span>
+
+                          {/* Priority badge */}
+                          <span className={cn('inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[0.65rem] font-medium shrink-0', priorityColors.bg, priorityColors.text)}>
+                            <span className={cn('w-1.5 h-1.5 rounded-full', priorityColors.dot)} />
+                            {getPriorityLabel(task.priority)}
+                          </span>
+
+                          {/* Due date */}
+                          {task.dueDate && (
+                            <span className={cn('text-xs shrink-0', isOverdue ? 'text-red-500 font-medium' : 'text-gray-400')}>
+                              {new Date(task.dueDate).toLocaleDateString('pt-BR')}
+                            </span>
+                          )}
+
+                          {/* Subtask count */}
+                          {totalSubtasks > 0 && (
+                            <span className="text-xs text-gray-400 shrink-0">
+                              {doneSubtasks}/{totalSubtasks}
+                            </span>
+                          )}
+
+                          {/* Expand/collapse */}
+                          <button
+                            onClick={() => setExpandedTaskId(isExpanded ? null : task.id)}
+                            className="p-0.5 text-gray-400 hover:text-gray-600 cursor-pointer shrink-0"
+                          >
+                            {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                          </button>
+
+                          {/* Delete task */}
+                          {taskDeleteConfirm === task.id ? (
+                            <div className="flex items-center gap-1 shrink-0">
+                              <button
+                                onClick={() => handleDeleteTask(task.id)}
+                                className="px-2 py-0.5 text-xs bg-red-500 text-white rounded cursor-pointer"
+                              >
+                                Excluir
+                              </button>
+                              <button
+                                onClick={() => setTaskDeleteConfirm(null)}
+                                className="px-2 py-0.5 text-xs bg-gray-200 text-gray-600 rounded cursor-pointer"
+                              >
+                                Não
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => setTaskDeleteConfirm(task.id)}
+                              className="p-0.5 text-gray-300 hover:text-red-500 cursor-pointer shrink-0"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                        </div>
+
+                        {/* Expanded detail area */}
+                        {isExpanded && !task.done && (
+                          <div className="px-3 pb-3 space-y-3 border-t border-gray-200/50 pt-3 ml-6">
+                            {/* Description */}
+                            <div>
+                              <label className="block text-xs text-gray-500 mb-1">Descrição</label>
+                              <textarea
+                                value={task.description || ''}
+                                onChange={(e) => {
+                                  if (!project) return;
+                                  updateTask(project.id, task.id, { description: e.target.value });
+                                }}
+                                placeholder="Adicionar descrição..."
+                                rows={2}
+                                className="w-full px-3 py-1.5 border border-gray-200 rounded-lg text-sm outline-none focus:border-[#3b82f6] resize-none"
+                              />
+                            </div>
+
+                            {/* Due date */}
+                            <div>
+                              <label className="block text-xs text-gray-500 mb-1">Data Limite</label>
+                              <input
+                                type="date"
+                                value={task.dueDate || ''}
+                                onChange={(e) => {
+                                  if (!project) return;
+                                  updateTask(project.id, task.id, { dueDate: e.target.value || undefined });
+                                }}
+                                className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm outline-none focus:border-[#3b82f6]"
+                              />
+                            </div>
+
+                            {/* Priority */}
+                            <div>
+                              <label className="block text-xs text-gray-500 mb-1">Prioridade</label>
+                              <select
+                                value={task.priority}
+                                onChange={(e) => {
+                                  if (!project) return;
+                                  updateTask(project.id, task.id, { priority: e.target.value as TaskPriority });
+                                }}
+                                className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm outline-none focus:border-[#3b82f6] cursor-pointer bg-white"
+                              >
+                                <option value="LOW">Baixa</option>
+                                <option value="MEDIUM">Média</option>
+                                <option value="HIGH">Alta</option>
+                              </select>
+                            </div>
+
+                            {/* Assignee (only in account scope) */}
+                            {accountMembers.length > 0 && (
+                              <div>
+                                <label className="block text-xs text-gray-500 mb-1">Responsável</label>
+                                <select
+                                  value={task.assignee || ''}
+                                  onChange={(e) => {
+                                    if (!project) return;
+                                    updateTask(project.id, task.id, { assignee: e.target.value || undefined });
+                                  }}
+                                  className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm outline-none focus:border-[#3b82f6] cursor-pointer bg-white"
+                                >
+                                  <option value="">Nenhum</option>
+                                  {accountMembers.map(m => (
+                                    <option key={m.uid} value={m.uid}>{m.email}</option>
+                                  ))}
+                                </select>
+                              </div>
+                            )}
+
+                            {/* Subtasks */}
+                            <div>
+                              <label className="block text-xs text-gray-500 mb-1.5">
+                                Subtarefas ({doneSubtasks}/{totalSubtasks})
+                              </label>
+                              <div className="space-y-1 mb-2">
+                                {task.subtasks.map(sub => (
+                                  <div key={sub.id} className="flex items-center gap-2 group">
+                                    <input
+                                      type="checkbox"
+                                      checked={sub.done}
+                                      onChange={() => toggleSubtask(task.id, sub.id)}
+                                      className="w-3.5 h-3.5 rounded border-gray-300 text-[#3b82f6] cursor-pointer shrink-0"
+                                    />
+                                    <span className={cn('text-sm flex-1', sub.done ? 'text-gray-400 line-through' : 'text-gray-700')}>
+                                      {sub.title}
+                                    </span>
+                                    <button
+                                      onClick={() => deleteSubtask(task.id, sub.id)}
+                                      className="p-0.5 text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer shrink-0"
+                                    >
+                                      <Trash2 className="w-3 h-3" />
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+                              {/* Add subtask */}
+                              <div className="flex items-center gap-2">
+                                <input
+                                  type="text"
+                                  value={editingSubtask?.taskId === task.id ? (editingSubtask?.text || '') : ''}
+                                  onChange={(e) => setEditingSubtask({ taskId: task.id, text: e.target.value })}
+                                  onFocus={() => { if (editingSubtask?.taskId !== task.id) setEditingSubtask({ taskId: task.id, text: '' }); }}
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter' && editingSubtask?.taskId === task.id) {
+                                      e.preventDefault();
+                                      addSubtask(task.id, editingSubtask.text);
+                                      setEditingSubtask(null);
+                                    }
+                                  }}
+                                  placeholder="+ Adicionar subtarefa"
+                                  className="flex-1 px-2 py-1 border border-gray-200 rounded text-xs outline-none focus:border-[#3b82f6]"
+                                />
+                                {editingSubtask?.taskId === task.id && editingSubtask.text.trim() && (
+                                  <button
+                                    onClick={() => {
+                                      addSubtask(task.id, editingSubtask.text);
+                                      setEditingSubtask(null);
+                                    }}
+                                    className="px-2 py-1 bg-[#3b82f6] text-white rounded text-xs cursor-pointer"
+                                  >
+                                    <Check className="w-3 h-3" />
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           )}
 

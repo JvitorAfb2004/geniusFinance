@@ -417,6 +417,14 @@ service cloud.firestore {
       allow delete: if isSignedIn() && userId == request.auth.uid;
     }
 
+    // Tasks subcollection (personal)
+    match /users/{userId}/projects/{projectId}/tasks/{taskId} {
+      allow read: if isSignedIn() && userId == request.auth.uid;
+      allow create: if isSignedIn() && userId == request.auth.uid && isValidId(taskId);
+      allow update: if isSignedIn() && userId == request.auth.uid;
+      allow delete: if isSignedIn() && userId == request.auth.uid;
+    }
+
     // ═══════════════════════════════════════════════════════════
     // ACCOUNT — accounts/{accountId} (shared, multi-tenant)
     // ═══════════════════════════════════════════════════════════
@@ -704,6 +712,14 @@ service cloud.firestore {
 
       allow delete: if isAccountMember(accountId) &&
         (isAccountOwnerOrAdmin(accountId) || existing().userId == request.auth.uid);
+    }
+
+    // Tasks subcollection (account)
+    match /accounts/{accountId}/projects/{projectId}/tasks/{taskId} {
+      allow read: if isAccountMember(accountId);
+      allow create: if isAccountMember(accountId) && isValidId(taskId);
+      allow update: if isAccountMember(accountId);
+      allow delete: if isAccountMember(accountId);
     }
 
     // ═══════════════════════════════════════════════════════════

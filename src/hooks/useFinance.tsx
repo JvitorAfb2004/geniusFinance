@@ -1,7 +1,7 @@
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { addMonths, format, parseISO } from 'date-fns';
-import { ContextType, FinanceContextState, Transaction, ViewType, Category, Budget, DRESection, SalesTarget, Tag, FinancialGoal, Lead, LeadOption, ServiceType, Project, ActiveScope, Account, AccountMember, AccountInvite, AccountRole } from '../types';
+import { ContextType, FinanceContextState, Transaction, ViewType, Category, Budget, DRESection, SalesTarget, Tag, FinancialGoal, Lead, LeadOption, ServiceType, Project, Task, ActiveScope, Account, AccountMember, AccountInvite, AccountRole } from '../types';
 import { auth, db, signInWithGoogle, signOut } from '../lib/firebase';
 import { handleFirestoreError } from '../lib/handleFirestoreError';
 import { DEFAULT_CATEGORIES } from '../lib/categories';
@@ -50,6 +50,8 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
   const [leadOptions, setLeadOptions] = useState<LeadOption[]>([]);
   const [serviceTypes, setServiceTypes] = useState<ServiceType[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
+  const [tasksMap, setTasksMap] = useState<Record<string, Task[]>>({});
+  const taskUnsubscribers = React.useRef<Record<string, (() => void)>>({});
   const [categoriesLoaded, setCategoriesLoaded] = useState(false);
   const [leadOptionsLoaded, setLeadOptionsLoaded] = useState(false);
 
@@ -76,6 +78,9 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
         setLeadOptions([]);
         setServiceTypes([]);
         setProjects([]);
+        setTasksMap({});
+        Object.values(taskUnsubscribers.current).forEach(fn => fn());
+        taskUnsubscribers.current = {};
         setAccounts([]);
         setAccountMembers([]);
         setAccountInvites([]);
@@ -1012,6 +1017,117 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  // ---- Task CRUD (subcollection: projects/{projectId}/tasks) ----
+
+  const getTaskColPath = useCallback((projectId: string) => {
+    if (!user) return '';
+    const base = resolveDataPath(activeScope, user.uid, 'projects');
+    return `${base}/${projectId}/tasks`;
+  }, [user, activeScope]);
+
+  const loadTasks = useCallback((projectId: string) => {
+    if (!user) return;
+    const colPath = getTaskColPath(projectId);
+    if (!colPath) return;
+
+    // Already listening
+    if (taskUnsubscribers.current[projectId]) return;
+
+    const colRef = collection(db, colPath);
+    const q = query(colRef);
+
+    const unsub = onSnapshot(q, (snapshot) => {
+      const tasks: Task[] = snapshot.docs.map((docSnap) => {
+        const data = docSnap.data();
+        return {
+          id: docSnap.id,
+          projectId: data.projectId || projectId,
+          title: data.title || '',
+          done: data.done || false,
+          dueDate: data.dueDate || undefined,
+          priority: data.priority || 'MEDIUM',
+          assignee: data.assignee || undefined,
+          description: data.description || undefined,
+          subtasks: data.subtasks || [],
+          order: data.order ?? 0,
+          createdAt: data.createdAt?.toDate?.().toISOString() || new Date().toISOString(),
+          updatedAt: data.updatedAt?.toDate?.().toISOString() || new Date().toISOString(),
+        } as Task;
+      });
+      tasks.sort((a, b) => a.order - b.order);
+      setTasksMap(prev => ({ ...prev, [projectId]: tasks }));
+    }, (err) => {
+      handleFirestoreError(err, 'list', colPath, user);
+    });
+
+    taskUnsubscribers.current[projectId] = unsub;
+  }, [user, activeScope, getTaskColPath]);
+
+  const unloadTasks = useCallback((projectId: string) => {
+    const unsub = taskUnsubscribers.current[projectId];
+    if (unsub) {
+      unsub();
+      delete taskUnsubscribers.current[projectId];
+    }
+    setTasksMap(prev => {
+      if (!(projectId in prev)) return prev;
+      const next = { ...prev };
+      delete next[projectId];
+      return next;
+    });
+  }, []);
+
+  const addTask = async (projectId: string, data: Omit<Task, 'id' | 'projectId' | 'createdAt' | 'updatedAt'>) => {
+    if (!user) return;
+    const colPath = getTaskColPath(projectId);
+    if (!colPath) return;
+    try {
+      const tasks = tasksMap[projectId] || [];
+      const maxOrder = tasks.reduce((max, t) => Math.max(max, t.order), -1);
+      const docRef = doc(collection(db, colPath));
+      const batch = writeBatch(db);
+      batch.set(docRef, {
+        ...data,
+        projectId,
+        userId: user.uid,
+        order: data.order ?? (maxOrder + 1),
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
+      await batch.commit();
+    } catch (error) {
+      handleFirestoreError(error, 'create', colPath, user);
+    }
+  };
+
+  const updateTask = async (projectId: string, taskId: string, updates: Partial<Task>) => {
+    if (!user) return;
+    const colPath = getTaskColPath(projectId);
+    if (!colPath) return;
+    try {
+      const docRef = doc(db, colPath, taskId);
+      const batch = writeBatch(db);
+      batch.update(docRef, { ...updates, updatedAt: serverTimestamp() });
+      await batch.commit();
+    } catch (error) {
+      handleFirestoreError(error, 'update', `${colPath}/${taskId}`, user);
+    }
+  };
+
+  const deleteTask = async (projectId: string, taskId: string) => {
+    if (!user) return;
+    const colPath = getTaskColPath(projectId);
+    if (!colPath) return;
+    try {
+      const docRef = doc(db, colPath, taskId);
+      const batch = writeBatch(db);
+      batch.delete(docRef);
+      await batch.commit();
+    } catch (error) {
+      handleFirestoreError(error, 'delete', `${colPath}/${taskId}`, user);
+    }
+  };
+
   const createAccountFn = async (name: string) => {
     if (!user) return;
     const accountId = await createAccount(user, name);
@@ -1087,6 +1203,9 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       leadOptions,
       serviceTypes,
       projects,
+      tasksMap,
+      loadTasks,
+      unloadTasks,
       accounts,
       accountMembers,
       accountInvites,
@@ -1133,6 +1252,9 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       addProject,
       updateProject,
       deleteProject,
+      addTask,
+      updateTask,
+      deleteTask,
     }}>
       {children}
     </FinanceContext.Provider>
