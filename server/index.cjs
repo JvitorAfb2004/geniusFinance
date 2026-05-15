@@ -215,6 +215,25 @@ function proxyStream(req, res, body) {
   });
 }
 
+// ── Serialization helper ──
+
+function serializeFirestoreDoc(doc) {
+  const data = {};
+  for (const [key, value] of Object.entries(doc)) {
+    if (value && typeof value === 'object' && value.constructor && value.constructor.name === 'Timestamp') {
+      data[key] = value.toDate().toISOString();
+    } else if (value && typeof value === 'object' && value._seconds !== undefined) {
+      // Already serialized Timestamp (from JSON roundtrip)
+      data[key] = new Date(value._seconds * 1000).toISOString();
+    } else if (value && typeof value === 'object' && !Array.isArray(value)) {
+      data[key] = serializeFirestoreDoc(value);
+    } else {
+      data[key] = value;
+    }
+  }
+  return data;
+}
+
 // ── Resend helper ──
 
 async function sendWelcomeEmail(email, displayName) {
@@ -401,7 +420,7 @@ const server = http.createServer(async (req, res) => {
       const { firestore } = require("./services/firebase-admin.cjs");
       const trialDoc = await firestore().collection("trials").doc(authUser.uid).get();
       if (trialDoc.exists) {
-        trial = { id: trialDoc.id, ...trialDoc.data() };
+        trial = { id: trialDoc.id, ...serializeFirestoreDoc(trialDoc.data()) };
       }
     } catch {} // trial lookup is best-effort
 
@@ -484,13 +503,13 @@ const server = http.createServer(async (req, res) => {
         return;
       }
 
-      const alreadyProcessed = await hasProcessedWebhookEvent(event.id);
-      if (alreadyProcessed) {
+      // Marca atomicamente (create() falha se já existir = duplicado)
+      const isNew = await markWebhookEventProcessed(event.id);
+      if (!isNew) {
         res.writeHead(200, { ...corsHeaders(), "Content-Type": "application/json" });
         res.end(JSON.stringify({ success: true, deduplicated: true }));
         return;
       }
-      await markWebhookEventProcessed(event.id);
 
       const eventEmail = String(
         event.data?.metadata?.userEmail || event.data?.customer?.email || ""
@@ -927,14 +946,17 @@ const server = http.createServer(async (req, res) => {
       // Notifica superadmin se configurado
       const superadminEmail = process.env.SUPERADMIN_EMAIL;
       if (superadminEmail && RESEND_API_KEY) {
+        const safeTitle = String(body.title || 'Sem título').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+        const safeDesc = String(body.description || '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+        const safeType = String(body.type || 'bug').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
         fetch("https://api.resend.com/emails", {
           method: "POST",
           headers: { "Authorization": `Bearer ${RESEND_API_KEY}`, "Content-Type": "application/json" },
           body: JSON.stringify({
             from: RESEND_FROM,
             to: [superadminEmail],
-            subject: `Novo Report: ${body.title || 'Sem título'}`,
-            html: `<p><strong>Tipo:</strong> ${body.type}</p><p><strong>Título:</strong> ${body.title}</p><p>${body.description}</p><p>Por: ${authUser.email}</p>`,
+            subject: `Novo Report: ${safeTitle}`,
+            html: `<p><strong>Tipo:</strong> ${safeType}</p><p><strong>Título:</strong> ${safeTitle}</p><p>${safeDesc}</p><p>Por: ${authUser.email}</p>`,
           }),
         }).catch(() => {});
       }
@@ -1011,14 +1033,16 @@ const server = http.createServer(async (req, res) => {
         const snap = await firestore().collection("reports").doc(reportId).get();
         if (snap.exists && RESEND_API_KEY) {
           const report = snap.data();
+          const safeTitle = String(report.title || '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+          const safeStatus = String(body.status).replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
           fetch("https://api.resend.com/emails", {
             method: "POST",
             headers: { "Authorization": `Bearer ${RESEND_API_KEY}`, "Content-Type": "application/json" },
             body: JSON.stringify({
               from: RESEND_FROM,
               to: [report.reporterEmail],
-              subject: `Report atualizado: ${body.status}`,
-              html: `<p>Seu report <strong>"${report.title}"</strong> foi atualizado para: <strong>${body.status}</strong></p>`,
+              subject: `Report atualizado: ${safeStatus}`,
+              html: `<p>Seu report <strong>"${safeTitle}"</strong> foi atualizado para: <strong>${safeStatus}</strong></p>`,
             }),
           }).catch(() => {});
         }

@@ -160,7 +160,7 @@ export function AdminSubscriptionsView() {
               <tr><td colSpan={6} className="px-4 py-6 text-center text-gray-400">Nenhuma assinatura encontrada.</td></tr>
             ) : subs.map(s => (
               <tr key={s.id} className="border-t border-gray-50 hover:bg-gray-50/50">
-                <td className="px-4 py-2.5 text-gray-700 text-xs font-mono">{s.userEmail || s.id}</td>
+                <td className="px-4 py-2.5 text-gray-700 text-xs font-mono">{s.userEmail || '—'}</td>
                 <td className="px-4 py-2.5"><span className={statusBadge(s.status)}>{s.status}</span></td>
                 <td className="px-4 py-2.5 text-gray-500 text-xs">{s.paymentMethod || 'manual'}</td>
                 <td className="px-4 py-2.5 text-gray-700">{formatPriceFromCents(s.totalAmount)}</td>
@@ -168,8 +168,8 @@ export function AdminSubscriptionsView() {
                   {s.currentPeriodEnd ? new Date(s.currentPeriodEnd).toLocaleDateString('pt-BR') : '-'}
                 </td>
                 <td className="px-4 py-2.5">
-                  {s.status !== 'cancelled' && (
-                    <button onClick={() => handleRevoke(s.userEmail || s.id)}
+                  {s.status !== 'cancelled' && s.userEmail && (
+                    <button onClick={() => handleRevoke(s.userEmail!)}
                       className="text-red-500 hover:text-red-700 text-xs font-medium cursor-pointer flex items-center gap-1">
                       <Trash2 className="w-3 h-3" /> Revogar
                     </button>

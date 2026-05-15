@@ -57,18 +57,29 @@ async function addBillingHistory(entry) {
 }
 
 async function hasProcessedWebhookEvent(eventId) {
-  if (!eventId) return false;
+  if (!eventId) return true; // sem ID = considera duplicado (não processa)
   const db = firestore();
   const doc = await db.collection(PROCESSED_EVENTS_COL).doc(eventId).get();
   return doc.exists;
 }
 
+// Marca evento como processado de forma atômica.
+// Retorna true se conseguiu marcar (evento novo), false se já existia (duplicado).
 async function markWebhookEventProcessed(eventId) {
-  if (!eventId) return;
+  if (!eventId) return false;
   const db = firestore();
-  await db.collection(PROCESSED_EVENTS_COL).doc(eventId).set({
-    processedAt: new Date().toISOString(),
-  });
+  try {
+    await db.collection(PROCESSED_EVENTS_COL).doc(eventId).create({
+      processedAt: new Date().toISOString(),
+    });
+    return true; // criado com sucesso = evento novo
+  } catch (err) {
+    // create() falha se o doc já existe (ALREADY_EXISTS)
+    if (err.code === 6 /* ALREADY_EXISTS */ || err.message?.includes('ALREADY_EXISTS')) {
+      return false; // já processado
+    }
+    throw err;
+  }
 }
 
 async function getAllSubscriptions() {
