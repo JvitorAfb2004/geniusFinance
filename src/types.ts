@@ -3,7 +3,7 @@ import { User } from 'firebase/auth';
 export type ContextType = 'PERSONAL' | 'BUSINESS';
 export type TransactionType = 'INCOME' | 'EXPENSE' | 'CREDIT_CARD';
 export type TransactionStatus = 'PENDING' | 'PAID';
-export type ViewType = 'DASHBOARD' | 'TRANSACTIONS' | 'CREDIT_CARDS' | 'FIXED_MONTHLY' | 'REPORTS' | 'SETTINGS' | 'DRE' | 'BUDGET' | 'SALES' | 'IMPORT' | 'CALCULATORS' | 'GOALS' | 'COMMERCIAL' | 'PROJECTS' | 'SERVICE_TYPES';
+export type ViewType = 'DASHBOARD' | 'TRANSACTIONS' | 'CREDIT_CARDS' | 'FIXED_MONTHLY' | 'REPORTS' | 'SETTINGS' | 'DRE' | 'BUDGET' | 'SALES' | 'IMPORT' | 'CALCULATORS' | 'GOALS' | 'COMMERCIAL' | 'PROJECTS' | 'SERVICE_TYPES' | 'SUBSCRIPTION';
 export type AccountRole = 'owner' | 'admin' | 'member';
 export type ActiveScope =
   | { type: 'PERSONAL'; userId: string }

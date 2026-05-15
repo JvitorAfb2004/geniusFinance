@@ -16,8 +16,10 @@ import GoalsView from './components/GoalsView';
 import CommercialView from './components/CommercialView';
 import ProjectsView from './components/ProjectsView';
 import ServiceTypesView from './components/ServiceTypesView';
-import { PieChart, List, CreditCard, Calendar, Settings, FileBarChart, X, Calculator, TrendingUp, Target, Users, Kanban, Layers } from 'lucide-react';
+import { PieChart, List, CreditCard, Calendar, Settings, FileBarChart, X, Calculator, TrendingUp, Target, Users, Kanban, Layers, ShoppingCart } from 'lucide-react';
+import { SubscriptionView } from './components/SubscriptionView';
 import LegalModal from './components/LegalModal';
+import { LoginEmailForm } from './components/LoginEmailForm';
 import { TERMOS_DE_USO } from './lib/termos-de-uso';
 import { POLITICA_PRIVACIDADE } from './lib/politica-privacidade';
 import { ViewType } from './types';
@@ -78,6 +80,12 @@ function MainApp() {
         { id: 'SALES', label: 'Vendas', icon: TrendingUp },
         { id: 'GOALS', label: 'Metas', icon: Target },
         { id: 'REPORTS', label: 'Relatórios Anuais', icon: FileBarChart },
+      ],
+    },
+    {
+      label: 'Conta',
+      items: [
+        { id: 'SUBSCRIPTION', label: 'Assinatura', icon: ShoppingCart },
       ],
     },
     {
@@ -167,6 +175,9 @@ function MainApp() {
             </svg>
             Entrar com Google
           </button>
+
+          <LoginEmailForm termsAccepted={termsAccepted} />
+
           <div className="mt-8 pt-6 border-t border-border">
             <p className="text-xs text-text-muted font-medium tracking-wide">
               Desenvolvido por <a href="https://geniusweb.online" target="_blank" rel="noopener noreferrer" className="text-[#3b82f6] hover:underline">geniusweb.online</a>
@@ -312,6 +323,7 @@ function MainApp() {
             </div>
           )}
 
+          {currentView === 'SUBSCRIPTION' && <SubscriptionView />}
           {currentView === 'CREDIT_CARDS' && <CreditCardsView />}
           {currentView === 'FIXED_MONTHLY' && <FixedMonthlyView />}
           {currentView === 'REPORTS' && <ReportsView />}
