@@ -39,11 +39,10 @@ function getOrInitializeApp() {
 export function getAdminFirestore() {
   const app = getOrInitializeApp();
   const databaseId = (process.env.FIREBASE_DATABASE_ID || "").trim();
-  const db = getFirestore(app);
   if (databaseId) {
-    return (db as any).database(databaseId);
+    return getFirestore(app, databaseId);
   }
-  return db;
+  return getFirestore(app);
 }
 
 export function getAdminAuth() {
