@@ -51,9 +51,9 @@ export function AdminSubscriptionsView() {
     setAssigning(true);
     setError('');
     try {
-      await apiFetch('/api/admin/subscriptions/assign', {
+      await apiFetch('/api/admin/subscriptions', {
         method: 'POST',
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, action: 'assign' }),
       });
       setShowAssign(false);
       setForm({ targetEmail: '', planId: '', durationMonths: 1, indefinite: false });
@@ -68,9 +68,9 @@ export function AdminSubscriptionsView() {
   const handleRevoke = async (email: string) => {
     if (!confirm(`Revogar assinatura de ${email}?`)) return;
     try {
-      await apiFetch('/api/admin/subscriptions/revoke', {
+      await apiFetch('/api/admin/subscriptions', {
         method: 'POST',
-        body: JSON.stringify({ targetEmail: email }),
+        body: JSON.stringify({ targetEmail: email, action: 'revoke' }),
       });
       await load();
     } catch (err: any) {
