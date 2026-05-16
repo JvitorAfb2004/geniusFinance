@@ -1,5 +1,4 @@
-// @ts-ignore - injected by Vite define
-const AI_PROXY = process.env.VITE_AI_PROXY || 'http://localhost:3001/api/ai/chat';
+const AI_ENDPOINT = '/api/ai/chat';
 
 interface ChatOptions {
   maxTokens?: number;
@@ -10,7 +9,7 @@ export async function chat(
   messages: { role: string; content: string }[],
   options: ChatOptions = {},
 ): Promise<string> {
-  const res = await fetch(AI_PROXY, {
+  const res = await fetch(AI_ENDPOINT, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -23,7 +22,7 @@ export async function chat(
   if (!res.ok) {
     const err = await res.text();
     if (res.status === 404 || res.status === 0) {
-      throw new Error('Servidor AI Proxy nao encontrado. Execute "npm run server" em outro terminal.');
+      throw new Error('API AI nao disponivel. O servidor Remix precisa estar rodando.');
     }
     throw new Error(`Erro ${res.status}: ${err}`);
   }
@@ -37,7 +36,7 @@ export async function chatStream(
   onToken: (text: string) => void,
   options: ChatOptions = {},
 ): Promise<string> {
-  const res = await fetch(AI_PROXY, {
+  const res = await fetch(AI_ENDPOINT, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({

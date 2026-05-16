@@ -1,7 +1,8 @@
 import { auth } from './firebase';
 
-// Em dev, usa localhost:3001. Em prod, usa a variável VITE_API_BASE.
-const BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3001';
+// No Remix, API e frontend compartilham a mesma origem.
+// VITE_API_BASE permite override para VPS/proxy separado.
+const BASE = import.meta.env.VITE_API_BASE || '';
 
 export async function apiFetch(path: string, options: RequestInit = {}) {
   const user = auth.currentUser;

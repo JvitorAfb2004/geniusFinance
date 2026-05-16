@@ -11,3 +11,6 @@ coverage/
 server/service-account.json
 server/*.zip
 server/data/
+
+# Remix build output
+build/

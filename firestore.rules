@@ -544,14 +544,14 @@ service cloud.firestore {
 
     function memberHasPermission(accountId, module, action) {
       let data = accountMemberData(accountId);
-      // owner e admin têm acesso total
-      if (data.role == 'owner' || data.role == 'admin') return true;
-      // Verifica o mapa de permissões
-      let perms = data.permissions;
-      if (perms == null) return action == 'view'; // sem permissões salvas = só leitura
-      let modulePerms = perms[module];
-      if (modulePerms == null) return false;
-      return modulePerms.hasAny([action]);
+      return (
+        data.role == 'owner' ||
+        data.role == 'admin' ||
+        (action == 'view' && data.permissions == null) ||
+        (data.permissions != null &&
+         data.permissions[module] != null &&
+         data.permissions[module].hasAny([action]))
+      );
     }
 
     // ── Account data collections ──
