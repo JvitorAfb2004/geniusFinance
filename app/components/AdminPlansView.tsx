@@ -29,7 +29,7 @@ export function AdminPlansView() {
   const [error, setError] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
-  const [showNew, setShowNew] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const [saving, setSaving] = useState(false);
 
   const load = async () => {
@@ -50,13 +50,11 @@ export function AdminPlansView() {
     setError('');
     try {
       if (editingId) {
-        await apiFetch(`/api/admin/plans/${editingId}`, { method: 'PUT', body: JSON.stringify(form) });
-        setEditingId(null);
+        await apiFetch('/api/admin/plans', { method: 'PUT', body: JSON.stringify({ id: editingId, ...form }) });
       } else {
         await apiFetch('/api/admin/plans', { method: 'POST', body: JSON.stringify(form) });
-        setShowNew(false);
       }
-      setForm(emptyForm);
+      closeModal();
       await load();
     } catch (err: any) {
       setError(err.message);
@@ -68,17 +66,29 @@ export function AdminPlansView() {
   const handleDelete = async (id: string) => {
     if (!confirm('Remover este plano?')) return;
     try {
-      await apiFetch(`/api/admin/plans/${id}`, { method: 'DELETE' });
+      await apiFetch('/api/admin/plans', { method: 'DELETE', body: JSON.stringify({ id }) });
       await load();
     } catch (err: any) {
       setError(err.message);
     }
   };
 
-  const startEdit = (plan: Plan) => {
+  const openNew = () => {
+    setEditingId(null);
+    setForm(emptyForm);
+    setShowModal(true);
+  };
+
+  const openEdit = (plan: Plan) => {
     setEditingId(plan.id);
     setForm({ name: plan.name, basePrice: plan.basePrice, type: plan.type, abacateProductId: plan.abacateProductId, isPublic: plan.isPublic });
-    setShowNew(false);
+    setShowModal(true);
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    setEditingId(null);
+    setForm(emptyForm);
   };
 
   if (loading) return <div className="p-6 text-center text-text-secondary">Carregando planos...</div>;
@@ -90,49 +100,11 @@ export function AdminPlansView() {
           <h2 className="text-xl font-bold text-gray-900">Gestão de Planos</h2>
           <p className="text-sm text-gray-500">Crie e gerencie os planos de assinatura disponíveis.</p>
         </div>
-        <button onClick={() => { setShowNew(true); setEditingId(null); setForm(emptyForm); }}
+        <button onClick={openNew}
           className="flex items-center gap-1.5 text-sm font-medium bg-[#3b82f6] text-white px-4 py-2 rounded-lg hover:bg-[#2563eb] cursor-pointer transition-colors">
           <Plus className="w-4 h-4" /> Novo Plano
         </button>
       </div>
-
-      {(showNew || editingId) && (
-        <div className="bg-white rounded-xl border border-[#e2e8f0] p-4 flex flex-col gap-3">
-          <div className="flex gap-3">
-            <input type="text" placeholder="Nome do plano" value={form.name}
-              onChange={e => setForm({ ...form, name: e.target.value })}
-              className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-[#3b82f6]" />
-            <input type="number" placeholder="Preço (centavos)" value={form.basePrice || ''}
-              onChange={e => setForm({ ...form, basePrice: Number(e.target.value) })}
-              className="w-40 px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-[#3b82f6]" />
-          </div>
-          <div className="flex gap-3">
-            <select value={form.type} onChange={e => setForm({ ...form, type: e.target.value })}
-              className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none cursor-pointer">
-              {PLAN_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
-            </select>
-            <input type="text" placeholder="ID Produto Abacate Pay" value={form.abacateProductId}
-              onChange={e => setForm({ ...form, abacateProductId: e.target.value })}
-              className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-[#3b82f6]" />
-          </div>
-          <div className="flex items-center justify-between">
-            <label className="flex items-center gap-2 text-sm cursor-pointer">
-              <input type="checkbox" checked={form.isPublic}
-                onChange={e => setForm({ ...form, isPublic: e.target.checked })}
-                className="w-4 h-4 rounded border-gray-300 cursor-pointer" />
-              Plano público
-            </label>
-            <div className="flex gap-2">
-              <button onClick={handleSave} disabled={saving || !form.name}
-                className="flex items-center gap-1 text-sm bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 disabled:opacity-50 cursor-pointer transition-colors">
-                <Check className="w-4 h-4" /> {saving ? 'Salvando...' : 'Salvar'}
-              </button>
-              <button onClick={() => { setEditingId(null); setShowNew(false); }}
-                className="text-sm text-gray-500 hover:text-gray-700 cursor-pointer px-3">Cancelar</button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {error && <p className="text-red-500 text-sm">{error}</p>}
 
@@ -155,7 +127,7 @@ export function AdminPlansView() {
                 <td className="px-4 py-2.5 text-gray-500 text-xs">{p.type}</td>
                 <td className="px-4 py-2.5 text-gray-700">{formatPriceFromCents(p.basePrice)}</td>
                 <td className="px-4 py-2.5 flex gap-2">
-                  <button onClick={() => startEdit(p)}
+                  <button onClick={() => openEdit(p)}
                     className="text-gray-400 hover:text-blue-600 cursor-pointer"><Pencil className="w-3.5 h-3.5" /></button>
                   <button onClick={() => handleDelete(p.id)}
                     className="text-gray-400 hover:text-red-500 cursor-pointer"><Trash2 className="w-3.5 h-3.5" /></button>
@@ -165,6 +137,71 @@ export function AdminPlansView() {
           </tbody>
         </table>
       </div>
+
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh]">
+          <div className="fixed inset-0 bg-black/50" onClick={closeModal} />
+          <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-md mx-4">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+              <h3 className="text-lg font-bold text-gray-900">
+                {editingId ? 'Editar Plano' : 'Novo Plano'}
+              </h3>
+              <button onClick={closeModal} className="p-1 text-gray-400 hover:text-gray-600 cursor-pointer">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="px-6 py-4 space-y-4">
+              <div>
+                <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider">Nome</label>
+                <input type="text" placeholder="Nome do plano" value={form.name}
+                  onChange={e => setForm({ ...form, name: e.target.value })}
+                  className="w-full mt-1 px-3 py-2 border border-border rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors" />
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider">Preço (centavos)</label>
+                <input type="number" placeholder="0" value={form.basePrice || ''}
+                  onChange={e => setForm({ ...form, basePrice: Number(e.target.value) })}
+                  className="w-full mt-1 px-3 py-2 border border-border rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider">Tipo</label>
+                <select value={form.type} onChange={e => setForm({ ...form, type: e.target.value })}
+                  className="w-full mt-1 px-3 py-2 border border-border rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary cursor-pointer bg-white">
+                  {PLAN_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+                </select>
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider">ID Produto Abacate Pay</label>
+                <input type="text" placeholder="abc123" value={form.abacateProductId}
+                  onChange={e => setForm({ ...form, abacateProductId: e.target.value })}
+                  className="w-full mt-1 px-3 py-2 border border-border rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
+              </div>
+
+              <label className="flex items-center gap-2 text-sm cursor-pointer">
+                <input type="checkbox" checked={form.isPublic}
+                  onChange={e => setForm({ ...form, isPublic: e.target.checked })}
+                  className="w-4 h-4 rounded border-gray-300 cursor-pointer" />
+                Plano público
+              </label>
+            </div>
+
+            <div className="flex justify-end gap-3 px-6 py-4 border-t border-gray-100">
+              <button onClick={closeModal}
+                className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 cursor-pointer">
+                Cancelar
+              </button>
+              <button onClick={handleSave} disabled={saving || !form.name}
+                className="px-4 py-2 bg-[#3b82f6] text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 cursor-pointer transition-colors flex items-center gap-1.5">
+                <Check className="w-4 h-4" /> {saving ? 'Salvando...' : 'Salvar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

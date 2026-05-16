@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { apiFetch } from '../lib/api';
 import { formatPriceFromCents } from '../lib/subscriptionService';
-import { Plus, Search, X, Trash2 } from 'lucide-react';
+import { Plus, X, Trash2 } from 'lucide-react';
 
 interface SubEntry {
   id: string;
@@ -105,42 +105,6 @@ export function AdminSubscriptionsView() {
         </button>
       </div>
 
-      {showAssign && (
-        <div className="bg-white rounded-xl border border-[#e2e8f0] p-4 flex flex-col gap-3">
-          <h3 className="font-semibold text-gray-900 text-sm">Atribuir assinatura</h3>
-          <input type="email" placeholder="Email do usuário" value={form.targetEmail}
-            onChange={e => setForm({ ...form, targetEmail: e.target.value })}
-            className="px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-[#3b82f6]" />
-          <select value={form.planId}
-            onChange={e => setForm({ ...form, planId: e.target.value })}
-            className="px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none cursor-pointer">
-            <option value="">Selecione um plano</option>
-            {plans.map(p => (
-              <option key={p.id} value={p.id}>{p.name} — {formatPriceFromCents(p.basePrice)}</option>
-            ))}
-          </select>
-          {!form.indefinite && (
-            <input type="number" min={1} placeholder="Duração (meses)" value={form.durationMonths}
-              onChange={e => setForm({ ...form, durationMonths: Number(e.target.value) })}
-              className="w-48 px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-[#3b82f6]" />
-          )}
-          <label className="flex items-center gap-2 text-sm cursor-pointer">
-            <input type="checkbox" checked={form.indefinite}
-              onChange={e => setForm({ ...form, indefinite: e.target.checked })}
-              className="w-4 h-4 rounded border-gray-300 cursor-pointer" />
-            Indeterminado (sem expiração)
-          </label>
-          <div className="flex gap-2">
-            <button onClick={handleAssign} disabled={assigning || !form.targetEmail || !form.planId}
-              className="text-sm bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 disabled:opacity-50 cursor-pointer transition-colors">
-              {assigning ? 'Atribuindo...' : 'Atribuir'}
-            </button>
-            <button onClick={() => setShowAssign(false)}
-              className="text-sm text-gray-500 hover:text-gray-700 cursor-pointer px-3">Cancelar</button>
-          </div>
-        </div>
-      )}
-
       {error && <p className="text-red-500 text-sm">{error}</p>}
 
       <div className="bg-white rounded-xl border border-[#e2e8f0] overflow-hidden">
@@ -180,6 +144,68 @@ export function AdminSubscriptionsView() {
           </tbody>
         </table>
       </div>
+
+      {showAssign && (
+        <div className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh]">
+          <div className="fixed inset-0 bg-black/50" onClick={() => setShowAssign(false)} />
+          <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-md mx-4">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+              <h3 className="text-lg font-bold text-gray-900">Atribuir Assinatura</h3>
+              <button onClick={() => setShowAssign(false)} className="p-1 text-gray-400 hover:text-gray-600 cursor-pointer">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="px-6 py-4 space-y-4">
+              <div>
+                <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider">Email do usuário</label>
+                <input type="email" placeholder="usuario@email.com" value={form.targetEmail}
+                  onChange={e => setForm({ ...form, targetEmail: e.target.value })}
+                  className="w-full mt-1 px-3 py-2 border border-border rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors" />
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider">Plano</label>
+                <select value={form.planId}
+                  onChange={e => setForm({ ...form, planId: e.target.value })}
+                  className="w-full mt-1 px-3 py-2 border border-border rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary cursor-pointer bg-white">
+                  <option value="">Selecione um plano</option>
+                  {plans.map(p => (
+                    <option key={p.id} value={p.id}>{p.name} — {formatPriceFromCents(p.basePrice)}</option>
+                  ))}
+                </select>
+              </div>
+
+              {!form.indefinite && (
+                <div>
+                  <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider">Duração (meses)</label>
+                  <input type="number" min={1} value={form.durationMonths}
+                    onChange={e => setForm({ ...form, durationMonths: Number(e.target.value) })}
+                    className="w-full mt-1 px-3 py-2 border border-border rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
+                </div>
+              )}
+
+              <label className="flex items-center gap-2 text-sm cursor-pointer">
+                <input type="checkbox" checked={form.indefinite}
+                  onChange={e => setForm({ ...form, indefinite: e.target.checked })}
+                  className="w-4 h-4 rounded border-gray-300 cursor-pointer" />
+                Indeterminado (sem expiração)
+              </label>
+            </div>
+
+            <div className="flex justify-end gap-3 px-6 py-4 border-t border-gray-100">
+              <button onClick={() => setShowAssign(false)}
+                className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 cursor-pointer">
+                Cancelar
+              </button>
+              <button onClick={handleAssign} disabled={assigning || !form.targetEmail || !form.planId}
+                className="px-4 py-2 bg-[#3b82f6] text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 cursor-pointer transition-colors">
+                {assigning ? 'Atribuindo...' : 'Atribuir'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
