@@ -2,16 +2,16 @@ FROM node:22-alpine
 
 WORKDIR /app
 
-# Copia package.json e instala dependências de produção
-COPY package.json package-lock.json ./
-RUN npm ci --omit=dev
+# Build context no EasyPanel é o pai de code/. Default SRC=code.
+# Build local:  docker build --build-arg SRC=. -f server/Dockerfile .
+ARG SRC=code
 
-# Copia config do Firebase (precisa pra firebase-auth.cjs)
-COPY firebase-applet-config.json ./
+COPY ${SRC}/package.json ${SRC}/package-lock.json ./
+RUN npm i
 
-# Copia o servidor inteiro
-COPY server/index.cjs ./
-COPY server/services/ ./services/
+COPY ${SRC}/firebase-applet-config.json ./
+COPY ${SRC}/server/index.cjs ./
+COPY ${SRC}/server/services/ ./services/
 
 # Service account deve ser montada como volume/secret em produção
 # NÃO copiar aqui — usar docker run -v ou secrets manager
