@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, User, Eye, EyeOff, ShieldCheck } from 'lucide-react';
 import { resetPassword, signInWithEmail, signUpWithEmail } from '../lib/firebase';
 import { createUserOnboardingDocs } from '../lib/onboarding';
 
@@ -7,6 +7,7 @@ type LoginMode = 'login' | 'register' | 'forgot';
 
 interface LoginEmailFormProps {
   termsAccepted: boolean;
+  onTermsChange: (accepted: boolean) => void;
 }
 
 function mapAuthError(error: unknown) {
@@ -20,11 +21,12 @@ function mapAuthError(error: unknown) {
   return 'Não foi possível concluir a operação. Tente novamente.';
 }
 
-export function LoginEmailForm({ termsAccepted }: LoginEmailFormProps) {
+export function LoginEmailForm({ termsAccepted, onTermsChange }: LoginEmailFormProps) {
   const [mode, setMode] = useState<LoginMode>('login');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -33,6 +35,12 @@ export function LoginEmailForm({ termsAccepted }: LoginEmailFormProps) {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError('');
+
+    if (mode === 'register' && password !== confirmPassword) {
+      setError('As senhas não conferem.');
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -73,7 +81,7 @@ export function LoginEmailForm({ termsAccepted }: LoginEmailFormProps) {
           onClick={() => { setMode('login'); setError(''); setResetSent(false); }}
           className={`flex-1 py-2 rounded-lg text-sm font-medium cursor-pointer ${mode === 'login' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
         >
-          Email
+          Entrar
         </button>
         <button
           type="button"
@@ -146,7 +154,22 @@ export function LoginEmailForm({ termsAccepted }: LoginEmailFormProps) {
             </label>
           )}
 
-          {mode !== 'forgot' && (
+          {mode === 'register' && (
+            <label className="flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200">
+              <ShieldCheck className="w-4 h-4 text-gray-400" />
+              <input
+                type={showPassword ? 'text' : 'password'}
+                placeholder="Confirmar senha"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                minLength={6}
+                className="w-full text-sm outline-none"
+              />
+            </label>
+          )}
+
+          {mode === 'login' && (
             <button
               type="button"
               onClick={() => { setMode('forgot'); setError(''); }}
@@ -157,6 +180,22 @@ export function LoginEmailForm({ termsAccepted }: LoginEmailFormProps) {
           )}
 
           {error && <p className="text-xs text-red-500">{error}</p>}
+
+          {/* Checkbox alinhado à esquerda, acima do botão */}
+          <label className="flex items-start gap-2 cursor-pointer mt-1">
+            <input
+              type="checkbox"
+              checked={termsAccepted}
+              onChange={(e) => onTermsChange(e.target.checked)}
+              className="mt-0.5 w-4 h-4 rounded border-gray-300 text-[#3b82f6] focus:ring-[#3b82f6] cursor-pointer shrink-0"
+            />
+            <span className="text-xs text-text-secondary leading-relaxed select-none text-left">
+              Li e concordo com os{' '}
+              <span className="text-[#3b82f6] font-medium">Termos de Uso</span>
+              {' '}e a{' '}
+              <span className="text-[#3b82f6] font-medium">Política de Privacidade</span>
+            </span>
+          </label>
 
           <button
             type="submit"

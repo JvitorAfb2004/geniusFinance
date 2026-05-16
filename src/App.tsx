@@ -154,41 +154,15 @@ function MainApp() {
         <div className="absolute -top-24 -right-24 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
         <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-success/5 rounded-full blur-3xl" />
         <div className="bg-surface p-8 rounded-2xl shadow-lg border border-border text-center max-w-md w-full relative z-10">
-          <div className="w-16 h-16 bg-gradient-to-br from-primary to-blue-400 text-surface rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-md">
-            <PieChart className="w-8 h-8" />
+          <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <img src="/icon.svg" alt="GeniusHub" className="w-12 h-12" />
           </div>
           <h1 className="text-2xl font-extrabold text-text-primary mb-2 font-sans tracking-tight">GeniusHub<span className="text-primary">.</span></h1>
           <p className="text-text-secondary mb-6">Faça login para acessar seus dados de forma segura na nuvem.</p>
 
-          <LoginEmailForm termsAccepted={termsAccepted} />
+          <LoginEmailForm termsAccepted={termsAccepted} onTermsChange={setTermsAccepted} />
 
-          <div className="mt-4 pt-4 border-t border-border flex flex-col gap-3">
-            <label className="flex items-start gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={termsAccepted}
-                onChange={() => setTermsAccepted(!termsAccepted)}
-                className="mt-0.5 w-4 h-4 rounded border-gray-300 text-[#3b82f6] focus:ring-[#3b82f6] cursor-pointer shrink-0"
-              />
-              <span className="text-xs text-text-secondary leading-relaxed select-none">
-                Li e concordo com os{' '}
-                <button
-                  type="button"
-                  onClick={() => setLegalModal('terms')}
-                  className="text-[#3b82f6] hover:underline font-medium cursor-pointer"
-                >
-                  Termos de Uso
-                </button>
-                {' '}e a{' '}
-                <button
-                  type="button"
-                  onClick={() => setLegalModal('privacy')}
-                  className="text-[#3b82f6] hover:underline font-medium cursor-pointer"
-                >
-                  Política de Privacidade
-                </button>
-              </span>
-            </label>
+          <div className="mt-4 pt-4 border-t border-border">
             <button
               onClick={() => {
                 localStorage.setItem(TERMS_KEY, 'true');
