@@ -8,6 +8,7 @@ import { DEFAULT_CATEGORIES } from '../lib/categories';
 import { ALL_DEFAULT_LEAD_OPTIONS } from '../lib/leadDefaults';
 import { resolveDataPath } from '../lib/pathAdapter';
 import type { FinanceCollectionName } from '../lib/pathAdapter';
+import { ensureUserOnboardingDocs } from '../lib/onboarding';
 import { createAccount, getUserAccounts, getAccountMembers, getAccountInvites, migrateUserToAccount, createInvite, getPendingInvites, acceptInvite as acceptInviteSvc, archiveAccount } from '../lib/accountService';
 import { User, onAuthStateChanged } from 'firebase/auth';
 import {
@@ -51,7 +52,7 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
   const [serviceTypes, setServiceTypes] = useState<ServiceType[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [tasksMap, setTasksMap] = useState<Record<string, Task[]>>({});
-  const taskUnsubscribers = React.useRef<Record<string, (() => void)>>({});
+  const taskUnsubscribers = useRef<Record<string, () => void>>({});
   const [categoriesLoaded, setCategoriesLoaded] = useState(false);
   const [leadOptionsLoaded, setLeadOptionsLoaded] = useState(false);
 
@@ -79,7 +80,12 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
         setServiceTypes([]);
         setProjects([]);
         setTasksMap({});
-        Object.values(taskUnsubscribers.current).forEach(fn => fn());
+        for (const projectId in taskUnsubscribers.current) {
+          const unsubscribeTask = taskUnsubscribers.current[projectId];
+          if (typeof unsubscribeTask === 'function') {
+            unsubscribeTask();
+          }
+        }
         taskUnsubscribers.current = {};
         setAccounts([]);
         setAccountMembers([]);
@@ -90,6 +96,15 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
         setActiveScope({ type: 'PERSONAL', userId: '' });
         setLoading(false);
       } else {
+        ensureUserOnboardingDocs({
+          uid: u.uid,
+          email: u.email || '',
+          displayName: u.displayName || '',
+          authProvider: u.providerData.some((provider) => provider.providerId === 'google.com') ? 'google' : 'email',
+        }).catch((error) => {
+          console.error('Erro ao garantir onboarding do usuário:', error);
+        });
+
         const saved = loadSavedScope();
         if (saved) {
           // Restore saved scope, updating userId for PERSONAL

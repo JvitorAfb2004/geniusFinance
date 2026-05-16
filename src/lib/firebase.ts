@@ -1,5 +1,14 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut as fbSignOut } from 'firebase/auth';
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signOut as fbSignOut,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
+  updateProfile,
+} from 'firebase/auth';
 import { getFirestore, doc, getDocFromServer } from 'firebase/firestore';
 import firebaseConfig from '../../firebase-applet-config.json';
 
@@ -23,6 +32,20 @@ export const signInWithGoogle = async () => {
 
 export const signOut = () => {
     fbSignOut(auth);
+};
+
+export const signInWithEmail = async (email: string, password: string) => {
+  return signInWithEmailAndPassword(auth, email, password);
+};
+
+export const signUpWithEmail = async (displayName: string, email: string, password: string) => {
+  const cred = await createUserWithEmailAndPassword(auth, email, password);
+  await updateProfile(cred.user, { displayName });
+  return cred;
+};
+
+export const resetPassword = async (email: string) => {
+  return sendPasswordResetEmail(auth, email);
 };
 
 // Validate connection on boot
