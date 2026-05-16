@@ -1,5 +1,5 @@
 import { getApps, initializeApp, cert } from "firebase-admin/app";
-import { getFirestore } from "firebase-admin/firestore";
+import { getFirestore, type Firestore } from "firebase-admin/firestore";
 import { getAuth } from "firebase-admin/auth";
 
 let initialized = false;
@@ -20,9 +20,14 @@ function initAdmin() {
   initialized = true;
 }
 
-export function getAdminFirestore() {
+export function getAdminFirestore(): Firestore {
   initAdmin();
-  return getFirestore();
+  const db = getFirestore();
+  const databaseId = process.env.FIREBASE_DATABASE_ID;
+  if (databaseId) {
+    return (db as any).database(databaseId) as Firestore;
+  }
+  return db;
 }
 
 export function getAdminAuth() {

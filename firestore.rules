@@ -425,6 +425,25 @@ service cloud.firestore {
       allow delete: if isSignedIn() && userId == request.auth.uid;
     }
 
+    // Profile (personal)
+    match /users/{userId}/profile/{docId} {
+      allow read, write: if isSignedIn() && userId == request.auth.uid;
+    }
+
+    // Trials
+    match /trials/{trialId} {
+      allow read: if isSignedIn() && trialId == request.auth.uid;
+      allow create: if isSignedIn() && trialId == request.auth.uid;
+      allow update: if false; // só Admin SDK atualiza trials
+      allow delete: if false;
+    }
+
+    // Plans (leitura pública para usuários autenticados, escrita só Admin SDK)
+    match /plans/{planId} {
+      allow read: if isSignedIn();
+      allow write: if false;
+    }
+
     // ═══════════════════════════════════════════════════════════
     // ACCOUNT — accounts/{accountId} (shared, multi-tenant)
     // ═══════════════════════════════════════════════════════════
