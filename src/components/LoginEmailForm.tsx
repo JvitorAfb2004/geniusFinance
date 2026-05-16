@@ -66,7 +66,7 @@ export function LoginEmailForm({ termsAccepted }: LoginEmailFormProps) {
   };
 
   return (
-    <div className="mt-4 border-t border-border pt-4">
+    <div>
       <div className="flex gap-2 mb-3">
         <button
           type="button"
@@ -146,6 +146,16 @@ export function LoginEmailForm({ termsAccepted }: LoginEmailFormProps) {
             </label>
           )}
 
+          {mode !== 'forgot' && (
+            <button
+              type="button"
+              onClick={() => { setMode('forgot'); setError(''); }}
+              className="text-xs text-text-secondary hover:text-primary cursor-pointer self-start"
+            >
+              Esqueci minha senha
+            </button>
+          )}
+
           {error && <p className="text-xs text-red-500">{error}</p>}
 
           <button
@@ -155,16 +165,6 @@ export function LoginEmailForm({ termsAccepted }: LoginEmailFormProps) {
           >
             {loading ? 'Processando...' : mode === 'register' ? 'Criar conta' : mode === 'forgot' ? 'Enviar recuperação' : 'Entrar com email'}
           </button>
-
-          {mode !== 'forgot' && (
-            <button
-              type="button"
-              onClick={() => { setMode('forgot'); setError(''); }}
-              className="text-xs text-text-secondary hover:text-primary cursor-pointer"
-            >
-              Esqueci minha senha
-            </button>
-          )}
         </form>
       )}
     </div>
