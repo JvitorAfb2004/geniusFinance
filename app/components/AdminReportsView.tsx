@@ -31,9 +31,9 @@ export function AdminReportsView() {
 
   const handleUpdate = async () => {
     if (!selected) return;
-    await apiFetch(`/api/admin/reports/${selected.id}`, {
+    await apiFetch('/api/admin/reports', {
       method: 'PUT',
-      body: JSON.stringify({ status: newStatus, adminNotes }),
+      body: JSON.stringify({ id: selected.id, status: newStatus, adminNotes }),
     });
     await load();
     setSelected(null);
