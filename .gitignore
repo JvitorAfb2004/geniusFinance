@@ -6,3 +6,8 @@ coverage/
 *.log
 .env*
 !.env.example
+
+# Secrets e credenciais
+server/service-account.json
+server/*.zip
+server/data/
