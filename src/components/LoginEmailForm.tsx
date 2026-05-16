@@ -36,6 +36,11 @@ export function LoginEmailForm({ termsAccepted, onTermsChange }: LoginEmailFormP
     event.preventDefault();
     setError('');
 
+    if (!termsAccepted) {
+      setError('Você precisa aceitar os Termos de Uso e Política de Privacidade.');
+      return;
+    }
+
     if (mode === 'register' && password !== confirmPassword) {
       setError('As senhas não conferem.');
       return;
@@ -179,17 +184,15 @@ export function LoginEmailForm({ termsAccepted, onTermsChange }: LoginEmailFormP
             </button>
           )}
 
-          {error && <p className="text-xs text-red-500">{error}</p>}
-
           {/* Checkbox alinhado à esquerda, acima do botão */}
-          <label className="flex items-start gap-2 cursor-pointer mt-1">
+          <label className={`flex items-start gap-2 cursor-pointer mt-1 p-2 rounded-lg transition-colors ${!termsAccepted && error ? 'bg-red-50 border border-red-200' : ''}`}>
             <input
               type="checkbox"
               checked={termsAccepted}
               onChange={(e) => onTermsChange(e.target.checked)}
               className="mt-0.5 w-4 h-4 rounded border-gray-300 text-[#3b82f6] focus:ring-[#3b82f6] cursor-pointer shrink-0"
             />
-            <span className="text-xs text-text-secondary leading-relaxed select-none text-left">
+            <span className={`text-xs leading-relaxed select-none text-left ${!termsAccepted && error ? 'text-red-600 font-medium' : 'text-text-secondary'}`}>
               Li e concordo com os{' '}
               <span className="text-[#3b82f6] font-medium">Termos de Uso</span>
               {' '}e a{' '}
@@ -197,9 +200,11 @@ export function LoginEmailForm({ termsAccepted, onTermsChange }: LoginEmailFormP
             </span>
           </label>
 
+          {error && <p className="text-xs text-red-500 -mt-1 mb-1">{error}</p>}
+
           <button
             type="submit"
-            disabled={loading || !termsAccepted}
+            disabled={loading}
             className="w-full bg-primary hover:bg-blue-700 text-white font-medium py-2.5 rounded-lg transition-all disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {loading ? 'Processando...' : mode === 'register' ? 'Criar conta' : mode === 'forgot' ? 'Enviar recuperação' : 'Entrar com email'}
