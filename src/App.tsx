@@ -16,12 +16,13 @@ import GoalsView from './components/GoalsView';
 import CommercialView from './components/CommercialView';
 import ProjectsView from './components/ProjectsView';
 import ServiceTypesView from './components/ServiceTypesView';
-import { PieChart, List, CreditCard, Calendar, Settings, FileBarChart, X, Calculator, TrendingUp, Target, Users, Kanban, Layers, ShoppingCart, ShieldCheck, Bug } from 'lucide-react';
+import { PieChart, List, CreditCard, Calendar, Settings, FileBarChart, X, Calculator, TrendingUp, Target, Users, Kanban, Layers, ShoppingCart, ShieldCheck, Bug, Clock } from 'lucide-react';
 import { SubscriptionView } from './components/SubscriptionView';
 import { AdminPlansView } from './components/AdminPlansView';
 import { AdminSubscriptionsView } from './components/AdminSubscriptionsView';
 import { AdminReportsView } from './components/AdminReportsView';
 import { ReportIssueView } from './components/ReportIssueView';
+import { TrialModal } from './components/TrialModal';
 import LegalModal from './components/LegalModal';
 import { LoginEmailForm } from './components/LoginEmailForm';
 import { TERMOS_DE_USO } from './lib/termos-de-uso';
@@ -57,12 +58,40 @@ function MainApp() {
   const { currentView, setCurrentView, user, loading, signInWithGoogle, signOut, pendingInvites } = useFinance();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSuperadmin, setIsSuperadmin] = useState(false);
+  const [showTrialModal, setShowTrialModal] = useState(false);
+  const [trialDaysLeft, setTrialDaysLeft] = useState(0);
+  const [isTrial, setIsTrial] = useState(false);
 
   useEffect(() => {
     if (!user) { setIsSuperadmin(false); return; }
     user.getIdTokenResult().then((result) => {
       setIsSuperadmin(result.claims.role === 'superadmin');
     }).catch(() => {});
+  }, [user]);
+
+  // Verifica trial ao logar
+  useEffect(() => {
+    if (!user) return;
+    import('./lib/api').then(({ apiFetch }) => {
+      apiFetch('/api/sub/status').then((res) => {
+        const trial = res.data?.trial;
+        const sub = res.data?.subscription;
+        if (trial && trial.status === 'active' && (!sub || sub.status === 'trial')) {
+          const expiresAt = trial.expiresAt ? new Date(trial.expiresAt) : null;
+          const days = expiresAt ? Math.ceil((expiresAt.getTime() - Date.now()) / 86400000) : 0;
+          if (days > 0) {
+            setTrialDaysLeft(days);
+            setIsTrial(true);
+            // Mostra modal só se ainda não foi visto nessa sessão
+            const seen = sessionStorage.getItem('trial_modal_seen');
+            if (!seen) {
+              setShowTrialModal(true);
+              sessionStorage.setItem('trial_modal_seen', '1');
+            }
+          }
+        }
+      }).catch(() => {});
+    });
   }, [user]);
   const [dashboardValuesVisible, setDashboardValuesVisible] = useState<boolean>(() => {
     try {
@@ -230,6 +259,22 @@ function MainApp() {
           </div>
           <span className="text-[0.65rem] font-bold text-white/40 uppercase tracking-wider">by geniusweb.online</span>
           <ScopeBadge />
+          {isTrial && (
+            <div className="mt-2 px-3 py-2 rounded-lg bg-amber-500/10 border border-amber-500/20">
+              <div className="flex items-center gap-1.5">
+                <Clock className="w-3 h-3 text-amber-400 shrink-0" />
+                <p className="text-[0.65rem] font-semibold text-amber-300 leading-tight">
+                  Trial · {trialDaysLeft} dia(s) restante(s)
+                </p>
+              </div>
+              <button
+                onClick={() => handleNav('SUBSCRIPTION')}
+                className="mt-1.5 w-full text-[0.6rem] font-bold bg-amber-500 text-white py-1 rounded-md hover:bg-amber-400 transition-colors cursor-pointer"
+              >
+                Assinar plano
+              </button>
+            </div>
+          )}
         </div>
         <nav className="flex flex-col flex-1 overflow-y-auto">
           {menuSections.map((section) => (
@@ -337,6 +382,17 @@ function MainApp() {
           {currentView === 'SETTINGS' && <SettingsView />}
         </main>
       </div>
+
+      {showTrialModal && (
+        <TrialModal
+          daysLeft={trialDaysLeft}
+          onClose={() => setShowTrialModal(false)}
+          onSubscribe={() => {
+            setShowTrialModal(false);
+            handleNav('SUBSCRIPTION');
+          }}
+        />
+      )}
     </div>
   );
 }
