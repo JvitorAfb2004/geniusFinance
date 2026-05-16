@@ -1,6 +1,12 @@
-const firebaseConfig = require("../../firebase-applet-config.json");
-
-const FIREBASE_WEB_API_KEY = process.env.FIREBASE_WEB_API_KEY || firebaseConfig.apiKey;
+// Tenta carregar config do Firebase de paths diferentes (local vs container)
+let firebaseApiKey = process.env.FIREBASE_WEB_API_KEY;
+if (!firebaseApiKey) {
+  try { firebaseApiKey = require("../../firebase-applet-config.json").apiKey; } catch {}
+}
+if (!firebaseApiKey) {
+  try { firebaseApiKey = require("../firebase-applet-config.json").apiKey; } catch {}
+}
+const FIREBASE_WEB_API_KEY = firebaseApiKey;
 
 // Tenta usar Firebase Admin SDK (preferível, retorna custom claims)
 // Cai para REST API se Admin SDK não estiver disponível
