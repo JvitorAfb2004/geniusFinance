@@ -6,7 +6,7 @@ import { TrialModal } from "~/components/TrialModal";
 import {
   PieChart, List, CreditCard, Calendar, Settings, FileBarChart, X,
   Calculator, TrendingUp, Target, Users, Kanban, Layers, ShoppingCart,
-  ShieldCheck, Bug, Clock,
+  ShieldCheck, Bug, Clock, Gauge,
 } from "lucide-react";
 import { cn } from "~/lib/utils";
 
@@ -114,6 +114,7 @@ export default function AppLayout() {
     { path: "/credit-cards", label: "Cartões de Crédito", icon: CreditCard },
     { path: "/dre", label: "DRE", icon: Calculator },
     { path: "/budget", label: "Orçamento", icon: TrendingUp },
+    { path: "/spending-limits", label: "Limites", icon: Gauge },
     { path: "/sales", label: "Vendas", icon: TrendingUp },
     { path: "/goals", label: "Metas", icon: Target },
     { path: "/reports", label: "Relatórios Anuais", icon: FileBarChart },
@@ -185,7 +186,7 @@ export default function AppLayout() {
         <nav className="flex flex-col flex-1 overflow-y-auto">
           <div className="mb-2">
             <div className="px-6 py-1.5 text-[0.6rem] font-bold text-white/30 uppercase tracking-widest">Financeiro</div>
-            {menuItems.filter(i => ["/dashboard","/transactions","/fixed-monthly","/credit-cards","/dre","/budget","/sales","/goals","/reports"].includes(i.path)).map(item => (
+            {menuItems.filter(i => ["/dashboard","/transactions","/fixed-monthly","/credit-cards","/dre","/budget","/spending-limits","/sales","/goals","/reports"].includes(i.path)).map(item => (
               <button key={item.path} onClick={() => navigateTo(item.path)}
                 className={cn(
                   "px-6 py-2.5 text-[0.85rem] flex items-center gap-3 cursor-pointer transition-colors text-left border-l-4 w-full",

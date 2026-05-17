@@ -10,7 +10,8 @@ export type FinanceCollectionName =
   | 'leads'
   | 'lead-options'
   | 'service-types'
-  | 'projects';
+  | 'projects'
+  | 'spending-limits';
 
 export function resolveDataPath(
   scope: ActiveScope,

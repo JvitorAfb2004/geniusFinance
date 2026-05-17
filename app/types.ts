@@ -73,6 +73,17 @@ export interface Budget {
   updatedAt: string;
 }
 
+export interface SpendingLimit {
+  id: string;
+  userId: string;
+  context: ContextType;
+  name: string;
+  limitAmount: number;
+  categoryIds: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface FinancialGoal {
   id: string;
   userId: string;
@@ -252,6 +263,7 @@ export interface FinanceContextState {
   salesTargets: SalesTarget[];
   tags: Tag[];
   goals: FinancialGoal[];
+  spendingLimits: SpendingLimit[];
   leads: Lead[];
   leadOptions: LeadOption[];
   serviceTypes: ServiceType[];
@@ -292,6 +304,9 @@ export interface FinanceContextState {
   addTag: (name: string, color: string) => Promise<void>;
   updateTag: (id: string, updates: Partial<Pick<Tag, 'name' | 'color'>>) => Promise<void>;
   deleteTag: (id: string) => Promise<void>;
+  addSpendingLimit: (data: Omit<SpendingLimit, 'id' | 'userId' | 'createdAt' | 'updatedAt'>) => Promise<void>;
+  updateSpendingLimit: (id: string, updates: Partial<Pick<SpendingLimit, 'name' | 'limitAmount' | 'categoryIds'>>) => Promise<void>;
+  deleteSpendingLimit: (id: string) => Promise<void>;
   addGoal: (goal: Omit<FinancialGoal, 'id' | 'userId' | 'createdAt' | 'updatedAt'>) => Promise<void>;
   updateGoal: (id: string, updates: Partial<FinancialGoal>) => Promise<void>;
   deleteGoal: (id: string) => Promise<void>;

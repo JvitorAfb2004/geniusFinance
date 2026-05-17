@@ -11,6 +11,7 @@ export default [
       { file: "routes/_app.credit-cards.tsx", path: "credit-cards" },
       { file: "routes/_app.dre.tsx", path: "dre" },
       { file: "routes/_app.budget.tsx", path: "budget" },
+      { file: "routes/_app.spending-limits.tsx", path: "spending-limits" },
       { file: "routes/_app.sales.tsx", path: "sales" },
       { file: "routes/_app.goals.tsx", path: "goals" },
       { file: "routes/_app.commercial.tsx", path: "commercial" },

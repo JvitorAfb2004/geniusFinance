@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { addMonths, format, parseISO } from 'date-fns';
-import { ContextType, FinanceContextState, Transaction, ViewType, Category, Budget, DRESection, SalesTarget, Tag, FinancialGoal, Lead, LeadOption, ServiceType, Project, Task, ActiveScope, Account, AccountMember, AccountInvite, AccountRole } from '../types';
+import { ContextType, FinanceContextState, Transaction, ViewType, Category, Budget, SpendingLimit, DRESection, SalesTarget, Tag, FinancialGoal, Lead, LeadOption, ServiceType, Project, Task, ActiveScope, Account, AccountMember, AccountInvite, AccountRole } from '../types';
 import { auth, db, signInWithGoogle, signOut } from '../lib/firebase';
 import { handleFirestoreError } from '../lib/handleFirestoreError';
 import { DEFAULT_CATEGORIES } from '../lib/categories';
@@ -47,6 +47,7 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
   const [salesTargets, setSalesTargets] = useState<SalesTarget[]>([]);
   const [tags, setTags] = useState<Tag[]>([]);
   const [goals, setGoals] = useState<FinancialGoal[]>([]);
+  const [spendingLimits, setSpendingLimits] = useState<SpendingLimit[]>([]);
   const [leads, setLeads] = useState<Lead[]>([]);
   const [leadOptions, setLeadOptions] = useState<LeadOption[]>([]);
   const [serviceTypes, setServiceTypes] = useState<ServiceType[]>([]);
@@ -75,6 +76,7 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
         setSalesTargets([]);
         setTags([]);
         setGoals([]);
+        setSpendingLimits([]);
         setLeads([]);
         setLeadOptions([]);
         setServiceTypes([]);
@@ -253,6 +255,32 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       setBudgets(buds);
     }, (err) => {
       handleFirestoreError(err, 'list', resolveDataPath(activeScope, user.uid, 'budgets'), user);
+    });
+    return () => unsubscribe();
+  }, [user, activeScope]);
+
+  // Spending limits listener
+  useEffect(() => {
+    if (!user) return;
+    const q = buildQuery('spending-limits');
+    if (!q) return;
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const limits: SpendingLimit[] = snapshot.docs.map((docSnap) => {
+        const data = docSnap.data();
+        return {
+          id: docSnap.id,
+          userId: data.userId,
+          context: data.context,
+          name: data.name,
+          limitAmount: data.limitAmount,
+          categoryIds: data.categoryIds || [],
+          createdAt: data.createdAt?.toDate?.().toISOString() || new Date().toISOString(),
+          updatedAt: data.updatedAt?.toDate?.().toISOString() || new Date().toISOString(),
+        } as SpendingLimit;
+      });
+      setSpendingLimits(limits);
+    }, (err) => {
+      handleFirestoreError(err, 'list', resolveDataPath(activeScope, user.uid, 'spending-limits'), user);
     });
     return () => unsubscribe();
   }, [user, activeScope]);
@@ -819,6 +847,54 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
     } catch (error) { handleFirestoreError(error, 'delete', `${resolveDataPath(activeScope, user.uid, 'goals')}/${id}`, user); }
   };
 
+  // Spending limit CRUD
+  const addSpendingLimit = async (data: Omit<SpendingLimit, 'id' | 'userId' | 'createdAt' | 'updatedAt'>) => {
+    if (!user) return;
+    try {
+      const colPath = resolveDataPath(activeScope, user.uid, 'spending-limits');
+      const docRef = doc(collection(db, colPath));
+      const batch = writeBatch(db);
+      batch.set(docRef, {
+        userId: user.uid,
+        context: data.context,
+        name: data.name,
+        limitAmount: data.limitAmount,
+        categoryIds: data.categoryIds,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
+      await batch.commit();
+    } catch (error) {
+      handleFirestoreError(error, 'create', resolveDataPath(activeScope, user.uid, 'spending-limits'), user);
+    }
+  };
+
+  const updateSpendingLimit = async (id: string, updates: Partial<Pick<SpendingLimit, 'name' | 'limitAmount' | 'categoryIds'>>) => {
+    if (!user) return;
+    try {
+      const colPath = resolveDataPath(activeScope, user.uid, 'spending-limits');
+      const docRef = doc(db, colPath, id);
+      const batch = writeBatch(db);
+      batch.update(docRef, { ...updates, updatedAt: serverTimestamp() });
+      await batch.commit();
+    } catch (error) {
+      handleFirestoreError(error, 'update', `${resolveDataPath(activeScope, user.uid, 'spending-limits')}/${id}`, user);
+    }
+  };
+
+  const deleteSpendingLimit = async (id: string) => {
+    if (!user) return;
+    try {
+      const colPath = resolveDataPath(activeScope, user.uid, 'spending-limits');
+      const docRef = doc(db, colPath, id);
+      const batch = writeBatch(db);
+      batch.delete(docRef);
+      await batch.commit();
+    } catch (error) {
+      handleFirestoreError(error, 'delete', `${resolveDataPath(activeScope, user.uid, 'spending-limits')}/${id}`, user);
+    }
+  };
+
   // Lead CRUD
   const addLead = async (leadData: Omit<Lead, 'id' | 'userId' | 'createdAt' | 'updatedAt'>) => {
     if (!user) return;
@@ -1214,6 +1290,7 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       salesTargets,
       tags,
       goals,
+      spendingLimits,
       leads,
       leadOptions,
       serviceTypes,
@@ -1254,6 +1331,9 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       addGoal,
       updateGoal,
       deleteGoal,
+      addSpendingLimit,
+      updateSpendingLimit,
+      deleteSpendingLimit,
       addLead,
       updateLead,
       deleteLead,

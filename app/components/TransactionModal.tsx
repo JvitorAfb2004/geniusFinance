@@ -3,7 +3,7 @@ import { useFinance } from '../hooks/useFinance.tsx';
 import { TransactionType, TransactionStatus, Transaction, DRESection } from '../types';
 import { format } from 'date-fns';
 import { SECTION_LABELS } from '../lib/categories';
-import { X, Search, Plus, ArrowUpCircle, ArrowDownCircle, CreditCard, CheckCircle, Clock, Check } from 'lucide-react';
+import { X, Search, Plus, ArrowUpCircle, ArrowDownCircle, CreditCard, CheckCircle, Clock, Check, Calculator } from 'lucide-react';
 import { motion } from 'motion/react';
 
 export function TransactionModal({ 
@@ -39,6 +39,7 @@ export function TransactionModal({
   const [newCategorySection, setNewCategorySection] = useState<DRESection>('DESPESAS');
   const categoryDropdownRef = useRef<HTMLDivElement>(null);
   const categoryInputRef = useRef<HTMLInputElement>(null);
+  const calculatorRef = useRef<HTMLDivElement>(null);
 
   const [recurrenceConfig, setRecurrenceConfig] = useState<'ONE_TIME' | 'FIXED' | 'INSTALLMENTS'>('ONE_TIME');
   const [installmentsCount, setInstallmentsCount] = useState(1);
@@ -46,6 +47,13 @@ export function TransactionModal({
   const [hasEndDate, setHasEndDate] = useState(!!initialData?.endDate);
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>(initialData?.tagIds || []);
   const [applyToFuture, setApplyToFuture] = useState(false);
+
+  // Calculator state
+  const [showCalculator, setShowCalculator] = useState(false);
+  const [calcDisplay, setCalcDisplay] = useState('0');
+  const [calcFirstOperand, setCalcFirstOperand] = useState<number | null>(null);
+  const [calcOperator, setCalcOperator] = useState<string | null>(null);
+  const [calcWaitingForSecond, setCalcWaitingForSecond] = useState(false);
 
   const selectedCatName = categories.find((c) => c.id === categoryId)?.name || '';
   const suggestedCategoryId = useMemo(() => {
@@ -108,6 +116,9 @@ export function TransactionModal({
       if (categoryDropdownRef.current && !categoryDropdownRef.current.contains(e.target as Node)) {
         setShowCategoryDropdown(false);
       }
+      if (calculatorRef.current && !calculatorRef.current.contains(e.target as Node)) {
+        setShowCalculator(false);
+      }
     }
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -136,6 +147,68 @@ export function TransactionModal({
   const getNumericAmount = () => {
     if (!amountStr) return 0;
     return parseFloat(amountStr.replace(/\./g, '').replace(',', '.'));
+  };
+
+  // Calculator helpers
+  const handleCalcDigit = (digit: string) => {
+    if (calcWaitingForSecond) {
+      setCalcDisplay(digit);
+      setCalcWaitingForSecond(false);
+    } else {
+      setCalcDisplay(calcDisplay === '0' ? digit : calcDisplay + digit);
+    }
+  };
+
+  const handleCalcOperator = (op: string) => {
+    const current = parseFloat(calcDisplay.replace(',', '.'));
+    if (calcFirstOperand === null) {
+      setCalcFirstOperand(current);
+    } else if (calcOperator && !calcWaitingForSecond) {
+      const result = computeResult(calcFirstOperand, current, calcOperator);
+      setCalcFirstOperand(result);
+      setCalcDisplay(String(result).replace('.', ','));
+    }
+    setCalcOperator(op);
+    setCalcWaitingForSecond(true);
+  };
+
+  const computeResult = (a: number, b: number, op: string) => {
+    switch (op) {
+      case '+': return a + b;
+      case '-': return a - b;
+      case '*': return a * b;
+      case '/': return b !== 0 ? a / b : 0;
+      default: return b;
+    }
+  };
+
+  const handleCalcEquals = () => {
+    if (calcFirstOperand === null || !calcOperator) return;
+    const current = parseFloat(calcDisplay.replace(',', '.'));
+    const result = computeResult(calcFirstOperand, current, calcOperator);
+    setCalcDisplay(String(result).replace('.', ','));
+    setCalcFirstOperand(null);
+    setCalcOperator(null);
+    setCalcWaitingForSecond(false);
+  };
+
+  const handleCalcClear = () => {
+    setCalcDisplay('0');
+    setCalcFirstOperand(null);
+    setCalcOperator(null);
+    setCalcWaitingForSecond(false);
+  };
+
+  const handleCalcApply = () => {
+    const val = parseFloat(calcDisplay.replace(',', '.'));
+    if (!isNaN(val) && val > 0) {
+      const formatted = new Intl.NumberFormat('pt-BR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }).format(val);
+      setAmountStr(formatted);
+    }
+    setShowCalculator(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -456,15 +529,70 @@ export function TransactionModal({
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider">Valor (R$)</label>
-              <input
-                required
-                type="text"
-                inputMode="numeric"
-                placeholder="0,00"
-                value={amountStr}
-                onChange={handleAmountChange}
-                className="w-full border border-border rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition-all placeholder:text-text-muted bg-surface"
-              />
+              <div className="relative flex gap-1">
+                <input
+                  required
+                  type="text"
+                  inputMode="numeric"
+                  placeholder="0,00"
+                  value={amountStr}
+                  onChange={handleAmountChange}
+                  className="w-full border border-border rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition-all placeholder:text-text-muted bg-surface"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowCalculator(!showCalculator)}
+                  className={`w-10 h-10 flex items-center justify-center rounded-lg border transition-colors cursor-pointer flex-shrink-0 ${
+                    showCalculator ? 'border-primary bg-primary-light text-primary' : 'border-border text-text-muted hover:text-text-primary hover:bg-bg'
+                  }`}
+                >
+                  <Calculator className="w-4 h-4" />
+                </button>
+
+                {showCalculator && (
+                  <div ref={calculatorRef} className="absolute top-full mt-1 right-0 z-30 bg-surface border border-border rounded-xl shadow-lg p-3 w-56">
+                    <div className="bg-bg rounded-lg px-3 py-2 mb-2 text-right font-mono text-lg font-semibold text-text-primary min-h-[2.5rem] flex items-center justify-end overflow-hidden">
+                      {calcDisplay}
+                    </div>
+                    <div className="grid grid-cols-4 gap-1.5">
+                      {['7','8','9','/','4','5','6','*','1','2','3','-','0',',','C','+'].map((key) => (
+                        <button
+                          key={key}
+                          type="button"
+                          onClick={() => {
+                            if (key === 'C') handleCalcClear();
+                            else if (key === '/' || key === '*' || key === '-' || key === '+') handleCalcOperator(key);
+                            else handleCalcDigit(key);
+                          }}
+                          className={`py-2 text-sm font-medium rounded-lg cursor-pointer transition-colors ${
+                            key === 'C'
+                              ? 'bg-red-50 text-red-600 hover:bg-red-100'
+                              : key === '/' || key === '*' || key === '-' || key === '+'
+                                ? 'bg-primary-light text-primary hover:bg-primary/20'
+                                : 'bg-bg text-text-primary hover:bg-border'
+                          }`}
+                        >
+                          {key}
+                        </button>
+                      ))}
+                      <button
+                        type="button"
+                        onClick={handleCalcEquals}
+                        className="py-2 text-sm font-bold rounded-lg cursor-pointer transition-colors bg-primary text-white hover:bg-primary-hover"
+                      >
+                        =
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleCalcApply}
+                        className="col-span-3 py-2 text-xs font-semibold rounded-lg cursor-pointer transition-colors bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+                      >
+                        Usar resultado
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider">Data Base</label>
