@@ -3,14 +3,25 @@ import { useFinance } from '../hooks/useFinance';
 import { formatCurrency } from '../lib/utils';
 import { SpendingLimit } from '../types';
 import { SpendingLimitModal } from './SpendingLimitModal';
-import { isSameMonth, parseISO } from 'date-fns';
+import { isSameMonth, parseISO, getMonth, getYear } from 'date-fns';
 import { Plus, Edit2, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+
+const MONTH_LABELS = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
 
 export function SpendingLimitsView() {
   const { spendingLimits, categories, transactions, activeContext, selectedMonth, deleteSpendingLimit } = useFinance();
   const [showModal, setShowModal] = useState(false);
   const [editingLimit, setEditingLimit] = useState<SpendingLimit | undefined>(undefined);
+
+  const visibleLimits = useMemo(() => {
+    const currentMonth = getMonth(selectedMonth) + 1;
+    const currentYear = getYear(selectedMonth);
+    return spendingLimits.filter((limit) => {
+      if (!limit.month) return true; // ongoing limit, always visible
+      return limit.month === currentMonth && (!limit.year || limit.year === currentYear);
+    });
+  }, [spendingLimits, selectedMonth]);
 
   const currentSpending = useMemo(() => {
     const map = new Map<string, number>();
@@ -49,7 +60,7 @@ export function SpendingLimitsView() {
     setEditingLimit(undefined);
   };
 
-  if (spendingLimits.length === 0 && !showModal) {
+  if (visibleLimits.length === 0 && !showModal) {
     return (
       <div className="space-y-4">
         <div className="flex items-center justify-between">
@@ -66,7 +77,9 @@ export function SpendingLimitsView() {
           </button>
         </div>
         <div className="flex items-center justify-center h-64 text-slate-400">
-          Nenhum limite de gasto configurado.
+          {spendingLimits.length === 0
+            ? 'Nenhum limite de gasto configurado.'
+            : 'Nenhum limite para este mês.'}
         </div>
         <AnimatePresence>
           {showModal && <SpendingLimitModal onClose={handleCloseModal} />}
@@ -92,7 +105,7 @@ export function SpendingLimitsView() {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        {spendingLimits.map((limit) => {
+        {visibleLimits.map((limit) => {
           const spent = currentSpending.get(limit.id) || 0;
           const pct = limit.limitAmount > 0 ? (spent / limit.limitAmount) * 100 : 0;
           const barColor =
@@ -104,7 +117,14 @@ export function SpendingLimitsView() {
               className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm hover:shadow-md transition-shadow"
             >
               <div className="flex items-start justify-between mb-3">
-                <h3 className="font-semibold text-slate-800">{limit.name}</h3>
+                <div>
+                  <h3 className="font-semibold text-slate-800">{limit.name}</h3>
+                  {limit.month && (
+                    <span className="text-xs text-slate-400">
+                      {MONTH_LABELS[limit.month - 1]}/{limit.year || ''}
+                    </span>
+                  )}
+                </div>
                 <div className="flex gap-1">
                   <button
                     onClick={() => handleEdit(limit)}

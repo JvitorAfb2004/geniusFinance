@@ -80,6 +80,8 @@ export interface SpendingLimit {
   name: string;
   limitAmount: number;
   categoryIds: string[];
+  month?: number; // 1-12, se definido o limite vale só para esse mês
+  year?: number;  // se definido junto com month, limita a um mês específico
   createdAt: string;
   updatedAt: string;
 }
@@ -305,7 +307,7 @@ export interface FinanceContextState {
   updateTag: (id: string, updates: Partial<Pick<Tag, 'name' | 'color'>>) => Promise<void>;
   deleteTag: (id: string) => Promise<void>;
   addSpendingLimit: (data: Omit<SpendingLimit, 'id' | 'userId' | 'createdAt' | 'updatedAt'>) => Promise<void>;
-  updateSpendingLimit: (id: string, updates: Partial<Pick<SpendingLimit, 'name' | 'limitAmount' | 'categoryIds'>>) => Promise<void>;
+  updateSpendingLimit: (id: string, updates: Partial<Pick<SpendingLimit, 'name' | 'limitAmount' | 'categoryIds' | 'month' | 'year'>>) => Promise<void>;
   deleteSpendingLimit: (id: string) => Promise<void>;
   addGoal: (goal: Omit<FinancialGoal, 'id' | 'userId' | 'createdAt' | 'updatedAt'>) => Promise<void>;
   updateGoal: (id: string, updates: Partial<FinancialGoal>) => Promise<void>;

@@ -269,10 +269,10 @@ export function TransactionModal({
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
         transition={{ type: 'spring', duration: 0.3 }}
-        className="bg-surface rounded-xl shadow-xl w-full max-w-lg overflow-hidden"
+        className="bg-surface rounded-xl shadow-xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="px-6 py-5 flex justify-between items-center">
+        <div className="px-6 py-5 flex justify-between items-center shrink-0">
           <div>
             <h3 className="text-lg font-bold font-sans text-text-primary">
               {initialData ? 'Editar Lançamento' : 'Novo Lançamento'}
@@ -287,7 +287,7 @@ export function TransactionModal({
         </div>
         <div className="border-b border-border mx-6" />
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4 relative">
+        <form onSubmit={handleSubmit} className="p-6 space-y-4 overflow-y-auto">
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider">Tipo</label>
             <div className="grid grid-cols-3 gap-2">

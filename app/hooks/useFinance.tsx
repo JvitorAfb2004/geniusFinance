@@ -869,7 +869,7 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const updateSpendingLimit = async (id: string, updates: Partial<Pick<SpendingLimit, 'name' | 'limitAmount' | 'categoryIds'>>) => {
+  const updateSpendingLimit = async (id: string, updates: Partial<Pick<SpendingLimit, 'name' | 'limitAmount' | 'categoryIds' | 'month' | 'year'>>) => {
     if (!user) return;
     try {
       const colPath = resolveDataPath(activeScope, user.uid, 'spending-limits');

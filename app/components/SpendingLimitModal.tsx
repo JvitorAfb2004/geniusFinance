@@ -26,6 +26,9 @@ export function SpendingLimitModal({
   const [categorySearch, setCategorySearch] = useState('');
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const categoryDropdownRef = useRef<HTMLDivElement>(null);
+  const [hasMonthLimit, setHasMonthLimit] = useState(!!initialData?.month);
+  const [limitMonth, setLimitMonth] = useState(initialData?.month || new Date().getMonth() + 1);
+  const [limitYear, setLimitYear] = useState(initialData?.year || new Date().getFullYear());
 
   const context: ContextType = activeScope.type === 'PERSONAL' ? 'PERSONAL' : 'BUSINESS';
 
@@ -89,10 +92,16 @@ export function SpendingLimitModal({
 
     setSubmitting(true);
     try {
+      const data = {
+        name: name.trim(),
+        limitAmount: val,
+        categoryIds: selectedCategoryIds,
+        ...(hasMonthLimit ? { month: limitMonth, year: limitYear } : { month: undefined, year: undefined }),
+      };
       if (initialData) {
-        await updateSpendingLimit(initialData.id, { name: name.trim(), limitAmount: val, categoryIds: selectedCategoryIds });
+        await updateSpendingLimit(initialData.id, data);
       } else {
-        await addSpendingLimit({ name: name.trim(), limitAmount: val, categoryIds: selectedCategoryIds, context });
+        await addSpendingLimit({ ...data, context });
       }
       onClose();
     } catch {
@@ -128,10 +137,10 @@ export function SpendingLimitModal({
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
         transition={{ type: 'spring', duration: 0.3 }}
-        className="bg-surface rounded-xl shadow-xl w-full max-w-lg overflow-hidden"
+        className="bg-surface rounded-xl shadow-xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="px-6 py-5 flex justify-between items-center">
+        <div className="px-6 py-5 flex justify-between items-center shrink-0">
           <div>
             <h3 className="text-lg font-bold font-sans text-text-primary">
               {initialData ? 'Editar Limite' : 'Novo Limite de Gasto'}
@@ -146,7 +155,7 @@ export function SpendingLimitModal({
         </div>
         <div className="border-b border-border mx-6" />
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-6 space-y-4 overflow-y-auto">
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider">Nome do Limite</label>
             <input
@@ -170,6 +179,40 @@ export function SpendingLimitModal({
               onChange={handleAmountChange}
               className="w-full border border-border rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition-all placeholder:text-text-muted bg-surface"
             />
+          </div>
+
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={hasMonthLimit}
+                onChange={(e) => setHasMonthLimit(e.target.checked)}
+                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              <span className="text-xs font-semibold text-text-secondary uppercase tracking-wider">Limitar a um mês específico</span>
+            </label>
+            {hasMonthLimit && (
+              <div className="grid grid-cols-2 gap-2">
+                <select
+                  value={limitMonth}
+                  onChange={(e) => setLimitMonth(parseInt(e.target.value))}
+                  className="border border-border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary bg-surface"
+                >
+                  {['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'].map((label, i) => (
+                    <option key={i + 1} value={i + 1}>{label}</option>
+                  ))}
+                </select>
+                <select
+                  value={limitYear}
+                  onChange={(e) => setLimitYear(parseInt(e.target.value))}
+                  className="border border-border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary bg-surface"
+                >
+                  {[new Date().getFullYear() - 1, new Date().getFullYear(), new Date().getFullYear() + 1].map((y) => (
+                    <option key={y} value={y}>{y}</option>
+                  ))}
+                </select>
+              </div>
+            )}
           </div>
 
           <div className="space-y-1.5" ref={categoryDropdownRef}>
