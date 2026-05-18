@@ -13,6 +13,11 @@ service cloud.firestore {
     function existing() { return resource.data; }
     function isSignedIn() { return request.auth != null; }
 
+    // Health check — usado pelo testConnection() no boot do app
+    match /test/{docId} {
+      allow read: if isSignedIn();
+    }
+
     // ── Account membership helpers ──
 
     function isAccountMember(accountId) {
@@ -90,6 +95,25 @@ service cloud.firestore {
         data.month is number && data.month >= 1 && data.month <= 12 &&
         data.categoryId is string && data.categoryId.size() <= 128 &&
         data.plannedAmount is number;
+    }
+
+    function isValidAccountSpendingLimitKeysSize(data) {
+      let size = 6;
+      let s1 = size + ('month' in data ? 1 : 0);
+      let s2 = s1 + ('year' in data ? 1 : 0);
+      return data.keys().size() == s2;
+    }
+
+    function isValidAccountSpendingLimit(data) {
+      return data.keys().hasAll(['userId', 'context', 'name', 'limitAmount', 'categoryIds', 'createdAt', 'updatedAt']) &&
+        isValidAccountSpendingLimitKeysSize(data) &&
+        data.userId is string &&
+        data.context in ['PERSONAL', 'BUSINESS'] &&
+        data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
+        data.limitAmount is number && data.limitAmount > 0 &&
+        data.categoryIds is list &&
+        (!('month' in data) || (data.month is number && data.month >= 1 && data.month <= 12)) &&
+        (!('year' in data) || data.year is number);
     }
 
     function isValidAccountSalesTarget(data) {
@@ -197,6 +221,25 @@ service cloud.firestore {
         data.month is number && data.month >= 1 && data.month <= 12 &&
         data.categoryId is string && data.categoryId.size() <= 128 &&
         data.plannedAmount is number;
+    }
+
+    function isValidSpendingLimitKeysSize(data) {
+      let size = 6;
+      let s1 = size + ('month' in data ? 1 : 0);
+      let s2 = s1 + ('year' in data ? 1 : 0);
+      return data.keys().size() == s2;
+    }
+
+    function isValidSpendingLimit(data) {
+      return data.keys().hasAll(['userId', 'context', 'name', 'limitAmount', 'categoryIds', 'createdAt', 'updatedAt']) &&
+        isValidSpendingLimitKeysSize(data) &&
+        data.userId is string && data.userId == request.auth.uid &&
+        data.context in ['PERSONAL', 'BUSINESS'] &&
+        data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
+        data.limitAmount is number && data.limitAmount > 0 &&
+        data.categoryIds is list &&
+        (!('month' in data) || (data.month is number && data.month >= 1 && data.month <= 12)) &&
+        (!('year' in data) || data.year is number);
     }
 
     match /users/{userId}/transactions/{transactionId} {
@@ -353,6 +396,25 @@ service cloud.firestore {
         data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
         data.steps is list &&
         data.customFieldDefs is list;
+    }
+
+    match /users/{userId}/spending-limits/{limitId} {
+      allow read: if isSignedIn() && userId == request.auth.uid && resource.data.userId == request.auth.uid;
+
+      allow create: if isSignedIn() &&
+        userId == request.auth.uid &&
+        isValidSpendingLimit(incoming());
+
+      allow update: if isSignedIn() &&
+        userId == request.auth.uid &&
+        isValidSpendingLimit(incoming()) &&
+        incoming().userId == existing().userId &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().diff(existing()).affectedKeys().hasOnly([
+          'name', 'limitAmount', 'categoryIds', 'month', 'year', 'updatedAt'
+        ]);
+
+      allow delete: if isSignedIn() && userId == request.auth.uid;
     }
 
     match /users/{userId}/service-types/{serviceTypeId} {
@@ -566,7 +628,7 @@ service cloud.firestore {
       return (
         data.role == 'owner' ||
         data.role == 'admin' ||
-        (action == 'view' && data.permissions == null) ||
+        (data.role in ['owner', 'admin', 'member'] && action == 'view' && data.permissions == null) ||
         (data.permissions != null &&
          data.permissions[module] != null &&
          data.permissions[module].hasAny([action]))
@@ -710,6 +772,25 @@ service cloud.firestore {
         incoming().userId == existing().userId &&
         incoming().createdAt == existing().createdAt &&
         incoming().diff(existing()).affectedKeys().hasOnly(['plannedAmount', 'updatedAt']);
+
+      allow delete: if isAccountMember(accountId) &&
+        (isAccountOwnerOrAdmin(accountId) || existing().userId == request.auth.uid);
+    }
+
+    match /accounts/{accountId}/spending-limits/{limitId} {
+      allow read: if isAccountMember(accountId);
+
+      allow create: if isAccountMember(accountId) &&
+        isValidAccountSpendingLimit(incoming()) &&
+        incoming().userId == request.auth.uid;
+
+      allow update: if isAccountMember(accountId) &&
+        isValidAccountSpendingLimit(incoming()) &&
+        incoming().userId == existing().userId &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().diff(existing()).affectedKeys().hasOnly([
+          'name', 'limitAmount', 'categoryIds', 'month', 'year', 'updatedAt'
+        ]);
 
       allow delete: if isAccountMember(accountId) &&
         (isAccountOwnerOrAdmin(accountId) || existing().userId == request.auth.uid);
