@@ -15,6 +15,9 @@ export default defineConfig(({mode}) => {
     define: {
       'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
     },
+    ssr: {
+      noExternal: ['react-router'],
+    },
     resolve: {
       alias: {
         '~': path.resolve(__dirname, 'app'),
