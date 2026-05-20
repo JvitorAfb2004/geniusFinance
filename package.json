@@ -6,7 +6,6 @@
   "scripts": {
     "dev": "react-router dev --port=3000 --host=0.0.0.0",
     "build": "react-router build",
-    "postbuild": "node scripts/patch-react-router.js",
     "start": "react-router-serve build/server/index.js",
     "lint": "tsc --noEmit"
   },
