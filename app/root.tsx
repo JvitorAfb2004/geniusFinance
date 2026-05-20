@@ -8,7 +8,7 @@ export const meta: MetaFunction = () => [
   { name: "viewport", content: "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" },
   { name: "theme-color", content: "#1e293b" },
   { name: "description", content: "Hub completo para gestão financeira, comercial e de projetos." },
-  { title: "Genius Hub" },
+  { title: "Genius Finance" },
 ];
 
 export const links: LinksFunction = () => [

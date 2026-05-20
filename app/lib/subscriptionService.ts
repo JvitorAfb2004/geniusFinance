@@ -24,7 +24,7 @@ export function calculateSubscriptionPrice(
 
   // Empresa principal
   if (planTypes.includes('BUSINESS')) {
-    items.push({ planId: 'plan_business', quantity: 1, unitPrice: 2990 });
+    items.push({ planId: 'plan_business', quantity: 1, unitPrice: 3990 });
   }
 
   // Empresas adicionais

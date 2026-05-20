@@ -36,9 +36,9 @@ export default function Index() {
       <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-success/5 rounded-full blur-3xl" />
       <div className="bg-surface p-8 rounded-2xl shadow-lg border border-border text-center max-w-md w-full relative z-10">
         <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6">
-          <img src="/icon.svg" alt="GeniusHub" className="w-12 h-12" />
+          <img src="/icon.svg" alt="Genius Finance" className="w-12 h-12" />
         </div>
-        <h1 className="text-2xl font-extrabold text-text-primary mb-2 font-sans tracking-tight">GeniusHub<span className="text-primary">.</span></h1>
+        <h1 className="text-2xl font-extrabold text-text-primary mb-2 font-sans tracking-tight">Genius Finance<span className="text-primary">.</span></h1>
         <p className="text-text-secondary mb-6">Faça login para acessar seus dados de forma segura na nuvem.</p>
 
         <LoginEmailForm termsAccepted={termsAccepted} onTermsChange={setTermsAccepted} />

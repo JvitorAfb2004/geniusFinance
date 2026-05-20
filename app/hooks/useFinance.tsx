@@ -1260,7 +1260,8 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
   const inviteMemberFn = async (email: string, role: Exclude<AccountRole, 'owner'>) => {
     if (!user || activeScope.type !== 'ACCOUNT') return;
     const accountName = activeScope.accountName;
-    await createInvite(activeScope.accountId, email, role, user.uid, accountName);
+    const normalizedEmail = email.trim().toLowerCase();
+    await createInvite(activeScope.accountId, normalizedEmail, role, user.uid, accountName);
     // Refresh account invites list
     const invites = await getAccountInvites(activeScope.accountId);
     setAccountInvites(invites);

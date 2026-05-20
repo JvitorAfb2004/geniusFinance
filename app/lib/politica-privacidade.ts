@@ -1,8 +1,8 @@
-export const POLITICA_PRIVACIDADE = `POLÍTICA DE PRIVACIDADE — GeniusHub
+export const POLITICA_PRIVACIDADE = `POLÍTICA DE PRIVACIDADE — Genius Finance
 
 Última atualização: 15 de maio de 2026
 
-Esta Política de Privacidade descreve como a GENIUS WEB, inscrita no CNPJ sob o nº 66.107.006/0001-70, coleta, utiliza, armazena e protege os dados pessoais e financeiros dos usuários da plataforma GeniusHub, em conformidade com a Lei Geral de Proteção de Dados Pessoais (LGPD — Lei nº 13.709/2018).
+Esta Política de Privacidade descreve como a GENIUS WEB, inscrita no CNPJ sob o nº 66.107.006/0001-70, coleta, utiliza, armazena e protege os dados pessoais e financeiros dos usuários da plataforma Genius Finance, em conformidade com a Lei Geral de Proteção de Dados Pessoais (LGPD — Lei nº 13.709/2018).
 
 1. INFORMAÇÕES GERAIS
 

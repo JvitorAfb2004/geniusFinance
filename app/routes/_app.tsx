@@ -158,8 +158,7 @@ export default function AppLayout() {
       )}>
         <div className="px-6 pb-6 border-b border-white/10 mb-6 flex flex-col gap-1">
           <div className="flex items-center justify-between font-extrabold text-[1.2rem] tracking-tight">
-            <span>GeniusHub<span className="text-primary">.</span></span>
-            <button className="lg:hidden text-white/70 hover:text-white" onClick={() => setIsSidebarOpen(false)}>
+            <span>Genius Finance<span className="text-primary">.</span></span>            <button className="lg:hidden text-white/70 hover:text-white" onClick={() => setIsSidebarOpen(false)}>
               <X className="w-5 h-5" />
             </button>
           </div>

@@ -32,5 +32,5 @@ export async function createTransparentPix(data: Record<string, unknown>) {
 }
 
 export async function cancelSubscription(id: string) {
-  return abacateRequest(`/subscriptions/${id}/cancel`, { method: "POST" });
+  return abacateRequest(`/subscriptions/cancel`, { method: "POST", body: { id } });
 }

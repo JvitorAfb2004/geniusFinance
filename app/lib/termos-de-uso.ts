@@ -1,14 +1,14 @@
-export const TERMOS_DE_USO = `TERMOS DE USO — GeniusHub
+export const TERMOS_DE_USO = `TERMOS DE USO — Genius Finance
 
 Última atualização: 15 de maio de 2026
 
-Estes Termos de Uso regulam o acesso e a utilização da plataforma GeniusHub, disponibilizada por GENIUS WEB, inscrita no CNPJ sob o nº 66.107.006/0001-70, por meio do site geniusweb.online.
+Estes Termos de Uso regulam o acesso e a utilização da plataforma Genius Finance, disponibilizada por GENIUS WEB, inscrita no CNPJ sob o nº 66.107.006/0001-70, por meio do site geniusweb.online.
 
 Ao criar uma conta, acessar ou utilizar a plataforma, o usuário declara que leu, compreendeu e concorda com estes Termos.
 
 1. OBJETO
 
-O GeniusHub é uma plataforma digital voltada à gestão financeira e gestão de projetos, permitindo que usuários organizem informações como receitas, despesas, contas, cartões de crédito, orçamentos, metas financeiras, vendas, DRE, leads comerciais, projetos com quadro Kanban, tarefas e demais funcionalidades disponíveis no sistema.
+O Genius Finance é uma plataforma digital voltada à gestão financeira e gestão de projetos, permitindo que usuários organizem informações como receitas, despesas, contas, cartões de crédito, orçamentos, metas financeiras, vendas, DRE, leads comerciais, projetos com quadro Kanban, tarefas e demais funcionalidades disponíveis no sistema.
 
 A plataforma é fornecida conforme as funcionalidades disponíveis no momento de uso, podendo ser atualizada, modificada ou descontinuada parcialmente, conforme necessidade técnica, comercial ou operacional.
 

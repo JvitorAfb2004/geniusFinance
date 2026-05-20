@@ -1,5 +1,5 @@
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
-const RESEND_FROM = process.env.RESEND_FROM || "GeniusHub <onboarding@geniushub.app>";
+const RESEND_FROM = process.env.RESEND_FROM || "Genius Finance <onboarding@geniusfinance.app>";
 
 export async function sendWelcomeEmail(email: string, displayName: string) {
   if (!RESEND_API_KEY) {
@@ -12,7 +12,7 @@ export async function sendWelcomeEmail(email: string, displayName: string) {
     body: JSON.stringify({
       from: RESEND_FROM,
       to: [email],
-      subject: "Bem-vindo ao GeniusHub!",
+      subject: "Bem-vindo ao Genius Finance!",
       html: `<p>Olá ${displayName || "!"}</p><p>Seu trial de 7 dias começou.</p>`,
     }),
   });

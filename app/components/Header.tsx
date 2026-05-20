@@ -34,7 +34,7 @@ export function Header({
     : activeScope.accountName;
 
   return (
-    <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center px-4 sm:px-6 py-4 sm:py-5 shrink-0 w-full bg-bg gap-4">
+    <header className={`flex flex-col sm:flex-row justify-between items-start sm:items-center px-4 sm:px-6 py-4 sm:py-5 shrink-0 w-full gap-4 transition-colors ${activeScope.type === 'ACCOUNT' ? 'bg-primary/5 border-b-2 border-primary/20' : 'bg-bg'}`}>
       <div className="flex items-center gap-3 sm:gap-6 w-full sm:w-auto">
         <button
           onClick={onOpenMenu}

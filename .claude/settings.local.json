@@ -1,6 +1,5 @@
 {
   "permissions": {
-    "defaultMode": "bypassPermissions",
     "allow": [
       "Bash(*)",
       "PowerShell(*)",
@@ -15,7 +14,9 @@
       "ExitPlanMode",
       "ShareOnboardingGuide"
     ],
+    "deny": [],
     "ask": [],
-    "deny": []
-  }
+    "defaultMode": "bypassPermissions"
+  },
+  "prefersReducedMotion": true
 }
