@@ -313,10 +313,15 @@ export async function getAccountInvites(accountId: string): Promise<AccountInvit
   });
 }
 
-export async function revokeInvite(accountId: string, inviteId: string): Promise<void> {
+export async function revokeInvite(accountId: string, inviteId: string, email: string): Promise<void> {
   const batch = writeBatch(db);
   const ref = doc(db, `accounts/${accountId}/invites/${inviteId}`);
   batch.update(ref, { status: 'REVOKED' });
+  const normalizedEmail = email.toLowerCase().trim();
+  if (normalizedEmail) {
+    const userInviteRef = doc(db, `user-invites/${normalizedEmail}/pending`, inviteId);
+    batch.update(userInviteRef, { status: 'REVOKED' });
+  }
   await batch.commit();
 }
 

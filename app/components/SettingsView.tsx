@@ -20,7 +20,7 @@ export function SettingsView() {
     signOut, addCategory, updateCategory, deleteCategory,
     addTag, deleteTag,
     addLeadOption, updateLeadOption, deleteLeadOption,
-    createAccount, deleteAccount, migrateToAccount, inviteMember, acceptInvite, updateAccountSettings,
+    createAccount, deleteAccount, migrateToAccount, inviteMember, acceptInvite, cancelInvite, updateAccountSettings,
   } = useFinance();
 
   const [activeTab, setActiveTab] = useState<SettingsTab>('geral');
@@ -58,6 +58,9 @@ export function SettingsView() {
   const [inviteRole, setInviteRole] = useState<Exclude<AccountRole, 'owner'>>('member');
   const [sendingInvite, setSendingInvite] = useState(false);
   const [inviteDone, setInviteDone] = useState(false);
+  const [cancelingInviteId, setCancelingInviteId] = useState<string | null>(null);
+  const [savingAccountSetting, setSavingAccountSetting] = useState(false);
+  const [accountSettingSaved, setAccountSettingSaved] = useState(false);
   const [permissionTarget, setPermissionTarget] = useState<AccountMember | null>(null);
 
   useEffect(() => {
@@ -309,14 +312,27 @@ export function SettingsView() {
                         value={accounts.find(a => a.id === activeScope.accountId)?.settings?.dashboardAlertsVisibility || 'EVERYONE'}
                         onChange={async (e) => {
                           const val = e.target.value as 'EVERYONE' | 'ADMIN';
-                          await updateAccountSettings(activeScope.accountId, { dashboardAlertsVisibility: val });
+                          setSavingAccountSetting(true);
+                          setAccountSettingSaved(false);
+                          try {
+                            await updateAccountSettings(activeScope.accountId, { dashboardAlertsVisibility: val });
+                            setAccountSettingSaved(true);
+                          } finally {
+                            setSavingAccountSetting(false);
+                          }
                         }}
-                        className="px-3 py-1.5 border border-gray-200 rounded text-xs outline-none cursor-pointer bg-white"
+                        disabled={savingAccountSetting}
+                        className="px-3 py-1.5 border border-gray-200 rounded text-xs outline-none cursor-pointer bg-white disabled:opacity-60"
                       >
                         <option value="EVERYONE">Todos (Dono, Admin, Membro)</option>
                         <option value="ADMIN">Apenas Administradores (Dono, Admin)</option>
                       </select>
                     </div>
+                    {(savingAccountSetting || accountSettingSaved) && (
+                      <p className={`text-xs font-medium ${savingAccountSetting ? 'text-blue-600' : 'text-emerald-600'}`}>
+                        {savingAccountSetting ? 'Salvando alteração...' : 'Alteração salva.'}
+                      </p>
+                    )}
                   </div>
                 </div>
               )}
@@ -552,7 +568,7 @@ export function SettingsView() {
                     <span className="text-xs font-semibold text-gray-500 uppercase">Convites Pendentes ({accountInvites.length})</span>
                   </div>
                   {accountInvites.map((inv) => (
-                    <div key={inv.id} className="px-3 py-2.5 flex items-center justify-between border-t border-gray-50">
+                    <div key={inv.id} className="px-3 py-2.5 flex items-center justify-between gap-3 border-t border-gray-50">
                       <div className="flex items-center gap-2">
                         <Mail className="w-3.5 h-3.5 text-gray-400" />
                         <div>
@@ -562,9 +578,27 @@ export function SettingsView() {
                           </p>
                         </div>
                       </div>
-                      <span className="text-[0.6rem] font-semibold uppercase px-2 py-0.5 rounded bg-amber-100 text-amber-700">
-                        Pendente
-                      </span>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className="text-[0.6rem] font-semibold uppercase px-2 py-0.5 rounded bg-amber-100 text-amber-700">
+                          Pendente
+                        </span>
+                        {(activeScope.role === 'owner' || activeScope.role === 'admin') && (
+                          <button
+                            onClick={async () => {
+                              setCancelingInviteId(inv.id);
+                              try {
+                                await cancelInvite(inv.id);
+                              } finally {
+                                setCancelingInviteId(null);
+                              }
+                            }}
+                            disabled={cancelingInviteId === inv.id}
+                            className="text-xs font-semibold text-red-600 hover:text-red-700 border border-red-100 px-2 py-1 rounded-md disabled:opacity-50 cursor-pointer"
+                          >
+                            {cancelingInviteId === inv.id ? 'Cancelando...' : 'Cancelar'}
+                          </button>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>

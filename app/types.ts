@@ -294,6 +294,7 @@ export interface FinanceContextState {
   migrateToAccount: (accountId: string) => Promise<{ collection: string; migrated: number; skipped: number; errors: number }[]>;
   inviteMember: (email: string, role: Exclude<AccountRole, 'owner'>) => Promise<void>;
   acceptInvite: (inviteId: string, accountId: string) => Promise<void>;
+  cancelInvite: (inviteId: string) => Promise<void>;
   updateAccountSettings: (accountId: string, settings: Partial<AccountSettings>) => Promise<void>;
   pendingInvites: AccountInvite[];
   addTransaction: (tx: Omit<Transaction, 'id' | 'userId' | 'createdAt' | 'updatedAt'>, generateMultiple?: 'INSTALLMENTS' | 'FIXED', count?: number) => Promise<void>;

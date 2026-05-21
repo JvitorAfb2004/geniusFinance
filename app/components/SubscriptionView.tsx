@@ -102,7 +102,7 @@ export function SubscriptionView() {
   const hasPaymentMethod = !!sub?.paymentMethod;
 
   return (
-    <div className="max-w-2xl mx-auto flex flex-col gap-6">
+    <div className="w-full max-w-5xl flex flex-col gap-6">
       {/* Status Card */}
       <div className="bg-white rounded-xl border border-[#e2e8f0] p-6">
         <h2 className="text-xl font-bold text-gray-900 mb-1">Sua Assinatura</h2>

@@ -63,7 +63,7 @@ export function ReportIssueView() {
 
   if (submitted) {
     return (
-      <div className="max-w-lg mx-auto flex flex-col items-center py-20 text-center">
+      <div className="w-full max-w-5xl flex flex-col items-center py-20 text-center">
         <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mb-4">
           <Check className="w-8 h-8" />
         </div>
@@ -84,7 +84,7 @@ export function ReportIssueView() {
   ];
 
   return (
-    <div className="max-w-2xl mx-auto flex flex-col gap-6">
+    <div className="w-full max-w-5xl grid grid-cols-1 xl:grid-cols-[minmax(0,1.1fr)_minmax(320px,0.9fr)] gap-6 items-start">
       <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-[#e2e8f0] p-6 flex flex-col gap-4">
         <h2 className="text-xl font-bold text-gray-900">Reportar Problema</h2>
         <p className="text-sm text-gray-500 -mt-2">Encontrou um bug? Tem uma sugestão? Conte pra gente.</p>

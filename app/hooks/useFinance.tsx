@@ -9,7 +9,7 @@ import { ALL_DEFAULT_LEAD_OPTIONS } from '../lib/leadDefaults';
 import { resolveDataPath } from '../lib/pathAdapter';
 import type { FinanceCollectionName } from '../lib/pathAdapter';
 import { ensureUserOnboardingDocs } from '../lib/onboarding';
-import { createAccount, getUserAccounts, getAccountMembers, getAccountInvites, migrateUserToAccount, createInvite, getPendingInvites, acceptInvite as acceptInviteSvc, archiveAccount, updateAccountSettings } from '../lib/accountService';
+import { createAccount, getUserAccounts, getAccountMembers, getAccountInvites, migrateUserToAccount, createInvite, getPendingInvites, acceptInvite as acceptInviteSvc, archiveAccount, updateAccountSettings, revokeInvite } from '../lib/accountService';
 import { User, onAuthStateChanged } from 'firebase/auth';
 import {
   collection, query, onSnapshot, doc, writeBatch, serverTimestamp,
@@ -854,7 +854,7 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       const colPath = resolveDataPath(activeScope, user.uid, 'spending-limits');
       const docRef = doc(collection(db, colPath));
       const batch = writeBatch(db);
-      batch.set(docRef, {
+      const payload: Record<string, unknown> = {
         userId: user.uid,
         context: data.context,
         name: data.name,
@@ -862,7 +862,10 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
         categoryIds: data.categoryIds,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
-      });
+      };
+      if (data.month !== undefined) payload.month = data.month;
+      if (data.year !== undefined) payload.year = data.year;
+      batch.set(docRef, payload);
       await batch.commit();
     } catch (error) {
       handleFirestoreError(error, 'create', resolveDataPath(activeScope, user.uid, 'spending-limits'), user);
@@ -875,7 +878,10 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       const colPath = resolveDataPath(activeScope, user.uid, 'spending-limits');
       const docRef = doc(db, colPath, id);
       const batch = writeBatch(db);
-      batch.update(docRef, { ...updates, updatedAt: serverTimestamp() });
+      const cleanUpdates = Object.fromEntries(
+        Object.entries(updates).filter(([, value]) => value !== undefined)
+      );
+      batch.update(docRef, { ...cleanUpdates, updatedAt: serverTimestamp() });
       await batch.commit();
     } catch (error) {
       handleFirestoreError(error, 'update', `${resolveDataPath(activeScope, user.uid, 'spending-limits')}/${id}`, user);
@@ -1279,6 +1285,27 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const cancelInviteFn = async (inviteId: string) => {
+    if (!user || activeScope.type !== 'ACCOUNT') return;
+    const invite = accountInvites.find((i) => i.id === inviteId);
+    if (!invite) return;
+    await revokeInvite(activeScope.accountId, inviteId, invite.email);
+    setAccountInvites((prev) => prev.filter((i) => i.id !== inviteId));
+  };
+
+  const updateAccountSettingsFn = async (accountId: string, settings: Partial<Account['settings']>) => {
+    await updateAccountSettings(accountId, settings);
+    setAccounts((prev) => prev.map((account) => (
+      account.id === accountId
+        ? { ...account, settings: { ...(account.settings || {}), ...settings } as Account['settings'] }
+        : account
+    )));
+    setActiveScope((prev) => {
+      if (prev.type !== 'ACCOUNT' || prev.accountId !== accountId) return prev;
+      return { ...prev };
+    });
+  };
+
   return (
     <FinanceContext.Provider value={{
       user,
@@ -1314,7 +1341,8 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       migrateToAccount: migrateToAccountFn,
       inviteMember: inviteMemberFn,
       acceptInvite: acceptInviteFn,
-      updateAccountSettings,
+      cancelInvite: cancelInviteFn,
+      updateAccountSettings: updateAccountSettingsFn,
       pendingInvites,
       addTransaction,
       updateTransaction,

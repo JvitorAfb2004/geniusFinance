@@ -105,7 +105,7 @@ service cloud.firestore {
     }
 
     function isValidAccountSpendingLimitKeysSize(data) {
-      let size = 6;
+      let size = 7;
       let s1 = size + ('month' in data ? 1 : 0);
       let s2 = s1 + ('year' in data ? 1 : 0);
       return data.keys().size() == s2;
@@ -231,7 +231,7 @@ service cloud.firestore {
     }
 
     function isValidSpendingLimitKeysSize(data) {
-      let size = 6;
+      let size = 7;
       let s1 = size + ('month' in data ? 1 : 0);
       let s2 = s1 + ('year' in data ? 1 : 0);
       return data.keys().size() == s2;
@@ -894,7 +894,12 @@ service cloud.firestore {
 
       allow update: if isSignedIn() &&
         incoming().diff(existing()).affectedKeys().hasOnly(['status']) &&
-        incoming().status in ['ACCEPTED', 'REVOKED'];
+        incoming().status in ['ACCEPTED', 'REVOKED'] &&
+        (
+          (request.auth.token.email != null &&
+           request.auth.token.email.toLowerCase() == email) ||
+          existing().createdBy == request.auth.uid
+        );
 
       allow delete: if isSignedIn();
     }
