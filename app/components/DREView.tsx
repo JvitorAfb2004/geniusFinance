@@ -14,6 +14,11 @@ import { ptBR } from 'date-fns/locale';
 import { TrendingUp, TrendingDown, DollarSign, Percent, ArrowUpRight, ArrowDownRight, Lightbulb, Loader2 } from 'lucide-react';
 import { useAnimatedValue } from '../hooks/useAnimatedValue';
 
+function formatTooltipCurrency(value: unknown) {
+  const numeric = Array.isArray(value) ? Number(value[0]) : Number(value);
+  return formatCurrency(Number.isFinite(numeric) ? numeric : 0);
+}
+
 const COLORS = ['#ef4444', '#f59e0b', '#3b82f6', '#10b981', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'];
 
 export default function DREView() {
@@ -142,7 +147,7 @@ export default function DREView() {
                 <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                 <XAxis dataKey="name" tick={{ fontSize: 12 }} />
                 <YAxis tick={{ fontSize: 12 }} tickFormatter={(v) => `R$${(v / 1000).toFixed(0)}k`} />
-                <Tooltip formatter={(v: number) => formatCurrency(v)} />
+                <Tooltip formatter={formatTooltipCurrency} />
                 <Bar dataKey="orcado" fill="#94a3b8" name="Orçado" radius={[4, 4, 0, 0]} />
                 <Bar dataKey="real" fill="#3b82f6" name="Real" radius={[4, 4, 0, 0]} />
               </BarChart>
@@ -159,7 +164,7 @@ export default function DREView() {
               <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
               <XAxis dataKey="name" tick={{ fontSize: 12 }} />
               <YAxis tick={{ fontSize: 12 }} tickFormatter={(v) => `R$${(v / 1000).toFixed(0)}k`} />
-              <Tooltip formatter={(v: number) => formatCurrency(v)} />
+              <Tooltip formatter={formatTooltipCurrency} />
               <Line
                 type="monotone"
                 dataKey="lucro"
@@ -369,7 +374,7 @@ function ForecastSection() {
               <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
               <XAxis dataKey="name" tick={{ fontSize: 12 }} />
               <YAxis tick={{ fontSize: 12 }} tickFormatter={(v) => `R$${(v / 1000).toFixed(0)}k`} />
-              <Tooltip formatter={(v: number) => formatCurrency(v)} />
+              <Tooltip formatter={formatTooltipCurrency} />
               <Bar dataKey="receitaReal" fill="#10b981" name="Receita Real" radius={[4, 4, 0, 0]} />
               <Bar dataKey="receitaPrevista" fill="#6ee7b7" name="Receita Prevista" radius={[4, 4, 0, 0]} />
             </BarChart>

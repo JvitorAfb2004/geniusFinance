@@ -17,20 +17,21 @@ export async function action({ request }: ActionFunctionArgs) {
 
   const totalAmount = items.reduce((s: number, i: { unitPrice?: number; quantity?: number }) => s + (Number(i.unitPrice || 0) * Number(i.quantity || 0)), 0);
   let currentSub = await getSubscriptionByEmail(userEmail);
+  let abacateCustomerId = currentSub?.abacateCustomerId;
 
-  if (!currentSub || !currentSub.abacateCustomerId) {
+  if (!abacateCustomerId) {
     const customer = await createCustomer({
       name: customerName,
       email: userEmail,
       cellphone: body.cellphone || undefined,
       taxId: body.taxId || undefined,
     });
-    currentSub = { ...(currentSub || {}), abacateCustomerId: customer.id };
+    abacateCustomerId = customer.id;
   }
 
   if (paymentMethod === "CARD") {
     const checkout = await createSubscriptionCheckout({
-      customerId: currentSub.abacateCustomerId,
+      customerId: abacateCustomerId,
       methods: ["CARD"],
       metadata: { userEmail },
       items: items.map((i: { abacateProductId?: string; planId?: string; quantity?: number }) => ({
@@ -40,6 +41,7 @@ export async function action({ request }: ActionFunctionArgs) {
     });
     await setSubscriptionByEmail(userEmail, {
       ...currentSub,
+      abacateCustomerId,
       status: "pending",
       paymentMethod: "CARD",
       items,
@@ -60,6 +62,7 @@ export async function action({ request }: ActionFunctionArgs) {
 
   await setSubscriptionByEmail(userEmail, {
     ...currentSub,
+    abacateCustomerId,
     status: "pending",
     paymentMethod: "PIX",
     items,

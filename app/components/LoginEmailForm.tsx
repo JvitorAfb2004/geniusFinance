@@ -59,9 +59,10 @@ export function LoginEmailForm({ termsAccepted, onTermsChange }: LoginEmailFormP
           displayName: name.trim(),
           authProvider: 'email',
         });
+        const token = await credential.user.getIdToken();
         fetch('/api/auth/welcome', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
           body: JSON.stringify({
             email: credential.user.email || email.trim(),
             displayName: name.trim(),

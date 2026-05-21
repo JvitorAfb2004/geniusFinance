@@ -20,7 +20,7 @@ export function SettingsView() {
     signOut, addCategory, updateCategory, deleteCategory,
     addTag, deleteTag,
     addLeadOption, updateLeadOption, deleteLeadOption,
-    createAccount, deleteAccount, migrateToAccount, inviteMember, acceptInvite,
+    createAccount, deleteAccount, migrateToAccount, inviteMember, acceptInvite, updateAccountSettings,
   } = useFinance();
 
   const [activeTab, setActiveTab] = useState<SettingsTab>('geral');
@@ -292,6 +292,34 @@ export function SettingsView() {
                     : `Papel: ${activeScope.role === 'owner' ? 'Dono' : activeScope.role === 'admin' ? 'Administrador' : 'Membro'}`}
                 </p>
               </div>
+
+              {/* Account Settings (Global) */}
+              {activeScope.type === 'ACCOUNT' && (activeScope.role === 'owner' || activeScope.role === 'admin') && (
+                <div className="border border-gray-100 rounded-lg overflow-hidden">
+                  <div className="px-3 py-2 bg-gray-50 flex items-center justify-between">
+                    <span className="text-xs font-semibold text-gray-500 uppercase">Configurações de Visibilidade</span>
+                  </div>
+                  <div className="p-4 flex flex-col gap-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div>
+                        <p className="text-sm font-semibold text-gray-700">Alertas de Pagamento (Dashboard)</p>
+                        <p className="text-xs text-gray-500">Define quem pode ver o alerta de "Despesas/Custos próximos do pagamento" no dashboard.</p>
+                      </div>
+                      <select
+                        value={accounts.find(a => a.id === activeScope.accountId)?.settings?.dashboardAlertsVisibility || 'EVERYONE'}
+                        onChange={async (e) => {
+                          const val = e.target.value as 'EVERYONE' | 'ADMIN';
+                          await updateAccountSettings(activeScope.accountId, { dashboardAlertsVisibility: val });
+                        }}
+                        className="px-3 py-1.5 border border-gray-200 rounded text-xs outline-none cursor-pointer bg-white"
+                      >
+                        <option value="EVERYONE">Todos (Dono, Admin, Membro)</option>
+                        <option value="ADMIN">Apenas Administradores (Dono, Admin)</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* My Accounts */}
               <div className="border border-gray-100 rounded-lg overflow-hidden">

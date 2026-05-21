@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useFinance } from '../hooks/useFinance.tsx';
+import { useFinance } from '../hooks/useFinance';
 import { format, isSameMonth, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { formatCurrency, cn } from '../lib/utils';

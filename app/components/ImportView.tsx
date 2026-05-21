@@ -3,7 +3,7 @@ import { useFinance } from '../hooks/useFinance';
 import { parseTransactions as aiParseTransactions } from '../lib/ai';
 import { formatCurrency } from '../lib/utils';
 import { Upload, FileSpreadsheet, FileText, Trash2, Pencil, Check, X, Loader2, Plus } from 'lucide-react';
-import * as XLSX from 'xlsx';
+import type { Transaction } from '../types';
 
 interface ParsedTx {
   key: string;
@@ -40,95 +40,8 @@ export default function ImportView() {
     if (file.name.endsWith('.csv')) {
       reader.onload = (ev) => parseText(ev.target?.result as string);
       reader.readAsText(file);
-    } else if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
-      reader.onload = (ev) => {
-        const wb = XLSX.read(ev.target?.result, { type: 'array' });
-        const allRows: string[] = [];
-        // Processar cada aba (mês)
-        for (const sheetName of wb.SheetNames) {
-          const sheet = wb.Sheets[sheetName];
-          const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' }) as unknown[][];
-          const entries: string[] = [];
-          const expenses: string[] = [];
-          let inExpenses = false;
-          let inCard = false;
-
-          for (const row of rows) {
-            const vals = row.map((c) => String(c).trim()).filter((c) => c && c !== '0');
-            if (vals.length < 2) continue;
-
-            // Detect sections
-            const rowStr = vals.join(' ').toUpperCase();
-            if (rowStr.includes('DESPESAS') || rowStr.includes('SAIDAS') || rowStr.includes('PAGAR')) {
-              inExpenses = true;
-              continue;
-            }
-            if (rowStr.includes('CARTÃO') || rowStr.includes('CARTAO')) {
-              inCard = true;
-              continue;
-            }
-            if (rowStr.includes('TOTAL') || rowStr.includes('SALDO') || rowStr.includes('FALTA') || rowStr.includes('SOBRAR') || rowStr.includes('GUARDAR') || rowStr.includes('CAIXINHA') || rowStr.includes('DEBITO') || rowStr.includes('DÉBITO')) {
-              continue;
-            }
-            if (rowStr.includes('ENTRADAS') && !inExpenses) {
-              inExpenses = false;
-              inCard = false;
-              continue;
-            }
-
-            // Try to extract pairs: desc + value
-            for (let i = 0; i < vals.length - 1; i++) {
-              const a = vals[i];
-              const b = vals[i + 1];
-              const aIsNum = /^-?\d[\d.,]*$/.test(a);
-              const bIsNum = /^-?\d[\d.,]*$/.test(b);
-
-              // Desc followed by number = entry
-              if (!aIsNum && bIsNum && a.length > 1 && !/^(MEIO|FINAL|SIM|NAO|PAGO)$/i.test(a)) {
-                const num = parseFloat(b.replace(',', '.'));
-                if (num > 0 && num < 100000) {
-                  if (inCard) {
-                    expenses.push(`${a}: ${num} (cartao, ${sheetName})`);
-                  } else if (inExpenses) {
-                    expenses.push(`${a}: ${num} (${sheetName})`);
-                  } else {
-                    entries.push(`${a}: ${num} (${sheetName})`);
-                  }
-                  i++; // skip next
-                }
-              }
-              // Number followed by desc (less common)
-              else if (aIsNum && !bIsNum && b.length > 1) {
-                const num = parseFloat(a.replace(',', '.'));
-                if (num > 0 && num < 100000) {
-                  if (inCard) {
-                    expenses.push(`${b}: ${num} (cartao, ${sheetName})`);
-                  } else if (inExpenses) {
-                    expenses.push(`${b}: ${num} (${sheetName})`);
-                  } else {
-                    entries.push(`${b}: ${num} (${sheetName})`);
-                  }
-                  i++;
-                }
-              }
-            }
-          }
-
-          if (entries.length > 0 || expenses.length > 0) {
-            allRows.push(`--- ${sheetName} ---`);
-            if (entries.length > 0) allRows.push(`ENTRADAS:\n${entries.join('\n')}`);
-            if (expenses.length > 0) allRows.push(`DESPESAS:\n${expenses.join('\n')}`);
-          }
-        }
-        const text = allRows.join('\n\n');
-        if (!text.trim()) {
-          setError('Nao foi possivel extrair dados do arquivo. Tente colar o conteudo como texto.');
-          setLoading(false);
-          return;
-        }
-        parseText(text);
-      };
-      reader.readAsArrayBuffer(file);
+    } else {
+      setError('Importação por arquivo aceita CSV. Para Excel, copie e cole os dados como texto.');
     }
     e.target.value = '';
   }
@@ -196,13 +109,14 @@ export default function ImportView() {
     setImportedCount(0);
     for (const tx of parsedTxs) {
       try {
-        const base: Record<string, unknown> = {
+        const base: Omit<Transaction, 'id' | 'userId' | 'createdAt' | 'updatedAt'> = {
           title: tx.title,
           amount: tx.amount,
           date: tx.date,
           type: tx.type,
           status: tx.status,
           context: activeContext,
+          tagIds: [],
         };
         if (tx.categoryId) base.categoryId = tx.categoryId;
         await addTransaction(base);
@@ -236,9 +150,9 @@ export default function ImportView() {
               <FileSpreadsheet className="w-10 h-10 text-slate-400" />
               <div>
                 <p className="font-semibold text-slate-700">Clique para enviar</p>
-                <p className="text-sm text-slate-400 mt-1">Excel (.xlsx) ou CSV</p>
+                <p className="text-sm text-slate-400 mt-1">CSV</p>
               </div>
-              <input type="file" accept=".xlsx,.xls,.csv" onChange={handleFile} className="hidden" />
+              <input type="file" accept=".csv" onChange={handleFile} className="hidden" />
             </label>
           </div>
 

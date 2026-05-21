@@ -1,5 +1,6 @@
 import React from 'react';
-import { useFinance } from '../hooks/useFinance.tsx';
+import { useLocation } from 'react-router';
+import { useFinance } from '../hooks/useFinance';
 import { ActiveScope } from '../types';
 import { ChevronLeft, ChevronRight, Eye, EyeOff, Menu, Building2, User } from 'lucide-react';
 import { format, addMonths, subMonths } from 'date-fns';
@@ -15,6 +16,31 @@ export function Header({
   onToggleDashboardValues?: () => void;
 }) {
   const { activeScope, setActiveScope, accounts, user, selectedMonth, setSelectedMonth } = useFinance();
+  const location = useLocation();
+
+  const pageTitles: Record<string, string> = {
+    '/dashboard': 'Visão Geral',
+    '/transactions': 'Entradas / Saídas',
+    '/fixed-monthly': 'Fixos Mensais',
+    '/credit-cards': 'Cartões de Crédito',
+    '/dre': 'DRE',
+    '/budget': 'Orçamento',
+    '/spending-limits': 'Limites',
+    '/sales': 'Vendas',
+    '/goals': 'Metas',
+    '/reports': 'Relatórios Anuais',
+    '/subscription': 'Assinatura',
+    '/report-issue': 'Reportar Problema',
+    '/commercial': 'Leads',
+    '/projects': 'Projetos',
+    '/service-types': 'Tipos de Serviço',
+    '/settings': 'Configurações',
+    '/admin/plans': 'Planos',
+    '/admin/subscriptions': 'Assinaturas',
+    '/admin/reports': 'Reports',
+  };
+
+  const pageTitle = pageTitles[location.pathname] || 'Genius Finance';
 
   const scopeOptions: { label: string; scope: ActiveScope; role?: string }[] = [
     { label: 'Pessoal', scope: { type: 'PERSONAL', userId: user?.uid || '' } },
@@ -29,10 +55,6 @@ export function Header({
     });
   }
 
-  const currentLabel = activeScope.type === 'PERSONAL'
-    ? 'Pessoal'
-    : activeScope.accountName;
-
   return (
     <header className={`flex flex-col sm:flex-row justify-between items-start sm:items-center px-4 sm:px-6 py-4 sm:py-5 shrink-0 w-full gap-4 transition-colors ${activeScope.type === 'ACCOUNT' ? 'bg-primary/5 border-b-2 border-primary/20' : 'bg-bg'}`}>
       <div className="flex items-center gap-3 sm:gap-6 w-full sm:w-auto">
@@ -42,13 +64,13 @@ export function Header({
         >
           <Menu className="w-6 h-6" />
         </button>
-        <h1 className="text-[1.3rem] sm:text-[1.8rem] font-bold text-text-primary tracking-tight">Visão Geral</h1>
+        <h1 className="text-[1.3rem] sm:text-[1.8rem] font-bold text-text-primary tracking-tight">{pageTitle}</h1>
 
         {/* Month Selector */}
         <div className="flex items-center gap-2 sm:gap-3 text-sm font-medium bg-white/40 px-2 py-1 rounded-lg border border-border ml-auto sm:ml-0">
           <button
             onClick={() => setSelectedMonth(subMonths(selectedMonth, 1))}
-            className="p-1 text-text-secondary hover:text-text-primary rounded-md transition-colors border-none bg-transparent cursor-pointer hidden sm:block"
+            className="p-1 text-text-secondary hover:text-text-primary rounded-md transition-colors border-none bg-transparent cursor-pointer"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
@@ -57,7 +79,7 @@ export function Header({
           </span>
           <button
             onClick={() => setSelectedMonth(addMonths(selectedMonth, 1))}
-            className="p-1 text-text-secondary hover:text-text-primary rounded-md transition-colors border-none bg-transparent cursor-pointer hidden sm:block"
+            className="p-1 text-text-secondary hover:text-text-primary rounded-md transition-colors border-none bg-transparent cursor-pointer"
           >
             <ChevronRight className="w-4 h-4" />
           </button>

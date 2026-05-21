@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { useFinance } from '../hooks/useFinance.tsx';
+import { useFinance } from '../hooks/useFinance';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
   LineChart, Line

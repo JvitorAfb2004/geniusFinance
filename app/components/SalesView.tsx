@@ -15,6 +15,11 @@ import { Target, TrendingUp, Zap, Percent, Plus, Trash2, Users, Tag } from 'luci
 import SalesTargetModal from './SalesTargetModal';
 import { useAnimatedValue } from '../hooks/useAnimatedValue';
 
+function formatTooltipCurrency(value: unknown) {
+  const numeric = Array.isArray(value) ? Number(value[0]) : Number(value);
+  return formatCurrency(Number.isFinite(numeric) ? numeric : 0);
+}
+
 export default function SalesView() {
   const { transactions, salesTargets, categories, activeContext, selectedMonth, deleteSalesTarget } = useFinance();
   const [isTargetModalOpen, setIsTargetModalOpen] = useState(false);
@@ -206,7 +211,7 @@ export default function SalesView() {
               <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
               <XAxis dataKey="dia" tick={{ fontSize: 10 }} interval={Math.max(Math.floor(dailyData.length / 10), 1)} />
               <YAxis tick={{ fontSize: 11 }} tickFormatter={formatCurrencyShort} />
-              <Tooltip formatter={(v: number) => formatCurrency(v)} />
+              <Tooltip formatter={formatTooltipCurrency} />
               <Bar dataKey="vendas" fill="#10b981" name="Vendas" radius={[3, 3, 0, 0]} />
               {mainTarget > 0 && (
                 <Line type="monotone" dataKey="metaDiaria" stroke="#ef4444" strokeWidth={2} name="Meta Diaria" dot={false} />
@@ -226,7 +231,7 @@ export default function SalesView() {
                 <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                 <XAxis dataKey="dia" tick={{ fontSize: 10 }} interval={Math.max(Math.floor(dailyData.length / 10), 1)} />
                 <YAxis tick={{ fontSize: 11 }} tickFormatter={formatCurrencyShort} />
-                <Tooltip formatter={(v: number) => formatCurrency(v)} />
+                <Tooltip formatter={formatTooltipCurrency} />
                 <Legend />
                 <Line type="monotone" dataKey="acumulado" stroke="#10b981" strokeWidth={2} name="Vendas Acumuladas" dot={false} />
                 <Line type="monotone" dataKey="metaAcumulada" stroke="#94a3b8" strokeWidth={2} strokeDasharray="5 5" name="Meta Acumulada" dot={false} />

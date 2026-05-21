@@ -3,6 +3,11 @@ import { formatCurrency } from '../lib/utils';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { Calculator, TrendingUp, CreditCard, Home } from 'lucide-react';
 
+function formatTooltipCurrency(value: unknown) {
+  const numeric = Array.isArray(value) ? Number(value[0]) : Number(value);
+  return formatCurrency(Number.isFinite(numeric) ? numeric : 0);
+}
+
 type CalcTab = 'INVESTMENT' | 'FINANCING' | 'INSTALLMENT';
 
 export default function CalculatorsView() {
@@ -97,7 +102,7 @@ function InvestmentCalc() {
               <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
               <XAxis dataKey="mes" tick={{ fontSize: 11 }} tickFormatter={(v) => `${Math.floor(v / 12)}a`} />
               <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `R$${((v as number) / 1000).toFixed(0)}k`} />
-              <Tooltip formatter={(v: number) => formatCurrency(v)} labelFormatter={(l) => `Mês ${l}`} />
+              <Tooltip formatter={formatTooltipCurrency} labelFormatter={(l) => `Mês ${l}`} />
               <Line type="monotone" dataKey="montante" stroke="#3b82f6" strokeWidth={2} name="Montante" dot={false} />
               <Line type="monotone" dataKey="investido" stroke="#94a3b8" strokeWidth={2} strokeDasharray="5 5" name="Investido" dot={false} />
             </LineChart>

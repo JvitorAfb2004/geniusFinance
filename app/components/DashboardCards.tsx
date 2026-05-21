@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useFinance } from '../hooks/useFinance.tsx';
+import { useFinance } from '../hooks/useFinance';
 import { formatCurrency, cn } from '../lib/utils';
 import { addDays, endOfDay, isSameMonth, isWithinInterval, parseISO, startOfDay } from 'date-fns';
 import { Settings2, Wallet, TrendingUp, TrendingDown, CreditCard, DollarSign, Percent, ArrowDownToLine, ArrowUpToLine, CalendarDays, CheckCircle2, Clock3 } from 'lucide-react';

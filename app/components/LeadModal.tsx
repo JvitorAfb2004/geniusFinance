@@ -149,7 +149,7 @@ export default function LeadModal({ lead, onClose }: { lead?: Lead; onClose: () 
     setSearch: (s: string) => void,
     showDropdown: boolean,
     setShowDropdown: (s: boolean) => void,
-    dropdownRef: React.RefObject<HTMLDivElement>,
+    dropdownRef: React.RefObject<HTMLDivElement | null>,
   ) => (
     <div className="flex flex-col gap-1">
       <label className="text-xs font-medium text-gray-500">{label}</label>

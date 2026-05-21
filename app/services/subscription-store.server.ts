@@ -4,13 +4,35 @@ const SUB_COL = "subscriptions";
 const BILLING_COL = "billing_history";
 const EVENTS_COL = "processed_webhook_events";
 
-export async function getSubscriptionByEmail(email: string) {
+export interface SubscriptionRecord {
+  id: string;
+  userEmail?: string;
+  status?: string;
+  paymentMethod?: "CARD" | "PIX" | string;
+  items?: unknown[];
+  totalAmount?: number;
+  abacateCustomerId?: string;
+  abacateSubscriptionId?: string;
+  pendingPix?: {
+    id?: string;
+    brCode?: string;
+    brCodeBase64?: string;
+    expiresAt?: string;
+  } | null;
+  currentPeriodStart?: string;
+  currentPeriodEnd?: string;
+  canceledAt?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export async function getSubscriptionByEmail(email: string): Promise<SubscriptionRecord | null> {
   if (!email) return null;
   const db = getAdminFirestore();
   const snap = await db.collection(SUB_COL).where("userEmail", "==", email.toLowerCase().trim()).limit(1).get();
   if (snap.empty) return null;
   const doc = snap.docs[0];
-  return { id: doc.id, ...doc.data() };
+  return { id: doc.id, ...doc.data() } as SubscriptionRecord;
 }
 
 export async function setSubscriptionByEmail(email: string, data: Record<string, unknown>) {
@@ -52,5 +74,5 @@ export async function markWebhookEventProcessed(eventId: string) {
 export async function getAllSubscriptions() {
   const db = getAdminFirestore();
   const snap = await db.collection(SUB_COL).orderBy("updatedAt", "desc").get();
-  return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  return snap.docs.map((d) => ({ id: d.id, ...d.data() } as SubscriptionRecord));
 }

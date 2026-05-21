@@ -44,6 +44,13 @@ service cloud.firestore {
       return roleInAccount(accountId) == 'owner';
     }
 
+    function isValidAccountSettings(settings) {
+      return settings is map &&
+        settings.keys().hasOnly(['dashboardAlertsVisibility']) &&
+        (!('dashboardAlertsVisibility' in settings) ||
+          settings.dashboardAlertsVisibility in ['EVERYONE', 'ADMIN']);
+    }
+
     // ── Account-scoped schema validators (no userId==auth.uid requirement) ──
 
     function isValidAccountTransactionKeysSize(data) {
@@ -523,12 +530,23 @@ service cloud.firestore {
         incoming().ownerId is string && incoming().ownerId == request.auth.uid &&
         incoming().status in ['ACTIVE', 'ARCHIVED'];
 
-      allow update: if isAccountOwner(accountId) &&
-        incoming().diff(existing()).affectedKeys().hasOnly(['name', 'status', 'updatedAt']) &&
+      allow update: if (
+        isAccountOwner(accountId) &&
+        incoming().diff(existing()).affectedKeys().hasOnly(['name', 'status', 'settings', 'updatedAt']) &&
         (!('name' in incoming()) || (incoming().name is string && incoming().name.size() > 0 && incoming().name.size() <= 100)) &&
         (!('status' in incoming()) || incoming().status in ['ACTIVE', 'ARCHIVED']) &&
+        (!('settings' in incoming()) || isValidAccountSettings(incoming().settings)) &&
         incoming().ownerId == existing().ownerId &&
-        incoming().createdAt == existing().createdAt;
+        incoming().createdAt == existing().createdAt
+      ) || (
+        isAccountOwnerOrAdmin(accountId) &&
+        incoming().diff(existing()).affectedKeys().hasOnly(['settings', 'updatedAt']) &&
+        isValidAccountSettings(incoming().settings) &&
+        incoming().ownerId == existing().ownerId &&
+        incoming().name == existing().name &&
+        incoming().status == existing().status &&
+        incoming().createdAt == existing().createdAt
+      );
 
       allow delete: if isAccountOwner(accountId);
     }
@@ -864,7 +882,9 @@ service cloud.firestore {
     // ═══════════════════════════════════════════════════════════
 
     match /user-invites/{email}/pending/{inviteId} {
-      allow read: if isSignedIn();
+      allow read: if isSignedIn() &&
+        request.auth.token.email != null &&
+        email == request.auth.token.email.toLowerCase();
 
       allow create: if isSignedIn() &&
         incoming().keys().hasAll(['accountId', 'accountName', 'email', 'role', 'status', 'createdBy', 'expiresAt', 'createdAt']) &&

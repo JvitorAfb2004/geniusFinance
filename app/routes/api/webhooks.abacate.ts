@@ -63,7 +63,7 @@ export async function action({ request }: ActionFunctionArgs) {
 
   const now = new Date().toISOString();
   const eventType = event.event as string;
-  const previousData = previous as Record<string, unknown>;
+  const previousData = previous as unknown as Record<string, unknown>;
 
   if (eventType === "subscription.completed" || eventType === "transparent.completed") {
     await setSubscriptionByEmail(eventEmail, {

@@ -12,12 +12,17 @@ export type ActiveScope =
 export type ProjectStatus = 'BACKLOG' | 'IN_PROGRESS' | 'REVIEW' | 'DONE' | 'CANCELLED';
 export type DRESection = 'RECEITA' | 'CUSTOS' | 'DESPESAS';
 
+export interface AccountSettings {
+  dashboardAlertsVisibility: 'EVERYONE' | 'ADMIN';
+}
+
 export interface Account {
   id: string;
   name: string;
   ownerId: string;
   memberRole?: AccountRole;
   status: 'ACTIVE' | 'ARCHIVED';
+  settings?: AccountSettings;
   createdAt: string;
   updatedAt: string;
 }
@@ -289,6 +294,7 @@ export interface FinanceContextState {
   migrateToAccount: (accountId: string) => Promise<{ collection: string; migrated: number; skipped: number; errors: number }[]>;
   inviteMember: (email: string, role: Exclude<AccountRole, 'owner'>) => Promise<void>;
   acceptInvite: (inviteId: string, accountId: string) => Promise<void>;
+  updateAccountSettings: (accountId: string, settings: Partial<AccountSettings>) => Promise<void>;
   pendingInvites: AccountInvite[];
   addTransaction: (tx: Omit<Transaction, 'id' | 'userId' | 'createdAt' | 'updatedAt'>, generateMultiple?: 'INSTALLMENTS' | 'FIXED', count?: number) => Promise<void>;
   updateTransaction: (id: string, updates: Partial<Transaction>, applyToFuture?: boolean) => Promise<void>;

@@ -158,6 +158,7 @@ export async function getUserAccounts(
           ownerId: data.ownerId,
           memberRole: mData.role as AccountRole,
           status: data.status,
+          settings: data.settings as Account['settings'],
           createdAt: data.createdAt?.toDate?.().toISOString() || new Date().toISOString(),
           updatedAt: data.updatedAt?.toDate?.().toISOString() || new Date().toISOString(),
         },
@@ -331,6 +332,23 @@ export async function archiveAccount(accountId: string): Promise<void> {
   const batch = writeBatch(db);
   batch.update(ref, {
     status: 'ARCHIVED',
+    updatedAt: serverTimestamp(),
+  });
+  await batch.commit();
+}
+
+export async function updateAccountSettings(
+  accountId: string,
+  settings: Partial<Account['settings']>
+): Promise<void> {
+  const ref = doc(db, 'accounts', accountId);
+  const accountSnap = await getDoc(ref);
+  if (!accountSnap.exists()) return;
+
+  const currentSettings = accountSnap.data().settings || {};
+  const batch = writeBatch(db);
+  batch.update(ref, {
+    settings: { ...currentSettings, ...settings },
     updatedAt: serverTimestamp(),
   });
   await batch.commit();

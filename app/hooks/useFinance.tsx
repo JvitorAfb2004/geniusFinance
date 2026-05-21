@@ -9,7 +9,7 @@ import { ALL_DEFAULT_LEAD_OPTIONS } from '../lib/leadDefaults';
 import { resolveDataPath } from '../lib/pathAdapter';
 import type { FinanceCollectionName } from '../lib/pathAdapter';
 import { ensureUserOnboardingDocs } from '../lib/onboarding';
-import { createAccount, getUserAccounts, getAccountMembers, getAccountInvites, migrateUserToAccount, createInvite, getPendingInvites, acceptInvite as acceptInviteSvc, archiveAccount } from '../lib/accountService';
+import { createAccount, getUserAccounts, getAccountMembers, getAccountInvites, migrateUserToAccount, createInvite, getPendingInvites, acceptInvite as acceptInviteSvc, archiveAccount, updateAccountSettings } from '../lib/accountService';
 import { User, onAuthStateChanged } from 'firebase/auth';
 import {
   collection, query, onSnapshot, doc, writeBatch, serverTimestamp,
@@ -1314,6 +1314,7 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       migrateToAccount: migrateToAccountFn,
       inviteMember: inviteMemberFn,
       acceptInvite: acceptInviteFn,
+      updateAccountSettings,
       pendingInvites,
       addTransaction,
       updateTransaction,

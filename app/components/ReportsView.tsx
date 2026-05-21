@@ -6,6 +6,11 @@ import { computeDRE } from '../lib/dre';
 import { startOfYear, endOfYear, parseISO, isWithinInterval, eachMonthOfInterval, format, isSameMonth } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
+function formatTooltipCurrency(value: unknown) {
+  const numeric = Array.isArray(value) ? Number(value[0]) : Number(value);
+  return formatCurrency(Number.isFinite(numeric) ? numeric : 0);
+}
+
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#84cc16'];
 
 export function ReportsView() {
@@ -118,7 +123,7 @@ export function ReportsView() {
                 <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                 <XAxis dataKey="name" tick={{ fontSize: 11 }} />
                 <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `R$${(v / 1000).toFixed(0)}k`} />
-                <RechartsTooltip formatter={(v: number) => formatCurrency(v)} />
+                <RechartsTooltip formatter={formatTooltipCurrency} />
                 <Legend />
                 <Bar dataKey="receita" fill="#10b981" name="Receita" radius={[4, 4, 0, 0]} />
                 <Bar dataKey="custos" fill="#f59e0b" name="Custos" radius={[4, 4, 0, 0]} />
@@ -141,7 +146,7 @@ export function ReportsView() {
                     ))}
                   </Pie>
                   <RechartsTooltip
-                    formatter={(value: number) => formatCurrency(value)}
+                    formatter={formatTooltipCurrency}
                     contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '12px' }}
                   />
                   <Legend />

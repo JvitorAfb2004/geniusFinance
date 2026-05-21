@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { useFinance } from '../hooks/useFinance.tsx';
+import { useFinance } from '../hooks/useFinance';
 import { TransactionType, TransactionStatus, Transaction, DRESection } from '../types';
 import { format } from 'date-fns';
 import { SECTION_LABELS } from '../lib/categories';
@@ -224,17 +224,17 @@ export function TransactionModal({
 
     setSubmitting(true);
     try {
-      const baseTx: Record<string, unknown> = {
+      const baseTx: Omit<Transaction, 'id' | 'userId' | 'createdAt' | 'updatedAt'> = {
         title: title.trim(),
         amount: val,
         date,
         type,
         status,
         context: activeContext,
+        tagIds: selectedTagIds,
       };
       if (categoryId) baseTx.categoryId = categoryId;
       if (hasEndDate && endDate) baseTx.endDate = endDate;
-      if (selectedTagIds.length > 0) baseTx.tagIds = selectedTagIds;
 
       if (initialData) {
         await updateTransaction(initialData.id, baseTx, applyToFuture);

@@ -20,7 +20,24 @@ function alertsEnabled() {
 }
 
 export function DashboardAlerts({ valuesVisible = true }: { valuesVisible?: boolean }) {
-  const { transactions, activeContext, toggleStatus, setCurrentView } = useFinance();
+  const { transactions, activeContext, activeScope, accounts, toggleStatus, setCurrentView } = useFinance();
+  
+  // Find current account if in ACCOUNT scope
+  const activeAccount = useMemo(() => {
+    if (activeScope.type !== 'ACCOUNT') return null;
+    return accounts.find(a => a.id === activeScope.accountId);
+  }, [accounts, activeScope]);
+
+  const canSeePaymentAlerts = useMemo(() => {
+    if (activeScope.type !== 'ACCOUNT') return true;
+    const visibility = activeAccount?.settings?.dashboardAlertsVisibility || 'EVERYONE';
+    if (visibility === 'EVERYONE') return true;
+    if (visibility === 'ADMIN') {
+      return activeScope.role === 'owner' || activeScope.role === 'admin';
+    }
+    return true;
+  }, [activeScope, activeAccount]);
+
   const [dismissedIds, setDismissedIds] = useState<string[]>(() => {
     try {
       const raw = localStorage.getItem(DISMISSED_ALERTS_KEY);
@@ -43,7 +60,7 @@ export function DashboardAlerts({ valuesVisible = true }: { valuesVisible?: bool
       .filter((tx) => tx.context === activeContext && tx.status === 'PENDING')
       .filter((tx) => !dismissedIds.includes(tx.id));
 
-    const expenses = contextTxs
+    const expenses = !canSeePaymentAlerts ? [] : contextTxs
       .filter((tx) => tx.type !== 'INCOME')
       .filter((tx) => {
         const txDate = startOfDay(parseISO(tx.date));
@@ -60,7 +77,7 @@ export function DashboardAlerts({ valuesVisible = true }: { valuesVisible?: bool
       paymentAlerts: expenses.slice(0, 4),
       todayIncomeAlerts: incomesToday.slice(0, 4),
     };
-  }, [transactions, activeContext, dismissedIds]);
+  }, [transactions, activeContext, dismissedIds, canSeePaymentAlerts]);
 
   if (paymentAlerts.length === 0 && todayIncomeAlerts.length === 0) return null;
 
