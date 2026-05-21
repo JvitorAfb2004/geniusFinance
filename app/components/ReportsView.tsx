@@ -5,6 +5,7 @@ import { formatCurrency } from '../lib/utils';
 import { computeDRE } from '../lib/dre';
 import { startOfYear, endOfYear, parseISO, isWithinInterval, eachMonthOfInterval, format, isSameMonth } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { AnimatedNumber } from './AnimatedNumber';
 
 function formatTooltipCurrency(value: unknown) {
   const numeric = Array.isArray(value) ? Number(value[0]) : Number(value);
@@ -96,21 +97,21 @@ export function ReportsView() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <div className="bg-white rounded-xl border border-[#e2e8f0] p-4 shadow-sm">
           <p className="text-xs text-gray-500 mb-1">Total Receitas</p>
-          <p className="text-lg font-bold font-mono text-emerald-600">{formatCurrency(yearTotals.income)}</p>
+          <p className="text-lg font-bold font-mono text-emerald-600"><AnimatedNumber value={yearTotals.income} /></p>
         </div>
         <div className="bg-white rounded-xl border border-[#e2e8f0] p-4 shadow-sm">
           <p className="text-xs text-gray-500 mb-1">Total Despesas</p>
-          <p className="text-lg font-bold font-mono text-red-500">{formatCurrency(yearTotals.expense)}</p>
+          <p className="text-lg font-bold font-mono text-red-500"><AnimatedNumber value={yearTotals.expense} /></p>
         </div>
         <div className="bg-white rounded-xl border border-[#e2e8f0] p-4 shadow-sm">
           <p className="text-xs text-gray-500 mb-1">Resultado</p>
           <p className={`text-lg font-bold font-mono ${yearTotals.net >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
-            {formatCurrency(yearTotals.net)}
+            <AnimatedNumber value={yearTotals.net} />
           </p>
         </div>
         <div className="bg-white rounded-xl border border-[#e2e8f0] p-4 shadow-sm">
           <p className="text-xs text-gray-500 mb-1">Transacoes</p>
-          <p className="text-lg font-bold font-mono text-slate-700">{yearTotals.count}</p>
+          <p className="text-lg font-bold font-mono text-slate-700"><AnimatedNumber value={yearTotals.count} kind="number" /></p>
         </div>
       </div>
 

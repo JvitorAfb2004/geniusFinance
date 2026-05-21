@@ -6,6 +6,7 @@ import { SpendingLimitModal } from './SpendingLimitModal';
 import { isSameMonth, parseISO, getMonth, getYear } from 'date-fns';
 import { Plus, Edit2, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { AnimatedNumber } from './AnimatedNumber';
 
 const MONTH_LABELS = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
 
@@ -158,11 +159,11 @@ export function SpendingLimitsView() {
               <div className="flex items-end justify-between mb-2">
                 <div>
                   <p className="text-xs text-slate-400">Gasto no mês</p>
-                  <p className="text-lg font-bold text-slate-800">{formatCurrency(spent)}</p>
+                  <p className="text-lg font-bold text-slate-800"><AnimatedNumber value={spent} /></p>
                 </div>
                 <div className="text-right">
                   <p className="text-xs text-slate-400">Limite</p>
-                  <p className="text-lg font-semibold text-slate-500">{formatCurrency(limit.limitAmount)}</p>
+                  <p className="text-lg font-semibold text-slate-500"><AnimatedNumber value={limit.limitAmount} /></p>
                 </div>
               </div>
 

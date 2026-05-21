@@ -3,6 +3,7 @@ import { useFinance } from '../hooks/useFinance';
 import { formatCurrency, cn } from '../lib/utils';
 import { addDays, endOfDay, isSameMonth, isWithinInterval, parseISO, startOfDay } from 'date-fns';
 import { Settings2, Wallet, TrendingUp, TrendingDown, CreditCard, DollarSign, Percent, ArrowDownToLine, ArrowUpToLine, CalendarDays, CheckCircle2, Clock3 } from 'lucide-react';
+import { motion } from 'motion/react';
 
 const DEFAULT_WIDGETS = [
   'month_balance',
@@ -247,8 +248,11 @@ export function DashboardCards({ valuesVisible = true }: { valuesVisible?: boole
 
       <div className={`grid gap-4 ${cards.length <= 2 ? 'grid-cols-1 md:grid-cols-2' : cards.length === 3 ? 'grid-cols-1 md:grid-cols-3' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4'}`}>
         {cards.map((card, index) => (
-          <div
+          <motion.div
             key={card.id}
+            initial={{ opacity: 0, y: 12, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.35, delay: index * 0.06, ease: 'easeOut' }}
             draggable
             onDragStart={() => setDraggingWidgetId(card.id)}
             onDragOver={(e) => e.preventDefault()}
@@ -277,7 +281,7 @@ export function DashboardCards({ valuesVisible = true }: { valuesVisible?: boole
                 <card.icon className={`w-5 h-5 ${card.iconColor}`} />
               </div>
             </div>
-          </div>
+          </motion.div>
         ))}
       </div>
     </div>

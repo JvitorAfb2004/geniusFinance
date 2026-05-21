@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useFinance } from '../hooks/useFinance';
-import { formatCurrency } from '../lib/utils';
-import { Target, Plus, Trash2, X, Check } from 'lucide-react';
+import { Plus, Trash2, X, Check } from 'lucide-react';
 import type { FinancialGoal } from '../types';
+import { motion } from 'motion/react';
+import { AnimatedNumber } from './AnimatedNumber';
 
 const CAT_LABELS: Record<string, string> = { SAVINGS: 'Reserva', INVESTMENT: 'Investimento', DEBT_PAYOFF: 'Quitar Dívida', PURCHASE: 'Compra' };
 const CAT_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
@@ -76,11 +77,19 @@ export default function GoalsView() {
               </div>
               <div>
                 <div className="flex justify-between text-sm mb-1">
-                  <span className="text-slate-600">{formatCurrency(g.currentAmount)} de {formatCurrency(g.targetAmount)}</span>
-                  <span className="font-bold" style={{ color: g.color }}>{pct.toFixed(0)}%</span>
+                  <span className="text-slate-600">
+                    <AnimatedNumber value={g.currentAmount} /> de <AnimatedNumber value={g.targetAmount} />
+                  </span>
+                  <span className="font-bold" style={{ color: g.color }}><AnimatedNumber value={pct} kind="percent" decimals={0} /></span>
                 </div>
                 <div className="w-full bg-slate-100 rounded-full h-3">
-                  <div className="h-3 rounded-full transition-all" style={{ width: `${pct}%`, backgroundColor: g.color }} />
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${pct}%` }}
+                    transition={{ duration: 0.5, ease: 'easeOut' }}
+                    className="h-3 rounded-full"
+                    style={{ backgroundColor: g.color }}
+                  />
                 </div>
               </div>
               {pct < 100 && (
@@ -97,7 +106,7 @@ export default function GoalsView() {
                     }}
                   />
                   <span className="text-xs text-slate-500 whitespace-nowrap">
-                    {monthlyNeeded > 0 ? `${formatCurrency(monthlyNeeded)}/mês` : ''}
+                    {monthlyNeeded > 0 ? <><AnimatedNumber value={monthlyNeeded} />/mês</> : ''}
                   </span>
                 </div>
               )}
