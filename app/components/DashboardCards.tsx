@@ -98,89 +98,85 @@ export function DashboardCards({ valuesVisible = true }: { valuesVisible?: boole
     switch (id) {
       case 'month_balance': return {
         title: `Saldo do Mês (${scopeLabel})`, value: monthBalance,
-        color: monthBalance >= 0 ? 'text-success' : 'text-danger', icon: Wallet,
-        iconBg: monthBalance >= 0 ? 'bg-success-light' : 'bg-danger-light',
-        iconColor: monthBalance >= 0 ? 'text-success' : 'text-danger',
-        accentBar: monthBalance >= 0
-          ? 'bg-gradient-to-r from-success to-emerald-400'
-          : 'bg-gradient-to-r from-danger to-rose-400'
+        color: monthBalance >= 0 ? 'text-emerald-600' : 'text-rose-600', icon: Wallet,
+        iconBg: monthBalance >= 0 ? 'bg-emerald-50' : 'bg-rose-50',
+        iconColor: monthBalance >= 0 ? 'text-emerald-600' : 'text-rose-600',
+        accentBar: monthBalance >= 0 ? 'bg-emerald-500' : 'bg-rose-500'
       };
       case 'balance': return {
         title: `Saldo Disponível (${scopeLabel})`, value: incomesReceived - expensesPaid,
-        color: 'text-text-primary', icon: Wallet,
-        iconBg: 'bg-primary-light', iconColor: 'text-primary',
-        accentBar: 'bg-gradient-to-r from-primary to-blue-400'
+        color: 'text-slate-800', icon: Wallet,
+        iconBg: 'bg-blue-50', iconColor: 'text-blue-600',
+        accentBar: 'bg-blue-500'
       };
       case 'income': return {
         title: 'Receitas (Mês)', value: incomes,
-        color: 'text-success', icon: TrendingUp,
-        iconBg: 'bg-success-light', iconColor: 'text-success',
-        accentBar: 'bg-gradient-to-r from-success to-emerald-400'
+        color: 'text-emerald-600', icon: TrendingUp,
+        iconBg: 'bg-emerald-50', iconColor: 'text-emerald-600',
+        accentBar: 'bg-emerald-500'
       };
       case 'income_received': return {
         title: 'Já recebidos (Mês)', value: incomesReceived,
-        color: 'text-success', icon: ArrowUpToLine,
-        iconBg: 'bg-success-light', iconColor: 'text-success',
-        accentBar: 'bg-gradient-to-r from-success to-emerald-400'
+        color: 'text-emerald-600', icon: ArrowUpToLine,
+        iconBg: 'bg-emerald-50', iconColor: 'text-emerald-600',
+        accentBar: 'bg-emerald-500'
       };
       case 'income_pending': return {
         title: 'Não recebidos (Mês)', value: incomesPending,
-        color: 'text-warning', icon: CalendarDays,
-        iconBg: 'bg-warning-light', iconColor: 'text-warning',
-        accentBar: 'bg-gradient-to-r from-warning to-amber-400'
+        color: 'text-amber-600', icon: CalendarDays,
+        iconBg: 'bg-amber-50', iconColor: 'text-amber-600',
+        accentBar: 'bg-amber-500'
       };
       case 'expense': return {
         title: 'Despesas (Mês)', value: totalExpenses,
-        color: 'text-danger', icon: TrendingDown,
-        iconBg: 'bg-danger-light', iconColor: 'text-danger',
-        accentBar: 'bg-gradient-to-r from-danger to-rose-400'
+        color: 'text-rose-600', icon: TrendingDown,
+        iconBg: 'bg-rose-50', iconColor: 'text-rose-600',
+        accentBar: 'bg-rose-500'
       };
       case 'expense_paid': return {
         title: 'Já pagos (Mês)', value: expensesPaid,
-        color: 'text-danger', icon: CheckCircle2,
-        iconBg: 'bg-danger-light', iconColor: 'text-danger',
-        accentBar: 'bg-gradient-to-r from-danger to-rose-400'
+        color: 'text-rose-600', icon: CheckCircle2,
+        iconBg: 'bg-rose-50', iconColor: 'text-rose-600',
+        accentBar: 'bg-rose-500'
       };
       case 'expense_pending': return {
         title: 'Não pagos (Mês)', value: expensesPending,
-        color: 'text-warning', icon: Clock3,
-        iconBg: 'bg-warning-light', iconColor: 'text-warning',
-        accentBar: 'bg-gradient-to-r from-warning to-amber-400'
+        color: 'text-amber-600', icon: Clock3,
+        iconBg: 'bg-amber-50', iconColor: 'text-amber-600',
+        accentBar: 'bg-amber-500'
       };
       case 'credit_card': return {
         title: 'Cartão (Mês)', value: creditCard,
-        color: 'text-warning', icon: CreditCard,
-        iconBg: 'bg-warning-light', iconColor: 'text-warning',
-        accentBar: 'bg-gradient-to-r from-warning to-amber-400'
+        color: 'text-amber-600', icon: CreditCard,
+        iconBg: 'bg-amber-50', iconColor: 'text-amber-600',
+        accentBar: 'bg-amber-500'
       };
       case 'payable_7d': return {
         title: 'A pagar (7 dias)', value: payable7d,
-        color: 'text-danger', icon: ArrowDownToLine,
-        iconBg: 'bg-danger-light', iconColor: 'text-danger',
-        accentBar: 'bg-gradient-to-r from-danger to-rose-400'
+        color: 'text-rose-600', icon: ArrowDownToLine,
+        iconBg: 'bg-rose-50', iconColor: 'text-rose-600',
+        accentBar: 'bg-rose-500'
       };
       case 'receivable_7d': return {
         title: 'A receber (7 dias)', value: receivable7d,
-        color: 'text-success', icon: ArrowUpToLine,
-        iconBg: 'bg-success-light', iconColor: 'text-success',
-        accentBar: 'bg-gradient-to-r from-success to-emerald-400'
+        color: 'text-emerald-600', icon: ArrowUpToLine,
+        iconBg: 'bg-emerald-50', iconColor: 'text-emerald-600',
+        accentBar: 'bg-emerald-500'
       };
       case 'net_profit': return {
         title: 'Lucro Líquido', value: incomes - totalExpenses,
-        color: incomes - totalExpenses >= 0 ? 'text-success' : 'text-danger',
+        color: incomes - totalExpenses >= 0 ? 'text-emerald-600' : 'text-rose-600',
         icon: DollarSign,
-        iconBg: incomes - totalExpenses >= 0 ? 'bg-success-light' : 'bg-danger-light',
-        iconColor: incomes - totalExpenses >= 0 ? 'text-success' : 'text-danger',
-        accentBar: incomes - totalExpenses >= 0
-          ? 'bg-gradient-to-r from-success to-emerald-400'
-          : 'bg-gradient-to-r from-danger to-rose-400'
+        iconBg: incomes - totalExpenses >= 0 ? 'bg-emerald-50' : 'bg-rose-50',
+        iconColor: incomes - totalExpenses >= 0 ? 'text-emerald-600' : 'text-rose-600',
+        accentBar: incomes - totalExpenses >= 0 ? 'bg-emerald-500' : 'bg-rose-500'
       };
       case 'margin': return {
         title: 'Margem Líquida', value: incomes > 0 ? ((incomes - totalExpenses) / incomes) * 100 : 0,
-        color: 'text-purple-600', isPercent: true,
+        color: 'text-indigo-600', isPercent: true,
         icon: Percent,
-        iconBg: 'bg-purple-50', iconColor: 'text-purple-600',
-        accentBar: 'bg-gradient-to-r from-purple-500 to-violet-400'
+        iconBg: 'bg-indigo-50', iconColor: 'text-indigo-600',
+        accentBar: 'bg-indigo-500'
       };
       default: return null;
     }
@@ -224,20 +220,22 @@ export function DashboardCards({ valuesVisible = true }: { valuesVisible?: boole
     <div>
       <button
         onClick={() => setEditing(!editing)}
-        className="text-xs text-text-muted hover:text-text-secondary cursor-pointer flex items-center gap-1 mb-2 ml-auto"
+        className="text-[0.72rem] font-bold text-slate-400 hover:text-slate-600 cursor-pointer flex items-center gap-1.5 mb-3.5 ml-auto transition-colors"
       >
-        <Settings2 className="w-3 h-3" />
-        {editing ? 'Concluir' : 'Personalizar'}
+        <Settings2 className="w-3.5 h-3.5" />
+        {editing ? 'Concluir Personalização' : 'Personalizar Dashboard'}
       </button>
 
       {editing && (
-        <div className="flex flex-wrap gap-2 mb-3 p-3 bg-surface border border-border rounded-xl">
+        <div className="flex flex-wrap gap-1.5 mb-4 p-4 bg-slate-50 border border-slate-200/60 rounded-2xl shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
           {ALL_WIDGETS.map((w) => (
             <button
               key={w.id}
               onClick={() => toggleWidget(w.id)}
-              className={`text-xs px-3 py-1 rounded-full border cursor-pointer transition-colors ${
-                widgets.includes(w.id) ? 'bg-primary text-surface border-primary' : 'bg-surface text-text-secondary border-border hover:border-primary/50'
+              className={`text-[0.72rem] font-semibold px-3 py-1.5 rounded-xl border cursor-pointer transition-all duration-200 ${
+                widgets.includes(w.id) 
+                  ? 'bg-slate-800 text-white border-slate-800 shadow-sm' 
+                  : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:text-slate-800'
               }`}
             >
               {w.label}
@@ -246,7 +244,7 @@ export function DashboardCards({ valuesVisible = true }: { valuesVisible?: boole
         </div>
       )}
 
-      <div className={`grid gap-4 ${cards.length <= 2 ? 'grid-cols-1 md:grid-cols-2' : cards.length === 3 ? 'grid-cols-1 md:grid-cols-3' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4'}`}>
+      <div className={`grid gap-4.5 ${cards.length <= 2 ? 'grid-cols-1 md:grid-cols-2' : cards.length === 3 ? 'grid-cols-1 md:grid-cols-3' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4'}`}>
         {cards.map((card, index) => (
           <motion.div
             key={card.id}
@@ -262,23 +260,23 @@ export function DashboardCards({ valuesVisible = true }: { valuesVisible?: boole
             }}
             onDragEnd={() => setDraggingWidgetId(null)}
             className={cn(
-              "bg-surface p-4 rounded-xl border border-border transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 relative overflow-hidden group",
+              "bg-surface p-5 pl-6 rounded-2xl border border-slate-100/90 transition-all duration-200 hover:shadow-[0_8px_30px_rgb(0,0,0,0.035)] hover:border-slate-200/60 hover:-translate-y-0.5 relative overflow-hidden group shadow-[0_1px_3px_rgba(0,0,0,0.01),0_1px_2px_rgba(0,0,0,0.005)]",
               "cursor-grab active:cursor-grabbing",
               draggingWidgetId === card.id && "opacity-60"
             )}
           >
-            <div className={`absolute top-0 left-0 right-0 h-0.5 ${card.accentBar}`} />
+            <div className={`absolute top-0 bottom-0 left-0 w-[3.5px] ${card.accentBar}`} />
             <div className="flex items-start justify-between">
               <div className="flex-1 min-w-0">
-                <div className="text-xs text-text-secondary uppercase tracking-wider mb-1.5 font-semibold">{card.title}</div>
-                <div className={cn('text-2xl font-bold font-mono tracking-tight', card.color)}>
+                <div className="text-[0.68rem] text-slate-400 uppercase tracking-[0.08em] mb-2.5 font-bold select-none">{card.title}</div>
+                <div className={cn('text-[1.38rem] font-bold font-mono tracking-tight leading-none', card.color)}>
                   {valuesVisible
                     ? (card.isPercent ? `${(animatedValues[index] ?? 0).toFixed(1)}%` : formatCurrency(animatedValues[index] ?? 0))
                     : '••••••'}
                 </div>
               </div>
-              <div className={`w-10 h-10 rounded-xl ${card.iconBg} flex items-center justify-center flex-shrink-0`}>
-                <card.icon className={`w-5 h-5 ${card.iconColor}`} />
+              <div className={`w-9.5 h-9.5 rounded-xl ${card.iconBg} flex items-center justify-center flex-shrink-0 shadow-[0_1px_2px_rgba(0,0,0,0.02)]`}>
+                <card.icon className={`w-4.5 h-4.5 ${card.iconColor}`} />
               </div>
             </div>
           </motion.div>

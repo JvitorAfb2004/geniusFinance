@@ -9,10 +9,10 @@ import ProjectModal from './ProjectModal';
 import type { Project, ProjectStatus } from '../types';
 
 const COLUMNS: { status: ProjectStatus; label: string; color: string; bg: string; border: string }[] = [
-  { status: 'BACKLOG', label: 'Backlog', color: '#6b7280', bg: 'bg-gray-50', border: 'border-gray-200' },
-  { status: 'IN_PROGRESS', label: 'Em Andamento', color: '#3b82f6', bg: 'bg-blue-50/30', border: 'border-blue-200' },
-  { status: 'REVIEW', label: 'Revisão', color: '#f59e0b', bg: 'bg-amber-50/30', border: 'border-amber-200' },
-  { status: 'DONE', label: 'Concluído', color: '#10b981', bg: 'bg-emerald-50/30', border: 'border-emerald-200' },
+  { status: 'BACKLOG', label: 'Backlog', color: '#64748b', bg: 'bg-slate-50/60', border: 'border-slate-100' },
+  { status: 'IN_PROGRESS', label: 'Em Andamento', color: '#0f766e', bg: 'bg-slate-50/60', border: 'border-slate-100' },
+  { status: 'REVIEW', label: 'Revisão', color: '#b45309', bg: 'bg-slate-50/60', border: 'border-slate-100' },
+  { status: 'DONE', label: 'Concluído', color: '#047857', bg: 'bg-slate-50/60', border: 'border-slate-100' },
 ];
 
 interface Props {
@@ -134,43 +134,41 @@ export default function ProjectKanban({ searchTerm, serviceTypeFilter }: Props) 
     const overdue = isOverdue(project.dueDate);
     const daysLeft = getDaysRemaining(project.dueDate);
 
-    const isDragging = draggedProject?.id === project.id;
-
-    return (
+    const isDragging = draggedProject?.id === project.id;    return (
       <div
         key={project.id}
         draggable
         onDragStart={(e) => handleDragStart(e, project)}
         onDragEnd={handleDragEnd}
         className={cn(
-          'bg-white rounded-lg border border-gray-200 p-3 shadow-sm hover:shadow-md transition-shadow group cursor-grab active:cursor-grabbing',
-          isDragging && 'opacity-40 shadow-lg'
+          'bg-white rounded-2xl border border-slate-100 p-4 shadow-[0_1px_3px_rgba(0,0,0,0.01)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.03)] hover:border-slate-200/80 transition-all duration-200 group cursor-grab active:cursor-grabbing',
+          isDragging && 'opacity-40 shadow-md border-slate-300'
         )}
       >
         {/* Drag handle + Title + Menu */}
-        <div className="flex items-start gap-2 mb-2">
-          <GripVertical className="w-3.5 h-3.5 text-gray-300 mt-0.5 shrink-0" />
+        <div className="flex items-start gap-2 mb-2.5">
+          <GripVertical className="w-3.5 h-3.5 text-slate-300 mt-0.5 shrink-0" />
           <h4
-            className="text-sm font-semibold text-gray-900 leading-snug flex-1 cursor-pointer hover:text-[#3b82f6] transition-colors"
+            className="text-sm font-semibold text-slate-900 leading-snug flex-1 cursor-pointer hover:text-slate-700 transition-colors"
             onClick={() => { setEditingProject(project); setIsModalOpen(true); }}
           >
             {project.title}
           </h4>
           <button
             onClick={(e) => openMenu(e, project)}
-            className="p-0.5 text-gray-300 hover:text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer shrink-0"
+            className="p-0.5 text-slate-300 hover:text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer shrink-0"
           >
             <MoreHorizontal className="w-4 h-4" />
           </button>
         </div>
 
         {/* Client & Service Type */}
-        <div className="flex items-center gap-2 text-xs text-gray-500 mb-2">
+        <div className="flex items-center gap-2 text-xs text-slate-500 mb-3">
           {project.clientName && (
-            <span className="truncate">{project.clientName}</span>
+            <span className="truncate text-slate-600 font-medium">{project.clientName}</span>
           )}
           {stName && (
-            <span className="px-1.5 py-0.5 bg-gray-100 rounded text-gray-500 text-[0.65rem] font-medium truncate">
+            <span className="px-2 py-0.5 bg-slate-100/80 text-slate-500 text-[0.65rem] font-semibold rounded-full truncate">
               {stName}
             </span>
           )}
@@ -178,17 +176,17 @@ export default function ProjectKanban({ searchTerm, serviceTypeFilter }: Props) 
 
         {/* Progress bar */}
         {totalSteps > 0 && (
-          <div className="mb-2">
-            <div className="flex items-center justify-between text-xs text-gray-400 mb-1">
+          <div className="mb-3 bg-slate-50/50 p-2 rounded-xl border border-slate-100/30">
+            <div className="flex items-center justify-between text-xs text-slate-400 mb-1.5">
               <span>Progresso</span>
-              <span>{doneSteps}/{totalSteps}</span>
+              <span className="font-semibold text-slate-500">{doneSteps}/{totalSteps}</span>
             </div>
-            <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
+            <div className="w-full h-1 bg-slate-100 rounded-full overflow-hidden">
               <div
                 className="h-full rounded-full transition-all duration-300"
                 style={{
                   width: `${progressPct}%`,
-                  backgroundColor: progressPct === 100 ? '#10b981' : '#3b82f6'
+                  backgroundColor: progressPct === 100 ? '#047857' : '#0f766e'
                 }}
               />
             </div>
@@ -255,31 +253,31 @@ export default function ProjectKanban({ searchTerm, serviceTypeFilter }: Props) 
             <div
               key={col.status}
               className={cn(
-                'rounded-xl border min-h-[200px] flex flex-col transition-colors duration-200',
+                'rounded-2xl border min-h-[220px] flex flex-col transition-all duration-200 shadow-[0_1px_3px_rgba(0,0,0,0.015)]',
                 col.bg,
-                isOver && canDrop ? 'border-[#3b82f6] bg-blue-50/50' : col.border
+                isOver && canDrop ? 'border-slate-300 bg-slate-100/50 shadow-[inset_0_1px_4px_rgba(0,0,0,0.02)]' : col.border
               )}
               onDragOver={(e) => handleDragOver(e, col.status)}
               onDragLeave={handleDragLeave}
               onDrop={(e) => handleDrop(e, col.status)}
             >
               {/* Column header */}
-              <div className="px-3 py-2.5 border-b border-inherit flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: col.color }} />
-                <span className="text-xs font-semibold text-gray-700 uppercase tracking-wider">
+              <div className="px-4 py-3.5 border-b border-slate-100/80 flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: col.color }} />
+                <span className="text-[0.68rem] font-bold text-slate-700 uppercase tracking-wider">
                   {col.label}
                 </span>
-                <span className="ml-auto text-xs text-gray-400 font-medium">
+                <span className="ml-auto text-[0.62rem] bg-slate-100 text-slate-500 font-bold px-2 py-0.5 rounded-md border border-slate-200/30">
                   {colProjects.length}
                 </span>
               </div>
 
               {/* Cards */}
-              <div className="flex-1 overflow-y-auto p-2 space-y-2">
+              <div className="flex-1 overflow-y-auto p-2.5 space-y-2.5">
                 {colProjects.length === 0 ? (
                   <div className={cn(
-                    'flex items-center justify-center py-8 text-xs transition-colors',
-                    isOver && canDrop ? 'text-[#3b82f6]' : 'text-gray-300'
+                    'flex items-center justify-center py-10 text-xs font-semibold tracking-wide transition-colors',
+                    isOver && canDrop ? 'text-slate-800' : 'text-slate-300'
                   )}>
                     {isOver && canDrop ? 'Soltar aqui' : 'Vazio'}
                   </div>

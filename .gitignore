@@ -15,3 +15,4 @@ server/data/
 # Remix build output
 build/
 .vercel
+.superpowers/

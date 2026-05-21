@@ -262,7 +262,7 @@ export function TransactionModal({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm flex flex-col items-center justify-center p-4"
+      className="fixed inset-0 z-50 bg-black/45 flex flex-col items-center justify-center p-4"
     >
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -701,7 +701,7 @@ export function TransactionModal({
             <button
               type="submit"
               disabled={submitting}
-              className="w-full bg-gradient-to-r from-primary to-primary-hover hover:from-primary-hover hover:to-primary disabled:opacity-60 disabled:cursor-not-allowed border-none text-surface font-semibold py-3.5 rounded-xl shadow-md hover:shadow-lg transition-all focus:ring-4 focus:ring-primary/20 active:scale-[0.97] cursor-pointer flex items-center justify-center gap-2"
+              className="w-full bg-slate-900 hover:bg-slate-800 disabled:opacity-60 disabled:cursor-not-allowed border-none text-white font-semibold py-3.5 rounded-xl shadow-[0_1px_2px_rgba(0,0,0,0.05)] hover:shadow-md transition-all active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2"
             >
               {submitting && (
                 <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
@@ -717,7 +717,7 @@ export function TransactionModal({
             <motion.div
               initial={{ opacity: 0, scale: 0.5 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="absolute inset-0 bg-surface/90 backdrop-blur-[2px] rounded-xl flex items-center justify-center z-10"
+              className="absolute inset-0 bg-white/98 rounded-xl flex items-center justify-center z-10"
             >
               <motion.div
                 initial={{ scale: 0, rotate: -90 }}

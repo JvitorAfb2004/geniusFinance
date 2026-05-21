@@ -8,6 +8,8 @@ type LoginMode = 'login' | 'register' | 'forgot';
 interface LoginEmailFormProps {
   termsAccepted: boolean;
   onTermsChange: (accepted: boolean) => void;
+  onOpenTerms: () => void;
+  onOpenPrivacy: () => void;
 }
 
 function mapAuthError(error: unknown) {
@@ -21,7 +23,7 @@ function mapAuthError(error: unknown) {
   return 'Não foi possível concluir a operação. Tente novamente.';
 }
 
-export function LoginEmailForm({ termsAccepted, onTermsChange }: LoginEmailFormProps) {
+export function LoginEmailForm({ termsAccepted, onTermsChange, onOpenTerms, onOpenPrivacy }: LoginEmailFormProps) {
   const [mode, setMode] = useState<LoginMode>('login');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -195,9 +197,19 @@ export function LoginEmailForm({ termsAccepted, onTermsChange }: LoginEmailFormP
             />
             <span className={`text-xs leading-relaxed select-none text-left ${!termsAccepted && error ? 'text-red-600 font-medium' : 'text-text-secondary'}`}>
               Li e concordo com os{' '}
-              <span className="text-[#3b82f6] font-medium">Termos de Uso</span>
+              <span 
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); onOpenTerms(); }} 
+                className="text-[#3b82f6] font-medium cursor-pointer hover:underline"
+              >
+                Termos de Uso
+              </span>
               {' '}e a{' '}
-              <span className="text-[#3b82f6] font-medium">Política de Privacidade</span>
+              <span 
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); onOpenPrivacy(); }} 
+                className="text-[#3b82f6] font-medium cursor-pointer hover:underline"
+              >
+                Política de Privacidade
+              </span>
             </span>
           </label>
 

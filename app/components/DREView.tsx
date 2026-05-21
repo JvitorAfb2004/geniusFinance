@@ -134,7 +134,7 @@ export default function DREView() {
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Orçado vs Real - Bar Chart */}
-        <div className="bg-white rounded-xl border border-slate-200 p-5 min-w-0">
+        <div className="bg-white rounded-xl border border-slate-100/90 p-5 shadow-[0_1px_3px_rgba(0,0,0,0.01)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.03)] hover:border-slate-200/80 transition-all duration-200 min-w-0">
           <h3 className="text-sm font-semibold text-slate-700 mb-4">Orçado vs Real</h3>
           <div style={{ width: '100%', height: 260 }}>
             <ResponsiveContainer>
@@ -156,7 +156,7 @@ export default function DREView() {
         </div>
 
         {/* Evolução Lucro Líquido - Line Chart */}
-        <div className="bg-white rounded-xl border border-slate-200 p-5 min-w-0">
+        <div className="bg-white rounded-xl border border-slate-100/90 p-5 shadow-[0_1px_3px_rgba(0,0,0,0.01)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.03)] hover:border-slate-200/80 transition-all duration-200 min-w-0">
           <h3 className="text-sm font-semibold text-slate-700 mb-4">Evolucao do Lucro Liquido</h3>
           <div style={{ width: '100%', height: 260 }}>
           <ResponsiveContainer>
@@ -185,7 +185,7 @@ export default function DREView() {
       {/* Top Categories */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Top Custos */}
-        <div className="bg-white rounded-xl border border-slate-200 p-5">
+        <div className="bg-white rounded-xl border border-slate-100/90 p-5 shadow-[0_1px_3px_rgba(0,0,0,0.01)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.03)] hover:border-slate-200/80 transition-all duration-200">
           <h3 className="text-sm font-semibold text-slate-700 mb-3">Principais Custos</h3>
           {topCustos.length === 0 ? (
             <p className="text-sm text-slate-400">Sem custos no mes.</p>
@@ -199,7 +199,7 @@ export default function DREView() {
         </div>
 
         {/* Top Despesas */}
-        <div className="bg-white rounded-xl border border-slate-200 p-5">
+        <div className="bg-white rounded-xl border border-slate-100/90 p-5 shadow-[0_1px_3px_rgba(0,0,0,0.01)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.03)] hover:border-slate-200/80 transition-all duration-200">
           <h3 className="text-sm font-semibold text-slate-700 mb-3">Principais Despesas</h3>
           {topDespesas.length === 0 ? (
             <p className="text-sm text-slate-400">Sem despesas no mes.</p>
@@ -235,19 +235,21 @@ function DRECard({
   const prefix = showSign && value > 0 ? '+' : '';
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 p-4">
-      <div className="flex items-center gap-2 mb-2">
-        <div className={`w-7 h-7 rounded-lg ${bg} flex items-center justify-center ${color}`}>
+    <div className="bg-white rounded-2xl border border-slate-100 p-4.5 shadow-[0_1px_2px_rgba(0,0,0,0.02)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.03)] hover:border-slate-200/60 transition-all duration-300 flex flex-col justify-between h-full min-h-[110px]">
+      <div className="flex items-center gap-2.5 mb-2.5">
+        <div className={`w-8 h-8 rounded-xl ${bg} bg-opacity-70 flex items-center justify-center ${color} shrink-0 border border-current border-opacity-10`}>
           {icon}
         </div>
-        <span className="text-xs font-medium text-slate-500">{title}</span>
+        <span className="text-[0.72rem] font-bold text-slate-500 uppercase tracking-wider">{title}</span>
       </div>
-      <p className={`text-lg font-bold font-mono ${color}`}>{prefix}{formatted}</p>
-      {!isPercent && planned > 0 && (
-        <p className="text-xs text-slate-400 mt-1">
-          Orçado: {formatCurrency(isCost ? Math.abs(planned) : planned)}
-        </p>
-      )}
+      <div>
+        <p className={`text-lg font-bold font-mono tracking-tight ${color}`}>{prefix}{formatted}</p>
+        {!isPercent && planned > 0 && (
+          <p className="text-[0.68rem] text-slate-400 font-medium mt-1">
+            Orçado: <span className="font-mono">{formatCurrency(isCost ? Math.abs(planned) : planned)}</span>
+          </p>
+        )}
+      </div>
     </div>
   );
 }
@@ -332,7 +334,7 @@ function ForecastSection() {
 
   if (!hasBudgetData) {
     return (
-      <div className="bg-white rounded-xl border border-slate-200 p-5">
+      <div className="bg-slate-50/50 border border-slate-100 rounded-2xl p-5 shadow-[0_1px_2px_rgba(0,0,0,0.01)]">
         <h3 className="text-sm font-semibold text-slate-700 mb-2">Previsao Anual</h3>
         <p className="text-sm text-slate-400">
           Defina valores no Orcamento para visualizar a previsao do ano.
@@ -344,29 +346,29 @@ function ForecastSection() {
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <div className="bg-white rounded-xl border border-slate-200 p-4">
-          <p className="text-xs text-slate-500 mb-1">Receita Projetada</p>
+        <div className="bg-white rounded-2xl border border-slate-100 p-4.5 shadow-[0_1px_2px_rgba(0,0,0,0.02)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.03)] hover:border-slate-200/60 transition-all duration-300">
+          <p className="text-[0.68rem] text-slate-400 font-bold uppercase tracking-wider mb-1.5">Receita Projetada</p>
           <p className="text-lg font-bold font-mono text-emerald-600">{formatCurrency(animReceita)}</p>
         </div>
-        <div className="bg-white rounded-xl border border-slate-200 p-4">
-          <p className="text-xs text-slate-500 mb-1">Custos Projetados</p>
+        <div className="bg-white rounded-2xl border border-slate-100 p-4.5 shadow-[0_1px_2px_rgba(0,0,0,0.02)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.03)] hover:border-slate-200/60 transition-all duration-300">
+          <p className="text-[0.68rem] text-slate-400 font-bold uppercase tracking-wider mb-1.5">Custos Projetados</p>
           <p className="text-lg font-bold font-mono text-amber-600">{formatCurrency(animCustos)}</p>
         </div>
-        <div className="bg-white rounded-xl border border-slate-200 p-4">
-          <p className="text-xs text-slate-500 mb-1">Lucro Projetado</p>
+        <div className="bg-white rounded-2xl border border-slate-100 p-4.5 shadow-[0_1px_2px_rgba(0,0,0,0.02)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.03)] hover:border-slate-200/60 transition-all duration-300">
+          <p className="text-[0.68rem] text-slate-400 font-bold uppercase tracking-wider mb-1.5">Lucro Projetado</p>
           <p className={`text-lg font-bold font-mono ${yearTotals.lucro >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
             {formatCurrency(animLucro)}
           </p>
         </div>
-        <div className="bg-white rounded-xl border border-slate-200 p-4">
-          <p className="text-xs text-slate-500 mb-1">Margem Projetada</p>
+        <div className="bg-white rounded-2xl border border-slate-100 p-4.5 shadow-[0_1px_2px_rgba(0,0,0,0.02)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.03)] hover:border-slate-200/60 transition-all duration-300">
+          <p className="text-[0.68rem] text-slate-400 font-bold uppercase tracking-wider mb-1.5">Margem Projetada</p>
           <p className={`text-lg font-bold font-mono ${yearTotals.margem >= 0 ? 'text-purple-600' : 'text-red-600'}`}>
             {animMargem.toFixed(1)}%
           </p>
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-slate-200 p-5 min-w-0">
+      <div className="bg-white rounded-2xl border border-slate-100 p-5.5 shadow-[0_1px_2px_rgba(0,0,0,0.02)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.03)] hover:border-slate-200/60 transition-all duration-300 min-w-0">
         <h3 className="text-sm font-semibold text-slate-700 mb-4">Receita Mensal: Real vs Prevista</h3>
         <div style={{ width: '100%', height: 260 }}>
           <ResponsiveContainer>
@@ -423,9 +425,9 @@ function SavingsPanel() {
 
   if (!savings.length && !loading) {
     return (
-      <div className="bg-white rounded-xl border border-slate-200 p-5">
-        <button onClick={handleAnalyze} className="flex items-center gap-2 text-sm text-amber-700 bg-amber-50 hover:bg-amber-100 px-4 py-2 rounded-lg cursor-pointer transition-colors font-medium">
-          <Lightbulb className="w-4 h-4" /> Analisar oportunidades de economia
+      <div className="bg-slate-50/50 border border-slate-100 rounded-2xl p-5 shadow-[0_1px_2px_rgba(0,0,0,0.01)] transition-all duration-300">
+        <button onClick={handleAnalyze} className="flex items-center gap-2 text-xs text-slate-700 bg-white hover:bg-slate-900 hover:text-white hover:border-slate-900 border border-slate-200/80 px-4.5 py-2.5 rounded-xl cursor-pointer transition-all duration-300 font-semibold active:scale-[0.98] shadow-sm">
+          <Lightbulb className="w-4 h-4 text-amber-500" /> Analisar oportunidades de economia com IA
         </button>
         {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
       </div>
@@ -434,38 +436,45 @@ function SavingsPanel() {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-xl border border-slate-200 p-5 flex items-center gap-3">
-        <Loader2 className="w-5 h-5 animate-spin text-amber-500" />
-        <span className="text-sm text-slate-600">Analisando gastos...</span>
+      <div className="bg-slate-50/50 border border-slate-100 rounded-2xl p-6 shadow-[0_1px_2px_rgba(0,0,0,0.01)] flex items-center gap-3.5">
+        <Loader2 className="w-5 h-5 animate-spin text-slate-800" />
+        <span className="text-sm font-medium text-slate-600">Analisando seus gastos com inteligência artificial...</span>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 p-5 space-y-4">
+    <div className="bg-white rounded-2xl border border-slate-100 p-6 shadow-[0_2px_8px_rgba(0,0,0,0.015)] space-y-5">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2"><Lightbulb className="w-5 h-5 text-amber-500" /><h3 className="font-semibold text-slate-800">Oportunidades de Economia</h3></div>
-        <button onClick={() => setSavings([])} className="text-xs text-slate-400 hover:text-slate-600 cursor-pointer">Fechar</button>
+        <div className="flex items-center gap-2.5">
+          <div className="w-7 h-7 rounded-lg bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-500">
+            <Lightbulb className="w-4 h-4" />
+          </div>
+          <h3 className="text-sm font-bold text-slate-800">Oportunidades de Economia Inteligentes</h3>
+        </div>
+        <button onClick={() => setSavings([])} className="text-xs font-semibold text-slate-400 hover:text-slate-600 cursor-pointer transition-colors p-1">Fechar</button>
       </div>
-      <p className="text-xs text-slate-400 -mt-2 mb-1">Sugestões automáticas, podem conter imprecisões.</p>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+      <p className="text-[0.7rem] text-slate-400 font-medium uppercase tracking-wider -mt-3.5">Sugestões automatizadas baseadas no seu perfil de gastos</p>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {savings.map((s, i) => (
-          <div key={i} className="border border-amber-200 bg-amber-50/30 rounded-lg p-3 space-y-2">
-            <div className="flex justify-between items-start">
-              <span className="text-sm font-semibold text-slate-800">{s.category}</span>
-              <span className="text-xs px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 font-bold">-{s.suggestedReduction}%</span>
+          <div key={i} className="border border-slate-100 bg-slate-50/40 rounded-xl p-4.5 space-y-3.5 transition-all hover:bg-white hover:shadow-[0_4px_16px_rgba(0,0,0,0.025)] hover:border-slate-200/60 duration-300">
+            <div className="flex justify-between items-start gap-2">
+              <span className="text-sm font-bold text-slate-800 truncate">{s.category}</span>
+              <span className="text-[0.68rem] px-2 py-0.5 rounded-full bg-amber-50 border border-amber-100 text-amber-800 font-bold shrink-0">-{s.suggestedReduction}%</span>
             </div>
-            <div className="flex justify-between text-xs">
-              <span className="text-slate-500">Gasto atual: {formatCurrency(s.currentSpending)}</span>
-              <span className="text-emerald-600 font-bold">Economia: {formatCurrency(s.projectedSaving)}/mês</span>
+            <div className="flex justify-between text-xs font-medium">
+              <span className="text-slate-500">Gasto atual: <span className="font-mono">{formatCurrency(s.currentSpending)}</span></span>
+              <span className="text-emerald-600">Economia: <span className="font-mono">{formatCurrency(s.projectedSaving)}</span>/mês</span>
             </div>
-            <p className="text-xs text-slate-600 italic">{s.tip}</p>
+            <p className="text-xs text-slate-500 leading-relaxed italic border-t border-slate-100/60 pt-2.5">"{s.tip}"</p>
           </div>
         ))}
       </div>
-      <p className="text-xs text-slate-500">
-        Economia total projetada: <strong className="text-emerald-600">{formatCurrency(savings.reduce((s, r) => s + r.projectedSaving, 0))}/mês</strong> = <strong className="text-emerald-600">{formatCurrency(savings.reduce((s, r) => s + r.projectedSaving, 0) * 12)}/ano</strong>
-      </p>
+      <div className="bg-slate-50 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border border-slate-100/60">
+        <p className="text-xs text-slate-600 font-medium">
+          Economia total projetada: <strong className="text-emerald-600 font-mono text-sm">{formatCurrency(savings.reduce((s, r) => s + r.projectedSaving, 0))}/mês</strong> = <strong className="text-emerald-600 font-mono text-sm">{formatCurrency(savings.reduce((s, r) => s + r.projectedSaving, 0) * 12)}/ano</strong>
+        </p>
+      </div>
     </div>
   );
 }

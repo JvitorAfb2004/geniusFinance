@@ -1,0 +1,106 @@
+- generic [ref=e2]:
+  - banner [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]:
+        - img "Genius Finance" [ref=e6]
+        - generic [ref=e7]:
+          - generic [ref=e8]: Genius Finance
+          - generic [ref=e9]: Clareza financeira com IA
+      - navigation [ref=e10]:
+        - link "Recursos" [ref=e11] [cursor=pointer]:
+          - /url: "#features"
+        - link "Por dentro" [ref=e12] [cursor=pointer]:
+          - /url: "#prints"
+        - link "FAQ" [ref=e13] [cursor=pointer]:
+          - /url: "#faq"
+      - link "Entrar" [ref=e14] [cursor=pointer]:
+        - /url: /login
+  - main [ref=e15]:
+    - generic [ref=e20]:
+      - generic [ref=e21]:
+        - generic [ref=e22]: Genius Finance com Analista IA
+        - heading "Receba clareza financeira. Decida rápido." [level=1] [ref=e24]:
+          - text: Receba clareza financeira.
+          - generic [ref=e25]: Decida rápido.
+        - paragraph [ref=e26]: Gestão financeira, comercial e projetos em um só lugar — com relatórios inteligentes e um analista IA que entende seus dados.
+        - generic [ref=e27]:
+          - link "Entrar no sistema" [ref=e28] [cursor=pointer]:
+            - /url: /login
+          - link "Ver por dentro" [ref=e29] [cursor=pointer]:
+            - /url: "#prints"
+        - generic [ref=e30]:
+          - generic [ref=e31]:
+            - generic [ref=e32]: DRE automático
+            - generic [ref=e33]: em tempo real
+          - generic [ref=e34]:
+            - generic [ref=e35]: Fluxo de caixa
+            - generic [ref=e36]: projeções e gráficos
+          - generic [ref=e37]:
+            - generic [ref=e38]: CRM + Kanban
+            - generic [ref=e39]: vendas e projetos
+      - generic [ref=e40]:
+        - img "Dashboard" [ref=e44]
+        - generic [ref=e45]:
+          - text: Prints em
+          - code [ref=e46]: public/prints
+          - text: .
+    - generic [ref=e47]:
+      - generic [ref=e49]:
+        - generic [ref=e50]: Por dentro
+        - heading "Veja a plataforma" [level=2] [ref=e51]
+        - paragraph [ref=e52]: Aqui vão prints reais para o usuário entender o produto antes de entrar.
+      - generic [ref=e53]:
+        - img "Dashboard" [ref=e57]
+        - img "Entradas / Saídas" [ref=e61]
+        - img "Projetos (Kanban)" [ref=e65]
+    - generic [ref=e67]:
+      - generic [ref=e68]: Recursos
+      - heading "Uma suíte completa" [level=2] [ref=e69]
+      - paragraph [ref=e70]: Financeiro, comercial e projetos — com IA nativa para te dar velocidade e clareza.
+      - generic [ref=e71]:
+        - generic [ref=e72]:
+          - heading "Analista IA nativo" [level=3] [ref=e75]
+          - paragraph [ref=e76]: Importe dados e faça perguntas sobre seus números em tempo real.
+        - generic [ref=e77]:
+          - heading "DRE e relatórios" [level=3] [ref=e80]
+          - paragraph [ref=e81]: Margem, lucro e performance sem planilhas manuais.
+        - generic [ref=e82]:
+          - heading "Fluxo de caixa" [level=3] [ref=e85]
+          - paragraph [ref=e86]: Projeções e visão do saldo acumulado com gráficos.
+        - generic [ref=e87]:
+          - heading "Cartões e fixos" [level=3] [ref=e90]
+          - paragraph [ref=e91]: Controle de recorrências, faturas e despesas mensais.
+        - generic [ref=e92]:
+          - heading "CRM (Leads e Vendas)" [level=3] [ref=e95]
+          - paragraph [ref=e96]: Pipeline, metas e registro simples de oportunidades.
+        - generic [ref=e97]:
+          - heading "Projetos (Kanban)" [level=3] [ref=e100]
+          - paragraph [ref=e101]: Do planejamento à execução com visão visual das entregas.
+    - generic [ref=e102]:
+      - generic [ref=e103]: FAQ
+      - heading "Dúvidas comuns" [level=2] [ref=e104]
+      - generic [ref=e105]:
+        - generic [ref=e106]:
+          - generic [ref=e107]: Preciso instalar algo?
+          - generic [ref=e108]: Não. É uma plataforma web, funciona no celular e no desktop.
+        - generic [ref=e109]:
+          - generic [ref=e110]: Meus dados ficam seguros?
+          - generic [ref=e111]: Sim. Os dados são armazenados na infraestrutura Firebase (Google) e o acesso é autenticado.
+        - generic [ref=e112]:
+          - generic [ref=e113]: Posso usar pessoal e empresa?
+          - generic [ref=e114]: Sim. Você alterna entre contextos sem misturar dados.
+        - generic [ref=e115]:
+          - generic [ref=e116]: Como começo?
+          - generic [ref=e117]: Clique em “Entrar no sistema”, crie sua conta e comece importando transações/leads.
+    - generic [ref=e120]:
+      - generic [ref=e121]:
+        - generic [ref=e122]: Começar
+        - generic [ref=e123]: Entre e veja seus números com clareza.
+        - generic [ref=e124]: Leva menos de 1 minuto para começar.
+      - link "Entrar no sistema" [ref=e125] [cursor=pointer]:
+        - /url: /login
+  - contentinfo [ref=e126]:
+    - generic [ref=e127]:
+      - generic [ref=e128]: © 2026 Genius Finance
+      - link "geniusweb.online" [ref=e130] [cursor=pointer]:
+        - /url: https://geniusweb.online

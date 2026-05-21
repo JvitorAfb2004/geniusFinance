@@ -58,36 +58,36 @@ export function TransactionTable({
   };
 
   return (
-    <div className="bg-white rounded-xl border border-[#e2e8f0] flex flex-col flex-1 min-h-[300px]">
-      <div className="p-4 border-b border-[#e2e8f0] flex flex-col md:flex-row items-start md:items-center justify-between z-10 gap-4 flex-wrap">
-        {!hideHeaderTitle && <span className="text-[#1e293b] font-bold">Transações Recentes</span>}
+    <div className="bg-surface rounded-2xl border border-slate-100 flex flex-col flex-1 min-h-[300px] shadow-[0_1px_3px_rgba(0,0,0,0.015),0_1px_2px_rgba(0,0,0,0.005)]">
+      <div className="p-4.5 border-b border-slate-100 flex flex-col md:flex-row items-start md:items-center justify-between z-10 gap-4 flex-wrap">
+        {!hideHeaderTitle && <span className="text-slate-800 font-bold text-[0.95rem] tracking-tight">Transações Recentes</span>}
         
         <div className="flex items-center gap-3 w-full md:w-auto ml-auto">
           <div className="relative flex-1 md:w-48">
-             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+             <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
              <input 
                type="text" 
                placeholder="Buscar..."
                value={searchTerm}
                onChange={(e) => setSearchTerm(e.target.value)}
-               className="w-full text-[0.75rem] border border-[#e2e8f0] rounded-md focus:border-[#3b82f6] pl-9 pr-2 py-1.5 outline-none font-medium text-[#1e293b] placeholder:text-gray-400"
+               className="w-full text-[0.78rem] border border-slate-200 rounded-xl focus:border-primary pl-9 pr-3 py-1.5 outline-none font-medium text-slate-700 placeholder:text-slate-400 bg-slate-50/50"
              />
           </div>
 
           {!forceFilter && (
             <select
-              className="text-[0.75rem] border-[#e2e8f0] rounded-md focus:border-[#3b82f6] px-2 py-1.5 border bg-white outline-none font-medium text-[#64748b] cursor-pointer"
+              className="text-[0.78rem] border-slate-200 rounded-xl focus:border-primary px-3 py-1.5 border bg-white outline-none font-medium text-slate-600 cursor-pointer shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
               value={filterType}
               onChange={(e) => setFilterType(e.target.value as any)}
             >
               <option value="ALL">Todas</option>
               <option value="INCOME">Entradas</option>
               <option value="EXPENSE">Despesas</option>
-              <option value="CREDIT_CARD">Cartao</option>
+              <option value="CREDIT_CARD">Cartão</option>
             </select>
           )}
           <select
-            className="text-[0.75rem] border-[#e2e8f0] rounded-md focus:border-[#3b82f6] px-2 py-1.5 border bg-white outline-none font-medium text-[#64748b] cursor-pointer max-w-[140px]"
+            className="text-[0.78rem] border-slate-200 rounded-xl focus:border-primary px-3 py-1.5 border bg-white outline-none font-medium text-slate-600 cursor-pointer max-w-[140px] shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
             value={categoryFilterId}
             onChange={(e) => setCategoryFilterId(e.target.value)}
           >
@@ -100,23 +100,23 @@ export function TransactionTable({
           </select>
           <button 
             onClick={handleCreate}
-            className="text-[0.75rem] text-[#3b82f6] border-none bg-transparent cursor-pointer font-bold hover:underline whitespace-nowrap"
+            className="text-[0.76rem] text-primary hover:text-primary-hover bg-slate-50 border border-slate-100 hover:border-slate-200 px-3.5 py-1.5 rounded-xl cursor-pointer font-bold transition-all whitespace-nowrap shadow-[0_1px_2px_rgba(0,0,0,0.01)]"
           >
-            + Nova Entrada/Saída
+            + Lançamento
           </button>
         </div>
       </div>
 
       <div className="overflow-x-auto overflow-y-auto flex-1">
         <table className="w-full text-left border-collapse text-[0.85rem] min-w-[600px]">
-          <thead className="sticky top-0 bg-[#f8fafc] z-10">
+          <thead className="sticky top-0 bg-slate-50/70 z-10">
             <tr>
-              <th className="py-3 px-4 font-semibold text-[#64748b] border-b border-[#e2e8f0] whitespace-nowrap">Data</th>
-              <th className="py-3 px-4 font-semibold text-[#64748b] border-b border-[#e2e8f0] whitespace-nowrap">Descrição</th>
-              <th className="py-3 px-4 font-semibold text-[#64748b] border-b border-[#e2e8f0] whitespace-nowrap">Categoria</th>
-              <th className="py-3 px-4 font-semibold text-[#64748b] border-b border-[#e2e8f0] text-right whitespace-nowrap">Valor</th>
-              <th className="py-3 px-4 font-semibold text-[#64748b] border-b border-[#e2e8f0] whitespace-nowrap">Status</th>
-              <th className="py-3 px-4 font-semibold text-[#64748b] border-b border-[#e2e8f0] text-center w-20 whitespace-nowrap"></th>
+              <th className="py-3 px-4 font-bold text-slate-500 text-[0.72rem] uppercase tracking-wider border-b border-slate-100 whitespace-nowrap">Data</th>
+              <th className="py-3 px-4 font-bold text-slate-500 text-[0.72rem] uppercase tracking-wider border-b border-slate-100 whitespace-nowrap">Descrição</th>
+              <th className="py-3 px-4 font-bold text-slate-500 text-[0.72rem] uppercase tracking-wider border-b border-slate-100 whitespace-nowrap">Categoria</th>
+              <th className="py-3 px-4 font-bold text-slate-500 text-[0.72rem] uppercase tracking-wider border-b border-slate-100 text-right whitespace-nowrap">Valor</th>
+              <th className="py-3 px-4 font-bold text-slate-500 text-[0.72rem] uppercase tracking-wider border-b border-slate-100 whitespace-nowrap">Status</th>
+              <th className="py-3 px-4 font-bold text-slate-500 text-[0.72rem] uppercase tracking-wider border-b border-slate-100 text-center w-20 whitespace-nowrap"></th>
             </tr>
           </thead>
           <tbody>

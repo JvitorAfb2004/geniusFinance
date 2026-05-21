@@ -9,7 +9,7 @@ interface Props {
 
 export default function LegalModal({ title, content, onClose }: Props) {
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center pt-[5vh]">
+    <div className="fixed inset-0 z-[60] flex items-start justify-center pt-[5vh]">
       <div className="fixed inset-0 bg-black/50" onClick={onClose} />
       <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] flex flex-col">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 shrink-0">

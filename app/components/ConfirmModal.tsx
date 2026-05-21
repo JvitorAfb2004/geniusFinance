@@ -33,38 +33,38 @@ export default function ConfirmModal({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm flex flex-col items-center justify-center p-4"
+      className="fixed inset-0 z-50 bg-black/45 flex flex-col items-center justify-center p-4"
       onClick={onCancel}
     >
       <motion.div
-        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        initial={{ opacity: 0, scale: 0.96, y: 15 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95, y: 20 }}
+        exit={{ opacity: 0, scale: 0.96, y: 15 }}
         transition={{ type: 'spring', duration: 0.3 }}
-        className="bg-surface rounded-xl shadow-xl w-full max-w-sm overflow-hidden relative"
+        className="bg-surface rounded-2xl shadow-xl w-full max-w-sm overflow-hidden relative border border-slate-100/60"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="p-5">
+        <div className="p-6">
           <div className="flex items-start gap-4">
-            <div className={`w-12 h-12 rounded-2xl ${colors.bg} flex items-center justify-center flex-shrink-0`}>
-              {variant === 'info' ? <Info className={`w-6 h-6 ${colors.text}`} /> : <AlertTriangle className={`w-6 h-6 ${colors.text}`} />}
+            <div className={`w-11 h-11 rounded-xl ${colors.bg} flex items-center justify-center flex-shrink-0 shadow-[0_1px_2px_rgba(0,0,0,0.02)]`}>
+              {variant === 'info' ? <Info className={`w-5 h-5 ${colors.text}`} /> : <AlertTriangle className={`w-5 h-5 ${colors.text}`} />}
             </div>
-            <div className="flex-1 min-w-0 pt-1">
-              <h3 className="text-base font-bold text-text-primary">{title}</h3>
-              <p className="text-sm text-text-secondary mt-1">{message}</p>
+            <div className="flex-1 min-w-0 pt-0.5">
+              <h3 className="text-[1.05rem] font-bold text-slate-800 tracking-tight leading-snug">{title}</h3>
+              <p className="text-[0.85rem] text-slate-500 mt-1 leading-relaxed">{message}</p>
             </div>
           </div>
         </div>
-        <div className="flex gap-2 px-5 pb-5">
+        <div className="flex gap-2.5 px-6 pb-6">
           <button
             onClick={onCancel}
-            className="flex-1 py-2.5 text-sm font-semibold text-text-secondary bg-bg hover:bg-border hover:text-text-primary rounded-xl transition-all cursor-pointer border-none"
+            className="flex-1 py-2.5 text-[0.82rem] font-bold text-slate-500 bg-slate-100 hover:bg-slate-200/80 hover:text-slate-800 rounded-xl transition-all cursor-pointer border-none"
           >
             {cancelLabel}
           </button>
           <button
             onClick={onConfirm}
-            className={`flex-1 py-2.5 text-sm font-semibold text-surface rounded-xl transition-all cursor-pointer border-none shadow-sm hover:shadow-md active:scale-[0.97] ${colors.btn}`}
+            className={`flex-1 py-2.5 text-[0.82rem] font-bold text-surface rounded-xl transition-all cursor-pointer border-none shadow-sm hover:shadow-md active:scale-[0.98] ${colors.btn}`}
           >
             {confirmLabel}
           </button>

@@ -61,12 +61,12 @@ export function PermissionsModal({ memberEmail, currentPermissions, onSave, onCl
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm" onClick={onClose}>
-      <div className="bg-white rounded-xl shadow-xl border border-[#e2e8f0] w-full max-w-lg max-h-[85vh] overflow-y-auto"
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45" onClick={onClose}>
+      <div className="bg-white rounded-2xl shadow-xl border border-slate-100 w-full max-w-lg max-h-[85vh] overflow-y-auto"
         onClick={e => e.stopPropagation()}>
-        <div className="flex items-center justify-between p-4 border-b border-[#e2e8f0] sticky top-0 bg-white">
-          <h3 className="font-bold text-gray-900">Permissões: {memberEmail}</h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 cursor-pointer">
+        <div className="flex items-center justify-between p-4 border-b border-slate-100 sticky top-0 bg-white">
+          <h3 className="font-bold text-slate-800 text-sm">Permissões: {memberEmail}</h3>
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 cursor-pointer">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -74,31 +74,31 @@ export function PermissionsModal({ memberEmail, currentPermissions, onSave, onCl
         <div className="p-4">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-xs font-semibold text-gray-500 uppercase border-b border-gray-50">
-                <th className="pb-2">Módulo</th>
+              <tr className="text-left text-[0.68rem] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100">
+                <th className="pb-2 font-bold">Módulo</th>
                 {(['view', 'create', 'edit', 'delete'] as ModuleAction[]).map(a => (
-                  <th key={a} className="pb-2 text-center">{ACTION_LABELS[a]}</th>
+                  <th key={a} className="pb-2 text-center font-bold">{ACTION_LABELS[a]}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {MODULES.map(mod => (
-                <tr key={mod.id} className="border-t border-gray-50 hover:bg-gray-50/50">
-                  <td className="py-2 font-medium text-gray-700 text-xs">{mod.label}</td>
+                <tr key={mod.id} className="border-t border-slate-50 hover:bg-slate-50/40">
+                  <td className="py-2.5 font-semibold text-slate-600 text-xs">{mod.label}</td>
                   {(['view', 'create', 'edit', 'delete'] as ModuleAction[]).map(action => {
                     const available = mod.actions.includes(action);
                     const active = (perms[mod.id] || []).includes(action);
                     return (
-                      <td key={action} className="py-2 text-center">
+                      <td key={action} className="py-2.5 text-center">
                         {available ? (
                           <input
                             type="checkbox"
                             checked={active}
                             onChange={() => toggle(mod.id, action)}
-                            className="w-4 h-4 rounded border-gray-300 text-[#3b82f6] focus:ring-[#3b82f6] cursor-pointer"
+                            className="w-4 h-4 rounded border-slate-200 text-slate-800 focus:ring-slate-900/5 focus:outline-none cursor-pointer"
                           />
                         ) : (
-                          <span className="text-gray-300 text-xs">—</span>
+                          <span className="text-slate-300 text-xs">—</span>
                         )}
                       </td>
                     );
@@ -109,11 +109,11 @@ export function PermissionsModal({ memberEmail, currentPermissions, onSave, onCl
           </table>
         </div>
 
-        <div className="flex justify-end gap-3 p-4 border-t border-[#e2e8f0] sticky bottom-0 bg-white">
+        <div className="flex justify-end gap-3 p-4 border-t border-slate-100 sticky bottom-0 bg-white">
           <button onClick={onClose}
-            className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 cursor-pointer">Cancelar</button>
+            className="px-4 py-2 text-xs text-slate-500 hover:text-slate-800 font-bold transition-colors cursor-pointer">Cancelar</button>
           <button onClick={handleSave} disabled={saving}
-            className="px-4 py-2 bg-[#3b82f6] text-white rounded-lg text-sm font-medium hover:bg-[#2563eb] disabled:opacity-50 cursor-pointer transition-colors">
+            className="px-4 py-2 bg-slate-900 text-white rounded-xl text-xs font-bold hover:bg-slate-800 disabled:opacity-50 cursor-pointer transition-all shadow-[0_1px_2px_rgba(0,0,0,0.05)]">
             {saving ? 'Salvando...' : 'Salvar Permissões'}
           </button>
         </div>

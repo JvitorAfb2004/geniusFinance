@@ -2,6 +2,7 @@ import { type RouteConfig } from "@react-router/dev/routes";
 
 export default [
   { file: "routes/_index.tsx", index: true },
+  { file: "routes/login.tsx", path: "login" },
   {
     file: "routes/_app.tsx",
     children: [

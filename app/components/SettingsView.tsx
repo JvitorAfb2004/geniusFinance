@@ -113,53 +113,53 @@ export function SettingsView() {
   };
 
   const renderLeadOptionSection = (label: string, options: LeadOption[], field: LeadOption['field']) => (
-    <div className="border border-gray-100 rounded-lg overflow-hidden">
-      <div className="px-3 py-2 bg-gray-50 flex items-center justify-between">
-        <span className="text-xs font-semibold text-gray-500 uppercase">{label}</span>
+    <div className="border border-slate-100 rounded-2xl overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.01)] bg-white">
+      <div className="px-4 py-3 bg-slate-50/60 flex items-center justify-between border-b border-slate-100/80">
+        <span className="text-[0.7rem] font-bold text-slate-500 uppercase tracking-wider">{label}</span>
         <button
           onClick={() => { setShowNewOption(showNewOption === field ? null : field); setNewOptionValue(''); setNewOptionColor('#3b82f6'); }}
-          className="text-xs text-blue-600 hover:text-blue-700 font-medium cursor-pointer flex items-center gap-1"
+          className="text-xs text-slate-600 hover:text-slate-800 font-semibold cursor-pointer flex items-center gap-1 transition-colors"
         >
           <Plus className="w-3 h-3" /> Adicionar
         </button>
       </div>
       {showNewOption === field && (
-        <div className="px-3 py-2 bg-blue-50 border-b border-blue-100 flex items-center gap-2">
+        <div className="px-4 py-3 bg-slate-50/30 border-b border-slate-100 flex items-center gap-2 flex-wrap sm:flex-nowrap">
           <input
             type="text"
             placeholder={`Nova opção`}
             value={newOptionValue}
             onChange={(e) => setNewOptionValue(e.target.value)}
-            className="flex-1 px-2 py-1 border border-gray-200 rounded text-sm outline-none"
+            className="flex-1 px-3 py-1.5 border border-slate-200 rounded-xl text-sm outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-400/25 transition-all"
             autoFocus
             onKeyDown={(e) => { if (e.key === 'Enter') handleAddOption(); if (e.key === 'Escape') setShowNewOption(null); }}
           />
           {field === 'status' && (
-            <div className="flex gap-0.5">
+            <div className="flex gap-1">
               {STATUS_COLORS.slice(0, 6).map((c) => (
                 <button key={c} type="button" onClick={() => setNewOptionColor(c)}
-                  className={`w-5 h-5 rounded-full border-2 cursor-pointer ${newOptionColor === c ? 'border-gray-800 scale-110' : 'border-transparent'}`}
+                  className={`w-5 h-5 rounded-full border-2 cursor-pointer transition-all ${newOptionColor === c ? 'border-slate-800 scale-110' : 'border-transparent'}`}
                   style={{ backgroundColor: c }} />
               ))}
             </div>
           )}
           <button onClick={handleAddOption} disabled={!newOptionValue.trim()}
-            className="px-2 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700 disabled:opacity-50 cursor-pointer">
+            className="px-3 py-1.5 bg-slate-900 text-white rounded-xl text-xs hover:bg-slate-800 disabled:opacity-50 cursor-pointer transition-all">
             <Check className="w-3.5 h-3.5" />
           </button>
         </div>
       )}
       {options.map((opt) => (
-        <div key={opt.id} className="px-3 py-2 flex items-center justify-between border-t border-gray-50 hover:bg-gray-50/50">
+        <div key={opt.id} className="px-4 py-3 flex items-center justify-between border-t border-slate-50 hover:bg-slate-50/20 transition-colors">
           <div className="flex items-center gap-2">
             {opt.field === 'status' && opt.color && (
-              <span className="w-3 h-3 rounded-full" style={{ backgroundColor: opt.color }} />
+              <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: opt.color }} />
             )}
-            <span className="text-sm text-gray-700">{opt.value}</span>
+            <span className="text-sm text-slate-700 font-medium">{opt.value}</span>
           </div>
           <button
             onClick={() => deleteLeadOption(opt.id)}
-            className="text-gray-400 hover:text-red-500 cursor-pointer"
+            className="text-slate-400 hover:text-red-500 cursor-pointer p-1 rounded hover:bg-red-50/30 transition-all"
             title="Excluir"
           >
             <Trash2 className="w-3.5 h-3.5" />
@@ -167,7 +167,7 @@ export function SettingsView() {
         </div>
       ))}
       {options.length === 0 && (
-        <div className="px-3 py-3 text-sm text-gray-400 text-center">Nenhuma opção cadastrada</div>
+        <div className="px-4 py-4 text-sm text-slate-400 text-center">Nenhuma opção cadastrada</div>
       )}
     </div>
   );
@@ -183,34 +183,34 @@ export function SettingsView() {
   return (
     <div className="flex flex-col max-w-3xl gap-6">
       {/* Profile Header */}
-      <div className="bg-white rounded-xl border border-[#e2e8f0] overflow-hidden">
-        <div className="p-6 flex items-center gap-4 bg-gray-50/50">
-          <div className="w-16 h-16 rounded-full bg-[#e2e8f0] flex items-center justify-center overflow-hidden shrink-0 border-2 border-white shadow-sm">
+      <div className="bg-white rounded-2xl border border-slate-100 shadow-[0_1px_4px_rgba(0,0,0,0.015)] overflow-hidden">
+        <div className="p-6 flex items-center gap-4 bg-slate-50/40">
+          <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center overflow-hidden shrink-0 border-2 border-white shadow-[0_1px_3px_rgba(0,0,0,0.05)]">
             {user?.photoURL ? (
               <img src={user.photoURL} alt="Avatar" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
             ) : (
-              <User className="w-8 h-8 text-gray-400" />
+              <User className="w-8 h-8 text-slate-400" />
             )}
           </div>
           <div>
-            <h2 className="text-xl font-bold text-gray-900">{user?.displayName || 'Usuário'}</h2>
-            <p className="text-gray-500 text-sm">{user?.email}</p>
+            <h2 className="text-xl font-bold text-slate-900">{user?.displayName || 'Usuário'}</h2>
+            <p className="text-slate-400 text-sm font-medium mt-0.5">{user?.email}</p>
           </div>
         </div>
       </div>
 
       {/* Tabs + Content */}
-      <div className="bg-white rounded-xl border border-[#e2e8f0] overflow-hidden">
+      <div className="bg-white rounded-2xl border border-slate-100 shadow-[0_1px_4px_rgba(0,0,0,0.015)] overflow-hidden">
         {/* Tab bar */}
-        <div className="flex border-b border-[#e2e8f0] bg-gray-50/50">
+        <div className="flex gap-1.5 p-3 bg-slate-50/50 border-b border-slate-100/80 flex-wrap">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`px-5 py-3 text-sm font-medium transition-colors cursor-pointer border-b-2 ${
+              className={`px-4 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
                 activeTab === tab.id
-                  ? 'border-[#3b82f6] text-[#3b82f6] bg-white'
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
+                  ? 'bg-slate-900 text-white shadow-[0_1px_2px_rgba(0,0,0,0.05)]'
+                  : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100/50'
               }`}
             >
               {tab.label}
@@ -222,47 +222,47 @@ export function SettingsView() {
         <div className="p-6">
           {activeTab === 'geral' && (
             <div className="flex flex-col gap-4">
-              <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">Conta e Dados</h3>
+              <h3 className="text-[0.68rem] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Conta e Dados</h3>
 
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-100 gap-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-slate-50/50 rounded-2xl border border-slate-100 gap-4">
                 <div className="flex items-center gap-3">
-                  <DownloadCloud className="text-[#3b82f6] w-5 h-5 shrink-0" />
+                  <DownloadCloud className="text-slate-700 w-5 h-5 shrink-0" />
                   <div>
-                    <p className="font-semibold text-gray-700">Exportar Banco de Dados (CSV)</p>
-                    <p className="text-xs text-gray-500">Baixe o histórico do contexto atual ({activeContext === 'PERSONAL' ? 'Pessoal' : 'Empresa'}).</p>
+                    <p className="font-semibold text-slate-700 text-sm">Exportar Banco de Dados (CSV)</p>
+                    <p className="text-xs text-slate-500 font-medium mt-0.5">Baixe o histórico do contexto atual ({activeContext === 'PERSONAL' ? 'Pessoal' : 'Empresa'}).</p>
                   </div>
                 </div>
                 <button onClick={handleExportCSV}
-                  className="text-xs font-bold bg-white border border-[#e2e8f0] text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer shrink-0 shadow-sm">
+                  className="text-xs font-bold bg-white border border-slate-200 text-slate-700 px-4 py-2 rounded-xl hover:bg-slate-50 hover:border-slate-300 transition-all cursor-pointer shrink-0 shadow-[0_1px_2px_rgba(0,0,0,0.02)] active:scale-[0.98]">
                   Baixar .CSV
                 </button>
               </div>
 
-              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-100">
+              <div className="flex items-center justify-between p-4 bg-slate-50/50 rounded-2xl border border-slate-100">
                 <div className="flex items-center gap-3">
-                  <Shield className="text-gray-400 w-5 h-5 shrink-0" />
+                  <Shield className="text-slate-500 w-5 h-5 shrink-0" />
                   <div>
-                    <p className="font-semibold text-gray-700">Segurança da Conta</p>
-                    <p className="text-xs text-gray-500">Autenticado via Google Cloud.</p>
+                    <p className="font-semibold text-slate-700 text-sm">Segurança da Conta</p>
+                    <p className="text-xs text-slate-500 font-medium mt-0.5">Autenticado via Google Cloud.</p>
                   </div>
                 </div>
-                <span className="text-xs font-bold bg-green-100 text-green-700 px-2 py-1 rounded">Seguro</span>
+                <span className="text-[0.65rem] font-bold bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md border border-slate-200/50">Seguro</span>
               </div>
 
-              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-100">
+              <div className="flex items-center justify-between p-4 bg-slate-50/50 rounded-2xl border border-slate-100">
                 <div className="flex items-center gap-3">
                   <BellRing className="text-amber-500 w-5 h-5 shrink-0" />
                   <div>
-                    <p className="font-semibold text-gray-700">Alertas do dashboard inicial</p>
-                    <p className="text-xs text-gray-500">Mostra avisos de pagamentos próximos e recebimentos do dia.</p>
+                    <p className="font-semibold text-slate-700 text-sm">Alertas do dashboard inicial</p>
+                    <p className="text-xs text-slate-500 font-medium mt-0.5">Mostra avisos de pagamentos próximos e recebimentos do dia.</p>
                   </div>
                 </div>
                 <button
                   onClick={handleToggleDashboardAlerts}
-                  className={`text-xs font-bold px-3 py-1 rounded cursor-pointer border ${
+                  className={`text-xs font-bold px-3 py-1 rounded-md cursor-pointer border transition-all ${
                     showDashboardAlerts
-                      ? 'bg-emerald-100 text-emerald-700 border-emerald-200'
-                      : 'bg-gray-100 text-gray-500 border-gray-200'
+                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200/60'
+                      : 'bg-slate-100 text-slate-500 border-slate-200'
                   }`}
                 >
                   {showDashboardAlerts ? 'Ativado' : 'Desativado'}
@@ -270,7 +270,7 @@ export function SettingsView() {
               </div>
 
               <button onClick={signOut}
-                className="mt-2 flex items-center justify-center gap-2 text-red-600 hover:bg-red-50 p-3 rounded-lg w-full sm:w-fit transition-colors font-medium border border-red-100 bg-transparent cursor-pointer">
+                className="mt-2 flex items-center justify-center gap-2 text-red-600 hover:bg-red-50/30 hover:text-red-700 hover:border-red-200/50 p-3 rounded-xl w-full sm:w-fit transition-all font-semibold border border-red-100 bg-transparent cursor-pointer active:scale-[0.98]">
                 <LogOut className="w-5 h-5" />
                 Sair do Aplicativo
               </button>
@@ -281,15 +281,15 @@ export function SettingsView() {
             <div className="flex flex-col gap-4">
               <div className="flex items-center gap-2 mb-2">
                 <Building2 className="w-4 h-4 text-[#3b82f6]" />
-                <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">Gestão de Conta Empresarial</h3>
+                <h3 className="text-[0.7rem] font-bold text-slate-400 uppercase tracking-wider">Gestão de Conta Empresarial</h3>
               </div>
 
               {/* Current scope info */}
-              <div className="p-4 bg-blue-50 rounded-lg border border-blue-100">
-                <p className="text-sm font-medium text-blue-800">
+              <div className="p-4 bg-slate-50/50 rounded-2xl border border-slate-100/80">
+                <p className="text-sm font-semibold text-slate-800">
                   Contexto atual: <strong>{activeScope.type === 'PERSONAL' ? 'Pessoal' : activeScope.accountName}</strong>
                 </p>
-                <p className="text-xs text-blue-600 mt-1">
+                <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
                   {activeScope.type === 'PERSONAL'
                     ? 'Você está visualizando seus dados pessoais. Crie ou selecione uma conta empresarial para começar a compartilhar.'
                     : `Papel: ${activeScope.role === 'owner' ? 'Dono' : activeScope.role === 'admin' ? 'Administrador' : 'Membro'}`}
@@ -338,12 +338,12 @@ export function SettingsView() {
               )}
 
               {/* My Accounts */}
-              <div className="border border-gray-100 rounded-lg overflow-hidden">
-                <div className="px-3 py-2 bg-gray-50 flex items-center justify-between">
-                  <span className="text-xs font-semibold text-gray-500 uppercase">Minhas Empresas</span>
+              <div className="border border-slate-100 rounded-2xl overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.01)] bg-white">
+                <div className="px-4 py-3 bg-slate-50/60 flex items-center justify-between border-b border-slate-100/80">
+                  <span className="text-[0.7rem] font-bold text-slate-500 uppercase tracking-wider">Minhas Empresas</span>
                   <button
                     onClick={() => { setShowNewAccount(!showNewAccount); setNewAccountName(''); }}
-                    className="text-xs text-blue-600 hover:text-blue-700 font-medium cursor-pointer flex items-center gap-1"
+                    className="text-xs text-slate-600 hover:text-slate-800 font-semibold cursor-pointer flex items-center gap-1 transition-colors"
                   >
                     <Plus className="w-3 h-3" /> Nova Empresa
                   </button>
@@ -653,16 +653,16 @@ export function SettingsView() {
 
           {activeTab === 'categorias' && (
             <div className="flex flex-col gap-4">
-              <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">Categorias (DRE)</h3>
+              <h3 className="text-[0.7rem] font-bold text-slate-400 uppercase tracking-wider mb-1">Categorias (DRE)</h3>
 
               {showNewCat ? (
-                <div className="p-3 bg-blue-50 rounded-lg border border-blue-100 space-y-2">
-                  <div className="flex gap-2">
+                <div className="p-4 bg-slate-50/50 rounded-2xl border border-slate-100 space-y-3">
+                  <div className="flex gap-2 flex-wrap sm:flex-nowrap">
                     <input type="text" placeholder="Nome da categoria" value={newCatName}
                       onChange={(e) => setNewCatName(e.target.value)}
-                      className="flex-1 px-3 py-1.5 border border-gray-300 rounded text-sm outline-none" autoFocus />
+                      className="flex-1 px-3 py-2 border border-slate-200 rounded-xl text-sm outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-400/25 transition-all" autoFocus />
                     <select value={newCatSection} onChange={(e) => setNewCatSection(e.target.value as DRESection)}
-                      className="px-2 py-1.5 border border-gray-300 rounded text-xs outline-none cursor-pointer">
+                      className="px-3 py-2 border border-slate-200 rounded-xl text-sm outline-none cursor-pointer bg-white transition-all">
                       <option value="RECEITA">Receita</option>
                       <option value="CUSTOS">Custos</option>
                       <option value="DESPESAS">Despesas</option>
@@ -671,23 +671,23 @@ export function SettingsView() {
                   <div className="flex gap-2">
                     <button onClick={async () => { if (!newCatName.trim()) return; await addCategory(newCatName.trim(), newCatSection); setNewCatName(''); setShowNewCat(false); }}
                       disabled={!newCatName.trim()}
-                      className="text-xs px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 cursor-pointer">Adicionar</button>
-                    <button onClick={() => setShowNewCat(false)} className="text-xs px-3 py-1 text-gray-500 hover:text-gray-700 cursor-pointer">Cancelar</button>
+                      className="text-xs font-semibold px-4 py-2 bg-slate-900 text-white rounded-xl hover:bg-slate-800 disabled:opacity-50 cursor-pointer transition-all">Adicionar</button>
+                    <button onClick={() => setShowNewCat(false)} className="text-xs font-semibold px-4 py-2 text-slate-500 hover:text-slate-800 cursor-pointer transition-colors">Cancelar</button>
                   </div>
                 </div>
               ) : (
                 <button onClick={() => setShowNewCat(true)}
-                  className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 font-medium cursor-pointer p-2">
+                  className="flex items-center gap-2 text-sm text-slate-600 hover:text-slate-800 font-semibold cursor-pointer p-2 w-fit transition-colors">
                   <Plus className="w-4 h-4" /> Nova categoria
                 </button>
               )}
 
-              <div className="space-y-1">
+              <div className="space-y-3">
                 {(['RECEITA', 'CUSTOS', 'DESPESAS'] as DRESection[]).map((section) => {
                   const sectionCats = categories.filter((c) => c.section === section).sort((a, b) => a.order - b.order);
                   if (sectionCats.length === 0) return null;
                   return (
-                    <div key={section} className="border border-gray-100 rounded-lg overflow-hidden">
+                    <div key={section} className="border border-slate-100 rounded-2xl overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.01)] bg-white">
                       <div className="px-3 py-1.5 bg-gray-50 text-xs font-semibold text-gray-500 uppercase">{SECTION_LABELS[section]}</div>
                       {sectionCats.map((cat) => (
                         <div key={cat.id} className="px-3 py-2 flex items-center justify-between border-t border-gray-50 hover:bg-gray-50/50">

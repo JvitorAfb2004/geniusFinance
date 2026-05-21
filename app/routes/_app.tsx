@@ -35,12 +35,12 @@ function ScopeBadge() {
     : "";
 
   return (
-    <div className="mt-2 flex items-center gap-2 px-2 py-1.5 rounded-lg bg-white/5 border border-white/10">
-      <div className="w-2 h-2 rounded-full bg-primary shrink-0" />
+    <div className="mt-2.5 flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-white/4 border border-white/6 shadow-sm">
+      <div className="w-1.5 h-1.5 rounded-full bg-primary shrink-0 animate-pulse" />
       <div className="min-w-0">
-        <p className="text-[0.7rem] font-semibold text-white/90 truncate">{label}</p>
+        <p className="text-[0.72rem] font-medium text-slate-200 truncate">{label}</p>
         {roleLabel && (
-          <p className="text-[0.55rem] text-white/40 uppercase tracking-wider">{roleLabel}</p>
+          <p className="text-[0.55rem] text-slate-500 font-bold uppercase tracking-widest mt-0.5">{roleLabel}</p>
         )}
       </div>
     </div>
@@ -65,7 +65,7 @@ export default function AppLayout() {
 
   useEffect(() => {
     if (!user) {
-      navigate("/", { replace: true });
+      navigate("/login", { replace: true });
       return;
     }
     user.getIdTokenResult().then((result) => {
@@ -147,34 +147,35 @@ export default function AppLayout() {
     <div className="flex h-[100dvh] bg-bg overflow-hidden text-text-primary">
       {isSidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40 lg:hidden"
+          className="fixed inset-0 bg-black/45 z-40 lg:hidden"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
 
       <aside className={cn(
-        "fixed inset-y-0 left-0 z-50 w-60 bg-text-primary text-surface flex flex-col py-6 transform transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 shrink-0",
+        "fixed inset-y-0 left-0 z-50 w-60 bg-[#0b0f19] text-surface flex flex-col py-6 transform transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 shrink-0",
         isSidebarOpen ? "translate-x-0" : "-translate-x-full"
       )}>
-        <div className="px-6 pb-6 border-b border-white/10 mb-6 flex flex-col gap-1">
-          <div className="flex items-center justify-between font-extrabold text-[1.2rem] tracking-tight">
-            <span>Genius Finance<span className="text-primary">.</span></span>            <button className="lg:hidden text-white/70 hover:text-white" onClick={() => setIsSidebarOpen(false)}>
+        <div className="px-6 pb-6 border-b border-white/8 mb-5 flex flex-col gap-1">
+          <div className="flex items-center justify-between font-bold text-[1.15rem] tracking-tight text-white">
+            <span>Genius Finance<span className="text-[#3b82f6]">.</span></span>
+            <button className="lg:hidden text-white/60 hover:text-white transition-colors" onClick={() => setIsSidebarOpen(false)}>
               <X className="w-5 h-5" />
             </button>
           </div>
-          <span className="text-[0.65rem] font-bold text-white/40 uppercase tracking-wider">by geniusweb.online</span>
+          <span className="text-[0.65rem] font-bold text-slate-500 uppercase tracking-wider">by geniusweb.online</span>
           <ScopeBadge />
           {isTrial && (
-            <div className="mt-2 px-3 py-2 rounded-lg bg-amber-500/10 border border-amber-500/20">
+            <div className="mt-2.5 px-3 py-2.5 rounded-xl bg-amber-500/8 border border-amber-500/15">
               <div className="flex items-center gap-1.5">
-                <Clock className="w-3 h-3 text-amber-400 shrink-0" />
+                <Clock className="w-3.5 h-3.5 text-amber-400 shrink-0" />
                 <p className="text-[0.65rem] font-semibold text-amber-300 leading-tight">
                   Trial · {trialDaysLeft} dia(s) restante(s)
                 </p>
               </div>
               <button
                 onClick={() => navigateTo("/subscription")}
-                className="mt-1.5 w-full text-[0.6rem] font-bold bg-amber-500 text-white py-1 rounded-md hover:bg-amber-400 transition-colors cursor-pointer"
+                className="mt-2 w-full text-[0.62rem] font-bold bg-amber-500 hover:bg-amber-400 text-white py-1.5 rounded-lg transition-colors cursor-pointer border-none"
               >
                 Assinar plano
               </button>
@@ -182,91 +183,135 @@ export default function AppLayout() {
           )}
         </div>
 
-        <nav className="flex flex-col flex-1 overflow-y-auto">
-          <div className="mb-2">
-            <div className="px-6 py-1.5 text-[0.6rem] font-bold text-white/30 uppercase tracking-widest">Financeiro</div>
-            {menuItems.filter(i => ["/dashboard","/transactions","/fixed-monthly","/credit-cards","/dre","/budget","/spending-limits","/sales","/goals","/reports"].includes(i.path)).map(item => (
-              <button key={item.path} onClick={() => navigateTo(item.path)}
-                className={cn(
-                  "px-6 py-2.5 text-[0.85rem] flex items-center gap-3 cursor-pointer transition-colors text-left border-l-4 w-full",
-                  isActive(item.path) ? "text-surface bg-white/5 border-primary" : "text-white/70 hover:text-surface hover:bg-white/5 border-transparent"
-                )}>
-                <item.icon className="w-4 h-4 opacity-70" /> {item.label}
-              </button>
-            ))}
+        <nav className="flex flex-col flex-1 overflow-y-auto gap-3.5">
+          <div>
+            <div className="px-7 py-1 text-[0.62rem] font-bold text-slate-500 uppercase tracking-[0.15em] mb-1.5">Financeiro</div>
+            <div className="flex flex-col gap-0.5">
+              {menuItems.filter(i => ["/dashboard","/transactions","/fixed-monthly","/credit-cards","/dre","/budget","/spending-limits","/sales","/goals","/reports"].includes(i.path)).map(item => (
+                <button key={item.path} onClick={() => navigateTo(item.path)}
+                  className={cn(
+                    "mx-3 px-4 py-2 text-[0.82rem] flex items-center gap-3 cursor-pointer rounded-xl transition-all duration-200 text-left w-[calc(100%-1.5rem)] border-none",
+                    isActive(item.path) 
+                      ? "text-white bg-white/8 font-medium shadow-sm" 
+                      : "text-slate-400 hover:text-white hover:bg-white/4"
+                  )}>
+                  <item.icon className={cn("w-4 h-4 transition-opacity", isActive(item.path) ? "opacity-100 text-primary" : "opacity-60")} /> 
+                  {item.label}
+                </button>
+              ))}
+            </div>
           </div>
 
-          <div className="mb-2">
-            <div className="px-6 py-1.5 text-[0.6rem] font-bold text-white/30 uppercase tracking-widest">Conta</div>
+          <div>
+            <div className="px-7 py-1 text-[0.62rem] font-bold text-slate-500 uppercase tracking-[0.15em] mb-1.5">Conta</div>
             <button key="/subscription" onClick={() => navigateTo("/subscription")}
-              className={cn("px-6 py-2.5 text-[0.85rem] flex items-center gap-3 cursor-pointer transition-colors text-left border-l-4 w-full",
-                isActive("/subscription") ? "text-surface bg-white/5 border-primary" : "text-white/70 hover:text-surface hover:bg-white/5 border-transparent")}>
-              <ShoppingCart className="w-4 h-4 opacity-70" /> Assinatura
+              className={cn(
+                "mx-3 px-4 py-2 text-[0.82rem] flex items-center gap-3 cursor-pointer rounded-xl transition-all duration-200 text-left w-[calc(100%-1.5rem)] border-none",
+                isActive("/subscription") 
+                  ? "text-white bg-white/8 font-medium shadow-sm" 
+                  : "text-slate-400 hover:text-white hover:bg-white/4"
+              )}>
+              <ShoppingCart className={cn("w-4 h-4 transition-opacity", isActive("/subscription") ? "opacity-100 text-primary" : "opacity-60")} /> 
+              Assinatura
             </button>
           </div>
 
-          <div className="mb-2">
-            <div className="px-6 py-1.5 text-[0.6rem] font-bold text-white/30 uppercase tracking-widest">Suporte</div>
+          <div>
+            <div className="px-7 py-1 text-[0.62rem] font-bold text-slate-500 uppercase tracking-[0.15em] mb-1.5">Suporte</div>
             <button onClick={() => navigateTo("/report-issue")}
-              className={cn("px-6 py-2.5 text-[0.85rem] flex items-center gap-3 cursor-pointer transition-colors text-left border-l-4 w-full",
-                isActive("/report-issue") ? "text-surface bg-white/5 border-primary" : "text-white/70 hover:text-surface hover:bg-white/5 border-transparent")}>
-              <Bug className="w-4 h-4 opacity-70" /> Reportar Problema
+              className={cn(
+                "mx-3 px-4 py-2 text-[0.82rem] flex items-center gap-3 cursor-pointer rounded-xl transition-all duration-200 text-left w-[calc(100%-1.5rem)] border-none",
+                isActive("/report-issue") 
+                  ? "text-white bg-white/8 font-medium shadow-sm" 
+                  : "text-slate-400 hover:text-white hover:bg-white/4"
+              )}>
+              <Bug className={cn("w-4 h-4 transition-opacity", isActive("/report-issue") ? "opacity-100 text-primary" : "opacity-60")} /> 
+              Reportar Problema
             </button>
           </div>
 
-          <div className="mb-2">
-            <div className="px-6 py-1.5 text-[0.6rem] font-bold text-white/30 uppercase tracking-widest">Comercial</div>
+          <div>
+            <div className="px-7 py-1 text-[0.62rem] font-bold text-slate-500 uppercase tracking-[0.15em] mb-1.5">Comercial</div>
             <button onClick={() => navigateTo("/commercial")}
-              className={cn("px-6 py-2.5 text-[0.85rem] flex items-center gap-3 cursor-pointer transition-colors text-left border-l-4 w-full",
-                isActive("/commercial") ? "text-surface bg-white/5 border-primary" : "text-white/70 hover:text-surface hover:bg-white/5 border-transparent")}>
-              <Users className="w-4 h-4 opacity-70" /> Leads
+              className={cn(
+                "mx-3 px-4 py-2 text-[0.82rem] flex items-center gap-3 cursor-pointer rounded-xl transition-all duration-200 text-left w-[calc(100%-1.5rem)] border-none",
+                isActive("/commercial") 
+                  ? "text-white bg-white/8 font-medium shadow-sm" 
+                  : "text-slate-400 hover:text-white hover:bg-white/4"
+              )}>
+              <Users className={cn("w-4 h-4 transition-opacity", isActive("/commercial") ? "opacity-100 text-primary" : "opacity-60")} /> 
+              Leads
             </button>
           </div>
 
-          <div className="mb-2">
-            <div className="px-6 py-1.5 text-[0.6rem] font-bold text-white/30 uppercase tracking-widest">Projetos</div>
-            <button onClick={() => navigateTo("/projects")}
-              className={cn("px-6 py-2.5 text-[0.85rem] flex items-center gap-3 cursor-pointer transition-colors text-left border-l-4 w-full",
-                isActive("/projects") ? "text-surface bg-white/5 border-primary" : "text-white/70 hover:text-surface hover:bg-white/5 border-transparent")}>
-              <Kanban className="w-4 h-4 opacity-70" /> Projetos
-            </button>
-            <button onClick={() => navigateTo("/service-types")}
-              className={cn("px-6 py-2.5 text-[0.85rem] flex items-center gap-3 cursor-pointer transition-colors text-left border-l-4 w-full",
-                isActive("/service-types") ? "text-surface bg-white/5 border-primary" : "text-white/70 hover:text-surface hover:bg-white/5 border-transparent")}>
-              <Layers className="w-4 h-4 opacity-70" /> Tipos de Serviço
-            </button>
+          <div>
+            <div className="px-7 py-1 text-[0.62rem] font-bold text-slate-500 uppercase tracking-[0.15em] mb-1.5">Projetos</div>
+            <div className="flex flex-col gap-0.5">
+              <button onClick={() => navigateTo("/projects")}
+                className={cn(
+                  "mx-3 px-4 py-2 text-[0.82rem] flex items-center gap-3 cursor-pointer rounded-xl transition-all duration-200 text-left w-[calc(100%-1.5rem)] border-none",
+                  isActive("/projects") 
+                    ? "text-white bg-white/8 font-medium shadow-sm" 
+                    : "text-slate-400 hover:text-white hover:bg-white/4"
+                )}>
+                <Kanban className={cn("w-4 h-4 transition-opacity", isActive("/projects") ? "opacity-100 text-primary" : "opacity-60")} /> 
+                Projetos
+              </button>
+              <button onClick={() => navigateTo("/service-types")}
+                className={cn(
+                  "mx-3 px-4 py-2 text-[0.82rem] flex items-center gap-3 cursor-pointer rounded-xl transition-all duration-200 text-left w-[calc(100%-1.5rem)] border-none",
+                  isActive("/service-types") 
+                    ? "text-white bg-white/8 font-medium shadow-sm" 
+                    : "text-slate-400 hover:text-white hover:bg-white/4"
+                )}>
+                <Layers className={cn("w-4 h-4 transition-opacity", isActive("/service-types") ? "opacity-100 text-primary" : "opacity-60")} /> 
+                Tipos de Serviço
+              </button>
+            </div>
           </div>
 
           {isSuperadmin && (
-            <div className="mb-2">
-              <div className="px-6 py-1.5 text-[0.6rem] font-bold text-white/30 uppercase tracking-widest">Admin</div>
-              {adminItems.map(item => (
-                <button key={item.path} onClick={() => navigateTo(item.path)}
-                  className={cn("px-6 py-2.5 text-[0.85rem] flex items-center gap-3 cursor-pointer transition-colors text-left border-l-4 w-full",
-                    isActive(item.path) ? "text-surface bg-white/5 border-primary" : "text-white/70 hover:text-surface hover:bg-white/5 border-transparent")}>
-                  <item.icon className="w-4 h-4 opacity-70" /> {item.label}
-                </button>
-              ))}
+            <div>
+              <div className="px-7 py-1 text-[0.62rem] font-bold text-slate-500 uppercase tracking-[0.15em] mb-1.5">Admin</div>
+              <div className="flex flex-col gap-0.5">
+                {adminItems.map(item => (
+                  <button key={item.path} onClick={() => navigateTo(item.path)}
+                    className={cn(
+                      "mx-3 px-4 py-2 text-[0.82rem] flex items-center gap-3 cursor-pointer rounded-xl transition-all duration-200 text-left w-[calc(100%-1.5rem)] border-none",
+                      isActive(item.path) 
+                        ? "text-white bg-white/8 font-medium shadow-sm" 
+                        : "text-slate-400 hover:text-white hover:bg-white/4"
+                    )}>
+                    <item.icon className={cn("w-4 h-4 transition-opacity", isActive(item.path) ? "opacity-100 text-primary" : "opacity-60")} /> 
+                    {item.label}
+                  </button>
+                ))}
+              </div>
             </div>
           )}
         </nav>
 
-        <div className="mt-auto">
+        <div className="mt-auto pt-4 flex flex-col gap-1 border-t border-white/6">
           <button onClick={() => navigateTo("/settings")}
-            className={cn("px-6 py-3 text-[0.9rem] flex items-center gap-3 cursor-pointer transition-colors text-left border-l-4 w-full",
-              isActive("/settings") ? "text-surface bg-white/5 border-primary" : "text-white/70 hover:text-surface hover:bg-white/5 border-transparent")}>
-            <Settings className="w-4 h-4 opacity-70" /> Configurações
+            className={cn(
+              "mx-3 px-4 py-2.5 text-[0.85rem] flex items-center gap-3 cursor-pointer rounded-xl transition-all duration-200 text-left w-[calc(100%-1.5rem)] border-none",
+              isActive("/settings") 
+                ? "text-white bg-white/8 font-medium" 
+                : "text-slate-400 hover:text-white hover:bg-white/4"
+            )}>
+            <Settings className={cn("w-4 h-4 transition-opacity", isActive("/settings") ? "opacity-100 text-primary" : "opacity-60")} /> 
+            Configurações
             {pendingInvites.length > 0 && (
-              <span className="ml-auto bg-red-500 text-white text-[0.65rem] font-bold px-1.5 py-0.5 rounded-full min-w-[1.25rem] text-center leading-none">
+              <span className="ml-auto bg-red-500 text-white text-[0.62rem] font-bold px-1.5 py-0.5 rounded-full min-w-[1.25rem] text-center leading-none">
                 {pendingInvites.length}
               </span>
             )}
           </button>
           <button
             onClick={() => { signOut(); setIsSidebarOpen(false); localStorage.removeItem(TERMS_KEY); }}
-            className="px-6 py-3 text-[0.9rem] flex items-center gap-3 cursor-pointer transition-colors text-left border-l-4 border-transparent text-danger hover:bg-white/5 w-full mt-2"
+            className="mx-3 px-4 py-2.5 text-[0.85rem] flex items-center gap-3 cursor-pointer rounded-xl transition-all duration-200 text-left border-none text-red-400 hover:bg-white/4 hover:text-red-300 w-[calc(100%-1.5rem)]"
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 opacity-70"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 opacity-60"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
             Sair
           </button>
         </div>

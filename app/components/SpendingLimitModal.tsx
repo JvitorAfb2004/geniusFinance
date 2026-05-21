@@ -130,14 +130,14 @@ export function SpendingLimitModal({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm flex flex-col items-center justify-center p-4"
+      className="fixed inset-0 z-50 bg-black/45 flex flex-col items-center justify-center p-4"
     >
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
         transition={{ type: 'spring', duration: 0.3 }}
-        className="bg-surface rounded-xl shadow-xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden"
+        className="bg-surface rounded-2xl shadow-xl border border-slate-100 w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="px-6 py-5 flex justify-between items-center shrink-0">
@@ -145,7 +145,7 @@ export function SpendingLimitModal({
             <h3 className="text-lg font-bold font-sans text-text-primary">
               {initialData ? 'Editar Limite' : 'Novo Limite de Gasto'}
             </h3>
-            <p className="text-xs text-text-secondary mt-0.5">
+            <p className="text-xs text-text-secondary mt-0.5 font-medium">
               {initialData ? 'Atualize os dados do limite' : 'Defina um teto de gastos por categoria'}
             </p>
           </div>
@@ -153,7 +153,7 @@ export function SpendingLimitModal({
             <X className="w-4 h-4" />
           </button>
         </div>
-        <div className="border-b border-border mx-6" />
+        <div className="border-b border-slate-100 mx-6" />
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4 overflow-y-auto">
           <div className="space-y-1.5">
@@ -303,7 +303,7 @@ export function SpendingLimitModal({
                 type="button"
                 onClick={handleDelete}
                 disabled={submitting}
-                className="px-4 py-3.5 rounded-xl border border-red-200 text-red-600 hover:bg-red-50 disabled:opacity-60 disabled:cursor-not-allowed font-semibold text-sm transition-all cursor-pointer"
+                className="px-4 py-3.5 rounded-xl border border-red-100 text-red-600 hover:bg-red-50/50 hover:text-red-700 disabled:opacity-60 disabled:cursor-not-allowed font-semibold text-sm transition-all cursor-pointer active:scale-[0.98]"
               >
                 Excluir
               </button>
@@ -311,7 +311,7 @@ export function SpendingLimitModal({
             <button
               type="submit"
               disabled={submitting}
-              className="flex-1 bg-gradient-to-r from-primary to-primary-hover hover:from-primary-hover hover:to-primary disabled:opacity-60 disabled:cursor-not-allowed border-none text-surface font-semibold py-3.5 rounded-xl shadow-md hover:shadow-lg transition-all focus:ring-4 focus:ring-primary/20 active:scale-[0.97] cursor-pointer flex items-center justify-center gap-2"
+              className="flex-1 bg-slate-900 hover:bg-slate-800 disabled:opacity-60 disabled:cursor-not-allowed border-none text-white font-semibold py-3.5 rounded-xl shadow-[0_1px_2px_rgba(0,0,0,0.05)] hover:shadow-md transition-all focus:ring-4 focus:ring-slate-900/5 active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2"
             >
               {submitting && (
                 <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">

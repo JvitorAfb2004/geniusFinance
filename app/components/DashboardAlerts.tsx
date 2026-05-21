@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router';
 import { addDays, format, isEqual, isSameDay, parseISO, startOfDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { AlertTriangle, CalendarClock, CheckCircle2, Settings, X } from 'lucide-react';
@@ -20,7 +21,8 @@ function alertsEnabled() {
 }
 
 export function DashboardAlerts({ valuesVisible = true }: { valuesVisible?: boolean }) {
-  const { transactions, activeContext, activeScope, accounts, toggleStatus, setCurrentView } = useFinance();
+  const { transactions, activeContext, activeScope, accounts, toggleStatus } = useFinance();
+  const navigate = useNavigate();
   
   // Find current account if in ACCOUNT scope
   const activeAccount = useMemo(() => {
@@ -104,8 +106,13 @@ export function DashboardAlerts({ valuesVisible = true }: { valuesVisible?: bool
               <h3 className="text-sm font-bold">Despesas/Custos próximos do pagamento</h3>
             </div>
             <button
-              onClick={() => setCurrentView('SETTINGS')}
-              className="text-amber-700 hover:text-amber-900 cursor-pointer"
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                navigate('/settings');
+              }}
+              className="text-amber-700 hover:text-amber-900 cursor-pointer relative z-10 p-1 rounded-md hover:bg-amber-100/50 transition-colors"
               title="Abrir configurações"
             >
               <Settings className="w-4 h-4" />
@@ -153,8 +160,13 @@ export function DashboardAlerts({ valuesVisible = true }: { valuesVisible?: bool
               <h3 className="text-sm font-bold">Recebimentos para hoje</h3>
             </div>
             <button
-              onClick={() => setCurrentView('SETTINGS')}
-              className="text-emerald-700 hover:text-emerald-900 cursor-pointer"
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                navigate('/settings');
+              }}
+              className="text-emerald-700 hover:text-emerald-900 cursor-pointer relative z-10 p-1 rounded-md hover:bg-emerald-100/50 transition-colors"
               title="Abrir configurações"
             >
               <Settings className="w-4 h-4" />

@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useFinance } from '../hooks/useFinance';
-import { formatCurrency } from '../lib/utils';
+import { formatCurrency, cn } from '../lib/utils';
 import { SECTION_LABELS } from '../lib/categories';
 import type { DRESection, Budget } from '../types';
 import { isSameMonth, parseISO, eachMonthOfInterval, startOfYear, endOfYear, format, getYear, getMonth } from 'date-fns';
@@ -113,25 +113,29 @@ export default function BudgetView() {
       </div>
 
       {/* Spreadsheet */}
-      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+      <div className="bg-white rounded-2xl border border-slate-100 shadow-[0_1px_4px_rgba(0,0,0,0.015)] overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full text-sm border-collapse">
             <thead>
-              <tr className="border-b border-slate-200 bg-slate-50">
-                <th className="sticky left-0 z-10 bg-slate-50 text-left px-3 py-2 font-semibold text-slate-600 min-w-[200px]">
+              <tr className="border-b border-slate-100 bg-slate-50/70">
+                <th className="sticky left-0 z-10 bg-slate-50/90 text-left px-4 py-3.5 font-bold text-slate-500 text-[0.68rem] uppercase tracking-wider min-w-[200px] border-r border-slate-100/60">
                   Categoria
                 </th>
-                {months.map((m, i) => (
-                  <th
-                    key={i}
-                    className={`px-2 py-2 text-center font-semibold min-w-[130px] ${
-                      i === currentMonthIndex ? 'bg-blue-50 text-blue-700' : 'text-slate-600'
-                    }`}
-                  >
-                    <div>{format(m, 'MMM', { locale: ptBR })}</div>
-                    <div className="text-xs font-normal text-slate-400">Orçado / Real</div>
-                  </th>
-                ))}
+                {months.map((m, i) => {
+                  const isCurrent = i === currentMonthIndex;
+                  return (
+                    <th
+                      key={i}
+                      className={cn(
+                        "px-3 py-3.5 text-center min-w-[130px] text-[0.68rem] uppercase tracking-wider transition-colors",
+                        isCurrent ? "bg-slate-100/40 text-slate-900 font-bold border-x border-slate-200/40" : "text-slate-500 font-semibold"
+                      )}
+                    >
+                      <div className="font-bold">{format(m, 'MMM', { locale: ptBR })}</div>
+                      <div className="text-[0.58rem] font-medium text-slate-400 normal-case tracking-normal mt-0.5">Orçado / Real</div>
+                    </th>
+                  );
+                })}
               </tr>
             </thead>
             <tbody>
@@ -141,18 +145,18 @@ export default function BudgetView() {
                   <React.Fragment key={section}>
                     {/* Section header */}
                     <tr
-                      className="border-b border-slate-100 bg-slate-50/50 cursor-pointer hover:bg-slate-100"
+                      className="border-b border-slate-100/70 bg-slate-50/20 cursor-pointer hover:bg-slate-50/50 transition-colors"
                       onClick={() => toggleSection(section)}
                     >
-                      <td className="sticky left-0 z-10 bg-slate-50/50 px-3 py-2 font-semibold text-slate-700 flex items-center gap-2">
-                        {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                        {section === 'RECEITA' ? '' : '(-) '}{label}
+                      <td className="sticky left-0 z-10 bg-slate-50/90 px-4 py-3 font-semibold text-slate-700 flex items-center gap-2 border-r border-slate-100/60">
+                        {isCollapsed ? <ChevronRight className="w-3.5 h-3.5 text-slate-400" /> : <ChevronDown className="w-3.5 h-3.5 text-slate-400" />}
+                        <span className="text-xs font-bold uppercase tracking-wider text-slate-600">{section === 'RECEITA' ? '' : '(-) '}{label}</span>
                       </td>
                       {months.map((_, i) => {
                         const planned = sectionTotal(section, i, 'planned');
                         const actual = sectionTotal(section, i, 'actual');
                         return (
-                          <td key={i} className="px-2 py-2 text-center font-mono font-semibold text-slate-700">
+                          <td key={i} className="px-3 py-3 text-center font-mono text-xs font-bold text-slate-700 transition-colors">
                             <span className={planned > 0 ? '' : 'text-slate-300'}>{formatCurrency(Math.abs(planned))}</span>
                             <span className="text-slate-300 mx-1">/</span>
                             <span className={actual !== 0 ? (section === 'RECEITA' ? (actual >= 0 ? 'text-emerald-600' : 'text-red-500') : 'text-red-500') : 'text-slate-300'}>
@@ -165,8 +169,8 @@ export default function BudgetView() {
 
                     {/* Category rows */}
                     {!isCollapsed && cats.map((cat) => (
-                      <tr key={cat.id} className="border-b border-slate-50 hover:bg-slate-50/50">
-                        <td className="sticky left-0 z-10 bg-white px-3 py-1.5 pl-8 text-slate-600">
+                      <tr key={cat.id} className="border-b border-slate-50/60 hover:bg-slate-50/30 transition-colors">
+                        <td className="sticky left-0 z-10 bg-white px-4 py-2.5 pl-9 text-slate-600 text-xs font-medium border-r border-slate-100/60">
                           {cat.name}
                         </td>
                         {months.map((_, i) => {
@@ -176,7 +180,10 @@ export default function BudgetView() {
                           return (
                             <td
                               key={i}
-                              className={`px-2 py-1 text-center font-mono text-xs ${isCurrent ? 'bg-blue-50/30' : ''}`}
+                              className={cn(
+                                "px-2 py-2 text-center font-mono text-xs transition-colors",
+                                isCurrent ? "bg-slate-50/10 border-x border-slate-100/40" : ""
+                              )}
                             >
                               {isEditing ? (
                                 <div className="flex items-center gap-1 justify-center">
@@ -185,35 +192,36 @@ export default function BudgetView() {
                                     value={editValue}
                                     onChange={(e) => setEditValue(e.target.value)}
                                     onKeyDown={handleKeyDown}
-                                    className="w-24 px-2 py-1 border border-blue-300 rounded text-xs text-center focus:outline-none focus:ring-1 focus:ring-blue-400"
+                                    className="w-24 px-2 py-1.5 border border-slate-200 focus:border-slate-800 rounded-lg text-xs text-center focus:outline-none focus:ring-4 focus:ring-slate-900/5 transition-all font-mono"
                                     placeholder="0,00"
                                     autoFocus
                                     step="0.01"
                                   />
-                                  <button onClick={confirmEdit} className="text-emerald-600 hover:text-emerald-700 cursor-pointer">
+                                  <button type="button" onClick={confirmEdit} className="p-1 rounded-md text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700 cursor-pointer transition-colors shrink-0">
                                     <Check className="w-3.5 h-3.5" />
                                   </button>
-                                  <button onClick={cancelEdit} className="text-red-500 hover:text-red-600 cursor-pointer">
+                                  <button type="button" onClick={cancelEdit} className="p-1 rounded-md text-slate-400 hover:bg-slate-100 hover:text-slate-600 cursor-pointer transition-colors shrink-0">
                                     <X className="w-3.5 h-3.5" />
                                   </button>
                                 </div>
                               ) : (
                                 <button
+                                  type="button"
                                   onClick={() => startEdit(cat.id, i, cell.planned)}
-                                  className="w-full text-left hover:bg-blue-50 rounded px-1 py-0.5 transition-colors group cursor-pointer"
+                                  className="w-full text-center hover:bg-slate-50/85 rounded-lg px-2 py-1.5 transition-all duration-200 group cursor-pointer flex items-center justify-center gap-1 min-h-[30px]"
                                 >
-                                  <span className={cell.planned > 0 ? 'font-medium text-slate-700' : 'text-slate-300'}>
+                                  <span className={cell.planned > 0 ? 'font-semibold text-slate-700' : 'text-slate-300'}>
                                     {cell.planned > 0 ? formatCurrency(cell.planned) : '--'}
                                   </span>
                                   <span className="text-slate-300 mx-0.5">/</span>
                                   <span className={
                                     cell.actual !== 0
-                                      ? (cat.section === 'RECEITA' ? (cell.actual >= 0 ? 'text-emerald-600' : 'text-red-500') : 'text-red-500')
+                                      ? (cat.section === 'RECEITA' ? (cell.actual >= 0 ? 'text-emerald-600 font-medium' : 'text-red-500 font-medium') : 'text-red-500 font-medium')
                                       : 'text-slate-300'
                                   }>
                                     {cell.actual !== 0 ? formatCurrency(Math.abs(cell.actual)) : '--'}
                                   </span>
-                                  <Edit2 className="w-3 h-3 text-slate-300 opacity-0 group-hover:opacity-100 inline ml-1" />
+                                  <Edit2 className="w-3 h-3 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity duration-200 ml-1 shrink-0" />
                                 </button>
                               )}
                             </td>
@@ -226,15 +234,15 @@ export default function BudgetView() {
               })}
 
               {/* Net Profit Row */}
-              <tr className="border-t-2 border-slate-300 bg-slate-50">
-                <td className="sticky left-0 z-10 bg-slate-50 px-3 py-2 font-bold text-slate-800">
-                  (=) Lucro Liquido
+              <tr className="border-t border-slate-200 bg-slate-50/50">
+                <td className="sticky left-0 z-10 bg-slate-50 px-4 py-3.5 font-bold text-slate-800 text-xs border-r border-slate-100/60">
+                  (=) Lucro Líquido
                 </td>
                 {months.map((_, i) => {
                   const np = netProfitMonth(i);
                   const planned = sectionTotal('RECEITA', i, 'planned') + sectionTotal('CUSTOS', i, 'planned') + sectionTotal('DESPESAS', i, 'planned');
                   return (
-                    <td key={i} className="px-2 py-2 text-center font-mono font-bold">
+                    <td key={i} className="px-3 py-3.5 text-center font-mono font-bold text-xs transition-colors">
                       <span className={planned > 0 ? 'text-slate-500' : 'text-slate-300'}>{formatCurrency(planned)}</span>
                       <span className="text-slate-300 mx-1">/</span>
                       <span className={np >= 0 ? 'text-emerald-600' : 'text-red-500'}>{formatCurrency(np)}</span>
@@ -244,14 +252,14 @@ export default function BudgetView() {
               </tr>
 
               {/* Margin Row */}
-              <tr className="border-b border-slate-200 bg-slate-50">
-                <td className="sticky left-0 z-10 bg-slate-50 px-3 py-1.5 text-sm text-slate-500">
-                  Margem Liquida
+              <tr className="border-b border-slate-100 bg-slate-50/50">
+                <td className="sticky left-0 z-10 bg-slate-50 px-4 py-3 text-xs font-bold text-slate-500 border-r border-slate-100/60">
+                  Margem Líquida
                 </td>
                 {months.map((_, i) => {
                   const nm = netMarginMonth(i);
                   return (
-                    <td key={i} className="px-2 py-1.5 text-center font-mono text-sm">
+                    <td key={i} className="px-3 py-3 text-center font-mono text-xs font-bold transition-colors">
                       <span className={nm >= 0 ? 'text-purple-600' : 'text-red-500'}>
                         {nm.toFixed(1)}%
                       </span>

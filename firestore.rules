@@ -582,7 +582,7 @@ service cloud.firestore {
            incoming().invitedBy.size() > 0 &&
            exists(/databases/$(database)/documents/accounts/$(accountId)/invites/$(incoming().invitedBy)) &&
            get(/databases/$(database)/documents/accounts/$(accountId)/invites/$(incoming().invitedBy)).data.status == 'PENDING' &&
-           get(/databases/$(database)/documents/accounts/$(accountId)/invites/$(incoming().invitedBy)).data.email.toLowerCase() == request.auth.token.email.toLowerCase())
+           (request.auth.token.email == null || get(/databases/$(database)/documents/accounts/$(accountId)/invites/$(incoming().invitedBy)).data.email.lower() == request.auth.token.email.lower()))
         );
 
       allow update: if (isAccountOwnerOrAdmin(accountId) || request.auth.uid == uid) &&
@@ -608,8 +608,7 @@ service cloud.firestore {
 
     match /accounts/{accountId}/invites/{inviteId} {
       allow read: if isAccountMember(accountId) ||
-        (isSignedIn() && request.auth.token.email != null &&
-         request.auth.token.email.toLowerCase() == resource.data.email.toLowerCase());
+        (isSignedIn() && (request.auth.token.email == null || request.auth.token.email.lower() == resource.data.email.lower()));
 
       allow create: if isAccountOwnerOrAdmin(accountId) &&
         isValidId(inviteId) &&
@@ -624,8 +623,7 @@ service cloud.firestore {
 
       allow update: if isSignedIn() &&
         // Only the invitee can accept (self-claim)
-        (request.auth.token.email != null &&
-         request.auth.token.email.toLowerCase() == existing().email.toLowerCase() &&
+        ((request.auth.token.email == null || request.auth.token.email.lower() == existing().email.lower()) &&
          existing().status == 'PENDING' &&
          incoming().diff(existing()).affectedKeys().hasOnly(['status']) &&
          incoming().status == 'ACCEPTED') ||
@@ -883,8 +881,7 @@ service cloud.firestore {
 
     match /user-invites/{email}/pending/{inviteId} {
       allow read: if isSignedIn() &&
-        request.auth.token.email != null &&
-        email == request.auth.token.email.toLowerCase();
+        (request.auth.token.email == null || email == request.auth.token.email.lower());
 
       allow create: if isSignedIn() &&
         incoming().keys().hasAll(['accountId', 'accountName', 'email', 'role', 'status', 'createdBy', 'expiresAt', 'createdAt']) &&
@@ -896,8 +893,7 @@ service cloud.firestore {
         incoming().diff(existing()).affectedKeys().hasOnly(['status']) &&
         incoming().status in ['ACCEPTED', 'REVOKED'] &&
         (
-          (request.auth.token.email != null &&
-           request.auth.token.email.toLowerCase() == email) ||
+          (request.auth.token.email == null || request.auth.token.email.lower() == email) ||
           existing().createdBy == request.auth.uid
         );
 
