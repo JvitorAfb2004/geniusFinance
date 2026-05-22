@@ -95,28 +95,28 @@ export function ReportsView() {
   return (
     <div className="flex flex-col gap-5">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <div className="bg-white rounded-xl border border-[#e2e8f0] p-4 shadow-sm">
+        <div className="bg-white rounded-2xl border border-slate-100 p-4 shadow-[0_1px_2px_rgba(0,0,0,0.02),0_4px_16px_rgba(0,0,0,0.02)]">
           <p className="text-xs text-gray-500 mb-1">Total Receitas</p>
           <p className="text-lg font-bold font-mono text-emerald-600"><AnimatedNumber value={yearTotals.income} /></p>
         </div>
-        <div className="bg-white rounded-xl border border-[#e2e8f0] p-4 shadow-sm">
+        <div className="bg-white rounded-2xl border border-slate-100 p-4 shadow-[0_1px_2px_rgba(0,0,0,0.02),0_4px_16px_rgba(0,0,0,0.02)]">
           <p className="text-xs text-gray-500 mb-1">Total Despesas</p>
           <p className="text-lg font-bold font-mono text-red-500"><AnimatedNumber value={yearTotals.expense} /></p>
         </div>
-        <div className="bg-white rounded-xl border border-[#e2e8f0] p-4 shadow-sm">
+        <div className="bg-white rounded-2xl border border-slate-100 p-4 shadow-[0_1px_2px_rgba(0,0,0,0.02),0_4px_16px_rgba(0,0,0,0.02)]">
           <p className="text-xs text-gray-500 mb-1">Resultado</p>
           <p className={`text-lg font-bold font-mono ${yearTotals.net >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
             <AnimatedNumber value={yearTotals.net} />
           </p>
         </div>
-        <div className="bg-white rounded-xl border border-[#e2e8f0] p-4 shadow-sm">
+        <div className="bg-white rounded-2xl border border-slate-100 p-4 shadow-[0_1px_2px_rgba(0,0,0,0.02),0_4px_16px_rgba(0,0,0,0.02)]">
           <p className="text-xs text-gray-500 mb-1">Transacoes</p>
           <p className="text-lg font-bold font-mono text-slate-700"><AnimatedNumber value={yearTotals.count} kind="number" /></p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        <div className="bg-white rounded-xl border border-[#e2e8f0] p-6 min-w-0">
+        <div className="bg-white rounded-2xl border border-slate-100 p-6 min-w-0 shadow-[0_1px_2px_rgba(0,0,0,0.02),0_4px_16px_rgba(0,0,0,0.02)]">
           <h2 className="text-lg font-bold text-gray-900 mb-4">Evolucao Mensal</h2>
           <div style={{ width: '100%', height: 300 }}>
             <ResponsiveContainer>
@@ -134,7 +134,7 @@ export function ReportsView() {
           </div>
         </div>
 
-        <div className="bg-white rounded-xl border border-[#e2e8f0] p-6">
+        <div className="bg-white rounded-2xl border border-slate-100 p-6 shadow-[0_1px_2px_rgba(0,0,0,0.02),0_4px_16px_rgba(0,0,0,0.02)]">
           <h2 className="text-lg font-bold text-gray-900 mb-2">Top Despesas (Ano)</h2>
           <p className="text-sm text-gray-500 mb-4">Maiores categorias de custo identificadas.</p>
           {pieData.length > 0 ? (
@@ -160,8 +160,8 @@ export function ReportsView() {
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-[#e2e8f0] overflow-hidden">
-        <div className="p-6 border-b border-[#e2e8f0]">
+      <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-[0_1px_2px_rgba(0,0,0,0.02),0_4px_16px_rgba(0,0,0,0.02)]">
+        <div className="p-6 border-b border-slate-100">
           <h2 className="text-lg font-bold text-gray-900">Detalhamento por Categoria</h2>
           <p className="text-sm text-gray-500 mt-1">Receitas e despesas agrupadas por categoria no ano.</p>
         </div>

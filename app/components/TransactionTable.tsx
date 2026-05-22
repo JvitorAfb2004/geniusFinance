@@ -58,25 +58,26 @@ export function TransactionTable({
   };
 
   return (
-    <div className="bg-surface rounded-2xl border border-slate-100 flex flex-col flex-1 min-h-[300px] shadow-[0_1px_3px_rgba(0,0,0,0.015),0_1px_2px_rgba(0,0,0,0.005)]">
-      <div className="p-4.5 border-b border-slate-100 flex flex-col md:flex-row items-start md:items-center justify-between z-10 gap-4 flex-wrap">
-        {!hideHeaderTitle && <span className="text-slate-800 font-bold text-[0.95rem] tracking-tight">Transações Recentes</span>}
-        
-        <div className="flex items-center gap-3 w-full md:w-auto ml-auto">
-          <div className="relative flex-1 md:w-48">
+    <div className="bg-white rounded-3xl border border-slate-100 flex flex-col flex-1 min-h-[300px] shadow-[0_1px_2px_rgba(0,0,0,0.02),0_4px_16px_rgba(0,0,0,0.02)]">
+      <div className="px-5 py-4 border-b border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between z-10 gap-3">
+        {!hideHeaderTitle && <span className="text-slate-700 font-bold text-[0.85rem] tracking-tight shrink-0">Transações Recentes</span>}
+
+        <div className="flex items-center gap-2 w-full sm:w-auto sm:ml-auto flex-wrap">
+          <div className="relative flex-1 sm:flex-none sm:w-40 min-w-[120px]">
              <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-             <input 
-               type="text" 
+             <input
+               type="text"
                placeholder="Buscar..."
                value={searchTerm}
                onChange={(e) => setSearchTerm(e.target.value)}
-               className="w-full text-[0.78rem] border border-slate-200 rounded-xl focus:border-primary pl-9 pr-3 py-1.5 outline-none font-medium text-slate-700 placeholder:text-slate-400 bg-slate-50/50"
+               className="w-full text-[0.78rem] border border-slate-200 rounded-2xl focus:border-primary pl-9 pr-3 py-1.5 outline-none font-medium text-slate-700 placeholder:text-slate-400 bg-slate-50/50 transition-colors"
              />
           </div>
 
+          <div className="flex items-center gap-2">
           {!forceFilter && (
             <select
-              className="text-[0.78rem] border-slate-200 rounded-xl focus:border-primary px-3 py-1.5 border bg-white outline-none font-medium text-slate-600 cursor-pointer shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
+              className="text-[0.72rem] border-slate-200 rounded-2xl focus:border-primary px-2 py-1.5 border bg-white outline-none font-medium text-slate-600 cursor-pointer transition-colors shrink-0"
               value={filterType}
               onChange={(e) => setFilterType(e.target.value as any)}
             >
@@ -87,51 +88,53 @@ export function TransactionTable({
             </select>
           )}
           <select
-            className="text-[0.78rem] border-slate-200 rounded-xl focus:border-primary px-3 py-1.5 border bg-white outline-none font-medium text-slate-600 cursor-pointer max-w-[140px] shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
+            className="text-[0.72rem] border-slate-200 rounded-2xl focus:border-primary px-2 py-1.5 border bg-white outline-none font-medium text-slate-600 cursor-pointer shrink-0 max-w-[110px] transition-colors"
             value={categoryFilterId}
             onChange={(e) => setCategoryFilterId(e.target.value)}
           >
-            <option value="">Todas categorias</option>
+            <option value="">Categorias</option>
             {categories
               .sort((a, b) => a.order - b.order)
               .map((cat) => (
                 <option key={cat.id} value={cat.id}>{cat.name}</option>
               ))}
           </select>
-          <button 
+          <button
             onClick={handleCreate}
-            className="text-[0.76rem] text-primary hover:text-primary-hover bg-slate-50 border border-slate-100 hover:border-slate-200 px-3.5 py-1.5 rounded-xl cursor-pointer font-bold transition-all whitespace-nowrap shadow-[0_1px_2px_rgba(0,0,0,0.01)]"
+            className="text-[0.72rem] text-primary hover:text-primary-hover bg-slate-50 border border-slate-100 hover:border-slate-200 px-2.5 py-1.5 rounded-2xl cursor-pointer font-bold transition-all whitespace-nowrap hover:shadow-[0_1px_3px_rgba(0,0,0,0.04)] shrink-0"
           >
             + Lançamento
           </button>
+          </div>
         </div>
       </div>
 
-      <div className="overflow-x-auto overflow-y-auto flex-1">
+      {/* Desktop: Table */}
+      <div className="overflow-x-auto overflow-y-auto flex-1 hidden md:block">
         <table className="w-full text-left border-collapse text-[0.85rem] min-w-[600px]">
-          <thead className="sticky top-0 bg-slate-50/70 z-10">
+          <thead className="sticky top-0 bg-slate-50/60 backdrop-blur-[2px] z-10">
             <tr>
-              <th className="py-3 px-4 font-bold text-slate-500 text-[0.72rem] uppercase tracking-wider border-b border-slate-100 whitespace-nowrap">Data</th>
-              <th className="py-3 px-4 font-bold text-slate-500 text-[0.72rem] uppercase tracking-wider border-b border-slate-100 whitespace-nowrap">Descrição</th>
-              <th className="py-3 px-4 font-bold text-slate-500 text-[0.72rem] uppercase tracking-wider border-b border-slate-100 whitespace-nowrap">Categoria</th>
-              <th className="py-3 px-4 font-bold text-slate-500 text-[0.72rem] uppercase tracking-wider border-b border-slate-100 text-right whitespace-nowrap">Valor</th>
-              <th className="py-3 px-4 font-bold text-slate-500 text-[0.72rem] uppercase tracking-wider border-b border-slate-100 whitespace-nowrap">Status</th>
-              <th className="py-3 px-4 font-bold text-slate-500 text-[0.72rem] uppercase tracking-wider border-b border-slate-100 text-center w-20 whitespace-nowrap"></th>
+              <th className="py-3 px-4 font-semibold text-slate-400 text-[0.7rem] uppercase tracking-[0.04em] border-b border-slate-100 whitespace-nowrap">Data</th>
+              <th className="py-3 px-4 font-semibold text-slate-400 text-[0.7rem] uppercase tracking-[0.04em] border-b border-slate-100 whitespace-nowrap">Descrição</th>
+              <th className="py-3 px-4 font-semibold text-slate-400 text-[0.7rem] uppercase tracking-[0.04em] border-b border-slate-100 whitespace-nowrap">Categoria</th>
+              <th className="py-3 px-4 font-semibold text-slate-400 text-[0.7rem] uppercase tracking-[0.04em] border-b border-slate-100 text-right whitespace-nowrap">Valor</th>
+              <th className="py-3 px-4 font-semibold text-slate-400 text-[0.7rem] uppercase tracking-[0.04em] border-b border-slate-100 whitespace-nowrap">Status</th>
+              <th className="py-3 px-4 font-semibold text-slate-400 text-[0.7rem] uppercase tracking-[0.04em] border-b border-slate-100 text-center w-20 whitespace-nowrap"></th>
             </tr>
           </thead>
           <tbody>
             {visibleTransactions.length === 0 ? (
               <tr>
-                <td colSpan={6} className="py-12 text-center text-[#64748b]">
-                  Nenhum lançamento encontrado.
+                <td colSpan={6} className="py-12 text-center text-slate-500">
+                  <span className="text-slate-400">Nenhum lançamento encontrado.</span>
                 </td>
               </tr>
             ) : visibleTransactions.map((tx) => (
-              <tr key={tx.id} className="hover:bg-[#f4f6f8]/50 transition-colors">
-                <td className="py-2.5 px-4 border-b border-[#e2e8f0] font-sans text-[#64748b] whitespace-nowrap">
+              <tr key={tx.id} className="hover:bg-slate-50/70 transition-colors duration-150">
+                <td className="py-2.5 px-4 border-b border-slate-100 font-sans text-slate-500 whitespace-nowrap">
                   {format(parseISO(tx.date), "dd/MM/yyyy")}
                 </td>
-                <td className="py-2.5 px-4 border-b border-[#e2e8f0] font-sans font-medium text-[#1e293b]">
+                <td className="py-2.5 px-4 border-b border-slate-100 font-sans font-medium text-slate-700">
                   {tx.title}
                   {(tx.tagIds && tx.tagIds.length > 0) && (
                     <span className="flex flex-wrap gap-1 mt-1">
@@ -147,15 +150,15 @@ export function TransactionTable({
                     </span>
                   )}
                   {tx.installmentInfo && (
-                    <span className="ml-2 text-[0.7rem] font-normal text-[#64748b] bg-[#e2e8f0] px-1.5 py-0.5 rounded">
+                    <span className="ml-2 text-[0.7rem] font-normal text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">
                       {tx.installmentInfo}
                     </span>
                   )}
                 </td>
-                <td className="py-2.5 px-4 border-b border-[#e2e8f0] font-sans text-[#64748b]">
+                <td className="py-2.5 px-4 border-b border-slate-100 font-sans text-slate-500">
                   {getCategoryName(tx.categoryId)}
                 </td>
-                <td className="py-2.5 px-4 border-b border-[#e2e8f0] text-right">
+                <td className="py-2.5 px-4 border-b border-slate-100 text-right">
                   <span className={cn(
                     "font-mono font-bold whitespace-nowrap",
                     tx.type === 'INCOME' ? 'text-[#10b981]' : 'text-[#ef4444]'
@@ -164,11 +167,11 @@ export function TransactionTable({
                     {formatCurrency(tx.amount)}
                   </span>
                 </td>
-                <td className="py-2.5 px-4 border-b border-[#e2e8f0]">
+                <td className="py-2.5 px-4 border-b border-slate-100">
                   <button 
                     onClick={() => toggleStatus(tx.id)}
                     className={cn(
-                      "px-2 py-0.5 rounded text-[0.7rem] font-bold uppercase cursor-pointer border-none transition-transform active:scale-95",
+                      "px-2.5 py-0.5 rounded-full text-[0.68rem] font-semibold cursor-pointer border-none transition-all active:scale-95",
                       tx.status === 'PAID' 
                         ? 'bg-[#dcfce7] text-[#166534]' 
                         : 'bg-[#fef9c3] text-[#854d0e]'
@@ -177,10 +180,10 @@ export function TransactionTable({
                     {tx.status === 'PAID' ? 'Pago' : 'Pendente'}
                   </button>
                 </td>
-                <td className="py-2.5 px-4 border-b border-[#e2e8f0] text-center whitespace-nowrap">
+                <td className="py-2.5 px-4 border-b border-slate-100 text-center whitespace-nowrap">
                   <button 
                     onClick={() => handleEdit(tx)}
-                    className="text-[#64748b] hover:text-[#3b82f6] transition-colors p-1 bg-transparent border-none cursor-pointer"
+                    className="text-slate-500 hover:text-[#3b82f6] transition-colors p-1 bg-transparent border-none cursor-pointer"
                   >
                     <Pencil className="w-4 h-4" />
                   </button>
@@ -192,7 +195,7 @@ export function TransactionTable({
                         setConfirmDelete({ tx, future: false });
                       }
                     }}
-                    className="text-[#64748b] hover:text-[#ef4444] transition-colors p-1 bg-transparent border-none cursor-pointer ml-1"
+                    className="text-slate-500 hover:text-[#ef4444] transition-colors p-1 bg-transparent border-none cursor-pointer ml-1"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -202,6 +205,75 @@ export function TransactionTable({
           </tbody>
         </table>
       </div>
+
+      {/* Mobile: Card List */}
+      <div className="md:hidden flex-1 overflow-y-auto px-4 pb-2">
+        {visibleTransactions.length === 0 ? (
+          <div className="py-12 text-center">
+            <span className="text-slate-400 text-sm">Nenhum lançamento encontrado.</span>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-2 py-3">
+            {visibleTransactions.map((tx) => (
+              <div key={tx.id} className="bg-white rounded-2xl border border-slate-100 p-3.5 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+                <div className="flex items-start justify-between gap-2 mb-2">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs text-slate-500 font-medium">{format(parseISO(tx.date), "dd/MM/yyyy")}</p>
+                    <p className="text-sm font-semibold text-slate-800 mt-0.5 truncate">{tx.title}</p>
+                    {tx.installmentInfo && (
+                      <span className="text-[0.65rem] text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded-md mt-1 inline-block">{tx.installmentInfo}</span>
+                    )}
+                  </div>
+                  <span className={cn(
+                    "text-sm font-bold font-mono whitespace-nowrap shrink-0",
+                    tx.type === 'INCOME' ? 'text-emerald-600' : 'text-rose-600'
+                  )}>
+                    {tx.type === 'INCOME' ? '' : '- '}{formatCurrency(tx.amount)}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-1.5 flex-wrap min-w-0">
+                    <span className="text-[0.65rem] text-slate-500 bg-slate-50 px-1.5 py-0.5 rounded-md truncate max-w-[120px]">{getCategoryName(tx.categoryId)}</span>
+                    {tx.tagIds && tx.tagIds.length > 0 && tx.tagIds.slice(0, 2).map((tid) => {
+                      const tag = tags.find((t) => t.id === tid);
+                      if (!tag) return null;
+                      return (
+                        <span key={tid} className="text-[0.55rem] px-1.5 py-0.5 rounded-full text-white font-medium" style={{ backgroundColor: tag.color }}>{tag.name}</span>
+                      );
+                    })}
+                  </div>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <button
+                      onClick={() => toggleStatus(tx.id)}
+                      className={cn(
+                        "px-2 py-0.5 rounded-full text-[0.6rem] font-semibold cursor-pointer border-none transition-all active:scale-95",
+                        tx.status === 'PAID'
+                          ? 'bg-emerald-100 text-emerald-700'
+                          : 'bg-amber-100 text-amber-700'
+                      )}
+                    >
+                      {tx.status === 'PAID' ? 'Pago' : 'Pendente'}
+                    </button>
+                    <button onClick={() => handleEdit(tx)} className="text-slate-400 hover:text-[#3b82f6] p-1 bg-transparent border-none cursor-pointer">
+                      <Pencil className="w-3.5 h-3.5" />
+                    </button>
+                    <button onClick={() => {
+                      if (tx.groupId && tx.isFixed) {
+                        setConfirmDelete({ tx, future: false });
+                      } else {
+                        setConfirmDelete({ tx, future: false });
+                      }
+                    }} className="text-slate-400 hover:text-[#ef4444] p-1 bg-transparent border-none cursor-pointer">
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
       {isModalOpen && <TransactionModal initialData={editingTx} onClose={() => setIsModalOpen(false)} />}
 
       {confirmDelete && !confirmDelete.tx.groupId && (

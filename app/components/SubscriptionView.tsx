@@ -104,7 +104,7 @@ export function SubscriptionView() {
   return (
     <div className="w-full max-w-5xl flex flex-col gap-6">
       {/* Status Card */}
-      <div className="bg-white rounded-xl border border-[#e2e8f0] p-6">
+      <div className="bg-white rounded-2xl border border-slate-100 p-6 shadow-[0_1px_2px_rgba(0,0,0,0.02),0_4px_16px_rgba(0,0,0,0.02)]">
         <h2 className="text-xl font-bold text-gray-900 mb-1">Sua Assinatura</h2>
         <p className="text-sm text-gray-500 mb-4">Gerencie seu plano GeniusHub</p>
 
@@ -187,20 +187,20 @@ export function SubscriptionView() {
 
       {/* Subscribe CTA (if no active plan) */}
       {!isActive && !isTrial && !isPastDue && (
-        <div className="bg-white rounded-xl border border-[#e2e8f0] p-6">
+        <div className="bg-white rounded-2xl border border-slate-100 p-6 shadow-[0_1px_2px_rgba(0,0,0,0.02),0_4px_16px_rgba(0,0,0,0.02)]">
           <h3 className="text-lg font-bold text-gray-900 mb-1">Escolha seu plano</h3>
           <p className="text-sm text-gray-500 mb-4">Plano Empresa R$29,90/mês — inclui Pessoal grátis.</p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <button onClick={() => handleSubscribe('CARD')} disabled={actionLoading}
-              className="p-6 border-2 border-gray-200 rounded-xl hover:border-[#3b82f6] transition-colors cursor-pointer text-left disabled:opacity-50">
+              className="p-6 border-2 border-slate-100 rounded-2xl hover:border-[#3b82f6] hover:shadow-[0_1px_4px_rgba(59,130,246,0.1)] transition-colors cursor-pointer text-left disabled:opacity-50">
               <CreditCard className="w-8 h-8 text-[#3b82f6] mb-3" />
               <p className="font-semibold text-gray-900">Cartão de Crédito</p>
               <p className="text-xs text-gray-500 mt-1">Assinatura recorrente automática. Cancele quando quiser.</p>
             </button>
 
             <button onClick={() => handleSubscribe('PIX')} disabled={actionLoading}
-              className="p-6 border-2 border-gray-200 rounded-xl hover:border-[#3b82f6] transition-colors cursor-pointer text-left disabled:opacity-50">
+              className="p-6 border-2 border-slate-100 rounded-2xl hover:border-[#3b82f6] hover:shadow-[0_1px_4px_rgba(59,130,246,0.1)] transition-colors cursor-pointer text-left disabled:opacity-50">
               <QrCode className="w-8 h-8 text-[#3b82f6] mb-3" />
               <p className="font-semibold text-gray-900">PIX</p>
               <p className="text-xs text-gray-500 mt-1">QR Code gerado a cada vencimento. Pague no app do seu banco.</p>

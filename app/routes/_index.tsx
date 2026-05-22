@@ -242,7 +242,7 @@ export default function Index() {
               <div className="gsap-hero-image lg:pl-4 group">
                 <div 
                   onClick={() => openLightbox(0)}
-                  className="cursor-pointer relative overflow-hidden rounded-2xl border border-border bg-surface shadow-lg hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-500"
+                  className="cursor-pointer relative overflow-hidden rounded-3xl border border-slate-100 bg-surface shadow-[0_4px_24px_rgba(0,0,0,0.06),0_1px_2px_rgba(0,0,0,0.04)] hover:shadow-[0_12px_40px_rgba(0,0,0,0.1)] hover:-translate-y-1.5 transition-all duration-500"
                 >
                   <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-success/10 z-0 pointer-events-none" />
                   <div className="relative aspect-[16/10] overflow-hidden">
@@ -370,7 +370,7 @@ export default function Index() {
               ].map((feature) => (
                 <div 
                   key={feature.title} 
-                  className="group rounded-2xl border border-border bg-surface p-6 hover:-translate-y-1.5 hover:shadow-xl transition-all duration-300 relative overflow-hidden"
+                  className="group rounded-2xl border border-slate-100 bg-surface p-6 shadow-[0_1px_2px_rgba(0,0,0,0.02)] hover:-translate-y-1.5 hover:shadow-xl transition-all duration-300 relative overflow-hidden"
                 >
                   <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
                   <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center relative z-10 transition-colors group-hover:bg-primary text-primary group-hover:text-white">
@@ -400,7 +400,7 @@ export default function Index() {
                 <div 
                   key={p.src} 
                   onClick={() => openLightbox(index)}
-                  className="group cursor-pointer relative overflow-hidden rounded-2xl border border-border bg-bg shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between"
+                  className="group cursor-pointer relative overflow-hidden rounded-3xl border border-slate-100 bg-bg shadow-[0_1px_2px_rgba(0,0,0,0.02),0_4px_16px_rgba(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between"
                 >
                   <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-success/5 z-0 pointer-events-none" />
                   
@@ -424,7 +424,7 @@ export default function Index() {
                   </div>
 
                   {/* Card Info */}
-                  <div className="p-5 relative z-10 bg-surface flex-grow flex flex-col justify-between">
+                  <div className="p-5 relative z-10 bg-white flex-grow flex flex-col justify-between rounded-b-3xl">
                     <div>
                       <h3 className="font-extrabold text-text-primary group-hover:text-primary transition-colors text-sm sm:text-base">{p.label}</h3>
                       <p className="mt-1.5 text-xs text-text-secondary leading-relaxed line-clamp-2">{p.description}</p>
@@ -560,6 +560,23 @@ export default function Index() {
           </div>
         </div>
       </footer>
+
+      {/* FAB Suporte WhatsApp */}
+      <a
+        href="https://wa.me/5574999425993?text=Ol%C3%A1%2C%20gostaria%20de%20solicitar%20suporte%20para%20o%20Genius%20Finance."
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-6 right-6 z-40 bg-[#25D366] hover:bg-[#20bd5a] text-white w-14 h-14 rounded-2xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center cursor-pointer group"
+        title="Suporte via WhatsApp"
+      >
+        <svg viewBox="0 0 24 24" fill="currentColor" className="w-7 h-7">
+          <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.76.45 3.45 1.3 4.94L2.05 22l5.32-1.39c1.45.79 3.08 1.21 4.76 1.21 5.46 0 9.91-4.45 9.91-9.91 0-5.46-4.45-9.91-9.91-9.91zm-3.46 14.29l-.28-1.77-.13-.8-.59.51C6.36 13.08 5.68 12 5.68 10.82c0-3.5 2.84-6.36 6.36-6.36 1.69 0 3.28.66 4.48 1.86a6.3 6.3 0 011.88 4.5c0 3.5-2.84 6.36-6.36 6.36-1.28 0-2.48-.38-3.49-1.05l-.59-.38-.66.18-1.74.46z"/>
+          <path d="M9.54 8.33c-.17-.38-.35-.39-.51-.4h-.44c-.18 0-.46.07-.7.33-.24.26-.92.9-.92 2.2 0 1.3.94 2.56 1.07 2.73.13.18 1.85 2.97 4.58 4.04 2.26.89 2.73.71 3.22.66.49-.04 1.58-.65 1.8-1.27.23-.62.23-1.15.16-1.27-.07-.11-.25-.18-.52-.31-.27-.14-1.58-.78-1.83-.87-.24-.09-.42-.13-.6.13-.17.27-.69.87-.84 1.05-.16.17-.31.2-.58.06-.27-.13-1.14-.42-2.17-1.34-.8-.72-1.34-1.6-1.5-1.87-.16-.27-.02-.42.12-.55.13-.12.27-.31.4-.47.13-.16.18-.27.27-.45.09-.18.04-.34-.02-.47-.07-.14-.6-1.49-.84-2.03z"/>
+        </svg>
+        <span className="absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-slate-800 text-white text-xs font-semibold px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none shadow-lg">
+          Suporte WhatsApp
+        </span>
+      </a>
 
       {/* Lightbox Modal */}
       {activeImageIndex !== null && (

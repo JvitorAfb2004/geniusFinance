@@ -14,15 +14,19 @@ export default function BudgetView() {
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
   const [editing, setEditing] = useState<CellEdit>(null);
   const [editValue, setEditValue] = useState('');
+  const [mobileMonth, setMobileMonth] = useState(getMonth(selectedMonth));
 
   const year = selectedMonth.getFullYear();
 
-  const months = useMemo(() =>
+  const allMonths = useMemo(() =>
     eachMonthOfInterval({ start: startOfYear(selectedMonth), end: endOfYear(selectedMonth) }),
     [year]
   );
 
   const currentMonthIndex = getMonth(selectedMonth);
+
+  // On mobile, show only the selected month; on md+, show all
+  const visibleMonths = allMonths;
 
   const sectionCats = useMemo(() => {
     const sections: DRESection[] = ['RECEITA', 'CUSTOS', 'DESPESAS'];
@@ -36,7 +40,7 @@ export default function BudgetView() {
   }, [categories]);
 
   function getCell(categoryId: string, monthIndex: number) {
-    const m = months[monthIndex];
+    const m = allMonths[monthIndex];
     const monthTxs = transactions.filter(
       (tx) => tx.context === activeContext && tx.categoryId === categoryId && isSameMonth(parseISO(tx.date), m)
     );
@@ -105,23 +109,36 @@ export default function BudgetView() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h2 className="text-lg font-bold text-slate-800">Orçamento {year}</h2>
-          <p className="text-sm text-slate-500">Valores planejados por categoria. Clique em uma celula para editar.</p>
+        </div>
+
+        {/* Mobile month selector */}
+        <div className="md:hidden">
+          <select
+            value={mobileMonth}
+            onChange={(e) => setMobileMonth(parseInt(e.target.value))}
+            className="text-[0.8rem] font-semibold border border-slate-200 rounded-2xl px-4 py-2 bg-white text-slate-700 cursor-pointer outline-none"
+          >
+            {allMonths.map((m, i) => (
+              <option key={i} value={i}>{format(m, "MMMM 'de' yyyy", { locale: ptBR })}</option>
+            ))}
+          </select>
         </div>
       </div>
 
       {/* Spreadsheet */}
       <div className="bg-white rounded-2xl border border-slate-100 shadow-[0_1px_4px_rgba(0,0,0,0.015)] overflow-hidden">
-        <div className="overflow-x-auto">
+        {/* Desktop: full table */}
+        <div className="overflow-x-auto hidden md:block">
           <table className="w-full text-sm border-collapse">
             <thead>
               <tr className="border-b border-slate-100 bg-slate-50/70">
                 <th className="sticky left-0 z-10 bg-slate-50/90 text-left px-4 py-3.5 font-bold text-slate-500 text-[0.68rem] uppercase tracking-wider min-w-[200px] border-r border-slate-100/60">
                   Categoria
                 </th>
-                {months.map((m, i) => {
+                {allMonths.map((m, i) => {
                   const isCurrent = i === currentMonthIndex;
                   return (
                     <th
@@ -152,7 +169,7 @@ export default function BudgetView() {
                         {isCollapsed ? <ChevronRight className="w-3.5 h-3.5 text-slate-400" /> : <ChevronDown className="w-3.5 h-3.5 text-slate-400" />}
                         <span className="text-xs font-bold uppercase tracking-wider text-slate-600">{section === 'RECEITA' ? '' : '(-) '}{label}</span>
                       </td>
-                      {months.map((_, i) => {
+                      {allMonths.map((_, i) => {
                         const planned = sectionTotal(section, i, 'planned');
                         const actual = sectionTotal(section, i, 'actual');
                         return (
@@ -173,7 +190,7 @@ export default function BudgetView() {
                         <td className="sticky left-0 z-10 bg-white px-4 py-2.5 pl-9 text-slate-600 text-xs font-medium border-r border-slate-100/60">
                           {cat.name}
                         </td>
-                        {months.map((_, i) => {
+                        {allMonths.map((_, i) => {
                           const cell = getCell(cat.id, i);
                           const isEditing = editing?.categoryId === cat.id && editing?.month === i;
                           const isCurrent = i === currentMonthIndex;
@@ -238,7 +255,7 @@ export default function BudgetView() {
                 <td className="sticky left-0 z-10 bg-slate-50 px-4 py-3.5 font-bold text-slate-800 text-xs border-r border-slate-100/60">
                   (=) Lucro Líquido
                 </td>
-                {months.map((_, i) => {
+                {allMonths.map((_, i) => {
                   const np = netProfitMonth(i);
                   const planned = sectionTotal('RECEITA', i, 'planned') + sectionTotal('CUSTOS', i, 'planned') + sectionTotal('DESPESAS', i, 'planned');
                   return (
@@ -256,7 +273,7 @@ export default function BudgetView() {
                 <td className="sticky left-0 z-10 bg-slate-50 px-4 py-3 text-xs font-bold text-slate-500 border-r border-slate-100/60">
                   Margem Líquida
                 </td>
-                {months.map((_, i) => {
+                {allMonths.map((_, i) => {
                   const nm = netMarginMonth(i);
                   return (
                     <td key={i} className="px-3 py-3 text-center font-mono text-xs font-bold transition-colors">
@@ -269,6 +286,57 @@ export default function BudgetView() {
               </tr>
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile: single month view */}
+        <div className="md:hidden">
+          <div className="p-3 border-b border-slate-100 bg-slate-50/50">
+            <span className="text-[0.72rem] font-bold text-slate-600 uppercase tracking-wider">
+              {format(allMonths[mobileMonth], "MMMM 'de' yyyy", { locale: ptBR })}
+            </span>
+          </div>
+          <div className="overflow-y-auto max-h-[60vh]">
+            {sectionCats.map(({ section, label, categories: cats }) => (
+              <div key={section}>
+                <div className="px-4 py-2 text-[0.65rem] font-bold text-slate-400 uppercase tracking-wider bg-slate-50/50 border-y border-slate-100">
+                  {label}
+                </div>
+                {cats.map((cat) => {
+                  const cell = getCell(cat.id, mobileMonth);
+                  return (
+                    <div key={cat.id} className="px-4 py-3 border-b border-slate-50 flex items-center justify-between gap-3">
+                      <span className="text-[0.78rem] font-medium text-slate-700 truncate flex-1">{cat.name}</span>
+                      <div className="text-right shrink-0">
+                        {editing && editing.categoryId === cat.id && editing.month === mobileMonth ? (
+                          <div className="flex items-center gap-1">
+                            <input type="number" value={editValue} onChange={(e) => setEditValue(e.target.value)} onKeyDown={handleKeyDown} className="w-16 px-1.5 py-0.5 text-xs border border-slate-300 rounded outline-none focus:ring-2 focus:ring-primary/30" autoFocus />
+                            <button onClick={confirmEdit} className="text-emerald-600 p-0.5"><Check className="w-3 h-3" /></button>
+                            <button onClick={cancelEdit} className="text-slate-400 p-0.5"><X className="w-3 h-3" /></button>
+                          </div>
+                        ) : (
+                          <button onClick={() => startEdit(cat.id, mobileMonth, cell.planned)} className="text-slate-400 hover:text-slate-700 cursor-pointer bg-transparent border-none text-xs font-mono">
+                            {formatCurrency(cell.planned)}
+                          </button>
+                        )}
+                        <div className="text-[0.62rem] mt-0.5">
+                          <span className={cell.actual >= 0 ? 'text-emerald-600' : 'text-red-500'}>
+                            {formatCurrency(cell.actual)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ))}
+            {/* Totals */}
+            <div className="px-4 py-3 border-t border-slate-100 bg-slate-50/50 flex items-center justify-between">
+              <span className="text-[0.72rem] font-bold text-slate-500">Resultado</span>
+              <span className={cn("text-sm font-mono font-bold", netProfitMonth(mobileMonth) >= 0 ? 'text-emerald-600' : 'text-rose-600')}>
+                {formatCurrency(netProfitMonth(mobileMonth))}
+              </span>
+            </div>
+          </div>
         </div>
       </div>
     </div>

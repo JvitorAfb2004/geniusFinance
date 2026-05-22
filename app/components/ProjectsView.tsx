@@ -168,7 +168,7 @@ export default function ProjectsView() {
           <ProjectKanban searchTerm={searchTerm} serviceTypeFilter={serviceTypeFilter} />
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-[#e2e8f0] overflow-hidden flex-1 flex flex-col">
+        <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden flex-1 flex flex-col shadow-[0_1px_2px_rgba(0,0,0,0.02),0_4px_16px_rgba(0,0,0,0.02)]">
           <div className="overflow-auto flex-1">
             {filteredProjects.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 text-gray-400">

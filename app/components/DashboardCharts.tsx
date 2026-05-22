@@ -10,7 +10,7 @@ import { ptBR } from 'date-fns/locale';
 function CustomTooltip({ active, payload, label }: any) {
   if (!active || !payload || !payload.length) return null;
   return (
-    <div className="bg-surface border border-border rounded-xl shadow-lg px-3 py-2.5 text-xs">
+    <div className="bg-white border border-slate-100 rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.08)] px-3 py-2.5 text-xs">
       <p className="font-semibold text-text-primary mb-1">{label}</p>
       {payload.map((entry: any) => (
         <div key={entry.name} className="flex items-center gap-2">
@@ -99,14 +99,14 @@ export function DashboardCharts() {
   }, [transactions, activeContext, selectedMonth]);
 
   return (
-    <div className="flex flex-col gap-5">
-      <div className="bg-surface rounded-xl border border-border flex flex-col">
-        <div className="p-4 border-b border-border font-bold text-text-primary">
+    <div className="flex flex-col gap-4">
+      <div className="bg-white rounded-3xl border border-slate-100 flex flex-col shadow-[0_1px_2px_rgba(0,0,0,0.02),0_4px_16px_rgba(0,0,0,0.02)]">
+        <div className="px-5 py-4 border-b border-slate-100 font-bold text-[0.82rem] text-slate-700 tracking-tight">
           Receitas vs Despesas (Ano)
         </div>
-        <div className="p-4 overflow-hidden" style={{ minHeight: 140 }}>
+        <div className="px-4 py-4 overflow-hidden" style={{ minHeight: 140 }}>
           <ResponsiveContainer width="100%" height={140}>
-            <BarChart data={monthlyData} margin={{ top: 5, right: 0, left: -20, bottom: 0 }} barSize={20}>
+            <BarChart data={monthlyData} margin={{ top: 5, right: 0, left: -20, bottom: 0 }} barSize={18}>
               <defs>
                 <linearGradient id="incomeGrad" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="#10b981" stopOpacity={0.9} />
@@ -117,7 +117,7 @@ export function DashboardCharts() {
                   <stop offset="100%" stopColor="#ef4444" stopOpacity={0.4} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f4f6f8" vertical={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
               <XAxis dataKey="name" axisLine={false} tickLine={false} fontSize={10} tickMargin={8} tick={{fill: '#64748b'}} />
               <YAxis axisLine={false} tickLine={false} fontSize={10} tickFormatter={(val) => `R$${val/1000}k`} tick={{fill: '#64748b'}} />
               <RechartsTooltip content={<CustomTooltip />} cursor={{fill: '#f4f6f8'}} />
@@ -128,11 +128,11 @@ export function DashboardCharts() {
         </div>
       </div>
 
-      <div className="bg-surface rounded-xl border border-border flex flex-col">
-        <div className="p-4 border-b border-border font-bold text-text-primary">
+      <div className="bg-white rounded-3xl border border-slate-100 flex flex-col shadow-[0_1px_2px_rgba(0,0,0,0.02),0_4px_16px_rgba(0,0,0,0.02)]">
+        <div className="px-5 py-4 border-b border-slate-100 font-bold text-[0.82rem] text-slate-700 tracking-tight">
           Previsão de Saldo Acumulado
         </div>
-        <div className="p-4 overflow-hidden" style={{ minHeight: 140 }}>
+        <div className="px-4 py-4 overflow-hidden" style={{ minHeight: 140 }}>
           <ResponsiveContainer width="100%" height={140}>
             <LineChart data={forecastData} margin={{ top: 5, right: 0, left: -20, bottom: 0 }}>
               <defs>
@@ -141,7 +141,7 @@ export function DashboardCharts() {
                   <stop offset="100%" stopColor="#3b82f6" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f4f6f8" vertical={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
               <XAxis dataKey="name" axisLine={false} tickLine={false} fontSize={10} tickMargin={8} tick={{fill: '#64748b'}} />
               <YAxis axisLine={false} tickLine={false} fontSize={10} tickFormatter={(val) => `R$${val/1000}k`} tick={{fill: '#64748b'}} />
               <RechartsTooltip content={<CustomTooltip />} />
@@ -150,9 +150,9 @@ export function DashboardCharts() {
                 dataKey="saldoAcumulado"
                 name="Saldo Previsto"
                 stroke="#3b82f6"
-                strokeWidth={3}
-                dot={{ r: 4, fill: '#3b82f6', strokeWidth: 2, stroke: '#fff' }}
-                activeDot={{ r: 6, fill: '#3b82f6', strokeWidth: 2, stroke: '#fff' }}
+                strokeWidth={2.5}
+                dot={{ r: 3.5, fill: '#3b82f6', strokeWidth: 2, stroke: '#fff' }}
+                activeDot={{ r: 5, fill: '#3b82f6', strokeWidth: 2.5, stroke: '#fff' }}
               />
             </LineChart>
           </ResponsiveContainer>

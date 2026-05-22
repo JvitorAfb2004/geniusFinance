@@ -134,7 +134,7 @@ export default function DREView() {
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Orçado vs Real - Bar Chart */}
-        <div className="bg-white rounded-xl border border-slate-100/90 p-5 shadow-[0_1px_3px_rgba(0,0,0,0.01)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.03)] hover:border-slate-200/80 transition-all duration-200 min-w-0">
+        <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-[0_1px_2px_rgba(0,0,0,0.02),0_4px_16px_rgba(0,0,0,0.02)] hover:shadow-[0_1px_2px_rgba(0,0,0,0.03),0_8px_24px_rgba(0,0,0,0.04)] hover:border-slate-200/80 transition-all duration-200 min-w-0">
           <h3 className="text-sm font-semibold text-slate-700 mb-4">Orçado vs Real</h3>
           <div style={{ width: '100%', height: 260 }}>
             <ResponsiveContainer>
@@ -156,7 +156,7 @@ export default function DREView() {
         </div>
 
         {/* Evolução Lucro Líquido - Line Chart */}
-        <div className="bg-white rounded-xl border border-slate-100/90 p-5 shadow-[0_1px_3px_rgba(0,0,0,0.01)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.03)] hover:border-slate-200/80 transition-all duration-200 min-w-0">
+        <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-[0_1px_2px_rgba(0,0,0,0.02),0_4px_16px_rgba(0,0,0,0.02)] hover:shadow-[0_1px_2px_rgba(0,0,0,0.03),0_8px_24px_rgba(0,0,0,0.04)] hover:border-slate-200/80 transition-all duration-200 min-w-0">
           <h3 className="text-sm font-semibold text-slate-700 mb-4">Evolucao do Lucro Liquido</h3>
           <div style={{ width: '100%', height: 260 }}>
           <ResponsiveContainer>
@@ -185,28 +185,28 @@ export default function DREView() {
       {/* Top Categories */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Top Custos */}
-        <div className="bg-white rounded-xl border border-slate-100/90 p-5 shadow-[0_1px_3px_rgba(0,0,0,0.01)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.03)] hover:border-slate-200/80 transition-all duration-200">
+        <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-[0_1px_2px_rgba(0,0,0,0.02),0_4px_16px_rgba(0,0,0,0.02)] hover:shadow-[0_1px_2px_rgba(0,0,0,0.03),0_8px_24px_rgba(0,0,0,0.04)] hover:border-slate-200/80 transition-all duration-200">
           <h3 className="text-sm font-semibold text-slate-700 mb-3">Principais Custos</h3>
           {topCustos.length === 0 ? (
             <p className="text-sm text-slate-400">Sem custos no mes.</p>
           ) : (
             <div className="space-y-2">
-              {topCustos.map((row) => (
-                <CategoryBar key={row.label} row={row} color="amber" />
+              {topCustos.map((row, i) => (
+                <CategoryBar key={row.categoryId || `custo-${i}`} row={row} color="amber" />
               ))}
             </div>
           )}
         </div>
 
         {/* Top Despesas */}
-        <div className="bg-white rounded-xl border border-slate-100/90 p-5 shadow-[0_1px_3px_rgba(0,0,0,0.01)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.03)] hover:border-slate-200/80 transition-all duration-200">
+        <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-[0_1px_2px_rgba(0,0,0,0.02),0_4px_16px_rgba(0,0,0,0.02)] hover:shadow-[0_1px_2px_rgba(0,0,0,0.03),0_8px_24px_rgba(0,0,0,0.04)] hover:border-slate-200/80 transition-all duration-200">
           <h3 className="text-sm font-semibold text-slate-700 mb-3">Principais Despesas</h3>
           {topDespesas.length === 0 ? (
             <p className="text-sm text-slate-400">Sem despesas no mes.</p>
           ) : (
             <div className="space-y-2">
-              {topDespesas.map((row) => (
-                <CategoryBar key={row.label} row={row} color="orange" />
+              {topDespesas.map((row, i) => (
+                <CategoryBar key={row.categoryId || `despesa-${i}`} row={row} color="orange" />
               ))}
             </div>
           )}

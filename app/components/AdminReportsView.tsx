@@ -63,7 +63,7 @@ export function AdminReportsView() {
 
   return (
     <div className="max-w-5xl mx-auto">
-      <div className="bg-white rounded-xl border border-[#e2e8f0] overflow-hidden">
+      <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-[0_1px_2px_rgba(0,0,0,0.02),0_4px_16px_rgba(0,0,0,0.02)]">
         <div className="p-4 border-b border-[#e2e8f0]">
           <h2 className="text-lg font-bold text-gray-900">Reports Recebidos</h2>
           <p className="text-xs text-gray-500">{reports.length} reports</p>
@@ -88,7 +88,7 @@ export function AdminReportsView() {
 
       {selected && (
         <div className="fixed inset-0 z-50 flex items-start justify-center pt-[10vh]">
-          <div className="fixed inset-0 bg-black/50" onClick={() => setSelected(null)} />
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setSelected(null)} />
           <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-lg mx-4 max-h-[80vh] flex flex-col">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
               <h3 className="text-lg font-bold text-gray-900">{selected.title}</h3>

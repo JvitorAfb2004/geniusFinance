@@ -36,7 +36,7 @@ export default function GoalsView() {
       </div>
 
       {showForm && (
-        <div className="bg-white rounded-xl border border-slate-200 p-5 space-y-3">
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-[0_1px_2px_rgba(0,0,0,0.02),0_4px_16px_rgba(0,0,0,0.02)] p-5 space-y-3">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <input placeholder="Nome da meta" value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} className="border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-400" />
             <input type="number" placeholder="Valor alvo (R$)" value={form.targetAmount} onChange={(e) => setForm((f) => ({ ...f, targetAmount: e.target.value }))} className="border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-400" />
@@ -55,7 +55,7 @@ export default function GoalsView() {
       )}
 
       {goals.length === 0 && !showForm && (
-        <div className="bg-white rounded-xl border border-slate-200 p-12 text-center text-slate-400">Nenhuma meta definida. Crie sua primeira meta!</div>
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-[0_1px_2px_rgba(0,0,0,0.02),0_4px_16px_rgba(0,0,0,0.02)] p-12 text-center text-slate-400">Nenhuma meta definida. Crie sua primeira meta!</div>
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -64,7 +64,7 @@ export default function GoalsView() {
           const daysLeft = Math.max(0, Math.ceil((new Date(g.deadline).getTime() - Date.now()) / (1000 * 60 * 60 * 24)));
           const monthlyNeeded = daysLeft > 0 ? (g.targetAmount - g.currentAmount) / Math.max(daysLeft / 30, 1) : 0;
           return (
-            <div key={g.id} className="bg-white rounded-xl border border-slate-200 p-4 space-y-3">
+            <div key={g.id} className="bg-white rounded-2xl border border-slate-100 shadow-[0_1px_2px_rgba(0,0,0,0.02),0_4px_16px_rgba(0,0,0,0.02)] p-4 space-y-3">
               <div className="flex items-start justify-between">
                 <div>
                   <div className="flex items-center gap-2">

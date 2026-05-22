@@ -85,7 +85,7 @@ export function ReportIssueView() {
 
   return (
     <div className="w-full max-w-5xl grid grid-cols-1 xl:grid-cols-[minmax(0,1.1fr)_minmax(320px,0.9fr)] gap-6 items-start">
-      <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-[#e2e8f0] p-6 flex flex-col gap-4">
+      <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-slate-100 shadow-[0_1px_2px_rgba(0,0,0,0.02),0_4px_16px_rgba(0,0,0,0.02)] p-6 flex flex-col gap-4">
         <h2 className="text-xl font-bold text-gray-900">Reportar Problema</h2>
         <p className="text-sm text-gray-500 -mt-2">Encontrou um bug? Tem uma sugestão? Conte pra gente.</p>
 
@@ -131,7 +131,7 @@ export function ReportIssueView() {
       </form>
 
       {myReports.length > 0 && (
-        <div className="bg-white rounded-xl border border-[#e2e8f0] p-6">
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-[0_1px_2px_rgba(0,0,0,0.02),0_4px_16px_rgba(0,0,0,0.02)] p-6">
           <h3 className="font-bold text-gray-900 mb-3">Seus Reports Anteriores</h3>
           <div className="flex flex-col gap-2">
             {myReports.map(r => (

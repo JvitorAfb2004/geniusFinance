@@ -220,22 +220,22 @@ export function DashboardCards({ valuesVisible = true }: { valuesVisible?: boole
     <div>
       <button
         onClick={() => setEditing(!editing)}
-        className="text-[0.72rem] font-bold text-slate-400 hover:text-slate-600 cursor-pointer flex items-center gap-1.5 mb-3.5 ml-auto transition-colors"
+        className="text-[0.72rem] font-semibold text-slate-400 hover:text-slate-600 cursor-pointer flex items-center gap-1.5 mb-4 ml-auto transition-colors"
       >
         <Settings2 className="w-3.5 h-3.5" />
         {editing ? 'Concluir Personalização' : 'Personalizar Dashboard'}
       </button>
 
       {editing && (
-        <div className="flex flex-wrap gap-1.5 mb-4 p-4 bg-slate-50 border border-slate-200/60 rounded-2xl shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+        <div className="flex flex-wrap gap-1.5 mb-4 p-4 bg-slate-50/80 border border-slate-100 rounded-3xl">
           {ALL_WIDGETS.map((w) => (
             <button
               key={w.id}
               onClick={() => toggleWidget(w.id)}
-              className={`text-[0.72rem] font-semibold px-3 py-1.5 rounded-xl border cursor-pointer transition-all duration-200 ${
-                widgets.includes(w.id) 
-                  ? 'bg-slate-800 text-white border-slate-800 shadow-sm' 
-                  : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:text-slate-800'
+              className={`text-[0.72rem] font-semibold px-3 py-1.5 rounded-2xl border cursor-pointer transition-all duration-200 ${
+                widgets.includes(w.id)
+                  ? 'bg-slate-800 text-white border-slate-800 shadow-[0_1px_4px_rgba(0,0,0,0.1)]'
+                  : 'bg-white text-slate-500 border-slate-200 hover:border-slate-300 hover:text-slate-700 hover:shadow-[0_1px_3px_rgba(0,0,0,0.04)]'
               }`}
             >
               {w.label}
@@ -244,7 +244,7 @@ export function DashboardCards({ valuesVisible = true }: { valuesVisible?: boole
         </div>
       )}
 
-      <div className={`grid gap-4.5 ${cards.length <= 2 ? 'grid-cols-1 md:grid-cols-2' : cards.length === 3 ? 'grid-cols-1 md:grid-cols-3' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4'}`}>
+      <div className={`grid gap-4 ${cards.length <= 2 ? 'grid-cols-1 md:grid-cols-2' : cards.length === 3 ? 'grid-cols-1 md:grid-cols-3' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4'}`}>
         {cards.map((card, index) => (
           <motion.div
             key={card.id}
@@ -260,23 +260,25 @@ export function DashboardCards({ valuesVisible = true }: { valuesVisible?: boole
             }}
             onDragEnd={() => setDraggingWidgetId(null)}
             className={cn(
-              "bg-surface p-5 pl-6 rounded-2xl border border-slate-100/90 transition-all duration-200 hover:shadow-[0_8px_30px_rgb(0,0,0,0.035)] hover:border-slate-200/60 hover:-translate-y-0.5 relative overflow-hidden group shadow-[0_1px_3px_rgba(0,0,0,0.01),0_1px_2px_rgba(0,0,0,0.005)]",
+              "bg-white p-5 pl-6 rounded-3xl border border-slate-100 transition-all duration-300 relative overflow-hidden group",
+              "shadow-[0_1px_2px_rgba(0,0,0,0.02),0_4px_16px_rgba(0,0,0,0.02)]",
+              "hover:shadow-[0_1px_2px_rgba(0,0,0,0.03),0_8px_24px_rgba(0,0,0,0.04)] hover:border-slate-200/80",
               "cursor-grab active:cursor-grabbing",
               draggingWidgetId === card.id && "opacity-60"
             )}
           >
-            <div className={`absolute top-0 bottom-0 left-0 w-[3.5px] ${card.accentBar}`} />
+            <div className={`absolute top-3 bottom-3 left-0 w-[3px] rounded-full ${card.accentBar}`} />
             <div className="flex items-start justify-between">
               <div className="flex-1 min-w-0">
-                <div className="text-[0.68rem] text-slate-400 uppercase tracking-[0.08em] mb-2.5 font-bold select-none">{card.title}</div>
-                <div className={cn('text-[1.38rem] font-bold font-mono tracking-tight leading-none', card.color)}>
+                <div className="text-[0.7rem] text-slate-400 uppercase tracking-[0.06em] mb-2 font-semibold select-none">{card.title}</div>
+                <div className={cn('text-[1.45rem] font-bold font-mono tracking-[-0.02em] leading-none', card.color)}>
                   {valuesVisible
                     ? (card.isPercent ? `${(animatedValues[index] ?? 0).toFixed(1)}%` : formatCurrency(animatedValues[index] ?? 0))
                     : '••••••'}
                 </div>
               </div>
-              <div className={`w-9.5 h-9.5 rounded-xl ${card.iconBg} flex items-center justify-center flex-shrink-0 shadow-[0_1px_2px_rgba(0,0,0,0.02)]`}>
-                <card.icon className={`w-4.5 h-4.5 ${card.iconColor}`} />
+              <div className={`w-10 h-10 rounded-2xl ${card.iconBg} flex items-center justify-center flex-shrink-0`}>
+                <card.icon className={`w-[18px] h-[18px] ${card.iconColor}`} />
               </div>
             </div>
           </motion.div>

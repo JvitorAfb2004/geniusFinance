@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router';
 import { useFinance } from '../hooks/useFinance';
 import { ActiveScope } from '../types';
 import { ChevronLeft, ChevronRight, Eye, EyeOff, Menu, Building2, User } from 'lucide-react';
 import { format, addMonths, subMonths } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { ScopeSwitchModal } from './ScopeSwitchModal';
 
 export function Header({
   onOpenMenu,
@@ -15,8 +16,21 @@ export function Header({
   dashboardValuesVisible?: boolean;
   onToggleDashboardValues?: () => void;
 }) {
-  const { activeScope, setActiveScope, accounts, user, selectedMonth, setSelectedMonth } = useFinance();
+  const { activeScope, setActiveScope, accounts, user, selectedMonth, setSelectedMonth, loading } = useFinance();
   const location = useLocation();
+  const [switchingLabel, setSwitchingLabel] = useState<string | null>(null);
+
+  // Dismiss switch modal when loading completes
+  useEffect(() => {
+    if (switchingLabel && !loading) {
+      setSwitchingLabel(null);
+    }
+  }, [loading, switchingLabel]);
+
+  const handleScopeSwitch = (opt: { label: string; scope: ActiveScope }) => {
+    setSwitchingLabel(opt.label);
+    setActiveScope(opt.scope);
+  };
 
   const pageTitles: Record<string, string> = {
     '/dashboard': 'Visão Geral',
@@ -95,7 +109,7 @@ export function Header({
       </div>
 
       <div className="flex gap-2 w-full sm:w-auto items-center">
-        <div className="flex gap-1 p-1 bg-slate-100/60 border border-slate-200/60 rounded-xl flex-1 sm:flex-none justify-center">
+        <div className="flex-1 min-w-0 sm:flex-none flex gap-1 p-1 bg-slate-100/60 border border-slate-200/60 rounded-xl overflow-x-auto">
           {scopeOptions.map((opt) => {
             const isActive = opt.scope.type === 'PERSONAL'
               ? activeScope.type === 'PERSONAL'
@@ -104,8 +118,8 @@ export function Header({
             return (
               <button
                 key={opt.scope.type === 'PERSONAL' ? 'personal' : (opt.scope as { type: 'ACCOUNT'; accountId: string }).accountId}
-                onClick={() => setActiveScope(opt.scope)}
-                className={`flex-1 sm:flex-none px-3.5 py-1.5 rounded-lg text-[0.8rem] font-semibold transition-all border-none cursor-pointer inline-flex items-center justify-center gap-1.5 ${
+                onClick={() => handleScopeSwitch(opt)}
+                className={`whitespace-nowrap px-3.5 py-1.5 rounded-lg text-[0.8rem] font-semibold transition-all border-none cursor-pointer inline-flex items-center justify-center gap-1.5 shrink-0 ${
                   isActive
                     ? 'bg-surface text-slate-800 shadow-[0_1px_3px_rgba(0,0,0,0.05),0_1px_2px_rgba(0,0,0,0.03)] font-semibold'
                     : 'bg-transparent text-slate-500 hover:text-slate-800'
@@ -122,16 +136,18 @@ export function Header({
             );
           })}
         </div>
-        
+
         <button
           onClick={onToggleDashboardValues}
-          className="h-[36px] px-3 bg-surface border border-slate-200 rounded-xl text-[0.78rem] font-bold text-slate-600 hover:text-slate-800 hover:bg-slate-50 hover:border-slate-300 transition-all cursor-pointer inline-flex items-center gap-1.5 shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
+          className="h-[36px] shrink-0 px-2.5 sm:px-3 bg-surface border border-slate-200 rounded-xl text-[0.78rem] font-bold text-slate-600 hover:text-slate-800 hover:bg-slate-50 hover:border-slate-300 transition-all cursor-pointer inline-flex items-center gap-1.5 shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
           title={dashboardValuesVisible ? 'Ocultar valores do dashboard' : 'Mostrar valores do dashboard'}
         >
           {dashboardValuesVisible ? <EyeOff className="w-4 h-4 text-slate-500" /> : <Eye className="w-4 h-4 text-slate-500" />}
           <span className="hidden md:inline">{dashboardValuesVisible ? 'Ocultar valores' : 'Mostrar valores'}</span>
         </button>
       </div>
+
+      {switchingLabel && <ScopeSwitchModal targetLabel={switchingLabel} />}
     </header>
   );
 }

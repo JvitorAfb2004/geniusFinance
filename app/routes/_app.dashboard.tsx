@@ -7,7 +7,7 @@ import { TransactionTable } from "~/components/TransactionTable";
 export default function Dashboard() {
   const { dashboardValuesVisible } = useAppContext();
   return (
-    <>
+    <div className="flex flex-col gap-5">
       <DashboardCards valuesVisible={dashboardValuesVisible} />
       <DashboardAlerts valuesVisible={dashboardValuesVisible} />
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-5 flex-1 min-h-[400px]">
@@ -18,6 +18,6 @@ export default function Dashboard() {
           <DashboardCharts />
         </div>
       </div>
-    </>
+    </div>
   );
 }

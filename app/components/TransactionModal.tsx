@@ -228,6 +228,12 @@ export function TransactionModal({
     if (nextOpen && calculatorButtonRef.current) {
       setCalculatorRect(calculatorButtonRef.current.getBoundingClientRect());
     }
+    // Prevent modal scroll to bottom when opening calculator
+    if (nextOpen) {
+      requestAnimationFrame(() => {
+        calculatorButtonRef.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      });
+    }
   };
 
   const getCalculatorStyle = (): React.CSSProperties => {
@@ -296,7 +302,7 @@ export function TransactionModal({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 bg-black/45 flex flex-col items-center justify-center p-4"
+      className="fixed inset-0 z-50 bg-black/35 backdrop-blur-sm flex flex-col items-center justify-center p-4"
     >
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 20 }}

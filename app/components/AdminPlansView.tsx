@@ -108,7 +108,7 @@ export function AdminPlansView() {
 
       {error && <p className="text-red-500 text-sm">{error}</p>}
 
-      <div className="bg-white rounded-xl border border-[#e2e8f0] overflow-hidden">
+      <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-[0_1px_2px_rgba(0,0,0,0.02),0_4px_16px_rgba(0,0,0,0.02)]">
         <table className="w-full text-sm">
           <thead className="bg-gray-50 text-left">
             <tr>
@@ -140,7 +140,7 @@ export function AdminPlansView() {
 
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh]">
-          <div className="fixed inset-0 bg-black/50" onClick={closeModal} />
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" onClick={closeModal} />
           <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-md mx-4">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
               <h3 className="text-lg font-bold text-gray-900">

@@ -36,7 +36,7 @@ export default function Login() {
     <div className="flex flex-col h-[100dvh] items-center justify-center bg-gradient-to-br from-bg to-primary/5 px-4 relative overflow-hidden">
       <div className="absolute -top-24 -right-24 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
       <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-success/5 rounded-full blur-3xl" />
-      <div className="bg-surface p-8 rounded-2xl shadow-lg border border-border text-center max-w-md w-full relative z-10">
+      <div className="bg-surface p-8 rounded-2xl shadow-none border border-border text-center max-w-md w-full relative z-10">
         <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6">
           <img src="/icon.svg" alt="Genius Finance" className="w-12 h-12" />
         </div>
@@ -78,7 +78,7 @@ export default function Login() {
 
       {isGoogleTermsModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="fixed inset-0 bg-black/50" onClick={() => setIsGoogleTermsModalOpen(false)} />
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setIsGoogleTermsModalOpen(false)} />
           <div className="relative bg-white border border-gray-100 p-6 rounded-2xl shadow-xl max-w-sm w-full z-10 text-center animate-scale-up">
             <div className="w-12 h-12 rounded-full bg-[#f8fafc] border border-gray-100 flex items-center justify-center mx-auto mb-4">
               <svg viewBox="0 0 24 24" className="w-6 h-6" fill="currentColor">

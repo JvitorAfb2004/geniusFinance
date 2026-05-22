@@ -194,7 +194,7 @@ export default function SalesView() {
       </div>
 
       {/* Daily Chart */}
-      <div className="bg-white rounded-xl border border-slate-200 p-5">
+      <div className="bg-white rounded-2xl border border-slate-100 shadow-[0_1px_2px_rgba(0,0,0,0.02),0_4px_16px_rgba(0,0,0,0.02)] p-5">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-sm font-semibold text-slate-700">Vendas Diarias vs Meta</h3>
           <button
@@ -223,7 +223,7 @@ export default function SalesView() {
 
       {/* Cumulative Chart */}
       {mainTarget > 0 && (
-        <div className="bg-white rounded-xl border border-slate-200 p-5">
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-[0_1px_2px_rgba(0,0,0,0.02),0_4px_16px_rgba(0,0,0,0.02)] p-5">
           <h3 className="text-sm font-semibold text-slate-700 mb-4">Acumulado vs Meta Acumulada</h3>
           <div style={{ width: '100%', height: 260 }}>
             <ResponsiveContainer>
@@ -244,7 +244,7 @@ export default function SalesView() {
       {/* Tables Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Sales by Category */}
-        <div className="bg-white rounded-xl border border-slate-200 p-5">
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-[0_1px_2px_rgba(0,0,0,0.02),0_4px_16px_rgba(0,0,0,0.02)] p-5">
           <h3 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
             <Tag className="w-4 h-4 text-slate-400" />
             Vendas por Categoria
@@ -264,7 +264,7 @@ export default function SalesView() {
         </div>
 
         {/* Sales by Channel */}
-        <div className="bg-white rounded-xl border border-slate-200 p-5">
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-[0_1px_2px_rgba(0,0,0,0.02),0_4px_16px_rgba(0,0,0,0.02)] p-5">
           <h3 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
             <Users className="w-4 h-4 text-slate-400" />
             Meta por Canal
@@ -297,7 +297,7 @@ export default function SalesView() {
         </div>
 
         {/* Sales by Seller */}
-        <div className="bg-white rounded-xl border border-slate-200 p-5">
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-[0_1px_2px_rgba(0,0,0,0.02),0_4px_16px_rgba(0,0,0,0.02)] p-5">
           <h3 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
             <Users className="w-4 h-4 text-slate-400" />
             Meta por Vendedor
@@ -332,7 +332,7 @@ export default function SalesView() {
 
       {/* Active Targets */}
       {salesTargets.filter((t) => t.context === activeContext && t.year === year && t.month === month).length > 0 && (
-        <div className="bg-white rounded-xl border border-slate-200 p-5">
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-[0_1px_2px_rgba(0,0,0,0.02),0_4px_16px_rgba(0,0,0,0.02)] p-5">
           <h3 className="text-sm font-semibold text-slate-700 mb-3">Metas Ativas</h3>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -389,7 +389,7 @@ function SalesCard({
   const animValue = useAnimatedValue(value);
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 p-4">
+    <div className="bg-white rounded-2xl border border-slate-100 shadow-[0_1px_2px_rgba(0,0,0,0.02),0_4px_16px_rgba(0,0,0,0.02)] p-4">
       <div className="flex items-center gap-2 mb-2">
         <div className={`w-7 h-7 rounded-lg ${bg} flex items-center justify-center ${color}`}>
           {icon}

@@ -115,7 +115,7 @@ export function SpendingLimitsView() {
           return (
             <div
               key={limit.id}
-              className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm hover:shadow-md transition-shadow"
+              className="bg-white rounded-2xl border border-slate-100 p-5 shadow-[0_1px_2px_rgba(0,0,0,0.02),0_4px_16px_rgba(0,0,0,0.02)] hover:shadow-[0_1px_2px_rgba(0,0,0,0.03),0_8px_24px_rgba(0,0,0,0.04)] transition-shadow"
             >
               <div className="flex items-start justify-between mb-3">
                 <div>

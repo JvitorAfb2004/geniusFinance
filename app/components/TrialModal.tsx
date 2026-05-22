@@ -9,7 +9,7 @@ interface Props {
 
 export function TrialModal({ daysLeft, onClose, onSubscribe }: Props) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/35 backdrop-blur-sm p-4">
       <div className="bg-white rounded-2xl shadow-2xl border border-[#e2e8f0] w-full max-w-md overflow-hidden">
         {/* Header */}
         <div className="bg-[#f97316] p-6 text-white text-center relative">
