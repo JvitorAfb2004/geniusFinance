@@ -1,11 +1,12 @@
 import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { addMonths, format, parseISO } from 'date-fns';
-import { ContextType, FinanceContextState, Transaction, ViewType, Category, Budget, SpendingLimit, DRESection, SalesTarget, Tag, FinancialGoal, Lead, LeadOption, ServiceType, Project, Task, ActiveScope, Account, AccountMember, AccountInvite, AccountRole } from '../types';
+import { ContextType, FinanceContextState, Transaction, ViewType, Category, Budget, SpendingLimit, DRESection, SalesTarget, Tag, FinancialGoal, Lead, LeadOption, ServiceType, Project, ProjectKanbanSettings, Task, ActiveScope, Account, AccountMember, AccountInvite, AccountRole } from '../types';
 import { auth, db, signInWithGoogle, signOut } from '../lib/firebase';
 import { handleFirestoreError } from '../lib/handleFirestoreError';
 import { DEFAULT_CATEGORIES } from '../lib/categories';
 import { ALL_DEFAULT_LEAD_OPTIONS } from '../lib/leadDefaults';
+import { normalizeProjectKanbanSettings } from '../lib/projectKanbanColumns';
 import { resolveDataPath } from '../lib/pathAdapter';
 import type { FinanceCollectionName } from '../lib/pathAdapter';
 import { ensureUserOnboardingDocs } from '../lib/onboarding';
@@ -52,6 +53,9 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
   const [leadOptions, setLeadOptions] = useState<LeadOption[]>([]);
   const [serviceTypes, setServiceTypes] = useState<ServiceType[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
+  const [projectKanbanSettings, setProjectKanbanSettings] = useState<ProjectKanbanSettings>(
+    normalizeProjectKanbanSettings()
+  );
   const [tasksMap, setTasksMap] = useState<Record<string, Task[]>>({});
   const taskUnsubscribers = useRef<Record<string, () => void>>({});
   const [categoriesLoaded, setCategoriesLoaded] = useState(false);
@@ -81,6 +85,7 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
         setLeadOptions([]);
         setServiceTypes([]);
         setProjects([]);
+        setProjectKanbanSettings(normalizeProjectKanbanSettings());
         setTasksMap({});
         for (const projectId in taskUnsubscribers.current) {
           const unsubscribeTask = taskUnsubscribers.current[projectId];
@@ -464,6 +469,37 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
     }, (err) => {
       handleFirestoreError(err, 'list', resolveDataPath(activeScope, user.uid, 'projects'), user);
     });
+    return () => unsubscribe();
+  }, [user, activeScope]);
+
+  // Project Kanban settings listener
+  useEffect(() => {
+    if (!user) {
+      setProjectKanbanSettings(normalizeProjectKanbanSettings());
+      return;
+    }
+
+    const colPath = resolveDataPath(activeScope, user.uid, 'project-kanban-settings');
+    const docRef = doc(db, colPath, 'default');
+    const unsubscribe = onSnapshot(docRef, (snapshot) => {
+      if (!snapshot.exists()) {
+        setProjectKanbanSettings(normalizeProjectKanbanSettings());
+        return;
+      }
+
+      const data = snapshot.data();
+      setProjectKanbanSettings(normalizeProjectKanbanSettings({
+        id: snapshot.id,
+        userId: data.userId,
+        columns: data.columns || [],
+        createdAt: data.createdAt?.toDate?.().toISOString() || undefined,
+        updatedAt: data.updatedAt?.toDate?.().toISOString() || undefined,
+      }));
+    }, (err) => {
+      handleFirestoreError(err, 'list', `${colPath}/default`, user);
+      setProjectKanbanSettings(normalizeProjectKanbanSettings());
+    });
+
     return () => unsubscribe();
   }, [user, activeScope]);
 
@@ -1114,6 +1150,29 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const updateProjectKanbanSettings = async (updates: Partial<ProjectKanbanSettings>) => {
+    if (!user) return;
+    try {
+      const colPath = resolveDataPath(activeScope, user.uid, 'project-kanban-settings');
+      const docRef = doc(db, colPath, 'default');
+      const normalized = normalizeProjectKanbanSettings({
+        ...projectKanbanSettings,
+        ...updates,
+      });
+      const payload: Record<string, unknown> = {
+        userId: user.uid,
+        columns: normalized.columns,
+        updatedAt: serverTimestamp(),
+      };
+      const batch = writeBatch(db);
+      batch.set(docRef, payload, { merge: true });
+      await batch.commit();
+      setProjectKanbanSettings(normalized);
+    } catch (error) {
+      handleFirestoreError(error, 'update', `${resolveDataPath(activeScope, user.uid, 'project-kanban-settings')}/default`, user);
+    }
+  };
+
   // ---- Task CRUD (subcollection: projects/{projectId}/tasks) ----
 
   const getTaskColPath = useCallback((projectId: string) => {
@@ -1323,6 +1382,8 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       leadOptions,
       serviceTypes,
       projects,
+      projectKanbanSettings,
+      projectKanbanColumns: projectKanbanSettings.columns,
       tasksMap,
       loadTasks,
       unloadTasks,
@@ -1377,6 +1438,7 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       addProject,
       updateProject,
       deleteProject,
+      updateProjectKanbanSettings,
       addTask,
       updateTask,
       deleteTask,

@@ -9,8 +9,24 @@ export type ActiveScope =
   | { type: 'PERSONAL'; userId: string }
   | { type: 'ACCOUNT'; accountId: string; accountName: string; role: AccountRole };
 
-export type ProjectStatus = 'BACKLOG' | 'IN_PROGRESS' | 'REVIEW' | 'DONE' | 'CANCELLED';
+export type ProjectStatus = string;
 export type DRESection = 'RECEITA' | 'CUSTOS' | 'DESPESAS';
+
+export interface ProjectKanbanColumn {
+  status: ProjectStatus;
+  label: string;
+  color: string;
+  order: number;
+  visible: boolean;
+}
+
+export interface ProjectKanbanSettings {
+  id?: string;
+  userId?: string;
+  columns: ProjectKanbanColumn[];
+  createdAt?: string;
+  updatedAt?: string;
+}
 
 export interface AccountSettings {
   dashboardAlertsVisibility: 'EVERYONE' | 'ADMIN';
@@ -275,6 +291,8 @@ export interface FinanceContextState {
   leadOptions: LeadOption[];
   serviceTypes: ServiceType[];
   projects: Project[];
+  projectKanbanSettings: ProjectKanbanSettings;
+  projectKanbanColumns: ProjectKanbanColumn[];
   tasksMap: Record<string, Task[]>;
   loadTasks: (projectId: string) => void;
   unloadTasks: (projectId: string) => void;
@@ -332,6 +350,7 @@ export interface FinanceContextState {
   addProject: (data: Omit<Project, 'id' | 'userId' | 'createdAt' | 'updatedAt'>) => Promise<void>;
   updateProject: (id: string, updates: Partial<Project>) => Promise<void>;
   deleteProject: (id: string) => Promise<void>;
+  updateProjectKanbanSettings: (updates: Partial<ProjectKanbanSettings>) => Promise<void>;
   addTask: (projectId: string, data: Omit<Task, 'id' | 'projectId' | 'createdAt' | 'updatedAt'>) => Promise<void>;
   updateTask: (projectId: string, taskId: string, updates: Partial<Task>) => Promise<void>;
   deleteTask: (projectId: string, taskId: string) => Promise<void>;

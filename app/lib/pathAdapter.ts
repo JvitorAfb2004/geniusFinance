@@ -11,6 +11,7 @@ export type FinanceCollectionName =
   | 'lead-options'
   | 'service-types'
   | 'projects'
+  | 'project-kanban-settings'
   | 'spending-limits';
 
 export function resolveDataPath(
@@ -23,4 +24,3 @@ export function resolveDataPath(
   }
   return `users/${uid}/${collection}`;
 }
-

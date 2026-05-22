@@ -1,7 +1,5 @@
 import React, { useState, useMemo } from 'react';
 import { useFinance } from '../hooks/useFinance';
-import { format, parseISO } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
 import { cn } from '../lib/utils';
 import {
   Plus, Search, FilterX, Pencil, Trash2, Kanban, List, Users, Layers,
@@ -11,27 +9,12 @@ import ConfirmModal from './ConfirmModal';
 import ProjectModal from './ProjectModal';
 import ProjectKanban from './ProjectKanban';
 import type { Project, ProjectStatus } from '../types';
+import { CANCELLED_PROJECT_STATUS } from '../lib/projectKanbanColumns';
 
 type Tab = 'kanban' | 'list';
 
-const STATUS_LABELS: Record<ProjectStatus, string> = {
-  BACKLOG: 'Backlog',
-  IN_PROGRESS: 'Em Andamento',
-  REVIEW: 'Revisão',
-  DONE: 'Concluído',
-  CANCELLED: 'Cancelado',
-};
-
-const STATUS_COLORS: Record<ProjectStatus, string> = {
-  BACKLOG: '#6b7280',
-  IN_PROGRESS: '#3b82f6',
-  REVIEW: '#f59e0b',
-  DONE: '#10b981',
-  CANCELLED: '#ef4444',
-};
-
 export default function ProjectsView() {
-  const { projects, serviceTypes, leads, deleteProject } = useFinance();
+  const { projects, serviceTypes, leads, projectKanbanColumns, deleteProject } = useFinance();
   const [tab, setTab] = useState<Tab>('kanban');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | undefined>(undefined);
@@ -65,6 +48,16 @@ export default function ProjectsView() {
 
   const getLeadName = (id?: string) =>
     leads.find(l => l.id === id)?.clientName;
+
+  const getStatusLabel = (status: ProjectStatus) => {
+    if (status === CANCELLED_PROJECT_STATUS) return 'Cancelado';
+    return projectKanbanColumns.find(column => column.status === status)?.label || status;
+  };
+
+  const getStatusColor = (status: ProjectStatus) => {
+    if (status === CANCELLED_PROJECT_STATUS) return '#ef4444';
+    return projectKanbanColumns.find(column => column.status === status)?.color || '#6b7280';
+  };
 
   const handleAdd = () => {
     setEditingProject(undefined);
@@ -151,9 +144,10 @@ export default function ProjectsView() {
               className="px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-[#3b82f6] cursor-pointer bg-white min-w-[140px]"
             >
               <option value="">Todos os status</option>
-              {Object.entries(STATUS_LABELS).map(([key, label]) => (
-                <option key={key} value={key}>{label}</option>
+              {projectKanbanColumns.map(column => (
+                <option key={column.status} value={column.status}>{column.label}</option>
               ))}
+              <option value={CANCELLED_PROJECT_STATUS}>Cancelado</option>
             </select>
           )}
           {hasFilters && (
@@ -223,9 +217,9 @@ export default function ProjectsView() {
                         <td className="py-3 px-4">
                           <span
                             className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-white"
-                            style={{ backgroundColor: STATUS_COLORS[project.status] }}
+                            style={{ backgroundColor: getStatusColor(project.status) }}
                           >
-                            {STATUS_LABELS[project.status]}
+                            {getStatusLabel(project.status)}
                           </span>
                         </td>
                         <td className="py-3 px-4 hidden lg:table-cell text-gray-600">

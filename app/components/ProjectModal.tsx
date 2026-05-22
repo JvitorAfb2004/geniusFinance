@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useFinance } from '../hooks/useFinance';
 import { cn } from '../lib/utils';
 import { X, Check, Plus, Search, ChevronDown, ChevronRight, Trash2, GripVertical } from 'lucide-react';
+import { CANCELLED_PROJECT_STATUS } from '../lib/projectKanbanColumns';
 import type { Project, ServiceType, Lead, StepStatus, CustomFieldValue, Task, TaskPriority, Subtask } from '../types';
 
 interface Props {
@@ -11,7 +12,7 @@ interface Props {
 }
 
 export default function ProjectModal({ project, lead, onClose }: Props) {
-  const { serviceTypes, leads, addProject, updateProject, tasksMap, loadTasks, unloadTasks, addTask, updateTask, deleteTask, accountMembers } = useFinance();
+  const { serviceTypes, leads, projectKanbanColumns, addProject, updateProject, tasksMap, loadTasks, unloadTasks, addTask, updateTask, deleteTask, accountMembers } = useFinance();
   const isEdit = !!project;
   const tasks = project ? (tasksMap[project.id] || []) : [];
 
@@ -48,6 +49,10 @@ export default function ProjectModal({ project, lead, onClose }: Props) {
   const [serviceTypeSearch, setServiceTypeSearch] = useState('');
   const [leadOpen, setLeadOpen] = useState(false);
   const [leadSearch, setLeadSearch] = useState('');
+  const serviceTypeButtonRef = useRef<HTMLButtonElement>(null);
+  const leadButtonRef = useRef<HTMLButtonElement>(null);
+  const [serviceTypeMenuRect, setServiceTypeMenuRect] = useState<DOMRect | null>(null);
+  const [leadMenuRect, setLeadMenuRect] = useState<DOMRect | null>(null);
 
   useEffect(() => {
     if (project) {
@@ -89,6 +94,14 @@ export default function ProjectModal({ project, lead, onClose }: Props) {
     [leads, leadSearch],
   );
 
+  const statusOptions = useMemo(() => {
+    const options = projectKanbanColumns.map(column => ({ value: column.status, label: column.label }));
+    if (status && status !== CANCELLED_PROJECT_STATUS && !options.some(option => option.value === status)) {
+      options.push({ value: status, label: status });
+    }
+    return options;
+  }, [projectKanbanColumns, status]);
+
   const handleServiceTypeChange = (id: string) => {
     setServiceTypeId(id);
     setServiceTypeOpen(false);
@@ -98,6 +111,34 @@ export default function ProjectModal({ project, lead, onClose }: Props) {
     if (st && !isEdit) {
       setStepStatuses(st.steps.map(s => ({ stepIndex: s.order, done: false })));
       setCustomFieldValues(st.customFieldDefs.map(f => ({ key: f.key, value: '' })));
+    }
+  };
+
+  const getDropdownStyle = (rect: DOMRect | null): React.CSSProperties => {
+    if (!rect) return {};
+    return {
+      left: rect.left,
+      top: rect.bottom + 4,
+      width: rect.width,
+      maxHeight: Math.min(260, window.innerHeight - rect.bottom - 24),
+    };
+  };
+
+  const toggleServiceTypeDropdown = () => {
+    const nextOpen = !serviceTypeOpen;
+    setServiceTypeOpen(nextOpen);
+    setLeadOpen(false);
+    if (nextOpen && serviceTypeButtonRef.current) {
+      setServiceTypeMenuRect(serviceTypeButtonRef.current.getBoundingClientRect());
+    }
+  };
+
+  const toggleLeadDropdown = () => {
+    const nextOpen = !leadOpen;
+    setLeadOpen(nextOpen);
+    setServiceTypeOpen(false);
+    if (nextOpen && leadButtonRef.current) {
+      setLeadMenuRect(leadButtonRef.current.getBoundingClientRect());
     }
   };
 
@@ -264,7 +305,13 @@ export default function ProjectModal({ project, lead, onClose }: Props) {
         </div>
 
         {/* Body */}
-        <div className="overflow-y-auto px-6 py-4 space-y-5 flex-1">
+        <div
+          className="overflow-y-auto px-6 py-4 space-y-5 flex-1"
+          onScroll={() => {
+            setServiceTypeOpen(false);
+            setLeadOpen(false);
+          }}
+        >
           {/* Basic info grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="sm:col-span-2">
@@ -296,11 +343,10 @@ export default function ProjectModal({ project, lead, onClose }: Props) {
                 onChange={(e) => setStatus(e.target.value as Project['status'])}
                 className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-[#3b82f6] cursor-pointer bg-white"
               >
-                <option value="BACKLOG">Backlog</option>
-                <option value="IN_PROGRESS">Em Andamento</option>
-                <option value="REVIEW">Revisão</option>
-                <option value="DONE">Concluído</option>
-                <option value="CANCELLED">Cancelado</option>
+                {statusOptions.map(option => (
+                  <option key={option.value} value={option.value}>{option.label}</option>
+                ))}
+                <option value={CANCELLED_PROJECT_STATUS}>Cancelado</option>
               </select>
             </div>
             <div>
@@ -345,8 +391,9 @@ export default function ProjectModal({ project, lead, onClose }: Props) {
             <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de Serviço</label>
             <div className="relative" data-dropdown>
               <button
+                ref={serviceTypeButtonRef}
                 type="button"
-                onClick={() => { setServiceTypeOpen(!serviceTypeOpen); setLeadOpen(false); }}
+                onClick={toggleServiceTypeDropdown}
                 className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm text-left outline-none focus:border-[#3b82f6] cursor-pointer bg-white flex items-center justify-between"
               >
                 <span className={selectedServiceType ? 'text-gray-900' : 'text-gray-400'}>
@@ -355,7 +402,11 @@ export default function ProjectModal({ project, lead, onClose }: Props) {
                 <span className="text-gray-400 text-xs">{serviceTypeOpen ? '▲' : '▼'}</span>
               </button>
               {serviceTypeOpen && (
-                <div className="absolute z-20 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                <div
+                  className="fixed z-[70] bg-white border border-gray-200 rounded-lg shadow-xl overflow-y-auto"
+                  style={getDropdownStyle(serviceTypeMenuRect)}
+                  data-dropdown
+                >
                   <div className="sticky top-0 bg-white p-2 border-b border-gray-100">
                     <div className="relative">
                       <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
@@ -400,8 +451,9 @@ export default function ProjectModal({ project, lead, onClose }: Props) {
             <label className="block text-sm font-medium text-gray-700 mb-1">Lead de Origem (opcional)</label>
             <div className="relative" data-dropdown>
               <button
+                ref={leadButtonRef}
                 type="button"
-                onClick={() => { setLeadOpen(!leadOpen); setServiceTypeOpen(false); }}
+                onClick={toggleLeadDropdown}
                 className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm text-left outline-none focus:border-[#3b82f6] cursor-pointer bg-white flex items-center justify-between"
               >
                 <span className={linkedLeadId ? 'text-gray-900' : 'text-gray-400'}>
@@ -412,7 +464,11 @@ export default function ProjectModal({ project, lead, onClose }: Props) {
                 <span className="text-gray-400 text-xs">{leadOpen ? '▲' : '▼'}</span>
               </button>
               {leadOpen && (
-                <div className="absolute z-20 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                <div
+                  className="fixed z-[70] bg-white border border-gray-200 rounded-lg shadow-xl overflow-y-auto"
+                  style={getDropdownStyle(leadMenuRect)}
+                  data-dropdown
+                >
                   <div className="sticky top-0 bg-white p-2 border-b border-gray-100">
                     <div className="relative">
                       <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
