@@ -1,7 +1,6 @@
 import { useMemo, useState, useEffect, useRef } from "react";
 import { Link } from "react-router";
 import { useFinance } from "~/hooks/useFinance";
-import { gsap } from "gsap";
 
 interface PrintItem {
   label: string;
@@ -106,48 +105,58 @@ export default function Index() {
   useEffect(() => {
     if (!heroRef.current) return;
 
-    const ctx = gsap.context(() => {
-      gsap.from(".gsap-hero-badge", {
-        y: -30,
-        opacity: 0,
-        duration: 0.8,
-        ease: "back.out(1.5)"
-      });
+    let ctx: gsap.Context | undefined;
+    let isMounted = true;
 
-      gsap.from(".gsap-hero-title", {
-        y: 40,
-        opacity: 0,
-        duration: 1,
-        delay: 0.15,
-        ease: "power4.out"
-      });
+    void import("gsap").then(({ default: gsap }) => {
+      if (!isMounted || !heroRef.current) return;
 
-      gsap.from(".gsap-hero-desc", {
-        y: 30,
-        opacity: 0,
-        duration: 1,
-        delay: 0.35,
-        ease: "power3.out"
-      });
+      ctx = gsap.context(() => {
+        gsap.from(".gsap-hero-badge", {
+          y: -30,
+          opacity: 0,
+          duration: 0.8,
+          ease: "back.out(1.5)"
+        });
 
-      gsap.from(".gsap-hero-ctas", {
-        y: 20,
-        opacity: 0,
-        duration: 0.8,
-        delay: 0.55,
-        ease: "power3.out"
-      });
+        gsap.from(".gsap-hero-title", {
+          y: 40,
+          opacity: 0,
+          duration: 1,
+          delay: 0.15,
+          ease: "power4.out"
+        });
 
-      gsap.from(".gsap-hero-image", {
-        scale: 0.92,
-        opacity: 0,
-        duration: 1.2,
-        delay: 0.25,
-        ease: "power2.out"
-      });
-    }, heroRef);
+        gsap.from(".gsap-hero-desc", {
+          y: 30,
+          opacity: 0,
+          duration: 1,
+          delay: 0.35,
+          ease: "power3.out"
+        });
 
-    return () => ctx.revert();
+        gsap.from(".gsap-hero-ctas", {
+          y: 20,
+          opacity: 0,
+          duration: 0.8,
+          delay: 0.55,
+          ease: "power3.out"
+        });
+
+        gsap.from(".gsap-hero-image", {
+          scale: 0.92,
+          opacity: 0,
+          duration: 1.2,
+          delay: 0.25,
+          ease: "power2.out"
+        });
+      }, heroRef);
+    });
+
+    return () => {
+      isMounted = false;
+      ctx?.revert();
+    };
   }, []);
 
   const toggleFaq = (index: number) => {
