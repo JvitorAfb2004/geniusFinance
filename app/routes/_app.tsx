@@ -7,7 +7,7 @@ import { MobileBottomNav } from "~/components/MobileBottomNav";
 import {
   PieChart, List, CreditCard, Calendar, Settings, FileBarChart, X,
   Calculator, TrendingUp, Target, Users, Kanban, Layers, ShoppingCart,
-  ShieldCheck, Bug, Clock, Gauge,
+  ShieldCheck, Bug, Clock, Gauge, PanelLeftClose, PanelLeftOpen,
 } from "lucide-react";
 import { cn } from "~/lib/utils";
 
@@ -53,6 +53,17 @@ export default function AppLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem("sidebar_collapsed") === "true";
+    } catch { return false; }
+  });
+
+  const toggleCollapse = () => {
+    const next = !isCollapsed;
+    setIsCollapsed(next);
+    localStorage.setItem("sidebar_collapsed", String(next));
+  };
   const [isSuperadmin, setIsSuperadmin] = useState(false);
   const [showTrialModal, setShowTrialModal] = useState(false);
   const [trialDaysLeft, setTrialDaysLeft] = useState(0);
@@ -154,19 +165,26 @@ export default function AppLayout() {
       )}
 
       <aside className={cn(
-        "fixed inset-y-0 left-0 z-50 w-60 bg-[#0b0f19] text-surface flex flex-col py-6 transform transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 shrink-0",
+        "fixed inset-y-0 left-0 z-50 bg-[#0b0f19] text-surface flex flex-col py-6 transform transition-all duration-300 ease-in-out lg:relative lg:translate-x-0 shrink-0",
+        isCollapsed ? "w-16" : "w-60",
         isSidebarOpen ? "translate-x-0" : "-translate-x-full"
       )}>
-        <div className="px-6 pb-6 border-b border-white/8 mb-5 flex flex-col gap-1">
+        <div className={cn("pb-6 border-b border-white/8 mb-5 flex flex-col gap-1", isCollapsed ? "px-3" : "px-6")}>
           <div className="flex items-center justify-between font-bold text-[1.15rem] tracking-tight text-white">
-            <span>Genius Finance<span className="text-[#3b82f6]">.</span></span>
-            <button className="lg:hidden text-white/60 hover:text-white transition-colors" onClick={() => setIsSidebarOpen(false)}>
-              <X className="w-5 h-5" />
-            </button>
+            {isCollapsed ? (
+              <span className="text-[#3b82f6] text-lg mx-auto">GF</span>
+            ) : (
+              <span>Genius Finance<span className="text-[#3b82f6]">.</span></span>
+            )}
+            {!isCollapsed && (
+              <button className="lg:hidden text-white/60 hover:text-white transition-colors" onClick={() => setIsSidebarOpen(false)}>
+                <X className="w-5 h-5" />
+              </button>
+            )}
           </div>
-          <span className="text-[0.65rem] font-bold text-slate-500 uppercase tracking-wider">by geniusweb.online</span>
-          <ScopeBadge />
-          {isTrial && (
+          {!isCollapsed && <span className="text-[0.65rem] font-bold text-slate-500 uppercase tracking-wider">by geniusweb.online</span>}
+          {!isCollapsed && <ScopeBadge />}
+          {!isCollapsed && isTrial && (
             <div className="mt-2.5 px-3 py-2.5 rounded-xl bg-amber-500/8 border border-amber-500/15">
               <div className="flex items-center gap-1.5">
                 <Clock className="w-3.5 h-3.5 text-amber-400 shrink-0" />
@@ -186,105 +204,119 @@ export default function AppLayout() {
 
         <nav className="flex flex-col flex-1 overflow-y-auto gap-3.5">
           <div>
-            <div className="px-7 py-1 text-[0.62rem] font-bold text-slate-500 uppercase tracking-[0.15em] mb-1.5">Financeiro</div>
+            {!isCollapsed && <div className="px-7 py-1 text-[0.62rem] font-bold text-slate-500 uppercase tracking-[0.15em] mb-1.5">Financeiro</div>}
             <div className="flex flex-col gap-0.5">
               {menuItems.filter(i => ["/dashboard","/transactions","/fixed-monthly","/credit-cards","/dre","/budget","/spending-limits","/sales","/goals","/reports"].includes(i.path)).map(item => (
                 <button key={item.path} onClick={() => navigateTo(item.path)}
+                  title={isCollapsed ? item.label : undefined}
                   className={cn(
-                    "mx-3 px-4 py-2 text-[0.82rem] flex items-center gap-3 cursor-pointer rounded-xl transition-all duration-200 text-left w-[calc(100%-1.5rem)] border-none",
-                    isActive(item.path) 
-                      ? "text-white bg-white/8 font-medium shadow-sm" 
+                    "mx-3 px-4 py-2 text-[0.82rem] flex items-center gap-3 cursor-pointer rounded-xl transition-all duration-200 text-left border-none",
+                    isCollapsed ? "w-[calc(100%-1.5rem)] justify-center px-1" : "w-[calc(100%-1.5rem)]",
+                    isActive(item.path)
+                      ? "text-white bg-white/8 font-medium shadow-sm"
                       : "text-slate-400 hover:text-white hover:bg-white/4"
                   )}>
-                  <item.icon className={cn("w-4 h-4 transition-opacity", isActive(item.path) ? "opacity-100 text-primary" : "opacity-60")} /> 
-                  {item.label}
+                  <item.icon className={cn("w-4 h-4 transition-opacity shrink-0", isActive(item.path) ? "opacity-100 text-primary" : "opacity-60")} />
+                  {!isCollapsed && item.label}
                 </button>
               ))}
             </div>
           </div>
 
           <div>
-            <div className="px-7 py-1 text-[0.62rem] font-bold text-slate-500 uppercase tracking-[0.15em] mb-1.5">Conta</div>
+            {!isCollapsed && <div className="px-7 py-1 text-[0.62rem] font-bold text-slate-500 uppercase tracking-[0.15em] mb-1.5">Conta</div>}
             <button key="/subscription" onClick={() => navigateTo("/subscription")}
+              title={isCollapsed ? "Assinatura" : undefined}
               className={cn(
-                "mx-3 px-4 py-2 text-[0.82rem] flex items-center gap-3 cursor-pointer rounded-xl transition-all duration-200 text-left w-[calc(100%-1.5rem)] border-none",
-                isActive("/subscription") 
-                  ? "text-white bg-white/8 font-medium shadow-sm" 
+                "mx-3 px-4 py-2 text-[0.82rem] flex items-center gap-3 cursor-pointer rounded-xl transition-all duration-200 text-left border-none",
+                isCollapsed ? "w-[calc(100%-1.5rem)] justify-center px-1" : "w-[calc(100%-1.5rem)]",
+                isActive("/subscription")
+                  ? "text-white bg-white/8 font-medium shadow-sm"
                   : "text-slate-400 hover:text-white hover:bg-white/4"
               )}>
-              <ShoppingCart className={cn("w-4 h-4 transition-opacity", isActive("/subscription") ? "opacity-100 text-primary" : "opacity-60")} /> 
-              Assinatura
+              <ShoppingCart className={cn("w-4 h-4 transition-opacity shrink-0", isActive("/subscription") ? "opacity-100 text-primary" : "opacity-60")} />
+              {!isCollapsed && "Assinatura"}
             </button>
           </div>
 
           <div>
-            <div className="px-7 py-1 text-[0.62rem] font-bold text-slate-500 uppercase tracking-[0.15em] mb-1.5">Suporte</div>
+            {!isCollapsed && <div className="px-7 py-1 text-[0.62rem] font-bold text-slate-500 uppercase tracking-[0.15em] mb-1.5">Suporte</div>}
             <button onClick={() => navigateTo("/report-issue")}
+              title={isCollapsed ? "Reportar Problema" : undefined}
               className={cn(
-                "mx-3 px-4 py-2 text-[0.82rem] flex items-center gap-3 cursor-pointer rounded-xl transition-all duration-200 text-left w-[calc(100%-1.5rem)] border-none",
-                isActive("/report-issue") 
-                  ? "text-white bg-white/8 font-medium shadow-sm" 
+                "mx-3 px-4 py-2 text-[0.82rem] flex items-center gap-3 cursor-pointer rounded-xl transition-all duration-200 text-left border-none",
+                isCollapsed ? "w-[calc(100%-1.5rem)] justify-center px-1" : "w-[calc(100%-1.5rem)]",
+                isActive("/report-issue")
+                  ? "text-white bg-white/8 font-medium shadow-sm"
                   : "text-slate-400 hover:text-white hover:bg-white/4"
               )}>
-              <Bug className={cn("w-4 h-4 transition-opacity", isActive("/report-issue") ? "opacity-100 text-primary" : "opacity-60")} /> 
-              Reportar Problema
+              <Bug className={cn("w-4 h-4 transition-opacity shrink-0", isActive("/report-issue") ? "opacity-100 text-primary" : "opacity-60")} />
+              {!isCollapsed && "Reportar Problema"}
             </button>
           </div>
 
           <div>
-            <div className="px-7 py-1 text-[0.62rem] font-bold text-slate-500 uppercase tracking-[0.15em] mb-1.5">Comercial</div>
+            {!isCollapsed && <div className="px-7 py-1 text-[0.62rem] font-bold text-slate-500 uppercase tracking-[0.15em] mb-1.5">Comercial</div>}
             <button onClick={() => navigateTo("/commercial")}
+              title={isCollapsed ? "Leads" : undefined}
               className={cn(
-                "mx-3 px-4 py-2 text-[0.82rem] flex items-center gap-3 cursor-pointer rounded-xl transition-all duration-200 text-left w-[calc(100%-1.5rem)] border-none",
-                isActive("/commercial") 
-                  ? "text-white bg-white/8 font-medium shadow-sm" 
+                "mx-3 px-4 py-2 text-[0.82rem] flex items-center gap-3 cursor-pointer rounded-xl transition-all duration-200 text-left border-none",
+                isCollapsed ? "w-[calc(100%-1.5rem)] justify-center px-1" : "w-[calc(100%-1.5rem)]",
+                isActive("/commercial")
+                  ? "text-white bg-white/8 font-medium shadow-sm"
                   : "text-slate-400 hover:text-white hover:bg-white/4"
               )}>
-              <Users className={cn("w-4 h-4 transition-opacity", isActive("/commercial") ? "opacity-100 text-primary" : "opacity-60")} /> 
-              Leads
+              <Users className={cn("w-4 h-4 transition-opacity shrink-0", isActive("/commercial") ? "opacity-100 text-primary" : "opacity-60")} />
+              {!isCollapsed && "Leads"}
             </button>
           </div>
 
           <div>
-            <div className="px-7 py-1 text-[0.62rem] font-bold text-slate-500 uppercase tracking-[0.15em] mb-1.5">Projetos</div>
+            {!isCollapsed && <div className="px-7 py-1 text-[0.62rem] font-bold text-slate-500 uppercase tracking-[0.15em] mb-1.5">Projetos</div>}
             <div className="flex flex-col gap-0.5">
               <button onClick={() => navigateTo("/projects")}
+                title={isCollapsed ? "Projetos" : undefined}
                 className={cn(
-                  "mx-3 px-4 py-2 text-[0.82rem] flex items-center gap-3 cursor-pointer rounded-xl transition-all duration-200 text-left w-[calc(100%-1.5rem)] border-none",
-                  isActive("/projects") 
-                    ? "text-white bg-white/8 font-medium shadow-sm" 
+                  "mx-3 px-4 py-2 text-[0.82rem] flex items-center gap-3 cursor-pointer rounded-xl transition-all duration-200 text-left border-none",
+                  isCollapsed ? "w-[calc(100%-1.5rem)] justify-center px-1" : "w-[calc(100%-1.5rem)]",
+                  isActive("/projects")
+                    ? "text-white bg-white/8 font-medium shadow-sm"
                     : "text-slate-400 hover:text-white hover:bg-white/4"
                 )}>
-                <Kanban className={cn("w-4 h-4 transition-opacity", isActive("/projects") ? "opacity-100 text-primary" : "opacity-60")} /> 
-                Projetos
+                <Kanban className={cn("w-4 h-4 transition-opacity shrink-0", isActive("/projects") ? "opacity-100 text-primary" : "opacity-60")} />
+                {!isCollapsed && "Projetos"}
               </button>
               <button onClick={() => navigateTo("/service-types")}
+                title={isCollapsed ? "Tipos de Serviço" : undefined}
                 className={cn(
-                  "mx-3 px-4 py-2 text-[0.82rem] flex items-center gap-3 cursor-pointer rounded-xl transition-all duration-200 text-left w-[calc(100%-1.5rem)] border-none",
-                  isActive("/service-types") 
-                    ? "text-white bg-white/8 font-medium shadow-sm" 
+                  "mx-3 px-4 py-2 text-[0.82rem] flex items-center gap-3 cursor-pointer rounded-xl transition-all duration-200 text-left border-none",
+                  isCollapsed ? "w-[calc(100%-1.5rem)] justify-center px-1" : "w-[calc(100%-1.5rem)]",
+                  isActive("/service-types")
+                    ? "text-white bg-white/8 font-medium shadow-sm"
                     : "text-slate-400 hover:text-white hover:bg-white/4"
                 )}>
-                <Layers className={cn("w-4 h-4 transition-opacity", isActive("/service-types") ? "opacity-100 text-primary" : "opacity-60")} /> 
-                Tipos de Serviço
+                <Layers className={cn("w-4 h-4 transition-opacity shrink-0", isActive("/service-types") ? "opacity-100 text-primary" : "opacity-60")} />
+                {!isCollapsed && "Tipos de Serviço"}
               </button>
             </div>
           </div>
 
           {isSuperadmin && (
             <div>
-              <div className="px-7 py-1 text-[0.62rem] font-bold text-slate-500 uppercase tracking-[0.15em] mb-1.5">Admin</div>
+              {!isCollapsed && <div className="px-7 py-1 text-[0.62rem] font-bold text-slate-500 uppercase tracking-[0.15em] mb-1.5">Admin</div>}
               <div className="flex flex-col gap-0.5">
                 {adminItems.map(item => (
                   <button key={item.path} onClick={() => navigateTo(item.path)}
+                    title={isCollapsed ? item.label : undefined}
                     className={cn(
-                      "mx-3 px-4 py-2 text-[0.82rem] flex items-center gap-3 cursor-pointer rounded-xl transition-all duration-200 text-left w-[calc(100%-1.5rem)] border-none",
-                      isActive(item.path) 
-                        ? "text-white bg-white/8 font-medium shadow-sm" 
+                      "mx-3 px-4 py-2 text-[0.82rem] flex items-center gap-3 cursor-pointer rounded-xl transition-all duration-200 text-left border-none",
+                      isCollapsed ? "w-[calc(100%-1.5rem)] justify-center px-1" : "w-[calc(100%-1.5rem)]",
+                      isActive(item.path)
+                        ? "text-white bg-white/8 font-medium shadow-sm"
                         : "text-slate-400 hover:text-white hover:bg-white/4"
                     )}>
-                    <item.icon className={cn("w-4 h-4 transition-opacity", isActive(item.path) ? "opacity-100 text-primary" : "opacity-60")} /> 
-                    {item.label}
+                    <item.icon className={cn("w-4 h-4 transition-opacity shrink-0", isActive(item.path) ? "opacity-100 text-primary" : "opacity-60")} />
+                    {!isCollapsed && item.label}
                   </button>
                 ))}
               </div>
@@ -294,15 +326,17 @@ export default function AppLayout() {
 
         <div className="mt-auto pt-4 flex flex-col gap-1 border-t border-white/6">
           <button onClick={() => navigateTo("/settings")}
+            title={isCollapsed ? "Configurações" : undefined}
             className={cn(
-              "mx-3 px-4 py-2.5 text-[0.85rem] flex items-center gap-3 cursor-pointer rounded-xl transition-all duration-200 text-left w-[calc(100%-1.5rem)] border-none",
-              isActive("/settings") 
-                ? "text-white bg-white/8 font-medium" 
+              "mx-3 px-4 py-2.5 text-[0.85rem] flex items-center gap-3 cursor-pointer rounded-xl transition-all duration-200 text-left border-none",
+              isCollapsed ? "w-[calc(100%-1.5rem)] justify-center px-1" : "w-[calc(100%-1.5rem)]",
+              isActive("/settings")
+                ? "text-white bg-white/8 font-medium"
                 : "text-slate-400 hover:text-white hover:bg-white/4"
             )}>
-            <Settings className={cn("w-4 h-4 transition-opacity", isActive("/settings") ? "opacity-100 text-primary" : "opacity-60")} /> 
-            Configurações
-            {pendingInvites.length > 0 && (
+            <Settings className={cn("w-4 h-4 transition-opacity shrink-0", isActive("/settings") ? "opacity-100 text-primary" : "opacity-60")} />
+            {!isCollapsed && "Configurações"}
+            {!isCollapsed && pendingInvites.length > 0 && (
               <span className="ml-auto bg-red-500 text-white text-[0.62rem] font-bold px-1.5 py-0.5 rounded-full min-w-[1.25rem] text-center leading-none">
                 {pendingInvites.length}
               </span>
@@ -310,10 +344,21 @@ export default function AppLayout() {
           </button>
           <button
             onClick={() => { signOut(); setIsSidebarOpen(false); localStorage.removeItem(TERMS_KEY); }}
-            className="mx-3 px-4 py-2.5 text-[0.85rem] flex items-center gap-3 cursor-pointer rounded-xl transition-all duration-200 text-left border-none text-red-400 hover:bg-white/4 hover:text-red-300 w-[calc(100%-1.5rem)]"
+            title={isCollapsed ? "Sair" : undefined}
+            className={cn(
+              "mx-3 px-4 py-2.5 text-[0.85rem] flex items-center gap-3 cursor-pointer rounded-xl transition-all duration-200 text-left border-none text-red-400 hover:bg-white/4 hover:text-red-300",
+              isCollapsed ? "w-[calc(100%-1.5rem)] justify-center px-1" : "w-[calc(100%-1.5rem)]"
+            )}
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 opacity-60"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-            Sair
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 opacity-60 shrink-0"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+            {!isCollapsed && "Sair"}
+          </button>
+          <button
+            onClick={toggleCollapse}
+            className="hidden lg:flex mx-3 px-4 py-2 text-[0.85rem] items-center gap-3 cursor-pointer rounded-xl transition-all duration-200 text-left border-none text-slate-500 hover:text-white hover:bg-white/4 w-[calc(100%-1.5rem)] justify-center"
+            title={isCollapsed ? "Expandir menu" : "Minimizar menu"}
+          >
+            {isCollapsed ? <PanelLeftOpen className="w-4 h-4" /> : <PanelLeftClose className="w-4 h-4" />}
           </button>
         </div>
       </aside>

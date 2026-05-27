@@ -222,6 +222,12 @@ export function TransactionModal({
     setShowCalculator(false);
   };
 
+  const handleCalcUseCurrentValue = () => {
+    if (!amountStr) return;
+    const stripped = amountStr.replace(/\./g, '');
+    setCalculatorState(createCalculatorState(stripped));
+  };
+
   const toggleCalculator = () => {
     const nextOpen = !showCalculator;
     setShowCalculator(nextOpen);
@@ -642,6 +648,15 @@ export function TransactionModal({
                       >
                         Usar resultado
                       </button>
+                      {initialData && amountStr && (
+                        <button
+                          type="button"
+                          onClick={handleCalcUseCurrentValue}
+                          className="col-span-4 mt-0.5 py-2 text-xs font-semibold rounded-lg cursor-pointer transition-colors bg-blue-50 text-blue-700 hover:bg-blue-100"
+                        >
+                          Puxar valor atual (R$ {amountStr})
+                        </button>
+                      )}
                     </div>
                   </div>
                 )}

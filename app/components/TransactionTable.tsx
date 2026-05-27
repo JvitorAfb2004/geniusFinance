@@ -23,6 +23,7 @@ export function TransactionTable({
   const [filterType, setFilterType] = useState<'ALL' | 'INCOME' | 'EXPENSE' | 'CREDIT_CARD'>('ALL');
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilterId, setCategoryFilterId] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'ALL' | 'PAID' | 'PENDING'>('ALL');
   const [confirmDelete, setConfirmDelete] = useState<{ tx: Transaction; future: boolean } | null>(null);
 
   const visibleTransactions = transactions
@@ -31,6 +32,7 @@ export function TransactionTable({
     .filter(t => forceFilter ? t.type === forceFilter : (filterType === 'ALL' || t.type === filterType))
     .filter(t => fixedOnly ? t.isFixed : true)
     .filter(t => categoryFilterId ? t.categoryId === categoryFilterId : true)
+    .filter(t => statusFilter === 'ALL' ? true : t.status === statusFilter)
     .filter(t => t.title.toLowerCase().includes(searchTerm.toLowerCase()))
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
@@ -59,11 +61,11 @@ export function TransactionTable({
 
   return (
     <div className="bg-white rounded-3xl border border-slate-100 flex flex-col flex-1 min-h-[300px] shadow-[0_1px_2px_rgba(0,0,0,0.02),0_4px_16px_rgba(0,0,0,0.02)]">
-      <div className="px-5 py-4 border-b border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between z-10 gap-3">
-        {!hideHeaderTitle && <span className="text-slate-700 font-bold text-[0.85rem] tracking-tight shrink-0">Transações Recentes</span>}
+      <div className="px-5 py-4 border-b border-slate-100 flex flex-row items-center justify-between z-10 gap-3">
+        {!hideHeaderTitle && <span className="text-slate-700 font-bold text-[0.85rem] tracking-tight shrink-0">Transações</span>}
 
-        <div className="flex items-center gap-2 w-full sm:w-auto sm:ml-auto flex-wrap">
-          <div className="relative flex-1 sm:flex-none sm:w-40 min-w-[120px]">
+        <div className="flex items-center gap-2 w-full sm:w-auto sm:ml-auto">
+          <div className="relative flex-1 sm:flex-none sm:w-32 min-w-[100px]">
              <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
              <input
                type="text"
@@ -87,6 +89,15 @@ export function TransactionTable({
               <option value="CREDIT_CARD">Cartão</option>
             </select>
           )}
+          <select
+            className="text-[0.72rem] border-slate-200 rounded-2xl focus:border-primary px-2 py-1.5 border bg-white outline-none font-medium text-slate-600 cursor-pointer shrink-0 transition-colors"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value as 'ALL' | 'PAID' | 'PENDING')}
+          >
+            <option value="ALL">Status</option>
+            <option value="PAID">Pago</option>
+            <option value="PENDING">Pendente</option>
+          </select>
           <select
             className="text-[0.72rem] border-slate-200 rounded-2xl focus:border-primary px-2 py-1.5 border bg-white outline-none font-medium text-slate-600 cursor-pointer shrink-0 max-w-[110px] transition-colors"
             value={categoryFilterId}
