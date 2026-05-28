@@ -23,6 +23,9 @@ type Pages = {
   "/transactions": {
     params: {};
   };
+  "/cash-calendar": {
+    params: {};
+  };
   "/fixed-monthly": {
     params: {};
   };
@@ -117,7 +120,7 @@ type Pages = {
 type RouteFiles = {
   "root.tsx": {
     id: "root";
-    page: "/" | "/login" | "/dashboard" | "/transactions" | "/fixed-monthly" | "/credit-cards" | "/dre" | "/budget" | "/spending-limits" | "/sales" | "/goals" | "/commercial" | "/projects" | "/service-types" | "/reports" | "/subscription" | "/settings" | "/report-issue" | "/admin/plans" | "/admin/subscriptions" | "/admin/reports" | "/api/sub/status" | "/api/sub/pix-pending" | "/api/sub/create" | "/api/sub/cancel" | "/api/auth/welcome" | "/api/reports" | "/api/ai/chat" | "/api/webhooks/abacate" | "/api/admin/plans" | "/api/admin/subscriptions" | "/api/admin/reports" | "/api/admin/members/:uid/permissions";
+    page: "/" | "/login" | "/dashboard" | "/transactions" | "/cash-calendar" | "/fixed-monthly" | "/credit-cards" | "/dre" | "/budget" | "/spending-limits" | "/sales" | "/goals" | "/commercial" | "/projects" | "/service-types" | "/reports" | "/subscription" | "/settings" | "/report-issue" | "/admin/plans" | "/admin/subscriptions" | "/admin/reports" | "/api/sub/status" | "/api/sub/pix-pending" | "/api/sub/create" | "/api/sub/cancel" | "/api/auth/welcome" | "/api/reports" | "/api/ai/chat" | "/api/webhooks/abacate" | "/api/admin/plans" | "/api/admin/subscriptions" | "/api/admin/reports" | "/api/admin/members/:uid/permissions";
   };
   "routes/_index.tsx": {
     id: "routes/_index";
@@ -129,7 +132,7 @@ type RouteFiles = {
   };
   "routes/_app.tsx": {
     id: "routes/_app";
-    page: "/dashboard" | "/transactions" | "/fixed-monthly" | "/credit-cards" | "/dre" | "/budget" | "/spending-limits" | "/sales" | "/goals" | "/commercial" | "/projects" | "/service-types" | "/reports" | "/subscription" | "/settings" | "/report-issue" | "/admin/plans" | "/admin/subscriptions" | "/admin/reports";
+    page: "/dashboard" | "/transactions" | "/cash-calendar" | "/fixed-monthly" | "/credit-cards" | "/dre" | "/budget" | "/spending-limits" | "/sales" | "/goals" | "/commercial" | "/projects" | "/service-types" | "/reports" | "/subscription" | "/settings" | "/report-issue" | "/admin/plans" | "/admin/subscriptions" | "/admin/reports";
   };
   "routes/_app.dashboard.tsx": {
     id: "routes/_app.dashboard";
@@ -138,6 +141,10 @@ type RouteFiles = {
   "routes/_app.transactions.tsx": {
     id: "routes/_app.transactions";
     page: "/transactions";
+  };
+  "routes/_app.cash-calendar.tsx": {
+    id: "routes/_app.cash-calendar";
+    page: "/cash-calendar";
   };
   "routes/_app.fixed-monthly.tsx": {
     id: "routes/_app.fixed-monthly";
@@ -264,6 +271,7 @@ type RouteModules = {
   "routes/_app": typeof import("./app/routes/_app.tsx");
   "routes/_app.dashboard": typeof import("./app/routes/_app.dashboard.tsx");
   "routes/_app.transactions": typeof import("./app/routes/_app.transactions.tsx");
+  "routes/_app.cash-calendar": typeof import("./app/routes/_app.cash-calendar.tsx");
   "routes/_app.fixed-monthly": typeof import("./app/routes/_app.fixed-monthly.tsx");
   "routes/_app.credit-cards": typeof import("./app/routes/_app.credit-cards.tsx");
   "routes/_app.dre": typeof import("./app/routes/_app.dre.tsx");

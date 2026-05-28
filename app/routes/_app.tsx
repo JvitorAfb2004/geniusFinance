@@ -122,6 +122,7 @@ export default function AppLayout() {
   const menuItems: MenuItem[] = [
     { path: "/dashboard", label: "Dashboard", icon: PieChart },
     { path: "/transactions", label: "Entradas / Saídas", icon: List },
+    { path: "/cash-calendar", label: "Calendário", icon: Calendar },
     { path: "/fixed-monthly", label: "Fixos Mensais", icon: Calendar },
     { path: "/credit-cards", label: "Cartões de Crédito", icon: CreditCard },
     { path: "/dre", label: "DRE", icon: Calculator },
@@ -206,7 +207,7 @@ export default function AppLayout() {
           <div>
             {!isCollapsed && <div className="px-7 py-1 text-[0.62rem] font-bold text-slate-500 uppercase tracking-[0.15em] mb-1.5">Financeiro</div>}
             <div className="flex flex-col gap-0.5">
-              {menuItems.filter(i => ["/dashboard","/transactions","/fixed-monthly","/credit-cards","/dre","/budget","/spending-limits","/sales","/goals","/reports"].includes(i.path)).map(item => (
+              {menuItems.filter(i => ["/dashboard","/transactions","/cash-calendar","/fixed-monthly","/credit-cards","/dre","/budget","/spending-limits","/sales","/goals","/reports"].includes(i.path)).map(item => (
                 <button key={item.path} onClick={() => navigateTo(item.path)}
                   title={isCollapsed ? item.label : undefined}
                   className={cn(

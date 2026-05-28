@@ -8,6 +8,7 @@ export default [
     children: [
       { file: "routes/_app.dashboard.tsx", path: "dashboard" },
       { file: "routes/_app.transactions.tsx", path: "transactions" },
+      { file: "routes/_app.cash-calendar.tsx", path: "cash-calendar" },
       { file: "routes/_app.fixed-monthly.tsx", path: "fixed-monthly" },
       { file: "routes/_app.credit-cards.tsx", path: "credit-cards" },
       { file: "routes/_app.dre.tsx", path: "dre" },
