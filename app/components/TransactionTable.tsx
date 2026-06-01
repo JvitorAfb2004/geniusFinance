@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useFinance } from '../hooks/useFinance';
-import { format, isSameMonth, parseISO } from 'date-fns';
+import { addMonths, format, isSameMonth, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { formatCurrency, cn } from '../lib/utils';
-import { Trash2, Pencil, Search } from 'lucide-react';
+import { Trash2, Pencil, Search, Forward } from 'lucide-react';
 import { TransactionModal } from './TransactionModal';
 import ConfirmModal from './ConfirmModal';
 import { Transaction } from '../types';
@@ -17,7 +17,7 @@ export function TransactionTable({
   forceFilter?: 'ALL' | 'INCOME' | 'EXPENSE' | 'CREDIT_CARD';
   fixedOnly?: boolean;
 }) {
-  const { transactions, activeContext, selectedMonth, toggleStatus, deleteTransaction, categories, tags } = useFinance();
+  const { transactions, activeContext, selectedMonth, toggleStatus, deleteTransaction, updateTransaction, categories, tags } = useFinance();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTx, setEditingTx] = useState<Transaction | undefined>(undefined);
   const [filterType, setFilterType] = useState<'ALL' | 'INCOME' | 'EXPENSE' | 'CREDIT_CARD'>('ALL');
@@ -39,6 +39,13 @@ export function TransactionTable({
   const handleEdit = (tx: Transaction) => {
     setEditingTx(tx);
     setIsModalOpen(true);
+  };
+
+  const handleMoveToNextMonth = (tx: Transaction) => {
+    const currentDate = parseISO(tx.date);
+    const nextMonthDate = addMonths(currentDate, 1);
+    const newDate = format(nextMonthDate, 'yyyy-MM-dd');
+    updateTransaction(tx.id, { date: newDate });
   };
 
   const getCategoryName = (catId?: string) => {
@@ -192,7 +199,14 @@ export function TransactionTable({
                   </button>
                 </td>
                 <td className="py-2.5 px-4 border-b border-slate-100 text-center whitespace-nowrap">
-                  <button 
+                  <button
+                    onClick={() => handleMoveToNextMonth(tx)}
+                    title="Passar para o próximo mês"
+                    className="text-slate-400 hover:text-emerald-600 transition-colors p-1 bg-transparent border-none cursor-pointer"
+                  >
+                    <Forward className="w-4 h-4" />
+                  </button>
+                  <button
                     onClick={() => handleEdit(tx)}
                     className="text-slate-500 hover:text-[#3b82f6] transition-colors p-1 bg-transparent border-none cursor-pointer"
                   >
@@ -264,6 +278,9 @@ export function TransactionTable({
                       )}
                     >
                       {tx.status === 'PAID' ? 'Pago' : 'Pendente'}
+                    </button>
+                    <button onClick={() => handleMoveToNextMonth(tx)} title="Passar para o próximo mês" className="text-slate-400 hover:text-emerald-600 p-1 bg-transparent border-none cursor-pointer">
+                      <Forward className="w-3.5 h-3.5" />
                     </button>
                     <button onClick={() => handleEdit(tx)} className="text-slate-400 hover:text-[#3b82f6] p-1 bg-transparent border-none cursor-pointer">
                       <Pencil className="w-3.5 h-3.5" />

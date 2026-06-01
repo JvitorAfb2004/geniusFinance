@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useFinance } from '../hooks/useFinance';
-import { Plus, Trash2, X, Check } from 'lucide-react';
+import { Plus, Trash2, X, Check, Pencil } from 'lucide-react';
 import type { FinancialGoal } from '../types';
 import { motion } from 'motion/react';
 import { AnimatedNumber } from './AnimatedNumber';
@@ -11,16 +11,42 @@ const CAT_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4
 export default function GoalsView() {
   const { goals, addGoal, updateGoal, deleteGoal } = useFinance();
   const [showForm, setShowForm] = useState(false);
+  const [editingGoalId, setEditingGoalId] = useState<string | null>(null);
   const [form, setForm] = useState({ name: '', targetAmount: '', currentAmount: '', deadline: '', category: 'SAVINGS' as FinancialGoal['category'], color: '#3b82f6' });
 
-  async function handleAdd() {
-    if (!form.name || !form.targetAmount || !form.deadline) return;
-    await addGoal({
-      name: form.name, targetAmount: parseFloat(form.targetAmount), currentAmount: parseFloat(form.currentAmount) || 0,
-      deadline: form.deadline, category: form.category, color: form.color,
-    });
+  function resetForm() {
     setForm({ name: '', targetAmount: '', currentAmount: '', deadline: '', category: 'SAVINGS', color: '#3b82f6' });
+    setEditingGoalId(null);
     setShowForm(false);
+  }
+
+  function startEdit(goal: FinancialGoal) {
+    setForm({
+      name: goal.name,
+      targetAmount: goal.targetAmount.toString(),
+      currentAmount: goal.currentAmount.toString(),
+      deadline: goal.deadline,
+      category: goal.category,
+      color: goal.color,
+    });
+    setEditingGoalId(goal.id);
+    setShowForm(true);
+  }
+
+  async function handleSubmit() {
+    if (!form.name || !form.targetAmount || !form.deadline) return;
+    if (editingGoalId) {
+      await updateGoal(editingGoalId, {
+        name: form.name, targetAmount: parseFloat(form.targetAmount), currentAmount: parseFloat(form.currentAmount) || 0,
+        deadline: form.deadline, category: form.category, color: form.color,
+      });
+    } else {
+      await addGoal({
+        name: form.name, targetAmount: parseFloat(form.targetAmount), currentAmount: parseFloat(form.currentAmount) || 0,
+        deadline: form.deadline, category: form.category, color: form.color,
+      });
+    }
+    resetForm();
   }
 
   return (
@@ -30,13 +56,14 @@ export default function GoalsView() {
           <h2 className="text-lg font-bold text-slate-800">Metas Financeiras</h2>
           <p className="text-sm text-slate-500">Acompanhe seus objetivos de economia e investimento.</p>
         </div>
-        <button onClick={() => setShowForm(!showForm)} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer flex items-center gap-2 text-sm font-medium">
+        <button onClick={() => { resetForm(); setShowForm(!showForm); }} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer flex items-center gap-2 text-sm font-medium">
           <Plus className="w-4 h-4" /> Nova Meta
         </button>
       </div>
 
       {showForm && (
         <div className="bg-white rounded-2xl border border-slate-100 shadow-[0_1px_2px_rgba(0,0,0,0.02),0_4px_16px_rgba(0,0,0,0.02)] p-5 space-y-3">
+          <h3 className="text-base font-bold text-slate-800">{editingGoalId ? 'Editar Meta' : 'Nova Meta'}</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <input placeholder="Nome da meta" value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} className="border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-400" />
             <input type="number" placeholder="Valor alvo (R$)" value={form.targetAmount} onChange={(e) => setForm((f) => ({ ...f, targetAmount: e.target.value }))} className="border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-400" />
@@ -48,8 +75,8 @@ export default function GoalsView() {
               {Object.entries(CAT_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
             </select>
             <div className="flex gap-1.5">{CAT_COLORS.map((c) => <button key={c} onClick={() => setForm((f) => ({ ...f, color: c }))} className={`w-6 h-6 rounded-full border-2 cursor-pointer ${form.color === c ? 'border-slate-800 scale-125' : 'border-transparent'}`} style={{ backgroundColor: c }} />)}</div>
-            <button onClick={handleAdd} className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 cursor-pointer text-sm font-medium"><Check className="w-4 h-4" /></button>
-            <button onClick={() => setShowForm(false)} className="text-slate-400 hover:text-slate-600 cursor-pointer"><X className="w-5 h-5" /></button>
+            <button onClick={handleSubmit} className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 cursor-pointer text-sm font-medium"><Check className="w-4 h-4" /></button>
+            <button onClick={resetForm} className="text-slate-400 hover:text-slate-600 cursor-pointer"><X className="w-5 h-5" /></button>
           </div>
         </div>
       )}
@@ -73,7 +100,10 @@ export default function GoalsView() {
                   </div>
                   <span className="text-xs text-slate-500">{CAT_LABELS[g.category]} • {daysLeft} dias restantes</span>
                 </div>
-                <button onClick={() => deleteGoal(g.id)} className="text-slate-300 hover:text-red-500 cursor-pointer"><Trash2 className="w-4 h-4" /></button>
+                <div className="flex items-center gap-1">
+                  <button onClick={() => startEdit(g)} className="text-slate-300 hover:text-blue-500 cursor-pointer"><Pencil className="w-4 h-4" /></button>
+                  <button onClick={() => deleteGoal(g.id)} className="text-slate-300 hover:text-red-500 cursor-pointer"><Trash2 className="w-4 h-4" /></button>
+                </div>
               </div>
               <div>
                 <div className="flex justify-between text-sm mb-1">

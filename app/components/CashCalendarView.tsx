@@ -14,7 +14,7 @@ import {
   startOfWeek,
 } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { ArrowDownToLine, ArrowUpToLine, CalendarDays } from 'lucide-react';
+import { CalendarDays } from 'lucide-react';
 
 const WEEK_DAYS = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
 
@@ -27,17 +27,6 @@ export function CashCalendarView() {
       isSameMonth(parseISO(tx.date), selectedMonth)
     );
   }, [transactions, activeContext, selectedMonth]);
-
-  const totals = useMemo(() => {
-    const income = monthTransactions
-      .filter((tx) => tx.type === 'INCOME')
-      .reduce((sum, tx) => sum + tx.amount, 0);
-    const outcome = monthTransactions
-      .filter((tx) => tx.type !== 'INCOME')
-      .reduce((sum, tx) => sum + tx.amount, 0);
-
-    return { income, outcome };
-  }, [monthTransactions]);
 
   const calendarDays = useMemo(() => {
     const start = startOfWeek(startOfMonth(selectedMonth), { weekStartsOn: 1 });
@@ -77,17 +66,11 @@ export function CashCalendarView() {
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <SummaryCard icon={ArrowUpToLine} label="Entradas do mês" value={totals.income} tone="emerald" />
-        <SummaryCard icon={ArrowDownToLine} label="Saídas do mês" value={totals.outcome} tone="rose" />
-      </div>
-
       <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_320px] gap-5">
         <div className="bg-white rounded-2xl border border-slate-100 shadow-[0_1px_2px_rgba(0,0,0,0.02),0_4px_16px_rgba(0,0,0,0.02)] overflow-hidden">
           <div className="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <div>
-              <h2 className="text-xl font-bold font-sans text-gray-900">Calendário financeiro</h2>
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-sm text-gray-500">
                 Entradas e saídas por dia em {format(selectedMonth, 'MMMM yyyy', { locale: ptBR })}.
               </p>
             </div>
@@ -196,35 +179,6 @@ export function CashCalendarView() {
             </div>
           )}
         </aside>
-      </div>
-    </div>
-  );
-}
-
-function SummaryCard({
-  icon: Icon,
-  label,
-  value,
-  tone,
-}: {
-  icon: React.ElementType;
-  label: string;
-  value: number;
-  tone: 'emerald' | 'rose';
-}) {
-  const toneClasses = {
-    emerald: 'bg-emerald-50 text-emerald-600',
-    rose: 'bg-rose-50 text-rose-600',
-  };
-
-  return (
-    <div className="bg-white rounded-2xl border border-slate-100 p-5 flex items-center gap-4 shadow-[0_1px_2px_rgba(0,0,0,0.02),0_4px_16px_rgba(0,0,0,0.02)]">
-      <div className={cn("p-3 rounded-xl shrink-0", toneClasses[tone])}>
-        <Icon className="w-5 h-5" />
-      </div>
-      <div className="min-w-0">
-        <p className="text-sm text-gray-500 font-medium">{label}</p>
-        <p className="text-xl font-bold text-gray-900 font-mono truncate">{formatCurrency(value)}</p>
       </div>
     </div>
   );
