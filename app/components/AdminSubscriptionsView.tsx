@@ -1,0 +1,211 @@
+import React, { useState, useEffect } from 'react';
+import { apiFetch } from '../lib/api';
+import { formatPriceFromCents } from '../lib/subscriptionService';
+import { Plus, X, Trash2 } from 'lucide-react';
+
+interface SubEntry {
+  id: string;
+  userEmail?: string;
+  status: string;
+  paymentMethod?: string;
+  totalAmount?: number;
+  currentPeriodEnd?: string;
+  items?: { planId: string; quantity: number; unitPrice: number }[];
+}
+
+interface Plan {
+  id: string;
+  name: string;
+  basePrice: number;
+  type: string;
+}
+
+export function AdminSubscriptionsView() {
+  const [subs, setSubs] = useState<SubEntry[]>([]);
+  const [plans, setPlans] = useState<Plan[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [showAssign, setShowAssign] = useState(false);
+  const [form, setForm] = useState({ targetEmail: '', planId: '', durationMonths: 1, indefinite: false });
+  const [assigning, setAssigning] = useState(false);
+
+  const load = async () => {
+    try {
+      const [subsRes, plansRes] = await Promise.all([
+        apiFetch('/api/admin/subscriptions'),
+        apiFetch('/api/admin/plans'),
+      ]);
+      setSubs(subsRes.data || []);
+      setPlans(plansRes.data || []);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { load(); }, []);
+
+  const handleAssign = async () => {
+    if (!form.targetEmail || !form.planId) return;
+    setAssigning(true);
+    setError('');
+    try {
+      await apiFetch('/api/admin/subscriptions', {
+        method: 'POST',
+        body: JSON.stringify({ ...form, action: 'assign' }),
+      });
+      setShowAssign(false);
+      setForm({ targetEmail: '', planId: '', durationMonths: 1, indefinite: false });
+      await load();
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setAssigning(false);
+    }
+  };
+
+  const handleRevoke = async (email: string) => {
+    if (!confirm(`Revogar assinatura de ${email}?`)) return;
+    try {
+      await apiFetch('/api/admin/subscriptions', {
+        method: 'POST',
+        body: JSON.stringify({ targetEmail: email, action: 'revoke' }),
+      });
+      await load();
+    } catch (err: any) {
+      setError(err.message);
+    }
+  };
+
+  const statusBadge = (status: string) => {
+    const map: Record<string, string> = {
+      active: 'bg-green-100 text-green-700',
+      trial: 'bg-amber-100 text-amber-700',
+      past_due: 'bg-red-100 text-red-700',
+      cancelled: 'bg-gray-100 text-gray-500',
+      expired: 'bg-gray-100 text-gray-500',
+      pending: 'bg-blue-100 text-blue-700',
+    };
+    return `text-xs font-semibold uppercase px-2 py-0.5 rounded ${map[status] || 'bg-gray-100 text-gray-500'}`;
+  };
+
+  if (loading) return <div className="p-6 text-center text-text-secondary">Carregando assinaturas...</div>;
+
+  return (
+    <div className="max-w-5xl mx-auto flex flex-col gap-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-xl font-bold text-gray-900">Gestão de Assinaturas</h2>
+          <p className="text-sm text-gray-500">Atribua e gerencie assinaturas dos usuários.</p>
+        </div>
+        <button onClick={() => setShowAssign(true)}
+          className="flex items-center gap-1.5 text-sm font-medium bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-hover cursor-pointer transition-colors">
+          <Plus className="w-4 h-4" /> Atribuir Plano
+        </button>
+      </div>
+
+      {error && <p className="text-red-500 text-sm">{error}</p>}
+
+      <div className="clay overflow-hidden">
+        <table className="w-full text-sm">
+          <thead className="bg-gray-50 text-left">
+            <tr>
+              <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Email</th>
+              <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Status</th>
+              <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Método</th>
+              <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Valor</th>
+              <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Expira</th>
+              <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {subs.length === 0 ? (
+              <tr><td colSpan={6} className="px-4 py-6 text-center text-gray-400">Nenhuma assinatura encontrada.</td></tr>
+            ) : subs.map(s => (
+              <tr key={s.id} className="border-t border-gray-50 hover:bg-gray-50/50">
+                <td className="px-4 py-2.5 text-gray-700 text-xs font-mono">{s.userEmail || '—'}</td>
+                <td className="px-4 py-2.5"><span className={statusBadge(s.status)}>{s.status}</span></td>
+                <td className="px-4 py-2.5 text-gray-500 text-xs">{s.paymentMethod || 'manual'}</td>
+                <td className="px-4 py-2.5 text-gray-700">{formatPriceFromCents(s.totalAmount)}</td>
+                <td className="px-4 py-2.5 text-gray-500 text-xs">
+                  {s.currentPeriodEnd ? new Date(s.currentPeriodEnd).toLocaleDateString('pt-BR') : '-'}
+                </td>
+                <td className="px-4 py-2.5">
+                  {s.status !== 'cancelled' && s.userEmail && (
+                    <button onClick={() => handleRevoke(s.userEmail!)}
+                      className="text-red-500 hover:text-red-700 text-xs font-medium cursor-pointer flex items-center gap-1">
+                      <Trash2 className="w-3 h-3" /> Revogar
+                    </button>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {showAssign && (
+        <div className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh]">
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowAssign(false)} />
+          <div className="relative clay shadow-xl w-full max-w-md mx-4">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+              <h3 className="text-lg font-bold text-gray-900">Atribuir Assinatura</h3>
+              <button onClick={() => setShowAssign(false)} className="p-1 text-gray-400 hover:text-gray-600 cursor-pointer">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="px-6 py-4 space-y-4">
+              <div>
+                <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider">Email do usuário</label>
+                <input type="email" placeholder="usuario@email.com" value={form.targetEmail}
+                  onChange={e => setForm({ ...form, targetEmail: e.target.value })}
+                  className="w-full mt-1 px-3 py-2 border border-border rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors" />
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider">Plano</label>
+                <select value={form.planId}
+                  onChange={e => setForm({ ...form, planId: e.target.value })}
+                  className="w-full mt-1 px-3 py-2 border border-border rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary cursor-pointer bg-white">
+                  <option value="">Selecione um plano</option>
+                  {plans.map(p => (
+                    <option key={p.id} value={p.id}>{p.name} — {formatPriceFromCents(p.basePrice)}</option>
+                  ))}
+                </select>
+              </div>
+
+              {!form.indefinite && (
+                <div>
+                  <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider">Duração (meses)</label>
+                  <input type="number" min={1} value={form.durationMonths}
+                    onChange={e => setForm({ ...form, durationMonths: Number(e.target.value) })}
+                    className="w-full mt-1 px-3 py-2 border border-border rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
+                </div>
+              )}
+
+              <label className="flex items-center gap-2 text-sm cursor-pointer">
+                <input type="checkbox" checked={form.indefinite}
+                  onChange={e => setForm({ ...form, indefinite: e.target.checked })}
+                  className="w-4 h-4 rounded border-gray-300 cursor-pointer" />
+                Indeterminado (sem expiração)
+              </label>
+            </div>
+
+            <div className="flex justify-end gap-3 px-6 py-4 border-t border-gray-100">
+              <button onClick={() => setShowAssign(false)}
+                className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 cursor-pointer">
+                Cancelar
+              </button>
+              <button onClick={handleAssign} disabled={assigning || !form.targetEmail || !form.planId}
+                className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 cursor-pointer transition-colors">
+                {assigning ? 'Atribuindo...' : 'Atribuir'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

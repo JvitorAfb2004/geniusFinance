@@ -1,0 +1,937 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    function isSignedIn() { return request.auth != null; }
+
+    // Health check — usado pelo testConnection() no boot do app
+    match /test/{docId} {
+      allow read: if isSignedIn();
+    }
+
+    // ── Account membership helpers ──
+
+    function isAccountMember(accountId) {
+      return isSignedIn() &&
+        exists(/databases/$(database)/documents/accounts/$(accountId)/members/$(request.auth.uid));
+    }
+
+    function accountMemberData(accountId) {
+      return get(/databases/$(database)/documents/accounts/$(accountId)/members/$(request.auth.uid)).data;
+    }
+
+    function roleInAccount(accountId) {
+      return isAccountMember(accountId)
+        ? accountMemberData(accountId).role
+        : '';
+    }
+
+    function isAccountOwnerOrAdmin(accountId) {
+      let role = roleInAccount(accountId);
+      return role == 'owner' || role == 'admin';
+    }
+
+    function isAccountOwner(accountId) {
+      return roleInAccount(accountId) == 'owner';
+    }
+
+    function isValidAccountSettings(settings) {
+      return settings is map &&
+        settings.keys().hasOnly(['dashboardAlertsVisibility']) &&
+        (!('dashboardAlertsVisibility' in settings) ||
+          settings.dashboardAlertsVisibility in ['EVERYONE', 'ADMIN']);
+    }
+
+    // ── Account-scoped schema validators (no userId==auth.uid requirement) ──
+
+    function isValidAccountTransactionKeysSize(data) {
+      let size = 9;
+      let s1 = size + ('isFixed' in data ? 1 : 0);
+      let s2 = s1 + ('groupId' in data ? 1 : 0);
+      let s3 = s2 + ('installmentInfo' in data ? 1 : 0);
+      let s4 = s3 + ('categoryId' in data ? 1 : 0);
+      let s5 = s4 + ('endDate' in data ? 1 : 0);
+      let s6 = s5 + ('tagIds' in data ? 1 : 0);
+      return data.keys().size() == s6;
+    }
+
+    function isValidAccountTransaction(data) {
+      return data.keys().hasAll([
+        'userId', 'context', 'type', 'title', 'amount', 'date', 'status', 'createdAt', 'updatedAt'
+      ]) &&
+      isValidAccountTransactionKeysSize(data) &&
+      data.userId is string &&
+      data.context in ['PERSONAL', 'BUSINESS'] &&
+      data.type in ['INCOME', 'EXPENSE', 'CREDIT_CARD'] &&
+      data.title is string && data.title.size() > 0 && data.title.size() <= 200 &&
+      data.amount is number &&
+      data.date is string && data.date.size() <= 20 &&
+      data.status in ['PENDING', 'PAID'] &&
+      (!('isFixed' in data) || data.isFixed is bool) &&
+      (!('groupId' in data) || (data.groupId is string && data.groupId.size() <= 128)) &&
+      (!('installmentInfo' in data) || (data.installmentInfo is string && data.installmentInfo.size() <= 32)) &&
+      (!('categoryId' in data) || (data.categoryId is string && data.categoryId.size() <= 128)) &&
+      (!('endDate' in data) || (data.endDate is string && data.endDate.size() <= 20));
+    }
+
+    function isValidAccountCategory(data) {
+      return data.keys().hasAll(['userId', 'name', 'section', 'order', 'isDefault']) &&
+        data.keys().size() == 5 &&
+        data.userId is string &&
+        data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
+        data.section in ['RECEITA', 'CUSTOS', 'DESPESAS'] &&
+        data.order is number &&
+        data.isDefault is bool;
+    }
+
+    function isValidAccountBudget(data) {
+      return data.keys().hasAll(['userId', 'context', 'year', 'month', 'categoryId', 'plannedAmount', 'createdAt', 'updatedAt']) &&
+        data.keys().size() == 8 &&
+        data.userId is string &&
+        data.context in ['PERSONAL', 'BUSINESS'] &&
+        data.year is number && data.year >= 2020 &&
+        data.month is number && data.month >= 1 && data.month <= 12 &&
+        data.categoryId is string && data.categoryId.size() <= 128 &&
+        data.plannedAmount is number;
+    }
+
+    function isValidAccountSpendingLimitKeysSize(data) {
+      let size = 7;
+      let s1 = size + ('month' in data ? 1 : 0);
+      let s2 = s1 + ('year' in data ? 1 : 0);
+      return data.keys().size() == s2;
+    }
+
+    function isValidAccountSpendingLimit(data) {
+      return data.keys().hasAll(['userId', 'context', 'name', 'limitAmount', 'categoryIds', 'createdAt', 'updatedAt']) &&
+        isValidAccountSpendingLimitKeysSize(data) &&
+        data.userId is string &&
+        data.context in ['PERSONAL', 'BUSINESS'] &&
+        data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
+        data.limitAmount is number && data.limitAmount > 0 &&
+        data.categoryIds is list &&
+        (!('month' in data) || (data.month is number && data.month >= 1 && data.month <= 12)) &&
+        (!('year' in data) || data.year is number);
+    }
+
+    function isValidAccountSalesTarget(data) {
+      let size = 7;
+      let s1 = size + ('channel' in data ? 1 : 0);
+      let s2 = s1 + ('seller' in data ? 1 : 0);
+      return data.keys().hasAll(['userId', 'context', 'year', 'month', 'targetAmount', 'createdAt', 'updatedAt']) &&
+        data.keys().size() == s2 &&
+        data.userId is string &&
+        data.context in ['PERSONAL', 'BUSINESS'] &&
+        data.year is number && data.year >= 2020 &&
+        data.month is number && data.month >= 1 && data.month <= 12 &&
+        data.targetAmount is number &&
+        (!('channel' in data) || data.channel is string) &&
+        (!('seller' in data) || data.seller is string);
+    }
+
+    function isValidAccountServiceType(data) {
+      return data.keys().hasAll(['userId', 'name', 'steps', 'customFieldDefs', 'createdAt', 'updatedAt']) &&
+        data.keys().size() == 6 &&
+        data.userId is string &&
+        data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
+        data.steps is list &&
+        data.customFieldDefs is list;
+    }
+
+    function isValidAccountProjectKeysSize(data) {
+      let size = 8;
+      let s1 = size + ('serviceTypeId' in data ? 1 : 0);
+      let s2 = s1 + ('leadId' in data ? 1 : 0);
+      let s3 = s2 + ('dueDate' in data ? 1 : 0);
+      let s4 = s3 + ('price' in data ? 1 : 0);
+      let s5 = s4 + ('description' in data ? 1 : 0);
+      return data.keys().size() == s5;
+    }
+
+    function isValidAccountProject(data) {
+      return data.keys().hasAll([
+        'userId', 'title', 'clientName', 'status', 'stepStatuses', 'customFieldValues', 'createdAt', 'updatedAt'
+      ]) &&
+      isValidAccountProjectKeysSize(data) &&
+      data.userId is string &&
+      data.title is string && data.title.size() > 0 && data.title.size() <= 200 &&
+      data.clientName is string && data.clientName.size() <= 200 &&
+      data.status is string && data.status.size() > 0 && data.status.size() <= 128 &&
+      data.stepStatuses is list &&
+      data.customFieldValues is list &&
+      (!('serviceTypeId' in data) || (data.serviceTypeId is string && data.serviceTypeId.size() <= 128)) &&
+      (!('leadId' in data) || (data.leadId is string && data.leadId.size() <= 128)) &&
+      (!('dueDate' in data) || (data.dueDate is string && data.dueDate.size() <= 20)) &&
+      (!('price' in data) || data.price is number) &&
+      (!('description' in data) || (data.description is string && data.description.size() <= 2000));
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // PERSONAL — users/{userId}/* (unchanged, private)
+    // ═══════════════════════════════════════════════════════════
+
+    function isValidTransactionKeysSize(data) {
+      let size = 9;
+      let s1 = size + ('isFixed' in data ? 1 : 0);
+      let s2 = s1 + ('groupId' in data ? 1 : 0);
+      let s3 = s2 + ('installmentInfo' in data ? 1 : 0);
+      let s4 = s3 + ('categoryId' in data ? 1 : 0);
+      let s5 = s4 + ('endDate' in data ? 1 : 0);
+      let s6 = s5 + ('tagIds' in data ? 1 : 0);
+      return data.keys().size() == s6;
+    }
+
+    function isValidTransaction(data) {
+      return data.keys().hasAll([
+        'userId', 'context', 'type', 'title', 'amount', 'date', 'status', 'createdAt', 'updatedAt'
+      ]) &&
+      isValidTransactionKeysSize(data) &&
+      data.userId is string && data.userId == request.auth.uid &&
+      data.context in ['PERSONAL', 'BUSINESS'] &&
+      data.type in ['INCOME', 'EXPENSE', 'CREDIT_CARD'] &&
+      data.title is string && data.title.size() > 0 && data.title.size() <= 200 &&
+      data.amount is number &&
+      data.date is string && data.date.size() <= 20 &&
+      data.status in ['PENDING', 'PAID'] &&
+      (!('isFixed' in data) || data.isFixed is bool) &&
+      (!('groupId' in data) || (data.groupId is string && data.groupId.size() <= 128)) &&
+      (!('installmentInfo' in data) || (data.installmentInfo is string && data.installmentInfo.size() <= 32)) &&
+      (!('categoryId' in data) || (data.categoryId is string && data.categoryId.size() <= 128)) &&
+      (!('endDate' in data) || (data.endDate is string && data.endDate.size() <= 20));
+    }
+
+    function isValidCategory(data) {
+      return data.keys().hasAll(['userId', 'name', 'section', 'order', 'isDefault']) &&
+        data.keys().size() == 5 &&
+        data.userId is string && data.userId == request.auth.uid &&
+        data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
+        data.section in ['RECEITA', 'CUSTOS', 'DESPESAS'] &&
+        data.order is number &&
+        data.isDefault is bool;
+    }
+
+    function isValidBudget(data) {
+      return data.keys().hasAll(['userId', 'context', 'year', 'month', 'categoryId', 'plannedAmount', 'createdAt', 'updatedAt']) &&
+        data.keys().size() == 8 &&
+        data.userId is string && data.userId == request.auth.uid &&
+        data.context in ['PERSONAL', 'BUSINESS'] &&
+        data.year is number && data.year >= 2020 &&
+        data.month is number && data.month >= 1 && data.month <= 12 &&
+        data.categoryId is string && data.categoryId.size() <= 128 &&
+        data.plannedAmount is number;
+    }
+
+    function isValidSpendingLimitKeysSize(data) {
+      let size = 7;
+      let s1 = size + ('month' in data ? 1 : 0);
+      let s2 = s1 + ('year' in data ? 1 : 0);
+      return data.keys().size() == s2;
+    }
+
+    function isValidSpendingLimit(data) {
+      return data.keys().hasAll(['userId', 'context', 'name', 'limitAmount', 'categoryIds', 'createdAt', 'updatedAt']) &&
+        isValidSpendingLimitKeysSize(data) &&
+        data.userId is string && data.userId == request.auth.uid &&
+        data.context in ['PERSONAL', 'BUSINESS'] &&
+        data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
+        data.limitAmount is number && data.limitAmount > 0 &&
+        data.categoryIds is list &&
+        (!('month' in data) || (data.month is number && data.month >= 1 && data.month <= 12)) &&
+        (!('year' in data) || data.year is number);
+    }
+
+    match /users/{userId}/transactions/{transactionId} {
+      allow read: if isSignedIn() && userId == request.auth.uid && resource.data.userId == request.auth.uid;
+
+      allow create: if isSignedIn() &&
+        userId == request.auth.uid &&
+        isValidId(transactionId) &&
+        isValidTransaction(incoming());
+
+      allow update: if isSignedIn() &&
+        userId == request.auth.uid &&
+        isValidId(transactionId) &&
+        isValidTransaction(incoming()) &&
+        incoming().userId == existing().userId &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().diff(existing()).affectedKeys().hasOnly([
+          'context', 'type', 'title', 'amount', 'date', 'status',
+          'isFixed', 'groupId', 'installmentInfo', 'categoryId', 'endDate', 'tagIds', 'updatedAt'
+        ]);
+
+      allow delete: if isSignedIn() && userId == request.auth.uid;
+    }
+
+    match /users/{userId}/categories/{categoryId} {
+      allow read: if isSignedIn() && userId == request.auth.uid && resource.data.userId == request.auth.uid;
+
+      allow create: if isSignedIn() &&
+        userId == request.auth.uid &&
+        isValidCategory(incoming());
+
+      allow update: if isSignedIn() &&
+        userId == request.auth.uid &&
+        isValidCategory(incoming()) &&
+        incoming().userId == existing().userId;
+
+      allow delete: if isSignedIn() &&
+        userId == request.auth.uid &&
+        existing().isDefault == false;
+    }
+
+    function isValidSalesTarget(data) {
+      let size = 7;
+      let s1 = size + ('channel' in data ? 1 : 0);
+      let s2 = s1 + ('seller' in data ? 1 : 0);
+      return data.keys().hasAll(['userId', 'context', 'year', 'month', 'targetAmount', 'createdAt', 'updatedAt']) &&
+        data.keys().size() == s2 &&
+        data.userId is string && data.userId == request.auth.uid &&
+        data.context in ['PERSONAL', 'BUSINESS'] &&
+        data.year is number && data.year >= 2020 &&
+        data.month is number && data.month >= 1 && data.month <= 12 &&
+        data.targetAmount is number &&
+        (!('channel' in data) || data.channel is string) &&
+        (!('seller' in data) || data.seller is string);
+    }
+
+    match /users/{userId}/goals/{goalId} {
+      allow read: if isSignedIn() && userId == request.auth.uid && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && userId == request.auth.uid &&
+        incoming().keys().hasAll(['userId', 'name', 'targetAmount', 'currentAmount', 'deadline', 'category', 'color', 'createdAt', 'updatedAt']) &&
+        incoming().userId is string && incoming().userId == request.auth.uid &&
+        incoming().name is string && incoming().name.size() > 0 &&
+        incoming().targetAmount is number && incoming().currentAmount is number &&
+        incoming().deadline is string && incoming().category is string && incoming().color is string;
+      allow update: if isSignedIn() && userId == request.auth.uid && incoming().userId == existing().userId;
+      allow delete: if isSignedIn() && userId == request.auth.uid;
+    }
+
+    match /users/{userId}/tags/{tagId} {
+      allow read: if isSignedIn() && userId == request.auth.uid && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && userId == request.auth.uid &&
+        incoming().keys().hasAll(['userId', 'name', 'color']) && incoming().keys().size() == 3 &&
+        incoming().userId is string && incoming().userId == request.auth.uid &&
+        incoming().name is string && incoming().name.size() > 0 && incoming().name.size() <= 50 &&
+        incoming().color is string && incoming().color.size() <= 20;
+      allow update: if isSignedIn() && userId == request.auth.uid && incoming().userId == existing().userId;
+      allow delete: if isSignedIn() && userId == request.auth.uid;
+    }
+
+    match /users/{userId}/sales-targets/{targetId} {
+      allow read: if isSignedIn() && userId == request.auth.uid && resource.data.userId == request.auth.uid;
+
+      allow create: if isSignedIn() &&
+        userId == request.auth.uid &&
+        isValidSalesTarget(incoming());
+
+      allow update: if isSignedIn() &&
+        userId == request.auth.uid &&
+        isValidSalesTarget(incoming()) &&
+        incoming().userId == existing().userId &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().diff(existing()).affectedKeys().hasOnly(['targetAmount', 'updatedAt']);
+
+      allow delete: if isSignedIn() && userId == request.auth.uid;
+    }
+
+    match /users/{userId}/leads/{leadId} {
+      allow read: if isSignedIn() && userId == request.auth.uid && resource.data.userId == request.auth.uid;
+
+      allow create: if isSignedIn() &&
+        userId == request.auth.uid &&
+        isValidId(leadId) &&
+        incoming().keys().hasAll(['userId', 'clientName', 'createdAt', 'updatedAt']) &&
+        incoming().userId is string && incoming().userId == request.auth.uid &&
+        incoming().clientName is string && incoming().clientName.size() > 0 && incoming().clientName.size() <= 200;
+
+      allow update: if isSignedIn() &&
+        userId == request.auth.uid &&
+        incoming().userId == existing().userId;
+
+      allow delete: if isSignedIn() && userId == request.auth.uid;
+    }
+
+    match /users/{userId}/lead-options/{optionId} {
+      allow read: if isSignedIn() && userId == request.auth.uid && resource.data.userId == request.auth.uid;
+
+      allow create: if isSignedIn() &&
+        userId == request.auth.uid &&
+        incoming().keys().hasAll(['userId', 'field', 'value', 'order', 'isDefault']) &&
+        incoming().userId is string && incoming().userId == request.auth.uid &&
+        incoming().value is string && incoming().value.size() > 0 && incoming().value.size() <= 100 &&
+        incoming().order is number &&
+        incoming().isDefault is bool &&
+        (incoming().field == 'status' || incoming().field == 'source' || incoming().field == 'service');
+
+      allow update: if isSignedIn() &&
+        userId == request.auth.uid &&
+        incoming().userId == existing().userId;
+
+      allow delete: if isSignedIn() && userId == request.auth.uid;
+    }
+
+    match /users/{userId}/budgets/{budgetId} {
+      allow read: if isSignedIn() && userId == request.auth.uid && resource.data.userId == request.auth.uid;
+
+      allow create: if isSignedIn() &&
+        userId == request.auth.uid &&
+        isValidBudget(incoming());
+
+      allow update: if isSignedIn() &&
+        userId == request.auth.uid &&
+        isValidBudget(incoming()) &&
+        incoming().userId == existing().userId &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().diff(existing()).affectedKeys().hasOnly(['plannedAmount', 'updatedAt']);
+
+      allow delete: if isSignedIn() && userId == request.auth.uid;
+    }
+
+    function isValidServiceType(data) {
+      return data.keys().hasAll(['userId', 'name', 'steps', 'customFieldDefs', 'createdAt', 'updatedAt']) &&
+        data.keys().size() == 6 &&
+        data.userId is string && data.userId == request.auth.uid &&
+        data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
+        data.steps is list &&
+        data.customFieldDefs is list;
+    }
+
+    match /users/{userId}/spending-limits/{limitId} {
+      allow read: if isSignedIn() && userId == request.auth.uid && resource.data.userId == request.auth.uid;
+
+      allow create: if isSignedIn() &&
+        userId == request.auth.uid &&
+        isValidSpendingLimit(incoming());
+
+      allow update: if isSignedIn() &&
+        userId == request.auth.uid &&
+        isValidSpendingLimit(incoming()) &&
+        incoming().userId == existing().userId &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().diff(existing()).affectedKeys().hasOnly([
+          'name', 'limitAmount', 'categoryIds', 'month', 'year', 'updatedAt'
+        ]);
+
+      allow delete: if isSignedIn() && userId == request.auth.uid;
+    }
+
+    match /users/{userId}/service-types/{serviceTypeId} {
+      allow read: if isSignedIn() && userId == request.auth.uid && resource.data.userId == request.auth.uid;
+
+      allow create: if isSignedIn() &&
+        userId == request.auth.uid &&
+        isValidId(serviceTypeId) &&
+        isValidServiceType(incoming());
+
+      allow update: if isSignedIn() &&
+        userId == request.auth.uid &&
+        isValidServiceType(incoming()) &&
+        incoming().userId == existing().userId &&
+        incoming().createdAt == existing().createdAt;
+
+      allow delete: if isSignedIn() && userId == request.auth.uid;
+    }
+
+    function isValidProjectKeysSize(data) {
+      let size = 8;
+      let s1 = size + ('serviceTypeId' in data ? 1 : 0);
+      let s2 = s1 + ('leadId' in data ? 1 : 0);
+      let s3 = s2 + ('dueDate' in data ? 1 : 0);
+      let s4 = s3 + ('price' in data ? 1 : 0);
+      let s5 = s4 + ('description' in data ? 1 : 0);
+      return data.keys().size() == s5;
+    }
+
+    function isValidProject(data) {
+      return data.keys().hasAll([
+        'userId', 'title', 'clientName', 'status', 'stepStatuses', 'customFieldValues', 'createdAt', 'updatedAt'
+      ]) &&
+      isValidProjectKeysSize(data) &&
+      data.userId is string && data.userId == request.auth.uid &&
+      data.title is string && data.title.size() > 0 && data.title.size() <= 200 &&
+      data.clientName is string && data.clientName.size() <= 200 &&
+      data.status is string && data.status.size() > 0 && data.status.size() <= 128 &&
+      data.stepStatuses is list &&
+      data.customFieldValues is list &&
+      (!('serviceTypeId' in data) || (data.serviceTypeId is string && data.serviceTypeId.size() <= 128)) &&
+      (!('leadId' in data) || (data.leadId is string && data.leadId.size() <= 128)) &&
+      (!('dueDate' in data) || (data.dueDate is string && data.dueDate.size() <= 20)) &&
+      (!('price' in data) || data.price is number) &&
+      (!('description' in data) || (data.description is string && data.description.size() <= 2000));
+    }
+
+    match /users/{userId}/projects/{projectId} {
+      allow read: if isSignedIn() && userId == request.auth.uid && resource.data.userId == request.auth.uid;
+
+      allow create: if isSignedIn() &&
+        userId == request.auth.uid &&
+        isValidId(projectId) &&
+        isValidProject(incoming());
+
+      allow update: if isSignedIn() &&
+        userId == request.auth.uid &&
+        isValidProject(incoming()) &&
+        incoming().userId == existing().userId &&
+        incoming().createdAt == existing().createdAt;
+
+      allow delete: if isSignedIn() && userId == request.auth.uid;
+    }
+
+    match /users/{userId}/project-kanban-settings/{settingsId} {
+      allow read: if isSignedIn() && userId == request.auth.uid;
+      allow create: if isSignedIn() &&
+        userId == request.auth.uid &&
+        settingsId == 'default' &&
+        incoming().keys().hasAll(['userId', 'columns', 'updatedAt']) &&
+        incoming().userId == request.auth.uid &&
+        incoming().columns is list;
+      allow update: if isSignedIn() &&
+        userId == request.auth.uid &&
+        settingsId == 'default' &&
+        incoming().userId == existing().userId &&
+        incoming().columns is list;
+      allow delete: if isSignedIn() && userId == request.auth.uid && settingsId == 'default';
+    }
+
+    // Tasks subcollection (personal)
+    match /users/{userId}/projects/{projectId}/tasks/{taskId} {
+      allow read: if isSignedIn() && userId == request.auth.uid;
+      allow create: if isSignedIn() && userId == request.auth.uid && isValidId(taskId);
+      allow update: if isSignedIn() && userId == request.auth.uid;
+      allow delete: if isSignedIn() && userId == request.auth.uid;
+    }
+
+    // Profile (personal)
+    match /users/{userId}/profile/{docId} {
+      allow read, write: if isSignedIn() && userId == request.auth.uid;
+    }
+
+    // Trials
+    match /trials/{trialId} {
+      allow read: if isSignedIn() && trialId == request.auth.uid;
+      allow create: if isSignedIn() && trialId == request.auth.uid;
+      allow update: if false; // só Admin SDK atualiza trials
+      allow delete: if false;
+    }
+
+    // Plans (leitura pública para usuários autenticados, escrita só Admin SDK)
+    match /plans/{planId} {
+      allow read: if isSignedIn();
+      allow write: if false;
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // ACCOUNT — accounts/{accountId} (shared, multi-tenant)
+    // ═══════════════════════════════════════════════════════════
+
+    // ── Account metadata ──
+
+    match /accounts/{accountId} {
+      allow read: if isSignedIn();
+
+      allow create: if isSignedIn() &&
+        isValidId(accountId) &&
+        incoming().keys().hasAll(['name', 'ownerId', 'status', 'createdAt', 'updatedAt']) &&
+        incoming().keys().size() == 5 &&
+        incoming().name is string && incoming().name.size() > 0 && incoming().name.size() <= 100 &&
+        incoming().ownerId is string && incoming().ownerId == request.auth.uid &&
+        incoming().status in ['ACTIVE', 'ARCHIVED'];
+
+      allow update: if (
+        isAccountOwner(accountId) &&
+        incoming().diff(existing()).affectedKeys().hasOnly(['name', 'status', 'settings', 'updatedAt']) &&
+        (!('name' in incoming()) || (incoming().name is string && incoming().name.size() > 0 && incoming().name.size() <= 100)) &&
+        (!('status' in incoming()) || incoming().status in ['ACTIVE', 'ARCHIVED']) &&
+        (!('settings' in incoming()) || isValidAccountSettings(incoming().settings)) &&
+        incoming().ownerId == existing().ownerId &&
+        incoming().createdAt == existing().createdAt
+      ) || (
+        isAccountOwnerOrAdmin(accountId) &&
+        incoming().diff(existing()).affectedKeys().hasOnly(['settings', 'updatedAt']) &&
+        isValidAccountSettings(incoming().settings) &&
+        incoming().ownerId == existing().ownerId &&
+        incoming().name == existing().name &&
+        incoming().status == existing().status &&
+        incoming().createdAt == existing().createdAt
+      );
+
+      allow delete: if isAccountOwner(accountId);
+    }
+
+    // ── Account members ──
+
+    match /accounts/{accountId}/members/{uid} {
+      allow read: if isAccountMember(accountId);
+
+      allow create: if isSignedIn() &&
+        incoming().keys().hasAll(['uid', 'email', 'role', 'invitedBy', 'createdAt', 'updatedAt']) &&
+        incoming().keys().size() == 6 &&
+        incoming().uid is string &&
+        incoming().email is string && incoming().email.size() > 0 &&
+        incoming().role in ['owner', 'admin', 'member'] &&
+        (
+          // Bootstrap: account being created in same batch — doesn't exist yet.
+          // Only the account creator can become the first owner.
+          (exists(/databases/$(database)/documents/accounts/$(accountId)) == false &&
+           incoming().uid == request.auth.uid &&
+           incoming().role == 'owner' &&
+           incoming().invitedBy == request.auth.uid)
+          ||
+          // Normal flow: owner/admin adding members to an existing account
+          (isAccountOwnerOrAdmin(accountId) &&
+           (incoming().role != 'owner' || isAccountOwner(accountId)) &&
+           (incoming().uid != existingAccountOwner(accountId) || incoming().role == 'owner'))
+          ||
+          // Invite acceptance: user accepts their own invite
+          (incoming().uid == request.auth.uid &&
+           incoming().role in ['admin', 'member'] &&
+           incoming().invitedBy is string &&
+           incoming().invitedBy.size() > 0 &&
+           exists(/databases/$(database)/documents/accounts/$(accountId)/invites/$(incoming().invitedBy)) &&
+           get(/databases/$(database)/documents/accounts/$(accountId)/invites/$(incoming().invitedBy)).data.status == 'PENDING' &&
+           (request.auth.token.email == null || get(/databases/$(database)/documents/accounts/$(accountId)/invites/$(incoming().invitedBy)).data.email.lower() == request.auth.token.email.lower()))
+        );
+
+      allow update: if (isAccountOwnerOrAdmin(accountId) || request.auth.uid == uid) &&
+        incoming().uid == existing().uid &&
+        incoming().createdAt == existing().createdAt &&
+        // Non-owners cannot change roles
+        (roleInAccount(accountId) in ['owner', 'admin'] || incoming().role == existing().role) &&
+        // Only owner can grant owner role
+        (incoming().role != 'owner' || isAccountOwner(accountId)) &&
+        // Cannot change own role (anti-escalation)
+        (request.auth.uid != uid || incoming().role == existing().role);
+
+      allow delete: if isAccountOwnerOrAdmin(accountId) &&
+        // Cannot remove the owner
+        uid != existingAccountOwner(accountId);
+    }
+
+    function existingAccountOwner(accountId) {
+      return get(/databases/$(database)/documents/accounts/$(accountId)).data.ownerId;
+    }
+
+    // ── Account invites ──
+
+    match /accounts/{accountId}/invites/{inviteId} {
+      allow read: if isAccountMember(accountId) ||
+        (isSignedIn() && (request.auth.token.email == null || request.auth.token.email.lower() == resource.data.email.lower()));
+
+      allow create: if isAccountOwnerOrAdmin(accountId) &&
+        isValidId(inviteId) &&
+        incoming().keys().hasAll(['accountId', 'email', 'role', 'status', 'createdBy', 'expiresAt', 'createdAt']) &&
+        incoming().keys().size() == 7 &&
+        incoming().accountId == accountId &&
+        incoming().email is string && incoming().email.size() > 0 &&
+        incoming().role in ['admin', 'member'] &&
+        incoming().status == 'PENDING' &&
+        incoming().createdBy is string && incoming().createdBy == request.auth.uid &&
+        incoming().expiresAt is string;
+
+      allow update: if isSignedIn() &&
+        // Only the invitee can accept (self-claim)
+        ((request.auth.token.email == null || request.auth.token.email.lower() == existing().email.lower()) &&
+         existing().status == 'PENDING' &&
+         incoming().diff(existing()).affectedKeys().hasOnly(['status']) &&
+         incoming().status == 'ACCEPTED') ||
+        // Owner/admin can revoke
+        (isAccountOwnerOrAdmin(accountId) &&
+         incoming().diff(existing()).affectedKeys().hasOnly(['status']) &&
+         incoming().status == 'REVOKED');
+
+      allow delete: if isAccountOwnerOrAdmin(accountId);
+    }
+
+    // ── Permissions helper ──
+    // Owner/admin bypass permission checks (full access)
+    // Member permissions are stored in the member doc under the "permissions" map
+
+    function memberHasPermission(accountId, module, action) {
+      let data = accountMemberData(accountId);
+      return (
+        data.role == 'owner' ||
+        data.role == 'admin' ||
+        (data.role in ['owner', 'admin', 'member'] && action == 'view' && data.permissions == null) ||
+        (data.permissions != null &&
+         data.permissions[module] != null &&
+         data.permissions[module].hasAny([action]))
+      );
+    }
+
+    // ── Account data collections ──
+    // Pattern: members can read if has view permission; owner/admin full access
+
+    match /accounts/{accountId}/transactions/{transactionId} {
+      allow read: if memberHasPermission(accountId, 'transactions', 'view');
+
+      allow create: if memberHasPermission(accountId, 'transactions', 'create') &&
+        isValidId(transactionId) &&
+        isValidAccountTransaction(incoming()) &&
+        incoming().userId == request.auth.uid;
+
+      allow update: if isAccountMember(accountId) &&
+        isValidId(transactionId) &&
+        isValidAccountTransaction(incoming()) &&
+        incoming().userId == existing().userId &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().diff(existing()).affectedKeys().hasOnly([
+          'context', 'type', 'title', 'amount', 'date', 'status',
+          'isFixed', 'groupId', 'installmentInfo', 'categoryId', 'endDate', 'tagIds', 'updatedAt'
+        ]);
+
+      allow delete: if isAccountOwnerOrAdmin(accountId) ||
+        (isAccountMember(accountId) && resource.data.userId == request.auth.uid);
+    }
+
+    match /accounts/{accountId}/categories/{categoryId} {
+      allow read: if isAccountMember(accountId);
+
+      allow create: if isAccountMember(accountId) &&
+        isValidAccountCategory(incoming()) &&
+        incoming().userId == request.auth.uid;
+
+      allow update: if isAccountMember(accountId) &&
+        isValidAccountCategory(incoming()) &&
+        incoming().userId == existing().userId;
+
+      allow delete: if isAccountMember(accountId) &&
+        existing().isDefault == false &&
+        (isAccountOwnerOrAdmin(accountId) || existing().userId == request.auth.uid);
+    }
+
+    match /accounts/{accountId}/sales-targets/{targetId} {
+      allow read: if isAccountMember(accountId);
+
+      allow create: if isAccountMember(accountId) &&
+        isValidAccountSalesTarget(incoming()) &&
+        incoming().userId == request.auth.uid;
+
+      allow update: if isAccountMember(accountId) &&
+        isValidAccountSalesTarget(incoming()) &&
+        incoming().userId == existing().userId &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().diff(existing()).affectedKeys().hasOnly(['targetAmount', 'updatedAt']);
+
+      allow delete: if isAccountMember(accountId) &&
+        (isAccountOwnerOrAdmin(accountId) || existing().userId == request.auth.uid);
+    }
+
+    match /accounts/{accountId}/goals/{goalId} {
+      allow read: if isAccountMember(accountId);
+
+      allow create: if isAccountMember(accountId) &&
+        incoming().keys().hasAll(['userId', 'name', 'targetAmount', 'currentAmount', 'deadline', 'category', 'color', 'createdAt', 'updatedAt']) &&
+        incoming().userId is string && incoming().userId == request.auth.uid &&
+        incoming().name is string && incoming().name.size() > 0 &&
+        incoming().targetAmount is number && incoming().currentAmount is number &&
+        incoming().deadline is string && incoming().category is string && incoming().color is string;
+
+      allow update: if isAccountMember(accountId) &&
+        incoming().userId == existing().userId;
+
+      allow delete: if isAccountMember(accountId) &&
+        (isAccountOwnerOrAdmin(accountId) || existing().userId == request.auth.uid);
+    }
+
+    match /accounts/{accountId}/tags/{tagId} {
+      allow read: if isAccountMember(accountId);
+
+      allow create: if isAccountMember(accountId) &&
+        incoming().keys().hasAll(['userId', 'name', 'color']) && incoming().keys().size() == 3 &&
+        incoming().userId is string && incoming().userId == request.auth.uid &&
+        incoming().name is string && incoming().name.size() > 0 && incoming().name.size() <= 50 &&
+        incoming().color is string && incoming().color.size() <= 20;
+
+      allow update: if isAccountMember(accountId) &&
+        incoming().userId == existing().userId;
+
+      allow delete: if isAccountMember(accountId) &&
+        (isAccountOwnerOrAdmin(accountId) || existing().userId == request.auth.uid);
+    }
+
+    match /accounts/{accountId}/leads/{leadId} {
+      allow read: if isAccountMember(accountId);
+
+      allow create: if isAccountMember(accountId) &&
+        isValidId(leadId) &&
+        incoming().keys().hasAll(['userId', 'clientName', 'createdAt', 'updatedAt']) &&
+        incoming().userId is string && incoming().userId == request.auth.uid &&
+        incoming().clientName is string && incoming().clientName.size() > 0 && incoming().clientName.size() <= 200;
+
+      allow update: if isAccountMember(accountId) &&
+        incoming().userId == existing().userId;
+
+      allow delete: if isAccountMember(accountId) &&
+        (isAccountOwnerOrAdmin(accountId) || existing().userId == request.auth.uid);
+    }
+
+    match /accounts/{accountId}/lead-options/{optionId} {
+      allow read: if isAccountMember(accountId);
+
+      allow create: if isAccountMember(accountId) &&
+        incoming().keys().hasAll(['userId', 'field', 'value', 'order', 'isDefault']) &&
+        incoming().userId is string && incoming().userId == request.auth.uid &&
+        incoming().value is string && incoming().value.size() > 0 && incoming().value.size() <= 100 &&
+        incoming().order is number &&
+        incoming().isDefault is bool &&
+        (incoming().field == 'status' || incoming().field == 'source' || incoming().field == 'service');
+
+      allow update: if isAccountMember(accountId) &&
+        incoming().userId == existing().userId;
+
+      allow delete: if isAccountMember(accountId) &&
+        (isAccountOwnerOrAdmin(accountId) || existing().userId == request.auth.uid);
+    }
+
+    match /accounts/{accountId}/budgets/{budgetId} {
+      allow read: if isAccountMember(accountId);
+
+      allow create: if isAccountMember(accountId) &&
+        isValidAccountBudget(incoming()) &&
+        incoming().userId == request.auth.uid;
+
+      allow update: if isAccountMember(accountId) &&
+        isValidAccountBudget(incoming()) &&
+        incoming().userId == existing().userId &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().diff(existing()).affectedKeys().hasOnly(['plannedAmount', 'updatedAt']);
+
+      allow delete: if isAccountMember(accountId) &&
+        (isAccountOwnerOrAdmin(accountId) || existing().userId == request.auth.uid);
+    }
+
+    match /accounts/{accountId}/spending-limits/{limitId} {
+      allow read: if isAccountMember(accountId);
+
+      allow create: if isAccountMember(accountId) &&
+        isValidAccountSpendingLimit(incoming()) &&
+        incoming().userId == request.auth.uid;
+
+      allow update: if isAccountMember(accountId) &&
+        isValidAccountSpendingLimit(incoming()) &&
+        incoming().userId == existing().userId &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().diff(existing()).affectedKeys().hasOnly([
+          'name', 'limitAmount', 'categoryIds', 'month', 'year', 'updatedAt'
+        ]);
+
+      allow delete: if isAccountMember(accountId) &&
+        (isAccountOwnerOrAdmin(accountId) || existing().userId == request.auth.uid);
+    }
+
+    match /accounts/{accountId}/service-types/{serviceTypeId} {
+      allow read: if isAccountMember(accountId);
+
+      allow create: if isAccountMember(accountId) &&
+        isValidId(serviceTypeId) &&
+        isValidAccountServiceType(incoming()) &&
+        incoming().userId == request.auth.uid;
+
+      allow update: if isAccountMember(accountId) &&
+        isValidAccountServiceType(incoming()) &&
+        incoming().userId == existing().userId &&
+        incoming().createdAt == existing().createdAt;
+
+      allow delete: if isAccountMember(accountId) &&
+        (isAccountOwnerOrAdmin(accountId) || existing().userId == request.auth.uid);
+    }
+
+    match /accounts/{accountId}/projects/{projectId} {
+      allow read: if isAccountMember(accountId);
+
+      allow create: if isAccountMember(accountId) &&
+        isValidId(projectId) &&
+        isValidAccountProject(incoming()) &&
+        incoming().userId == request.auth.uid;
+
+      allow update: if isAccountMember(accountId) &&
+        isValidAccountProject(incoming()) &&
+        incoming().userId == existing().userId &&
+        incoming().createdAt == existing().createdAt;
+
+      allow delete: if isAccountMember(accountId) &&
+        (isAccountOwnerOrAdmin(accountId) || existing().userId == request.auth.uid);
+    }
+
+    match /accounts/{accountId}/project-kanban-settings/{settingsId} {
+      allow read: if isAccountMember(accountId);
+      allow create: if isAccountMember(accountId) &&
+        settingsId == 'default' &&
+        incoming().keys().hasAll(['userId', 'columns', 'updatedAt']) &&
+        incoming().userId == request.auth.uid &&
+        incoming().columns is list;
+      allow update: if isAccountMember(accountId) &&
+        settingsId == 'default' &&
+        incoming().userId == existing().userId &&
+        incoming().columns is list;
+      allow delete: if isAccountOwnerOrAdmin(accountId) && settingsId == 'default';
+    }
+
+    // Tasks subcollection (account)
+    match /accounts/{accountId}/projects/{projectId}/tasks/{taskId} {
+      allow read: if isAccountMember(accountId);
+      allow create: if isAccountMember(accountId) && isValidId(taskId);
+      allow update: if isAccountMember(accountId);
+      allow delete: if isAccountMember(accountId);
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // USER-ACCOUNTS INDEX — user -> account membership lookup
+    // ═══════════════════════════════════════════════════════════
+
+    match /user-accounts/{userId}/memberships/{accountId} {
+      allow read: if isSignedIn() && userId == request.auth.uid;
+
+      allow create: if isSignedIn() &&
+        userId == request.auth.uid &&
+        incoming().keys().hasAll(['accountId', 'accountName', 'role', 'createdAt']) &&
+        incoming().accountId is string &&
+        incoming().accountName is string &&
+        incoming().role in ['owner', 'admin', 'member'];
+
+      allow update: if isSignedIn() &&
+        userId == request.auth.uid &&
+        incoming().role in ['owner', 'admin', 'member'];
+
+      allow delete: if isSignedIn() && userId == request.auth.uid;
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // USER-INVITES INDEX — invitee email -> pending invites
+    // ═══════════════════════════════════════════════════════════
+
+    match /user-invites/{email}/pending/{inviteId} {
+      allow read: if isSignedIn() &&
+        (request.auth.token.email == null || email == request.auth.token.email.lower());
+
+      allow create: if isSignedIn() &&
+        incoming().keys().hasAll(['accountId', 'accountName', 'email', 'role', 'status', 'createdBy', 'expiresAt', 'createdAt']) &&
+        incoming().accountId is string &&
+        incoming().role in ['admin', 'member'] &&
+        incoming().status == 'PENDING';
+
+      allow update: if isSignedIn() &&
+        incoming().diff(existing()).affectedKeys().hasOnly(['status']) &&
+        incoming().status in ['ACCEPTED', 'REVOKED'] &&
+        (
+          (request.auth.token.email == null || request.auth.token.email.lower() == email) ||
+          existing().createdBy == request.auth.uid
+        );
+
+      allow delete: if isSignedIn() &&
+        (
+          (request.auth.token.email == null || request.auth.token.email.lower() == email) ||
+          existing().createdBy == request.auth.uid
+        );
+    }
+  }
+}

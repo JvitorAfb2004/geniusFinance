@@ -1,0 +1,29 @@
+node_modules/
+build/
+dist/
+coverage/
+.DS_Store
+*.log
+.env*
+!.env.example
+
+# Secrets e credenciais
+server/service-account.json
+server/*.zip
+server/data/
+
+# Remix build output
+build/
+.vercel
+.superpowers/
+.antigravitycli/
+
+# Generated framework types
+.react-router/
+
+# Editor / personal config
+.claude/
+.playwright-mcp/
+
+# Design mockups / large assets not needed in source
+TELA/

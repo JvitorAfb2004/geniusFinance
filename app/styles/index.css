@@ -1,0 +1,139 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: "JetBrains Mono", "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+
+  /* Brand / primary - warm blue */
+  --color-primary: #5b7def;
+  --color-primary-hover: #4a6cdc;
+  --color-primary-light: #eef2ff;
+  --color-primary-dark: #3d5bbf;
+
+  /* Semantic */
+  --color-success: #10b981;
+  --color-success-light: #d1fae5;
+  --color-success-dark: #065f46;
+  --color-danger: #ef4444;
+  --color-danger-light: #fee2e2;
+  --color-danger-dark: #991b1b;
+  --color-warning: #f59e0b;
+  --color-warning-light: #fef3c7;
+  --color-warning-dark: #92400e;
+
+  /* Claymorphism palette - warm neutrals */
+  --color-bg: #f5f0eb;
+  --color-surface: #fffbf7;
+  --color-border: #e5ddd6;
+  --color-text-primary: #2d221c;
+  --color-text-secondary: #6b5c52;
+  --color-text-muted: #9a8a7e;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: #f5f0eb;
+  color: #2d221c;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+input, select, textarea, button {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: #5b7def;
+  box-shadow: 0 0 0 3px rgba(91, 125, 239, 0.12);
+}
+
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* =============================================
+   Card & component base classes
+   ============================================= */
+
+.clay {
+  background: linear-gradient(145deg, #fffbf7, #f3ede6);
+  border-radius: 0.75rem;
+  box-shadow:
+    inset 2px -2px 6px rgba(0,0,0,0.06),
+    inset -2px 2px 6px rgba(255,255,255,0.5),
+    8px 8px 16px rgba(0,0,0,0.10);
+}
+
+.clay-hover {
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.clay-hover:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    inset 2px -2px 6px rgba(0,0,0,0.06),
+    inset -2px 2px 6px rgba(255,255,255,0.5),
+    12px 12px 24px rgba(0,0,0,0.12);
+}
+
+.clay-btn {
+  background: linear-gradient(145deg, #fffbf7, #f3ede6);
+  border-radius: 0.625rem;
+  box-shadow:
+    inset 2px -2px 4px rgba(0,0,0,0.06),
+    inset -2px 2px 4px rgba(255,255,255,0.4),
+    4px 4px 10px rgba(0,0,0,0.08);
+  transition: all 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+  &:active {
+    transform: scale(0.96);
+  }
+}
+.clay-btn-primary {
+  background: linear-gradient(145deg, #5b7def, #4a6cdc);
+  color: white;
+  border-radius: 0.625rem;
+  box-shadow:
+    inset 2px -2px 4px rgba(0,0,0,0.15),
+    inset -2px 2px 4px rgba(255,255,255,0.15),
+    4px 4px 12px rgba(74, 108, 220, 0.25);
+  transition: all 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+  &:active {
+    transform: scale(0.96);
+  }
+}
+
+.clay-input {
+  background: linear-gradient(145deg, #f0e8e0, #faf5f0);
+  border-radius: 0.625rem;
+  box-shadow: inset 3px 3px 8px rgba(0,0,0,0.06), inset -3px -2px 6px rgba(255,255,255,0.5);
+  transition: all 0.2s ease;
+}
+.clay-input:focus {
+  box-shadow: inset 3px 3px 8px rgba(0,0,0,0.06), inset -3px -2px 6px rgba(255,255,255,0.5), 0 0 0 3px rgba(91, 125, 239, 0.15);
+}
+
+/* Card with border-based design (more administrative) */
+.card-admin {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.625rem;
+}
+
+/* ponytail: global focus-visible for keyboard navigation */
+*:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: 0.25rem;
+}
