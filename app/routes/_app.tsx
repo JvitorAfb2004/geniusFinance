@@ -4,7 +4,7 @@ import { useFinance } from "~/hooks/useFinance";
 import { Header } from "~/components/Header";
 import { TrialModal } from "~/components/TrialModal";
 import { MobileBottomNav } from "~/components/MobileBottomNav";
-import ChatBot from "~/components/ChatBot";
+import { getProtectedLoginPath } from "~/lib/authRedirect";
 import {
   PieChart, List, CreditCard, Calendar, Settings, FileBarChart, X,
   Calculator, TrendingUp, Target, Users, Kanban, Layers, ShoppingCart,
@@ -111,13 +111,13 @@ export default function AppLayout() {
 
   useEffect(() => {
     if (!user) {
-      navigate("/login", { replace: true });
+      navigate(getProtectedLoginPath(location.pathname, location.search), { replace: true });
       return;
     }
     user.getIdTokenResult().then((result) => {
       setIsSuperadmin(result.claims.role === "superadmin");
     }).catch(() => {});
-  }, [user, navigate]);
+  }, [user, navigate, location.pathname, location.search]);
 
   useEffect(() => {
     if (!user) return;

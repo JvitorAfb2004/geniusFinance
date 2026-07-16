@@ -1,16 +1,18 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 import { useFinance } from "~/hooks/useFinance";
 import { LoginEmailForm } from "~/components/LoginEmailForm";
 import LegalModal from "~/components/LegalModal";
 import { TERMOS_DE_USO } from "~/lib/termos-de-uso";
 import { POLITICA_PRIVACIDADE } from "~/lib/politica-privacidade";
+import { getLoginRedirectPath } from "~/lib/authRedirect";
 
 const TERMS_KEY = "gh_terms_accepted";
 
 export default function Login() {
   const { user, loading, signInWithGoogle } = useFinance();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [termsAccepted, setTermsAccepted] = useState(() => {
     try { return localStorage.getItem(TERMS_KEY) === "true"; } catch { return false; }
   });
@@ -19,8 +21,8 @@ export default function Login() {
   const [googleTermsAccepted, setGoogleTermsAccepted] = useState(false);
 
   useEffect(() => {
-    if (user) navigate("/dashboard", { replace: true });
-  }, [user, navigate]);
+    if (user) navigate(getLoginRedirectPath(searchParams.get("redirect")), { replace: true });
+  }, [user, navigate, searchParams]);
 
   if (loading) {
     return (
@@ -155,4 +157,3 @@ export default function Login() {
     </div>
   );
 }
-
