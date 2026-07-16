@@ -188,6 +188,8 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
 
   useCollectionListener(user, activeScope, 'projects', setProjects);
 
+  useCollectionListener(user, activeScope, 'monthly-closings', setMonthlyClosings);
+
   // Kanban settings: single-doc listener (not a collection, so not using useCollectionListener)
 
   // Clean up task listeners on scope switch — ponytail: prevents memory leak and data contamination
