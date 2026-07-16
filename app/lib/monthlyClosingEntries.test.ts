@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildMonthlyClosingEntries } from './monthlyClosingEntries';
+import { buildMonthlyClosingEntries, getMonthlyClosingTransactions } from './monthlyClosingEntries';
 import type { MonthlyClosing, Transaction } from '../types';
 
 function tx(id: string, date: string, context: Transaction['context'] = 'BUSINESS'): Transaction {
@@ -57,5 +57,23 @@ describe('buildMonthlyClosingEntries', () => {
       '2026-7',
       '2026-1',
     ]);
+  });
+});
+
+describe('getMonthlyClosingTransactions', () => {
+  it('returns active-context transactions for the selected month sorted by date', () => {
+    const result = getMonthlyClosingTransactions({
+      transactions: [
+        tx('later', '2026-07-20'),
+        tx('other-context', '2026-07-05', 'PERSONAL'),
+        tx('earlier', '2026-07-01'),
+        tx('other-month', '2026-06-30'),
+      ],
+      activeContext: 'BUSINESS',
+      year: 2026,
+      month: 7,
+    });
+
+    expect(result.map((item) => item.id)).toEqual(['earlier', 'later']);
   });
 });

@@ -123,6 +123,38 @@ service cloud.firestore {
         (!('year' in data) || data.year is number);
     }
 
+    function isValidMonthlyClosingKeysSize(data) {
+      let size = 16;
+      let s1 = size + ('reopenedBy' in data ? 1 : 0);
+      let s2 = s1 + ('reopenedAt' in data ? 1 : 0);
+      return data.keys().size() == s2;
+    }
+
+    function isValidAccountMonthlyClosing(data) {
+      return data.keys().hasAll([
+        'userId', 'context', 'year', 'month', 'status', 'totalIncome', 'totalExpense',
+        'totalCreditCard', 'balance', 'openingBalance', 'closingBalance', 'notes',
+        'closedBy', 'closedAt', 'createdAt', 'updatedAt'
+      ]) &&
+      isValidMonthlyClosingKeysSize(data) &&
+      data.userId is string &&
+      data.context in ['PERSONAL', 'BUSINESS'] &&
+      data.year is number && data.year >= 2020 &&
+      data.month is number && data.month >= 1 && data.month <= 12 &&
+      data.status in ['OPEN', 'CLOSED'] &&
+      data.totalIncome is number &&
+      data.totalExpense is number &&
+      data.totalCreditCard is number &&
+      data.balance is number &&
+      data.openingBalance is number &&
+      data.closingBalance is number &&
+      data.notes is string && data.notes.size() <= 2000 &&
+      data.closedBy is string &&
+      data.closedAt is string && data.closedAt.size() <= 40 &&
+      (!('reopenedBy' in data) || data.reopenedBy is string) &&
+      (!('reopenedAt' in data) || (data.reopenedAt is string && data.reopenedAt.size() <= 40));
+    }
+
     function isValidAccountSalesTarget(data) {
       let size = 7;
       let s1 = size + ('channel' in data ? 1 : 0);
@@ -247,6 +279,10 @@ service cloud.firestore {
         data.categoryIds is list &&
         (!('month' in data) || (data.month is number && data.month >= 1 && data.month <= 12)) &&
         (!('year' in data) || data.year is number);
+    }
+
+    function isValidMonthlyClosing(data) {
+      return isValidAccountMonthlyClosing(data) && data.userId == request.auth.uid;
     }
 
     match /users/{userId}/transactions/{transactionId} {
@@ -420,6 +456,23 @@ service cloud.firestore {
         incoming().diff(existing()).affectedKeys().hasOnly([
           'name', 'limitAmount', 'categoryIds', 'month', 'year', 'updatedAt'
         ]);
+
+      allow delete: if isSignedIn() && userId == request.auth.uid;
+    }
+
+    match /users/{userId}/monthly-closings/{closingId} {
+      allow read: if isSignedIn() && userId == request.auth.uid && resource.data.userId == request.auth.uid;
+
+      allow create: if isSignedIn() &&
+        userId == request.auth.uid &&
+        isValidId(closingId) &&
+        isValidMonthlyClosing(incoming());
+
+      allow update: if isSignedIn() &&
+        userId == request.auth.uid &&
+        isValidId(closingId) &&
+        isValidMonthlyClosing(incoming()) &&
+        incoming().userId == existing().userId;
 
       allow delete: if isSignedIn() && userId == request.auth.uid;
     }
@@ -823,6 +876,23 @@ service cloud.firestore {
         incoming().diff(existing()).affectedKeys().hasOnly([
           'name', 'limitAmount', 'categoryIds', 'month', 'year', 'updatedAt'
         ]);
+
+      allow delete: if isAccountMember(accountId) &&
+        (isAccountOwnerOrAdmin(accountId) || existing().userId == request.auth.uid);
+    }
+
+    match /accounts/{accountId}/monthly-closings/{closingId} {
+      allow read: if isAccountMember(accountId);
+
+      allow create: if isAccountMember(accountId) &&
+        isValidId(closingId) &&
+        isValidAccountMonthlyClosing(incoming()) &&
+        incoming().userId == request.auth.uid;
+
+      allow update: if isAccountMember(accountId) &&
+        isValidId(closingId) &&
+        isValidAccountMonthlyClosing(incoming()) &&
+        incoming().userId == existing().userId;
 
       allow delete: if isAccountMember(accountId) &&
         (isAccountOwnerOrAdmin(accountId) || existing().userId == request.auth.uid);

@@ -36,3 +36,23 @@ export function buildMonthlyClosingEntries({
     })
     .sort((a, b) => b.year - a.year || b.month - a.month);
 }
+
+export function getMonthlyClosingTransactions({
+  transactions,
+  activeContext,
+  year,
+  month,
+}: {
+  transactions: Transaction[];
+  activeContext: ContextType;
+  year: number;
+  month: number;
+}) {
+  return transactions
+    .filter((tx) => {
+      if (tx.context !== activeContext) return false;
+      const date = new Date(`${tx.date}T00:00:00`);
+      return date.getFullYear() === year && date.getMonth() + 1 === month;
+    })
+    .sort((a, b) => a.date.localeCompare(b.date) || a.title.localeCompare(b.title));
+}

@@ -3,7 +3,7 @@ import { useFinance } from '../hooks/useFinance';
 import { formatCurrency } from '../lib/utils';
 import { format } from 'date-fns';
 import { Lock, Unlock, ChevronDown, ChevronUp, FileText } from 'lucide-react';
-import { buildMonthlyClosingEntries } from '../lib/monthlyClosingEntries';
+import { buildMonthlyClosingEntries, getMonthlyClosingTransactions } from '../lib/monthlyClosingEntries';
 
 const MONTH_NAMES = [
   'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
@@ -15,6 +15,7 @@ export function MonthlyClosingView() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [closeNotes, setCloseNotes] = useState('');
   const [closingTarget, setClosingTarget] = useState<{ year: number; month: number } | null>(null);
+  const [showReviewTransactions, setShowReviewTransactions] = useState(false);
 
   const contextTxs = transactions.filter((t) => t.context === activeContext);
   const entries = useMemo(() => buildMonthlyClosingEntries({
@@ -43,6 +44,7 @@ export function MonthlyClosingView() {
     await closeMonth(closingTarget.year, closingTarget.month, closeNotes);
     setClosingTarget(null);
     setCloseNotes('');
+    setShowReviewTransactions(false);
   };
 
   return (
@@ -186,7 +188,7 @@ export function MonthlyClosingView() {
 
       {closingTarget && (
         <div className="fixed inset-0 z-50 bg-black/35 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="clay p-6 w-full max-w-md">
+          <div className="clay p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <h3 className="text-lg font-bold text-gray-900 mb-2">
               Fechar {MONTH_NAMES[closingTarget.month - 1]} / {closingTarget.year}
             </h3>
@@ -205,6 +207,39 @@ export function MonthlyClosingView() {
                 );
               })()}
             </div>
+            <button
+              type="button"
+              onClick={() => setShowReviewTransactions((value) => !value)}
+              className="mb-3 w-full px-3 py-2 text-xs font-bold text-primary border border-primary/30 rounded-md bg-primary/5 hover:bg-primary/10 cursor-pointer"
+            >
+              {showReviewTransactions ? 'Ocultar transações do mês' : 'Ver transações do mês'}
+            </button>
+            {showReviewTransactions && (
+              <div className="mb-4 max-h-56 overflow-auto border border-slate-200 rounded-md bg-white">
+                <table className="w-full text-xs">
+                  <thead className="sticky top-0 bg-slate-50 text-slate-500 uppercase tracking-wide">
+                    <tr>
+                      <th className="text-left px-2 py-2">Data</th>
+                      <th className="text-left px-2 py-2">Descrição</th>
+                      <th className="text-left px-2 py-2">Status</th>
+                      <th className="text-right px-2 py-2">Valor</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {getMonthlyClosingTransactions({ transactions, activeContext, year: closingTarget.year, month: closingTarget.month }).map((tx) => (
+                      <tr key={tx.id} className="border-t border-slate-100">
+                        <td className="px-2 py-1.5 text-slate-500 whitespace-nowrap">{format(new Date(`${tx.date}T00:00:00`), 'dd/MM/yyyy')}</td>
+                        <td className="px-2 py-1.5 text-slate-700 min-w-[140px]">{tx.title}</td>
+                        <td className="px-2 py-1.5 text-slate-500 whitespace-nowrap">{tx.status === 'PAID' ? 'Pago' : 'Pendente'}</td>
+                        <td className={`px-2 py-1.5 text-right font-mono whitespace-nowrap ${tx.type === 'INCOME' ? 'text-emerald-600' : 'text-rose-600'}`}>
+                          {tx.type === 'INCOME' ? '+' : '-'}{formatCurrency(tx.amount)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
             <textarea
               placeholder="Observações (opcional)"
               value={closeNotes}
@@ -214,7 +249,7 @@ export function MonthlyClosingView() {
             />
             <div className="flex gap-3">
               <button
-                onClick={() => { setClosingTarget(null); setCloseNotes(''); }}
+                onClick={() => { setClosingTarget(null); setCloseNotes(''); setShowReviewTransactions(false); }}
                 className="flex-1 clay-btn font-medium py-2 text-sm cursor-pointer border-none"
               >
                 Cancelar
