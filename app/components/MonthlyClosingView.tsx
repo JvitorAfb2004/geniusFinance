@@ -2,9 +2,8 @@ import React, { useMemo, useState } from 'react';
 import { useFinance } from '../hooks/useFinance';
 import { formatCurrency } from '../lib/utils';
 import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
-import { Lock, Unlock, Eye, ChevronDown, ChevronUp, FileText } from 'lucide-react';
-import type { MonthlyClosing } from '../types';
+import { Lock, Unlock, ChevronDown, ChevronUp, FileText } from 'lucide-react';
+import { buildMonthlyClosingEntries } from '../lib/monthlyClosingEntries';
 
 const MONTH_NAMES = [
   'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
@@ -17,28 +16,12 @@ export function MonthlyClosingView() {
   const [closeNotes, setCloseNotes] = useState('');
   const [closingTarget, setClosingTarget] = useState<{ year: number; month: number } | null>(null);
 
-  const years = useMemo(() => {
-    const set = new Set<number>();
-    for (const c of monthlyClosings) set.add(c.year);
-    const currentYear = new Date().getFullYear();
-    for (let y = currentYear - 2; y <= currentYear + 1; y++) set.add(y);
-    return Array.from(set).sort((a, b) => b - a);
-  }, [monthlyClosings]);
-
-  const entries = useMemo(() => {
-    const list: { year: number; month: number; closing?: MonthlyClosing; exists: boolean }[] = [];
-    const closingMap = new Map(monthlyClosings.map((c) => [`${c.year}-${c.month}`, c]));
-    for (const year of years) {
-      for (let m = 12; m >= 1; m--) {
-        const key = `${year}-${m}`;
-        const closing = closingMap.get(key);
-        list.push({ year, month: m, closing, exists: !!closing });
-      }
-    }
-    return list;
-  }, [monthlyClosings, years]);
-
   const contextTxs = transactions.filter((t) => t.context === activeContext);
+  const entries = useMemo(() => buildMonthlyClosingEntries({
+    transactions,
+    monthlyClosings,
+    activeContext,
+  }), [transactions, monthlyClosings, activeContext]);
 
   const computeClosingData = (year: number, month: number) => {
     const monthTxs = contextTxs.filter(
