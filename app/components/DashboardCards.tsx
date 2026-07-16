@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router';
 import { useFinance } from '../hooks/useFinance';
 import { formatCurrency, cn } from '../lib/utils';
 import { addDays, endOfDay, format, isSameMonth, isWithinInterval, parseISO, startOfDay } from 'date-fns';
@@ -41,6 +42,7 @@ const ALL_WIDGETS = [
 
 export function DashboardCards({ valuesVisible = true }: { valuesVisible?: boolean }) {
   const { transactions, activeContext, selectedMonth, activeScope, monthlyClosings } = useFinance();
+  const navigate = useNavigate();
   const [widgets, setWidgets] = useState<string[]>(loadWidgets);
   const [editing, setEditing] = useState(false);
   const [draggingWidgetId, setDraggingWidgetId] = useState<string | null>(null);
@@ -235,9 +237,9 @@ export function DashboardCards({ valuesVisible = true }: { valuesVisible?: boole
         );
         if (!currentClosing) {
           return (
-            <a href="/monthly-closing" className="block mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800 font-medium hover:bg-amber-100 transition-colors">
+            <button onClick={() => navigate('/monthly-closing')} className="block w-full text-left mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800 font-medium hover:bg-amber-100 transition-colors cursor-pointer border-none">
               Mês de {format(selectedMonth, 'MMMM/yyyy', { locale: ptBR })} ainda não foi fechado. Clique para registrar.
-            </a>
+            </button>
           );
         }
         if (currentClosing.status === 'CLOSED') {
