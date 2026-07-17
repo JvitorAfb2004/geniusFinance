@@ -3,7 +3,7 @@ import { useFinance } from './useFinance';
 import type { ModuleName, ModuleAction, MemberPermissions } from '../types';
 
 const MODULES: ModuleName[] = [
-  'dashboard', 'transactions', 'fixed_monthly', 'credit_cards',
+  'dashboard', 'transactions', 'fixed_monthly',
   'dre', 'budget', 'sales', 'goals', 'reports',
   'leads', 'projects', 'service_types',
 ];
@@ -11,7 +11,7 @@ const MODULES: ModuleName[] = [
 const FULL_PERMISSIONS: MemberPermissions = Object.freeze(
   MODULES.reduce((acc, m) => ({
     ...acc,
-    [m]: (m === 'dashboard' || m === 'dre' || m === 'reports' || m === 'fixed_monthly' || m === 'credit_cards'
+    [m]: (m === 'dashboard' || m === 'dre' || m === 'reports' || m === 'fixed_monthly'
       ? ['view']
       : ['view', 'create', 'edit', 'delete']) as ModuleAction[],
   }), {} as MemberPermissions)

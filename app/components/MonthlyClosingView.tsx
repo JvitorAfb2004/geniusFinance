@@ -26,17 +26,17 @@ export function MonthlyClosingView() {
 
   const computeClosingData = (year: number, month: number) => {
     const monthTxs = contextTxs.filter(
-      (t) => new Date(t.date).getFullYear() === year && new Date(t.date).getMonth() + 1 === month
+      (t) => t.type !== 'CREDIT_CARD' && new Date(t.date).getFullYear() === year && new Date(t.date).getMonth() + 1 === month
     );
     const totalIncome = monthTxs.filter((t) => t.type === 'INCOME').reduce((s, t) => s + t.amount, 0);
     const totalExpense = monthTxs.filter((t) => t.type === 'EXPENSE').reduce((s, t) => s + t.amount, 0);
-    const totalCreditCard = monthTxs.filter((t) => t.type === 'CREDIT_CARD').reduce((s, t) => s + t.amount, 0);
-    const closedClosings = monthlyClosings.filter(
-      (c) => c.context === activeContext && c.status === 'CLOSED'
-    ).sort((a, b) => b.year - a.year || b.month - a.month);
-    const opening = closedClosings.length > 0 ? closedClosings[0].closingBalance : 0;
-    const balance = totalIncome - totalExpense - totalCreditCard;
-    return { totalIncome, totalExpense, totalCreditCard, balance, openingBalance: opening, closingBalance: opening + balance };
+    const prevKey = month === 1 ? `${year - 1}-12` : `${year}-${String(month - 1).padStart(2, '0')}`;
+    const prevClosing = monthlyClosings.find(
+      (c) => c.context === activeContext && c.status === 'CLOSED' && `${c.year}-${c.month}` === prevKey
+    );
+    const opening = prevClosing ? prevClosing.closingBalance : 0;
+    const balance = totalIncome - totalExpense;
+    return { totalIncome, totalExpense, balance, openingBalance: opening, closingBalance: opening + balance };
   };
 
   const handleClose = async () => {
@@ -65,7 +65,7 @@ export function MonthlyClosingView() {
                 <th className="text-left py-3 px-3">Competência</th>
                 <th className="text-right py-3 px-3">Receitas</th>
                 <th className="text-right py-3 px-3">Despesas</th>
-                <th className="text-right py-3 px-3">Cartão</th>
+
                 <th className="text-right py-3 px-3">Saldo</th>
                 <th className="text-center py-3 px-3">Status</th>
                 <th className="text-center py-3 px-3">Ações</th>
@@ -90,12 +90,9 @@ export function MonthlyClosingView() {
                       <td className="py-2.5 px-3 text-right text-rose-600 font-mono text-xs">
                         {formatCurrency(data.totalExpense)}
                       </td>
-                      <td className="py-2.5 px-3 text-right text-amber-600 font-mono text-xs">
-                        {formatCurrency(data.totalCreditCard)}
-                      </td>
                       <td className="py-2.5 px-3 text-right font-mono text-xs font-bold">
-                        <span className={data.closingBalance >= 0 ? 'text-emerald-600' : 'text-rose-600'}>
-                          {formatCurrency(data.closingBalance)}
+                        <span className={data.balance >= 0 ? 'text-emerald-600' : 'text-rose-600'}>
+                          {formatCurrency(data.balance)}
                         </span>
                       </td>
                       <td className="py-2.5 px-3 text-center">
@@ -199,7 +196,7 @@ export function MonthlyClosingView() {
                   <>
                     <div className="flex justify-between"><span className="text-slate-500">Receitas</span><span className="text-emerald-600 font-mono">{formatCurrency(data.totalIncome)}</span></div>
                     <div className="flex justify-between"><span className="text-slate-500">Despesas</span><span className="text-rose-600 font-mono">{formatCurrency(data.totalExpense)}</span></div>
-                    <div className="flex justify-between"><span className="text-slate-500">Cartão</span><span className="text-amber-600 font-mono">{formatCurrency(data.totalCreditCard)}</span></div>
+
                     <div className="flex justify-between border-t border-slate-200 pt-2 font-bold"><span>Saldo do Mês</span><span className={data.balance >= 0 ? 'text-emerald-600' : 'text-rose-600'}>{formatCurrency(data.balance)}</span></div>
                     <div className="flex justify-between text-xs text-slate-500"><span>Saldo Inicial</span><span>{formatCurrency(data.openingBalance)}</span></div>
                     <div className="flex justify-between text-xs font-bold"><span>Saldo Final</span><span className={data.closingBalance >= 0 ? 'text-emerald-600' : 'text-rose-600'}>{formatCurrency(data.closingBalance)}</span></div>

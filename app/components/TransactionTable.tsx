@@ -14,13 +14,13 @@ export function TransactionTable({
   fixedOnly
 }: { 
   hideHeaderTitle?: boolean;
-  forceFilter?: 'ALL' | 'INCOME' | 'EXPENSE' | 'CREDIT_CARD';
+  forceFilter?: 'ALL' | 'INCOME' | 'EXPENSE';
   fixedOnly?: boolean;
 }) {
   const { transactions, activeContext, selectedMonth, toggleStatus, deleteTransaction, updateTransaction, categories, tags } = useFinance();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTx, setEditingTx] = useState<Transaction | undefined>(undefined);
-  const [filterType, setFilterType] = useState<'ALL' | 'INCOME' | 'EXPENSE' | 'CREDIT_CARD'>('ALL');
+  const [filterType, setFilterType] = useState<'ALL' | 'INCOME' | 'EXPENSE'>('ALL');
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilterId, setCategoryFilterId] = useState('');
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'PAID' | 'PENDING'>('ALL');
@@ -57,7 +57,6 @@ export function TransactionTable({
   const txTypeLabel = (type: string | null) => {
     if (type === 'INCOME') return 'Entrada';
     if (type === 'EXPENSE') return 'Fixo/Avulso';
-    if (type === 'CREDIT_CARD') return 'Cartao';
     return 'Geral';
   };
 
@@ -93,7 +92,7 @@ export function TransactionTable({
               <option value="ALL">Todas</option>
               <option value="INCOME">Entradas</option>
               <option value="EXPENSE">Despesas</option>
-              <option value="CREDIT_CARD">Cartão</option>
+
             </select>
           )}
           <select

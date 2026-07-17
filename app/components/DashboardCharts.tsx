@@ -39,15 +39,14 @@ export function DashboardCharts() {
       const monthEnd = endOfMonth(monthDate);
       
       const monthTxs = transactions.filter(t => 
-        t.context === activeContext &&
+        t.type !== 'CREDIT_CARD' && t.context === activeContext &&
         parseISO(t.date) >= monthStart && 
         parseISO(t.date) <= monthEnd
       );
 
       const receitas = monthTxs.filter(t => t.type === 'INCOME').reduce((a, b) => a + b.amount, 0);
       const despesasFixas = monthTxs.filter(t => t.type === 'EXPENSE').reduce((a, b) => a + b.amount, 0);
-      const cartao = monthTxs.filter(t => t.type === 'CREDIT_CARD').reduce((a, b) => a + b.amount, 0);
-      const despesas = despesasFixas + cartao;
+      const despesas = despesasFixas;
 
       data.push({
         name: format(monthDate, 'MMM', { locale: ptBR }),
@@ -65,7 +64,7 @@ export function DashboardCharts() {
     
     // Calculate initial accumulated balance up to the start of current month
     const pastTxs = transactions.filter(t => 
-      t.context === activeContext &&
+      t.type !== 'CREDIT_CARD' && t.context === activeContext &&
       parseISO(t.date) < startOfMonth(selectedMonth)
     );
     let accumulatedBalance = pastTxs.reduce((acc, t) => {
@@ -79,7 +78,7 @@ export function DashboardCharts() {
       const mEnd = endOfMonth(mDate);
 
       const mtxs = transactions.filter(t => 
-        t.context === activeContext &&
+        t.type !== 'CREDIT_CARD' && t.context === activeContext &&
         parseISO(t.date) >= mStart && 
         parseISO(t.date) <= mEnd
       );

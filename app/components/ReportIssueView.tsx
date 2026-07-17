@@ -8,7 +8,7 @@ const MODULES: { id: ModuleName | ''; label: string }[] = [
   { id: 'dashboard', label: 'Dashboard' },
   { id: 'transactions', label: 'Transações' },
   { id: 'fixed_monthly', label: 'Fixos Mensais' },
-  { id: 'credit_cards', label: 'Cartões' },
+
   { id: 'dre', label: 'DRE' },
   { id: 'budget', label: 'Orçamento' },
   { id: 'sales', label: 'Vendas' },

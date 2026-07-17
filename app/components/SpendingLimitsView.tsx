@@ -29,7 +29,7 @@ export function SpendingLimitsView() {
     const monthTxs = transactions.filter(
       (tx) =>
         tx.context === activeContext &&
-        (tx.type === 'EXPENSE' || tx.type === 'CREDIT_CARD') &&
+        tx.type === 'EXPENSE' &&
         tx.status === 'PAID' &&
         isSameMonth(parseISO(tx.date), selectedMonth)
     );

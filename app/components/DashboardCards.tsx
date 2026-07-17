@@ -4,7 +4,7 @@ import { useFinance } from '../hooks/useFinance';
 import { formatCurrency, cn } from '../lib/utils';
 import { addDays, endOfDay, format, isSameMonth, isWithinInterval, parseISO, startOfDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Settings2, Wallet, TrendingUp, TrendingDown, CreditCard, DollarSign, Percent, ArrowDownToLine, ArrowUpToLine, CalendarDays, CheckCircle2, Clock3 } from 'lucide-react';
+import { Settings2, Wallet, TrendingUp, TrendingDown, DollarSign, Percent, ArrowDownToLine, ArrowUpToLine, CalendarDays, CheckCircle2, Clock3 } from 'lucide-react';
 import { motion } from 'motion/react';
 
 const DEFAULT_WIDGETS = [
@@ -33,7 +33,7 @@ const ALL_WIDGETS = [
   { id: 'expense', label: 'Despesas (Mes)' },
   { id: 'expense_paid', label: 'Pagos (Mes)' },
   { id: 'expense_pending', label: 'Nao pagos (Mes)' },
-  { id: 'credit_card', label: 'Cartao (Mes)' },
+
   { id: 'payable_7d', label: 'A pagar (7 dias)' },
   { id: 'receivable_7d', label: 'A receber (7 dias)' },
   { id: 'net_profit', label: 'Lucro Liquido' },
@@ -49,12 +49,11 @@ export function DashboardCards({ valuesVisible = true }: { valuesVisible?: boole
   const scopeLabel = activeScope.type === 'PERSONAL' ? 'Pessoal' : 'Empresa';
 
   const currentMonthTxs = transactions.filter((t) =>
-    t.context === activeContext && isSameMonth(parseISO(t.date), selectedMonth)
+    t.type !== 'CREDIT_CARD' && t.context === activeContext && isSameMonth(parseISO(t.date), selectedMonth)
   );
 
   const incomes = currentMonthTxs.filter((t) => t.type === 'INCOME').reduce((s, t) => s + t.amount, 0);
   const expenses = currentMonthTxs.filter((t) => t.type === 'EXPENSE').reduce((s, t) => s + t.amount, 0);
-  const creditCard = currentMonthTxs.filter((t) => t.type === 'CREDIT_CARD').reduce((s, t) => s + t.amount, 0);
   const incomesReceived = currentMonthTxs
     .filter((t) => t.type === 'INCOME' && t.status === 'PAID')
     .reduce((sum, t) => sum + t.amount, 0);
@@ -67,7 +66,7 @@ export function DashboardCards({ valuesVisible = true }: { valuesVisible?: boole
   const expensesPending = currentMonthTxs
     .filter((t) => t.type !== 'INCOME' && t.status === 'PENDING')
     .reduce((sum, t) => sum + t.amount, 0);
-  const totalExpenses = expenses + creditCard;
+  const totalExpenses = expenses;
   const monthBalance = incomes - totalExpenses;
 
   const today = startOfDay(new Date());
@@ -148,12 +147,7 @@ export function DashboardCards({ valuesVisible = true }: { valuesVisible?: boole
         iconBg: 'bg-amber-50', iconColor: 'text-amber-600',
         accentBar: 'bg-amber-500'
       };
-      case 'credit_card': return {
-        title: 'Cartão (Mês)', value: creditCard,
-        color: 'text-amber-600', icon: CreditCard,
-        iconBg: 'bg-amber-50', iconColor: 'text-amber-600',
-        accentBar: 'bg-amber-500'
-      };
+
       case 'payable_7d': return {
         title: 'A pagar (7 dias)', value: payable7d,
         color: 'text-rose-600', icon: ArrowDownToLine,

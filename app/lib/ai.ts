@@ -198,14 +198,14 @@ Formato de cada transação:
   "title": "descrição clara e curta em português",
   "amount": número positivo (ex: 150.00),
   "date": "YYYY-MM-DD",
-  "type": "INCOME" | "EXPENSE" | "CREDIT_CARD",
+  "type": "INCOME" | "EXPENSE",
   "status": "PAID" | "PENDING"
 }
 
 Regras:
 - INCOME = receitas, entradas, salário, renda, dinheiro recebido, vendas
 - EXPENSE = despesas, gastos, saídas, contas, boletos
-- CREDIT_CARD = compras no cartão de crédito, faturas
+
 - PAID = pago/recebido/confirmado. PENDING = pendente/agendado
 - amount SEMPRE positivo (ex: 150.00, nunca -150.00)
 - date no formato YYYY-MM-DD. Se não tiver ano, use 2026. Se não tiver mês, use o mês mais provável.
@@ -222,7 +222,7 @@ export async function parseTransactions(input: string): Promise<
     title: string;
     amount: number;
     date: string;
-    type: "INCOME" | "EXPENSE" | "CREDIT_CARD";
+    type: "INCOME" | "EXPENSE";
     status: "PAID" | "PENDING";
   }[]
 > {

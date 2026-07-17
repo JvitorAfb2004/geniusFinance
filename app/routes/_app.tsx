@@ -6,7 +6,7 @@ import { TrialModal } from "~/components/TrialModal";
 import { MobileBottomNav } from "~/components/MobileBottomNav";
 import { getProtectedLoginPath } from "~/lib/authRedirect";
 import {
-  PieChart, List, CreditCard, Calendar, Settings, FileBarChart, X,
+  PieChart, List, Calendar, Settings, FileBarChart, X,
   Calculator, TrendingUp, Target, Users, Kanban, Layers, ShoppingCart,
   ShieldCheck, Bug, Clock, Gauge, PanelLeftClose, PanelLeftOpen, Sparkles,
 } from "lucide-react";
@@ -159,7 +159,7 @@ export default function AppLayout() {
     { path: "/cash-calendar", label: "Calendário", icon: Calendar },
     { path: "/monthly-closing", label: "Fechamento Mensal", icon: FileBarChart },
     { path: "/fixed-monthly", label: "Fixos Mensais", icon: Calendar },
-    { path: "/credit-cards", label: "Cartões de Crédito", icon: CreditCard },
+
     { path: "/dre", label: "DRE", icon: Calculator },
     { path: "/budget", label: "Orçamento", icon: TrendingUp },
     { path: "/spending-limits", label: "Limites", icon: Gauge },
@@ -242,7 +242,7 @@ export default function AppLayout() {
         <nav className="flex flex-col flex-1 overflow-y-auto gap-3.5">
           <SidebarSection label="Financeiro" isCollapsed={isCollapsed} />
           <div className="flex flex-col gap-0.5">
-            {menuItems.filter(i => ["/dashboard","/cash-calendar","/monthly-closing","/fixed-monthly","/credit-cards","/dre","/budget","/spending-limits","/sales","/goals","/reports","/ai-chat"].includes(i.path)).map(item => (
+            {menuItems.filter(i => ["/dashboard","/cash-calendar","/monthly-closing","/fixed-monthly","/dre","/budget","/spending-limits","/sales","/goals","/reports","/ai-chat"].includes(i.path)).map(item => (
               <SidebarItem key={item.path} item={item} isCollapsed={isCollapsed} isActive={isActive(item.path)} onClick={() => navigateTo(item.path)} />
             ))}
           </div>

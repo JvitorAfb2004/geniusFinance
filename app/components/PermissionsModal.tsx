@@ -6,7 +6,7 @@ const MODULES: { id: ModuleName; label: string; actions: ModuleAction[] }[] = [
   { id: 'dashboard', label: 'Dashboard', actions: ['view'] },
   { id: 'transactions', label: 'Transações', actions: ['view', 'create', 'edit', 'delete'] },
   { id: 'fixed_monthly', label: 'Fixos Mensais', actions: ['view', 'create', 'edit', 'delete'] },
-  { id: 'credit_cards', label: 'Cartões de Crédito', actions: ['view', 'create', 'edit', 'delete'] },
+
   { id: 'dre', label: 'DRE', actions: ['view'] },
   { id: 'budget', label: 'Orçamento', actions: ['view', 'create', 'edit', 'delete'] },
   { id: 'sales', label: 'Vendas', actions: ['view', 'create', 'edit', 'delete'] },

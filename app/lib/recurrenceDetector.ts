@@ -4,7 +4,7 @@ import { addMonths, format, parseISO } from 'date-fns';
 interface RecurrenceSuggestion {
   title: string;
   amount: number;
-  type: 'INCOME' | 'EXPENSE' | 'CREDIT_CARD';
+  type: 'INCOME' | 'EXPENSE';
   months: string[];
   confidence: number;
 }

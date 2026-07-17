@@ -10,7 +10,7 @@ interface ParsedTx {
   title: string;
   amount: number;
   date: string;
-  type: 'INCOME' | 'EXPENSE' | 'CREDIT_CARD';
+  type: 'INCOME' | 'EXPENSE';
   status: 'PAID' | 'PENDING';
   categoryId: string;
 }
@@ -275,7 +275,7 @@ export default function ImportView() {
                           <select value={editForm.type || 'EXPENSE'} onChange={(e) => setEditForm((f) => ({ ...f, type: e.target.value as ParsedTx['type'] }))} className="border border-slate-300 rounded px-2 py-1 text-xs cursor-pointer">
                             <option value="INCOME">Entrada</option>
                             <option value="EXPENSE">Despesa</option>
-                            <option value="CREDIT_CARD">Cartão</option>
+
                           </select>
                         </td>
                         <td className="py-1.5 px-3">
@@ -305,10 +305,9 @@ export default function ImportView() {
                         <td className="py-1.5 px-3 text-center">
                           <span className={`text-xs px-1.5 py-0.5 rounded font-medium ${
                             tx.type === 'INCOME' ? 'bg-emerald-50 text-emerald-700' :
-                            tx.type === 'CREDIT_CARD' ? 'bg-blue-50 text-blue-700' :
                             'bg-rose-50 text-rose-700'
                           }`}>
-                            {tx.type === 'INCOME' ? 'Entrada' : tx.type === 'CREDIT_CARD' ? 'Cartão' : 'Despesa'}
+                            {tx.type === 'INCOME' ? 'Entrada' : 'Despesa'}
                           </span>
                         </td>
                         <td className="py-1.5 px-3 text-center">

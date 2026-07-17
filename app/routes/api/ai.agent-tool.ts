@@ -18,7 +18,7 @@ interface TransactionDoc {
   id: string;
   userId: string;
   context: string;
-  type: 'INCOME' | 'EXPENSE' | 'CREDIT_CARD';
+  type: 'INCOME' | 'EXPENSE';
   title: string;
   amount: number;
   date: string;

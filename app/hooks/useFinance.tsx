@@ -389,23 +389,19 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
     if (!user) return;
     const contextValue: ContextType = activeScope.type === 'PERSONAL' ? 'PERSONAL' : 'BUSINESS';
     const monthTxs = transactions.filter(
-      (t) => t.context === contextValue &&
+      (t) => t.type !== 'CREDIT_CARD' && t.context === contextValue &&
         new Date(t.date).getFullYear() === year &&
         new Date(t.date).getMonth() + 1 === month
     );
     const totalIncome = monthTxs.filter((t) => t.type === 'INCOME').reduce((s, t) => s + t.amount, 0);
     const totalExpense = monthTxs.filter((t) => t.type === 'EXPENSE').reduce((s, t) => s + t.amount, 0);
-    const totalCreditCard = monthTxs.filter((t) => t.type === 'CREDIT_CARD').reduce((s, t) => s + t.amount, 0);
-    const balance = totalIncome - totalExpense - totalCreditCard;
+    const balance = totalIncome - totalExpense;
 
+    const prevKey = month === 1 ? `${year - 1}-12` : `${year}-${String(month - 1).padStart(2, '0')}`;
     const prevClosing = monthlyClosings.find(
-      (c) => c.context === contextValue && c.status === 'CLOSED' &&
-        (c.year < year || (c.year === year && c.month < month))
+      (c) => c.context === contextValue && c.status === 'CLOSED' && `${c.year}-${c.month}` === prevKey
     );
-    const sorted = monthlyClosings
-      .filter((c) => c.context === contextValue && c.status === 'CLOSED')
-      .sort((a, b) => b.year - a.year || b.month - a.month);
-    const openingBalance = sorted.length > 0 ? sorted[0].closingBalance : 0;
+    const openingBalance = prevClosing ? prevClosing.closingBalance : 0;
     const closingBalance = openingBalance + balance;
 
     const existingId = `${year}-${String(month).padStart(2, '0')}`;
@@ -422,7 +418,7 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
         status: 'CLOSED',
         totalIncome,
         totalExpense,
-        totalCreditCard,
+
         balance,
         openingBalance,
         closingBalance,

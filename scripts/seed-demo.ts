@@ -6,7 +6,7 @@ import { DEFAULT_CATEGORIES } from "../app/lib/categories";
 import { ALL_DEFAULT_LEAD_OPTIONS } from "../app/lib/leadDefaults";
 
 type ContextType = "BUSINESS";
-type TransactionType = "INCOME" | "EXPENSE" | "CREDIT_CARD";
+type TransactionType = "INCOME" | "EXPENSE";
 type TransactionStatus = "PENDING" | "PAID";
 
 function formatYmd(date: Date) {
@@ -414,7 +414,7 @@ async function main() {
   for (let i = 1; i <= 6; i++) {
     mkTx({
       context: "BUSINESS",
-      type: "CREDIT_CARD",
+      type: "EXPENSE",
       title: "Notebook (parcelado)",
       amount: 650,
       date: formatYmd(addMonths(thisMonthStart, -(6 - i))),

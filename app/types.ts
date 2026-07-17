@@ -1,9 +1,9 @@
 import { User } from 'firebase/auth';
 
 export type ContextType = 'PERSONAL' | 'BUSINESS';
-export type TransactionType = 'INCOME' | 'EXPENSE' | 'CREDIT_CARD';
+export type TransactionType = 'INCOME' | 'EXPENSE' | 'CREDIT_CARD'; // Deprecated: keep for existing data
 export type TransactionStatus = 'PENDING' | 'PAID';
-export type ViewType = 'DASHBOARD' | 'TRANSACTIONS' | 'CREDIT_CARDS' | 'FIXED_MONTHLY' | 'REPORTS' | 'SETTINGS' | 'DRE' | 'BUDGET' | 'SALES' | 'IMPORT' | 'CALCULATORS' | 'GOALS' | 'COMMERCIAL' | 'PROJECTS' | 'SERVICE_TYPES' | 'SUBSCRIPTION' | 'ADMIN_PLANS' | 'ADMIN_SUBS' | 'ADMIN_REPORTS' | 'REPORT_ISSUE';
+export type ViewType = 'DASHBOARD' | 'TRANSACTIONS' | 'FIXED_MONTHLY' | 'REPORTS' | 'SETTINGS' | 'DRE' | 'BUDGET' | 'SALES' | 'IMPORT' | 'CALCULATORS' | 'GOALS' | 'COMMERCIAL' | 'PROJECTS' | 'SERVICE_TYPES' | 'SUBSCRIPTION' | 'ADMIN_PLANS' | 'ADMIN_SUBS' | 'ADMIN_REPORTS' | 'REPORT_ISSUE';
 export type AccountRole = 'owner' | 'admin' | 'member';
 export type ActiveScope =
   | { type: 'PERSONAL'; userId: string }
@@ -46,7 +46,7 @@ export interface Account {
 export type ModuleAction = 'view' | 'create' | 'edit' | 'delete';
 
 export type ModuleName =
-  | 'dashboard' | 'transactions' | 'fixed_monthly' | 'credit_cards'
+  | 'dashboard' | 'transactions' | 'fixed_monthly'
   | 'dre' | 'budget' | 'sales' | 'goals' | 'reports'
   | 'leads' | 'projects' | 'service_types';
 

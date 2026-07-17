@@ -12,13 +12,13 @@ export function FixedMonthlyView() {
   const [confirmed, setConfirmed] = useState<Set<string>>(new Set());
 
   const currentTxs = transactions.filter((t) =>
-    t.context === activeContext &&
+    t.type !== 'CREDIT_CARD' && t.context === activeContext &&
     t.isFixed &&
     isSameMonth(parseISO(t.date), selectedMonth)
   );
 
   const totalFixedIncomes = currentTxs.filter((t) => t.type === 'INCOME').reduce((acc, t) => acc + t.amount, 0);
-  const totalFixedExpenses = currentTxs.filter((t) => t.type === 'EXPENSE' || t.type === 'CREDIT_CARD').reduce((acc, t) => acc + t.amount, 0);
+  const totalFixedExpenses = currentTxs.filter((t) => t.type === 'EXPENSE').reduce((acc, t) => acc + t.amount, 0);
 
   const animIncomes = useAnimatedValue(totalFixedIncomes);
   const animExpenses = useAnimatedValue(totalFixedExpenses);

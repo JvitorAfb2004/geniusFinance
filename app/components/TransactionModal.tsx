@@ -13,7 +13,7 @@ import {
   pressCalculatorEquals,
   pressCalculatorOperator,
 } from '../lib/calculator';
-import { X, Search, Plus, ArrowUpCircle, ArrowDownCircle, CreditCard, CheckCircle, Clock, Check, Calculator } from 'lucide-react';
+import { X, Search, Plus, ArrowUpCircle, ArrowDownCircle, CheckCircle, Clock, Check, Calculator } from 'lucide-react';
 import { motion } from 'motion/react';
 
 export function TransactionModal({ 
@@ -358,7 +358,6 @@ export function TransactionModal({
               {[
                 { id: 'INCOME', label: 'Entrada', icon: ArrowUpCircle, activeClass: 'border-emerald-400 bg-emerald-50 text-emerald-700' },
                 { id: 'EXPENSE', label: 'Saída', icon: ArrowDownCircle, activeClass: 'border-red-400 bg-red-50 text-red-700' },
-                { id: 'CREDIT_CARD', label: 'Crédito', icon: CreditCard, activeClass: 'border-purple-400 bg-purple-50 text-purple-700' },
               ].map(opt => (
                 <button
                   key={opt.id}
@@ -691,7 +690,7 @@ export function TransactionModal({
           {!initialData ? (
             <div className="space-y-3 pt-2">
               <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider">Recorrência</label>
-              <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 gap-2">
                 {[
                   { id: 'ONE_TIME', label: 'Única' },
                   { id: 'FIXED', label: 'Fixa' },
