@@ -31,7 +31,7 @@ export function useAppContext() {
 
 function SidebarSection({ label, isCollapsed }: { label: string; isCollapsed: boolean }) {
   if (isCollapsed) return null;
-  return <div className="px-7 py-1 text-[0.62rem] font-bold text-slate-500 uppercase tracking-[0.15em] mb-1.5">{label}</div>;
+  return <div className="px-6 py-1 text-[0.62rem] font-semibold text-slate-500 uppercase tracking-[0.12em] mb-1.5">{label}</div>;
 }
 
 function SidebarItem({ item, isCollapsed, isActive, onClick, badge }: {
@@ -45,16 +45,16 @@ function SidebarItem({ item, isCollapsed, isActive, onClick, badge }: {
     <button onClick={onClick}
       title={isCollapsed ? item.label : undefined}
       className={cn(
-        "mx-3 px-4 py-2 text-[0.82rem] flex items-center gap-3 cursor-pointer rounded-xl transition-all duration-200 text-left border-none",
+        "mx-3 px-3.5 py-2 text-[0.82rem] flex items-center gap-3 cursor-pointer rounded-md transition-colors duration-150 text-left border-none",
         isCollapsed ? "w-[calc(100%-1.5rem)] justify-center px-1" : "w-[calc(100%-1.5rem)]",
         isActive
-          ? "text-white bg-white/10 font-medium shadow-[inset_2px_-2px_4px_rgba(0,0,0,0.15),inset_-2px_2px_4px_rgba(255,255,255,0.05)]"
-          : "text-slate-400 hover:text-white hover:bg-white/6"
+          ? "text-white bg-slate-800 font-medium border-l-2 border-primary"
+          : "text-slate-400 hover:text-white hover:bg-slate-800/60"
       )}>
-      <item.icon className={cn("w-4 h-4 transition-opacity shrink-0", isActive ? "opacity-100 text-primary" : "opacity-60")} />
+      <item.icon className={cn("w-4 h-4 shrink-0", isActive ? "text-primary" : "text-slate-500")} />
       {!isCollapsed && item.label}
       {!isCollapsed && badge != null && badge > 0 && (
-        <span className="ml-auto bg-red-500 text-white text-[0.62rem] font-bold px-1.5 py-0.5 rounded-full min-w-[1.25rem] text-center leading-none">
+        <span className="ml-auto bg-red-600 text-white text-[0.62rem] font-bold px-1.5 py-0.5 rounded-full min-w-[1.25rem] text-center leading-none">
           {badge}
         </span>
       )}
@@ -70,12 +70,12 @@ function ScopeBadge() {
     : "";
 
   return (
-    <div className="mt-2.5 flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-white/6 border border-white/10">
-      <div className="w-1.5 h-1.5 rounded-full bg-primary shrink-0 animate-pulse" />
+    <div className="mt-2.5 flex items-center gap-2.5 px-3 py-2.5 rounded-md bg-slate-800/60 border border-slate-700/60">
+      <div className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
       <div className="min-w-0">
         <p className="text-[0.72rem] font-medium text-slate-200 truncate">{label}</p>
         {roleLabel && (
-          <p className="text-[0.55rem] text-slate-500 font-bold uppercase tracking-widest mt-0.5">{roleLabel}</p>
+          <p className="text-[0.55rem] text-slate-500 font-semibold uppercase tracking-widest mt-0.5">{roleLabel}</p>
         )}
       </div>
     </div>
@@ -202,16 +202,16 @@ export default function AppLayout() {
       )}
 
       <aside className={cn(
-        "fixed inset-y-0 left-0 z-50 bg-[#0b0f19] text-surface flex flex-col py-6 transform transition-all duration-300 ease-in-out lg:relative lg:translate-x-0 shrink-0",
+        "fixed inset-y-0 left-0 z-50 bg-slate-900 text-surface flex flex-col py-6 transform transition-all duration-200 ease-out lg:relative lg:translate-x-0 shrink-0",
         isCollapsed ? "w-16" : "w-60",
         isSidebarOpen ? "translate-x-0" : "-translate-x-full"
       )}>
-        <div className={cn("pb-6 border-b border-white/8 mb-5 flex flex-col gap-1", isCollapsed ? "px-3" : "px-6")}>
-          <div className="flex items-center justify-between font-bold text-[1.15rem] tracking-tight text-white">
+        <div className={cn("pb-6 border-b border-slate-800 mb-5 flex flex-col gap-1", isCollapsed ? "px-3" : "px-6")}>
+          <div className="flex items-center justify-between font-semibold text-[1.05rem] tracking-tight text-white">
             {isCollapsed ? (
-              <span className="text-[#5b7def] text-lg mx-auto">GF</span>
+              <span className="text-primary text-base mx-auto">GF</span>
             ) : (
-              <span>Genius Finance<span className="text-[#5b7def]">.</span></span>
+              <span>Genius Finance</span>
             )}
             {!isCollapsed && (
               <button className="lg:hidden text-white/60 hover:text-white transition-colors" onClick={() => setIsSidebarOpen(false)}>
@@ -219,19 +219,19 @@ export default function AppLayout() {
               </button>
             )}
           </div>
-          {!isCollapsed && <span className="text-[0.65rem] font-bold text-slate-500 uppercase tracking-wider">by geniusweb.online</span>}
+          {!isCollapsed && <span className="text-[0.65rem] font-semibold text-slate-500 uppercase tracking-wider">Plataforma de Gestão</span>}
           {!isCollapsed && <ScopeBadge />}
           {!isCollapsed && isTrial && (
-            <div className="mt-2.5 px-3 py-2.5 rounded-xl bg-amber-500/8 border border-amber-500/15 shadow-[inset_1px_-1px_3px_rgba(0,0,0,0.08),inset_-1px_1px_3px_rgba(255,255,255,0.1)]">
+            <div className="mt-2.5 px-3 py-2.5 rounded-md bg-amber-50 border-l-2 border-amber-500">
               <div className="flex items-center gap-1.5">
-                <Clock className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                <p className="text-[0.65rem] font-semibold text-amber-300 leading-tight">
+                <Clock className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+                <p className="text-[0.65rem] font-semibold text-amber-800 leading-tight">
                   Trial · {trialDaysLeft} dia(s) restante(s)
                 </p>
               </div>
               <button
                 onClick={() => navigateTo("/subscription")}
-                className="mt-2 w-full text-[0.62rem] font-bold bg-amber-500 hover:bg-amber-400 text-white py-1.5 rounded-xl shadow-[inset_1px_-1px_2px_rgba(0,0,0,0.1),inset_-1px_1px_2px_rgba(255,255,255,0.1)] transition-colors cursor-pointer border-none"
+                className="mt-2 w-full text-[0.62rem] font-bold bg-amber-500 hover:bg-amber-600 text-white py-1.5 rounded-md transition-colors cursor-pointer border-none"
               >
                 Assinar plano
               </button>
@@ -274,22 +274,22 @@ export default function AppLayout() {
           )}
         </nav>
 
-        <div className="mt-auto pt-4 flex flex-col gap-1 border-t border-white/6">
+        <div className="mt-auto pt-4 flex flex-col gap-1 border-t border-slate-800">
           <SidebarItem item={{ path: "/settings", label: "Configurações", icon: Settings }} isCollapsed={isCollapsed} isActive={isActive("/settings")} onClick={() => navigateTo("/settings")} badge={pendingInvites.length} />
           <button
             onClick={() => { signOut(); setIsSidebarOpen(false); localStorage.removeItem(TERMS_KEY); }}
             title={isCollapsed ? "Sair" : undefined}
             className={cn(
-              "mx-3 px-4 py-2.5 text-[0.85rem] flex items-center gap-3 cursor-pointer rounded-xl transition-all duration-200 text-left border-none text-red-400 shadow-[inset_1px_-1px_2px_rgba(0,0,0,0.06)] hover:bg-white/4 hover:text-red-300",
+              "mx-3 px-3.5 py-2.5 text-[0.85rem] flex items-center gap-3 cursor-pointer rounded-md transition-colors duration-150 text-left border-none text-red-400 hover:bg-slate-800/60 hover:text-red-300",
               isCollapsed ? "w-[calc(100%-1.5rem)] justify-center px-1" : "w-[calc(100%-1.5rem)]"
             )}
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 opacity-60 shrink-0"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
             {!isCollapsed && "Sair"}
           </button>
           <button
             onClick={toggleCollapse}
-            className="hidden lg:flex mx-3 px-4 py-2 text-[0.85rem] items-center gap-3 cursor-pointer rounded-xl transition-all duration-200 text-left border-none text-slate-500 hover:text-white hover:bg-white/6 w-[calc(100%-1.5rem)] justify-center"
+            className="hidden lg:flex mx-3 px-3.5 py-2 text-[0.85rem] items-center gap-3 cursor-pointer rounded-md transition-colors duration-150 text-left border-none text-slate-500 hover:text-white hover:bg-slate-800/60 w-[calc(100%-1.5rem)] justify-center"
             title={isCollapsed ? "Expandir menu" : "Minimizar menu"}
           >
             {isCollapsed ? <PanelLeftOpen className="w-4 h-4" /> : <PanelLeftClose className="w-4 h-4" />}

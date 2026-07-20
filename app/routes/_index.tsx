@@ -131,27 +131,27 @@ export default function Index() {
   return (
     <div className="min-h-[100dvh] bg-bg text-text-primary overflow-x-hidden selection:bg-primary/20 selection:text-primary">
       {/* Header */}
-      <header className="sticky top-0 z-20 backdrop-blur-md bg-bg/80 border-b border-border transition-all duration-300">
+      <header className="sticky top-0 z-20 backdrop-blur-md bg-bg/85 border-b border-border transition-colors duration-150">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 py-4 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0">
-            <img src="/icon.svg" alt="Genius Finance" className="w-10 h-10 hover:rotate-12 transition-transform duration-300" />
+            <img src="/icon.svg" alt="Genius Finance" className="w-9 h-9" />
             <div className="min-w-0">
-              <div className="font-extrabold tracking-tight text-lg leading-none">
-                Genius <span className="text-primary bg-gradient-to-r from-primary to-success bg-clip-text text-transparent">Finance</span>
+              <div className="font-semibold tracking-tight text-base leading-none text-text-primary">
+                Genius Finance
               </div>
-              <div className="text-[0.7rem] sm:text-[0.75rem] text-text-muted leading-none mt-1.5 font-medium">Gestão unificada de finanças e projetos</div>
+              <div className="text-[0.7rem] sm:text-[0.75rem] text-text-secondary leading-none mt-1.5 font-medium">Plataforma de Gestão Financeira</div>
             </div>
           </div>
 
-          <nav className="hidden md:flex items-center gap-8 text-sm font-semibold text-text-secondary">
-            <a className="hover:text-primary transition-colors relative after:absolute after:bottom-[-22px] after:left-0 after:w-0 hover:after:w-full after:h-0.5 after:bg-primary after:transition-all after:duration-300" href="#features">Recursos</a>
-            <a className="hover:text-primary transition-colors relative after:absolute after:bottom-[-22px] after:left-0 after:w-0 hover:after:w-full after:h-0.5 after:bg-primary Image after:transition-all after:duration-300" href="#prints">Telas do Sistema</a>
-            <a className="hover:text-primary transition-colors relative after:absolute after:bottom-[-22px] after:left-0 after:w-0 hover:after:w-full after:h-0.5 after:bg-primary after:transition-all after:duration-300" href="#faq">Dúvidas Comuns</a>
+          <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-text-secondary">
+            <a className="hover:text-primary transition-colors relative after:absolute after:bottom-[-22px] after:left-0 after:w-0 hover:after:w-full after:h-0.5 after:bg-primary after:transition-all after:duration-200" href="#features">Recursos</a>
+            <a className="hover:text-primary transition-colors relative after:absolute after:bottom-[-22px] after:left-0 after:w-0 hover:after:w-full after:h-0.5 after:bg-primary after:transition-all after:duration-200" href="#prints">Telas do Sistema</a>
+            <a className="hover:text-primary transition-colors relative after:absolute after:bottom-[-22px] after:left-0 after:w-0 hover:after:w-full after:h-0.5 after:bg-primary after:transition-all after:duration-200" href="#faq">Dúvidas</a>
           </nav>
 
           <Link
             to={topCta.to}
-            className="clay-btn-primary font-bold px-5 py-2.5 text-sm"
+            className="clay-btn-primary font-semibold px-5 py-2.5 text-sm"
           >
             {topCta.label}
           </Link>
@@ -161,37 +161,37 @@ export default function Index() {
       <main>
         {/* Hero Section */}
         <section ref={heroRef} className="relative overflow-hidden pt-8 pb-16 sm:py-24">
-          <div className="absolute -top-40 -right-40 w-[550px] h-[550px] bg-primary/10 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-40 -left-40 w-[550px] h-[550px] bg-success/8 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -top-40 -right-40 w-[480px] h-[480px] bg-primary/5 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-40 -left-40 w-[480px] h-[480px] bg-primary/5 rounded-full blur-3xl pointer-events-none" />
 
           <div className="mx-auto max-w-6xl px-4 sm:px-6">
             <div className="grid lg:grid-cols-2 gap-12 items-center">
               <div>
-                <div className="gsap-hero-badge inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3.5 py-1.5 text-xs font-semibold text-primary">
-                  <span className="w-2 h-2 rounded-full bg-success" />
+                <div className="gsap-hero-badge inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-medium text-text-secondary">
+                  <span className="w-2 h-2 rounded-full bg-primary" />
                   Plataforma Integrada de Finanças e Projetos
                 </div>
-                <h1 className="gsap-hero-title mt-5 text-4xl sm:text-5xl font-extrabold tracking-tight leading-tight">
+                <h1 className="gsap-hero-title mt-5 text-4xl sm:text-5xl font-extrabold tracking-tight leading-tight text-text-primary">
                   Tome o controle do seu negócio.
-                  <span className="block mt-2 bg-gradient-to-r from-primary via-blue-500 to-success bg-clip-text text-transparent">Gestão simples e profissional.</span>
+                  <span className="block mt-2 text-primary">Gestão simples e profissional.</span>
                 </h1>
                 <p className="gsap-hero-desc mt-6 text-base sm:text-lg text-text-secondary leading-relaxed max-w-xl">
-                  O Genius Finance integra controle financeiro, CRM de vendas e projetos Kanban de forma simples. Acompanhe seus números e tome decisões com máxima clareza.
+                  O Genius Finance integra controle financeiro, CRM de vendas e projetos Kanban de forma simples. Acompanhe seus números e tome decisões com clareza.
                 </p>
 
                 <div className="gsap-hero-ctas mt-8">
                   <div className="flex flex-col sm:flex-row gap-4 sm:items-center">
                     <Link
                       to="/login"
-                      className="clay-btn-primary font-bold px-6 py-3.5 text-sm"
+                      className="clay-btn-primary font-semibold px-6 py-3.5 text-sm"
                     >
                       Começar grátis agora
                     </Link>
                     <a
                       href="#prints"
-                      className="inline-flex items-center justify-center rounded-xl border border-border bg-surface hover:bg-primary/5 text-text-primary font-bold px-6 py-3.5 transition-all duration-300 hover:border-primary/30 text-center text-sm"
+                      className="inline-flex items-center justify-center rounded-md border border-slate-200 bg-white text-text-primary font-medium px-6 py-3.5 transition-colors duration-150 hover:bg-slate-50 hover:border-slate-300 text-center text-sm"
                     >
-                      Ver demonstrações reais
+                      Ver demonstrações
                     </a>
                   </div>
                   <p className="mt-3.5 text-xs text-text-muted flex items-center gap-1.5 justify-start font-medium">
@@ -207,29 +207,28 @@ export default function Index() {
               <div className="gsap-hero-image lg:pl-4 group">
                 <div 
                   onClick={() => openLightbox(0)}
-                  className="clay cursor-pointer relative overflow-hidden hover:shadow-[0_12px_40px_rgba(0,0,0,0.1)] hover:-translate-y-1.5 transition-all duration-500"
+                  className="clay cursor-pointer relative overflow-hidden hover:shadow-md transition-shadow duration-200"
                 >
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-success/10 z-0 pointer-events-none" />
                   <div className="relative aspect-[16/10] overflow-hidden">
                     <img
                       src={prints[0].src}
                       alt={prints[0].label}
-                      className="w-full h-full object-cover block transition-transform duration-700 group-hover:scale-[1.03]"
+                      className="w-full h-full object-cover block"
                       loading="lazy"
                     />
-                    <div className="absolute inset-0 bg-black/35 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all duration-300 z-10">
-                      <div className="bg-surface/95 text-text-primary px-4 py-2.5 rounded-xl text-xs font-bold shadow-lg flex items-center gap-2 backdrop-blur-sm transform translate-y-3 group-hover:translate-y-0 transition-transform duration-300">
+                    <div className="absolute inset-0 bg-black/35 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity duration-200 z-10">
+                      <div className="bg-white text-text-primary px-4 py-2.5 rounded-md text-xs font-semibold shadow-md flex items-center gap-2 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-200">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4 text-primary">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.637 10.637z" />
                         </svg>
-                        Ampliar Dashboard Inteligente
+                        Ampliar Dashboard
                       </div>
                     </div>
                   </div>
                 </div>
                 <p className="mt-3 text-center text-xs text-text-muted flex items-center justify-center gap-1.5">
                   <span className="inline-block w-1.5 h-1.5 rounded-full bg-primary" />
-                  Clique no painel para ver o sistema em tela cheia e explorar outras telas
+                  Clique no painel para ver o sistema em tela cheia
                 </p>
               </div>
             </div>
@@ -241,22 +240,22 @@ export default function Index() {
           <div className="mx-auto max-w-6xl px-4 sm:px-6">
             <div className="grid md:grid-cols-3 gap-8 text-center divide-y md:divide-y-0 md:divide-x divide-border">
               <div className="pt-6 md:pt-0 md:px-4">
-                <div className="text-3xl font-black text-primary">100% Unificado</div>
-                <h4 className="mt-2 font-bold text-text-primary">Chega de sistemas fragmentados</h4>
+                <div className="text-3xl font-bold text-primary">100% Unificado</div>
+                <h4 className="mt-2 font-semibold text-text-primary">Chega de sistemas fragmentados</h4>
                 <p className="mt-1 text-sm text-text-secondary leading-relaxed max-w-xs mx-auto">
                   A venda no CRM gera o projeto no Kanban e pré-lança a receita no financeiro automaticamente.
                 </p>
               </div>
               <div className="pt-6 md:pt-0 md:px-6">
-                <div className="text-3xl font-black text-success">+40% Produtividade</div>
-                <h4 className="mt-2 font-bold text-text-primary">Menos tempo em planilhas</h4>
+                <div className="text-3xl font-bold text-slate-900">+40% Produtividade</div>
+                <h4 className="mt-2 font-semibold text-text-primary">Menos tempo em planilhas</h4>
                 <p className="mt-1 text-sm text-text-secondary leading-relaxed max-w-xs mx-auto">
                   Automatize relatórios complexos de caixa e DRE para focar em fazer sua empresa crescer.
                 </p>
               </div>
               <div className="pt-6 md:pt-0 md:px-6">
-                <div className="text-3xl font-black text-primary-dark">7 Dias Grátis</div>
-                <h4 className="mt-2 font-bold text-text-primary">Sem cartão de crédito</h4>
+                <div className="text-3xl font-bold text-slate-900">7 Dias Grátis</div>
+                <h4 className="mt-2 font-semibold text-text-primary">Sem cartão de crédito</h4>
                 <p className="mt-1 text-sm text-text-secondary leading-relaxed max-w-xs mx-auto">
                   Cadastre-se em menos de um minuto e teste o sistema com acesso completo, sem compromissos.
                 </p>
@@ -269,8 +268,8 @@ export default function Index() {
         <section id="features" className="py-16 sm:py-20 relative">
           <div className="mx-auto max-w-6xl px-4 sm:px-6">
             <div className="text-center max-w-2xl mx-auto">
-              <div className="text-xs font-bold tracking-widest text-primary uppercase">Recursos do Sistema</div>
-              <h2 className="mt-2 text-3xl sm:text-4xl font-extrabold tracking-tight">Tudo que o seu negócio precisa em um só lugar</h2>
+              <div className="text-xs font-semibold tracking-widest text-primary uppercase">Recursos do Sistema</div>
+              <h2 className="mt-2 text-3xl sm:text-4xl font-bold tracking-tight text-text-primary">Tudo que o seu negócio precisa em um só lugar</h2>
               <p className="mt-3 text-text-secondary text-sm sm:text-base leading-relaxed">
                 Gestão comercial avançada, controle de entregas operacionais e inteligência financeira unificados e de fácil controle.
               </p>
@@ -335,14 +334,13 @@ export default function Index() {
               ].map((feature) => (
                 <div 
                   key={feature.title} 
-                  className="group clay p-6 hover:-translate-y-1.5 hover:shadow-xl transition-all duration-300 relative overflow-hidden"
+                  className="group clay p-6 hover:shadow-md hover:border-slate-300 transition-all duration-150 relative overflow-hidden"
                 >
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-                  <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center relative z-10 transition-colors group-hover:bg-primary text-primary group-hover:text-white">
-                    <span className="transition-colors">{feature.icon}</span>
+                  <div className="w-10 h-10 rounded-md bg-primary/10 border border-primary/15 flex items-center justify-center text-primary transition-colors group-hover:bg-primary group-hover:text-white group-hover:border-primary">
+                    <span>{feature.icon}</span>
                   </div>
-                  <h3 className="mt-4 font-extrabold tracking-tight text-text-primary text-base relative z-10 group-hover:text-primary transition-colors">{feature.title}</h3>
-                  <p className="mt-2.5 text-xs sm:text-sm text-text-secondary leading-relaxed relative z-10">{feature.desc}</p>
+                  <h3 className="mt-4 font-semibold tracking-tight text-text-primary text-base group-hover:text-primary transition-colors">{feature.title}</h3>
+                  <p className="mt-2.5 text-xs sm:text-sm text-text-secondary leading-relaxed">{feature.desc}</p>
                 </div>
               ))}
             </div>
@@ -353,10 +351,10 @@ export default function Index() {
         <section id="prints" className="bg-surface border-y border-border py-16 sm:py-20 relative">
           <div className="mx-auto max-w-6xl px-4 sm:px-6">
             <div className="text-center max-w-2xl mx-auto">
-              <div className="text-xs font-bold tracking-widest text-success uppercase">Por dentro do sistema</div>
-              <h2 className="mt-2 text-3xl sm:text-4xl font-extrabold tracking-tight">Telas Reais do Genius Finance</h2>
+              <div className="text-xs font-semibold tracking-widest text-text-secondary uppercase">Por dentro do sistema</div>
+              <h2 className="mt-2 text-3xl sm:text-4xl font-bold tracking-tight text-text-primary">Telas do Genius Finance</h2>
               <p className="mt-3 text-text-secondary text-sm sm:text-base leading-relaxed">
-                Navegue pelas interfaces do sistema. Clique em qualquer imagem para abrir a galeria interativa em carrossel e tela cheia.
+                Navegue pelas interfaces do sistema. Clique em qualquer imagem para abrir a galeria em tela cheia.
               </p>
             </div>
 
@@ -365,21 +363,19 @@ export default function Index() {
                 <div 
                   key={p.src} 
                   onClick={() => openLightbox(index)}
-                  className="group clay cursor-pointer relative overflow-hidden rounded-3xl hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between"
+                  className="group clay cursor-pointer relative overflow-hidden rounded-md hover:shadow-md transition-shadow duration-200 flex flex-col justify-between"
                 >
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-success/5 z-0 pointer-events-none" />
-                  
                   {/* Print Image */}
-                  <div className="relative aspect-[16/10] overflow-hidden rounded-t-2xl border-b border-border/40">
+                  <div className="relative aspect-[16/10] overflow-hidden rounded-t-md border-b border-border">
                     <img
                       src={p.src}
                       alt={p.label}
-                      className="w-full h-full object-cover block transition-transform duration-500 group-hover:scale-105"
+                      className="w-full h-full object-cover block transition-transform duration-300 group-hover:scale-[1.02]"
                       loading="lazy"
                     />
                     {/* View Overlay */}
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity duration-300 z-10">
-                      <div className="bg-surface/95 text-text-primary px-4 py-2.5 rounded-xl text-xs font-bold shadow-md flex items-center gap-2 backdrop-blur-sm transform translate-y-3 group-hover:translate-y-0 transition-all duration-300">
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity duration-200 z-10">
+                      <div className="bg-white text-text-primary px-4 py-2.5 rounded-md text-xs font-semibold shadow-md flex items-center gap-2 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-200">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-3.5 h-3.5 text-primary">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.637 10.637z" />
                         </svg>
@@ -389,12 +385,12 @@ export default function Index() {
                   </div>
 
                   {/* Card Info */}
-                  <div className="p-5 relative z-10 bg-surface flex-grow flex flex-col justify-between rounded-b-3xl">
+                  <div className="p-5 bg-surface flex-grow flex flex-col justify-between rounded-b-md">
                     <div>
-                      <h3 className="font-extrabold text-text-primary group-hover:text-primary transition-colors text-sm sm:text-base">{p.label}</h3>
+                      <h3 className="font-semibold text-text-primary group-hover:text-primary transition-colors text-sm sm:text-base">{p.label}</h3>
                       <p className="mt-1.5 text-xs text-text-secondary leading-relaxed line-clamp-2">{p.description}</p>
                     </div>
-                    <div className="mt-3.5 pt-3.5 border-t border-border/40 flex items-center justify-between text-[0.7rem] font-bold text-primary">
+                    <div className="mt-3.5 pt-3.5 border-t border-border/60 flex items-center justify-between text-[0.7rem] font-semibold text-primary">
                       <span>VER DETALHES</span>
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-3 h-3 transform group-hover:translate-x-1 transition-transform">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
@@ -410,14 +406,14 @@ export default function Index() {
         {/* Accordion FAQ Section */}
         <section id="faq" className="py-16 sm:py-20 relative max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center max-w-2xl mx-auto">
-            <div className="text-xs font-bold tracking-widest text-primary uppercase">FAQ</div>
-            <h2 className="mt-2 text-3xl sm:text-4xl font-extrabold tracking-tight">Dúvidas Frequentes</h2>
+            <div className="text-xs font-semibold tracking-widest text-primary uppercase">FAQ</div>
+            <h2 className="mt-2 text-3xl sm:text-4xl font-bold tracking-tight text-text-primary">Dúvidas Frequentes</h2>
             <p className="mt-3 text-text-secondary text-sm sm:text-base leading-relaxed">
-              Tudo o que você precisa saber para começar a gerenciar sua empresa com inteligência.
+              Tudo o que você precisa saber para começar a gerenciar sua empresa.
             </p>
           </div>
 
-          <div className="mt-12 max-w-3xl mx-auto space-y-4">
+          <div className="mt-12 max-w-3xl mx-auto space-y-3">
             {[
               { 
                 q: "O Genius Finance é difícil de usar?", 
@@ -448,23 +444,23 @@ export default function Index() {
               return (
                 <div 
                   key={item.q} 
-                  className="rounded-2xl border border-border bg-surface shadow-sm overflow-hidden transition-all duration-300"
+                  className="rounded-md border border-border bg-white overflow-hidden transition-shadow duration-150 hover:shadow-sm"
                 >
                   <button
                     onClick={() => toggleFaq(index)}
-                    className="w-full px-5 py-4 sm:py-5 flex items-center justify-between text-left font-extrabold text-sm sm:text-base text-text-primary hover:text-primary transition-colors cursor-pointer select-none"
+                    className="w-full px-5 py-4 flex items-center justify-between text-left font-semibold text-sm sm:text-base text-text-primary hover:text-primary transition-colors cursor-pointer select-none"
                   >
                     <span className="pr-4">{item.q}</span>
-                    <span className={`ml-4 flex-shrink-0 transition-transform duration-300 text-text-secondary ${isExpanded ? "rotate-180 text-primary" : ""}`}>
+                    <span className={`ml-4 flex-shrink-0 transition-transform duration-200 text-text-secondary ${isExpanded ? "rotate-180 text-primary" : ""}`}>
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
                       </svg>
                     </span>
                   </button>
                   <div 
-                    className={`transition-all duration-300 ease-in-out overflow-hidden ${isExpanded ? "max-h-52 border-t border-border/40" : "max-h-0"}`}
+                    className={`transition-all duration-200 ease-out overflow-hidden ${isExpanded ? "max-h-52 border-t border-border" : "max-h-0"}`}
                   >
-                    <div className="p-5 text-xs sm:text-sm text-text-secondary leading-relaxed bg-bg/20">
+                    <div className="p-5 text-xs sm:text-sm text-text-secondary leading-relaxed bg-slate-50">
                       {item.a}
                     </div>
                   </div>
@@ -475,29 +471,28 @@ export default function Index() {
         </section>
 
         {/* Final CTA Section */}
-        <section className="bg-primary text-white relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-white/5 rounded-full blur-3xl pointer-events-none" />
+        <section className="bg-primary text-white relative">
           <div className="mx-auto max-w-6xl px-4 sm:px-6 py-16 sm:py-20">
-            <div className="flex flex-col md:flex-row md:items-center gap-8 justify-between relative z-10">
+            <div className="flex flex-col md:flex-row md:items-center gap-8 justify-between">
               <div className="max-w-xl">
-                <div className="text-white/70 text-xs font-bold tracking-widest uppercase">Comece Agora</div>
-                <h2 className="mt-2 text-3xl sm:text-4xl font-extrabold tracking-tight">
+                <div className="text-white/70 text-xs font-semibold tracking-widest uppercase">Comece Agora</div>
+                <h2 className="mt-2 text-3xl sm:text-4xl font-bold tracking-tight">
                   Organize seus números hoje e veja seu lucro crescer.
                 </h2>
                 <p className="mt-3 text-white/80 text-sm sm:text-base leading-relaxed">
-                  Leva menos de 1 minuto para criar sua conta. Experimente e sinta a clareza financeira de gerenciar sua empresa de forma profissional.
+                  Leva menos de 1 minuto para criar sua conta. Experimente e sinta a clareza de gerenciar sua empresa de forma profissional.
                 </p>
               </div>
               
               <div className="flex flex-col items-center sm:items-end gap-2.5">
                 <Link
                   to="/login"
-                  className="inline-flex items-center justify-center rounded-xl bg-white text-primary font-black px-8 py-4 shadow-lg hover:bg-white/95 hover:scale-[1.03] active:scale-95 transition-all duration-300 text-center text-sm sm:text-base"
+                  className="inline-flex items-center justify-center rounded-md bg-white text-primary font-semibold px-8 py-4 shadow-md hover:bg-slate-100 active:scale-[0.98] transition-all duration-150 text-center text-sm"
                 >
                   Criar minha conta grátis
                 </Link>
-                <div className="text-xs text-white/80 font-semibold tracking-wide flex items-center gap-1.5">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-3.5 h-3.5 text-white/90">
+                <div className="text-xs text-white/75 font-medium tracking-wide flex items-center gap-1.5">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-3.5 h-3.5 text-white/80">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
                   </svg>
                   7 dias grátis — sem cartão de crédito.
@@ -509,18 +504,18 @@ export default function Index() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-border bg-bg relative">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 py-10 flex flex-col sm:flex-row gap-4 items-center justify-between">
+      <footer className="border-t border-border bg-white">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 py-8 flex flex-col sm:flex-row gap-4 items-center justify-between">
           <div className="flex items-center gap-3">
-            <img src="/icon.svg" alt="Genius Finance" className="w-8 h-8 opacity-80" />
-            <div className="text-sm font-extrabold tracking-tight text-text-primary">
-              Genius <span className="text-primary">Finance</span>
+            <img src="/icon.svg" alt="Genius Finance" className="w-7 h-7 opacity-80" />
+            <div className="text-sm font-semibold tracking-tight text-text-primary">
+              Genius Finance
             </div>
             <div className="text-xs text-text-muted">
               © {new Date().getFullYear()} Genius Finance. Todos os direitos reservados.
             </div>
           </div>
-          <div className="text-xs font-bold text-text-secondary hover:text-primary transition-colors">
+          <div className="text-xs font-medium text-text-secondary hover:text-primary transition-colors">
             <a href="https://geniusweb.online" target="_blank" rel="noopener noreferrer" className="hover:underline">geniusweb.online</a>
           </div>
         </div>
@@ -531,21 +526,21 @@ export default function Index() {
         href="https://wa.me/5574999425993?text=Ol%C3%A1%2C%20gostaria%20de%20solicitar%20suporte%20para%20o%20Genius%20Finance."
         target="_blank"
         rel="noopener noreferrer"
-        className="fixed bottom-6 right-6 z-40 bg-[#25D366] hover:bg-[#20bd5a] text-white w-14 h-14 rounded-2xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center cursor-pointer group"
+        className="fixed bottom-6 right-6 z-40 bg-[#25D366] hover:bg-[#20bd5a] text-white w-12 h-12 rounded-full shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center cursor-pointer group"
         title="Suporte via WhatsApp"
       >
         <svg viewBox="0 0 24 24" fill="currentColor" className="w-7 h-7">
           <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.76.45 3.45 1.3 4.94L2.05 22l5.32-1.39c1.45.79 3.08 1.21 4.76 1.21 5.46 0 9.91-4.45 9.91-9.91 0-5.46-4.45-9.91-9.91-9.91zm-3.46 14.29l-.28-1.77-.13-.8-.59.51C6.36 13.08 5.68 12 5.68 10.82c0-3.5 2.84-6.36 6.36-6.36 1.69 0 3.28.66 4.48 1.86a6.3 6.3 0 011.88 4.5c0 3.5-2.84 6.36-6.36 6.36-1.28 0-2.48-.38-3.49-1.05l-.59-.38-.66.18-1.74.46z"/>
           <path d="M9.54 8.33c-.17-.38-.35-.39-.51-.4h-.44c-.18 0-.46.07-.7.33-.24.26-.92.9-.92 2.2 0 1.3.94 2.56 1.07 2.73.13.18 1.85 2.97 4.58 4.04 2.26.89 2.73.71 3.22.66.49-.04 1.58-.65 1.8-1.27.23-.62.23-1.15.16-1.27-.07-.11-.25-.18-.52-.31-.27-.14-1.58-.78-1.83-.87-.24-.09-.42-.13-.6.13-.17.27-.69.87-.84 1.05-.16.17-.31.2-.58.06-.27-.13-1.14-.42-2.17-1.34-.8-.72-1.34-1.6-1.5-1.87-.16-.27-.02-.42.12-.55.13-.12.27-.31.4-.47.13-.16.18-.27.27-.45.09-.18.04-.34-.02-.47-.07-.14-.6-1.49-.84-2.03z"/>
         </svg>
-        <span className="absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-text-primary text-white text-xs font-semibold px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none shadow-lg">
+        <span className="absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-slate-800 text-white text-xs font-medium px-3 py-1.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-150 whitespace-nowrap pointer-events-none shadow-lg">
           Suporte WhatsApp
         </span>
       </a>
 
       {/* Lightbox Modal */}
       {activeImageIndex !== null && (
-        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/90 backdrop-blur-md transition-opacity duration-300 select-none animate-fade-in">
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/90 transition-opacity duration-200 select-none">
           {/* Close Button */}
           <button
             onClick={closeLightbox}
@@ -575,7 +570,7 @@ export default function Index() {
               <img
                 src={prints[activeImageIndex].src}
                 alt={prints[activeImageIndex].label}
-                className="max-h-[65vh] max-w-[85vw] sm:max-w-full rounded-xl border border-white/10 object-contain shadow-2xl transition-all duration-300 animate-scale-up"
+                className="max-h-[65vh] max-w-[85vw] sm:max-w-full rounded-lg border border-white/10 object-contain shadow-2xl transition-all duration-200"
               />
             </div>
 
@@ -592,14 +587,14 @@ export default function Index() {
           </div>
 
           {/* Bottom Info Bar */}
-          <div className="mt-6 text-center px-6 max-w-3xl relative z-40 animate-fade-in-up">
-            <h4 className="text-white text-lg font-extrabold tracking-tight">
+          <div className="mt-6 text-center px-6 max-w-3xl z-40">
+            <h4 className="text-white text-lg font-semibold tracking-tight">
               {prints[activeImageIndex].label}
             </h4>
             <p className="mt-2 text-white/70 text-xs sm:text-sm leading-relaxed max-w-2xl mx-auto font-medium">
               {prints[activeImageIndex].description}
             </p>
-            <div className="mt-4 text-white/40 text-xs font-bold tracking-widest uppercase">
+            <div className="mt-4 text-white/40 text-xs font-semibold tracking-widest uppercase">
               {activeImageIndex + 1} DE {prints.length}
             </div>
           </div>
