@@ -13,7 +13,7 @@ import {
   pressCalculatorEquals,
   pressCalculatorOperator,
 } from '../lib/calculator';
-import { X, Search, Plus, ArrowUpCircle, ArrowDownCircle, CheckCircle, Clock, Check, Calculator } from 'lucide-react';
+import { X, Search, Plus, ArrowUpCircle, ArrowDownCircle, CheckCircle, Clock, Calculator } from 'lucide-react';
 import { motion } from 'motion/react';
 
 export function TransactionModal({ 
@@ -25,7 +25,6 @@ export function TransactionModal({
 }) {
   const { addTransaction, updateTransaction, activeContext, categories, addCategory, selectedMonth, tags, activeScope, transactions, monthlyClosings } = useFinance();
   const [submitting, setSubmitting] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
   
   const [title, setTitle] = useState(initialData?.title || '');
   const [amountStr, setAmountStr] = useState(() => {
@@ -294,8 +293,7 @@ export function TransactionModal({
         }
       }
 
-      setShowSuccess(true);
-      setTimeout(() => onClose(), 800);
+      onClose();
     } catch {
       // Error handled by handleFirestoreError
     } finally {
@@ -363,10 +361,10 @@ export function TransactionModal({
                   key={opt.id}
                   type="button"
                   onClick={() => setType(opt.id as TransactionType)}
-                   className={`py-2.5 px-3 text-sm font-medium clay-btn cursor-pointer transition-all flex flex-col items-center gap-1 ${
+                   className={`py-2.5 px-3 text-sm font-medium cursor-pointer transition-all flex flex-col items-center gap-1 ${
                      type === opt.id
-                       ? `border-2 ${opt.activeClass}`
-                       : 'border-none text-text-secondary hover:brightness-95'
+                       ? `border-2 rounded-md ${opt.activeClass}`
+                       : 'clay-btn border-none text-text-secondary hover:brightness-95'
                    }`}
                 >
                   <opt.icon className="w-4 h-4" />
@@ -387,10 +385,10 @@ export function TransactionModal({
                   key={opt.id}
                   type="button"
                   onClick={() => setStatus(opt.id as TransactionStatus)}
-                   className={`py-2.5 px-3 text-sm font-medium clay-btn cursor-pointer transition-all flex items-center justify-center gap-2 ${
+                   className={`py-2.5 px-3 text-sm font-medium cursor-pointer transition-all flex items-center justify-center gap-2 ${
                      status === opt.id
-                       ? `border-2 ${opt.activeClass}`
-                       : 'border-none text-text-secondary hover:brightness-95'
+                       ? `border-2 rounded-md ${opt.activeClass}`
+                       : 'clay-btn border-none text-text-secondary hover:brightness-95'
                    }`}
                 >
                   <opt.icon className="w-4 h-4" />
@@ -700,10 +698,10 @@ export function TransactionModal({
                     key={opt.id}
                     type="button"
                     onClick={() => setRecurrenceConfig(opt.id as any)}
-                    className={`py-2.5 px-3 text-sm font-medium clay-btn cursor-pointer transition-all ${
+                    className={`py-2.5 px-3 text-sm font-medium cursor-pointer transition-all ${
                       recurrenceConfig === opt.id
-                        ? 'border-2 border-primary bg-primary-light text-primary-dark'
-                        : 'border-none text-text-secondary hover:brightness-95'
+                        ? 'border-2 rounded-md border-primary bg-primary/10 text-primary-dark'
+                        : 'clay-btn border-none text-text-secondary hover:brightness-95'
                     }`}
                   >
                     {opt.label}
@@ -793,23 +791,6 @@ export function TransactionModal({
               {submitting ? 'Salvando...' : 'Salvar Lançamento'}
             </button>
           </div>
-
-          {showSuccess && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.5 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="absolute inset-0 bg-white/98 rounded-xl flex items-center justify-center z-10"
-            >
-              <motion.div
-                initial={{ scale: 0, rotate: -90 }}
-                animate={{ scale: 1, rotate: 0 }}
-                transition={{ type: 'spring', stiffness: 200, damping: 15 }}
-                className="w-16 h-16 bg-success rounded-full flex items-center justify-center shadow-lg"
-              >
-                <Check className="w-8 h-8 text-white" />
-              </motion.div>
-            </motion.div>
-          )}
         </form>
       </motion.div>
     </motion.div>

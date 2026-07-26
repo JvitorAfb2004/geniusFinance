@@ -18,7 +18,7 @@ export function SettingsView() {
     user, transactions, categories, tags, leadOptions, activeContext, activeScope,
     accounts, accountMembers, accountInvites, pendingInvites,
     signOut, addCategory, updateCategory, deleteCategory,
-    addTag, deleteTag,
+    addTag, deleteTag, updateTag,
     addLeadOption, updateLeadOption, deleteLeadOption,
     createAccount, deleteAccount, migrateToAccount, inviteMember, acceptInvite, cancelInvite, updateAccountSettings,
   } = useFinance();
@@ -38,6 +38,9 @@ export function SettingsView() {
   const [newTagName, setNewTagName] = useState('');
   const [newTagColor, setNewTagColor] = useState('#3b82f6');
   const [showNewTag, setShowNewTag] = useState(false);
+  const [editingTagId, setEditingTagId] = useState<string | null>(null);
+  const [editTagName, setEditTagName] = useState('');
+  const [editTagColor, setEditTagColor] = useState('');
 
   // Lead option state
   const [showNewOption, setShowNewOption] = useState<LeadOption['field'] | null>(null);
@@ -757,11 +760,35 @@ export function SettingsView() {
 
               <div className="flex flex-wrap gap-2">
                 {tags.map((tag) => (
-                  <span key={tag.id} className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium text-white cursor-pointer group"
-                    style={{ backgroundColor: tag.color }} onClick={() => deleteTag(tag.id)} title="Clique para excluir">
-                    {tag.name}
-                    <X className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </span>
+                  editingTagId === tag.id ? (
+                    <div key={tag.id} className="p-2 bg-blue-50 rounded-lg border border-blue-100 space-y-2 w-full">
+                      <input type="text" value={editTagName}
+                        onChange={(e) => setEditTagName(e.target.value)}
+                        className="w-full px-3 py-1.5 border border-gray-300 rounded text-sm outline-none" autoFocus />
+                      <div className="flex gap-1.5 flex-wrap">
+                        {TAG_COLORS.map((c) => (
+                          <button key={c} type="button" onClick={() => setEditTagColor(c)}
+                            className={`w-5 h-5 rounded-full border-2 transition-colors cursor-pointer ${editTagColor === c ? 'border-slate-800 scale-125' : 'border-transparent'}`}
+                            style={{ backgroundColor: c }} />
+                        ))}
+                      </div>
+                      <div className="flex gap-2">
+                        <button onClick={async () => { if (!editTagName.trim()) return; await updateTag(tag.id, { name: editTagName.trim(), color: editTagColor }); setEditingTagId(null); }}
+                          disabled={!editTagName.trim()}
+                          className="text-xs px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 cursor-pointer">Salvar</button>
+                        <button onClick={() => setEditingTagId(null)} className="text-xs px-3 py-1 text-gray-500 hover:text-gray-700 cursor-pointer">Cancelar</button>
+                        <button onClick={() => { deleteTag(tag.id); setEditingTagId(null); }}
+                          className="text-xs px-3 py-1 text-red-500 hover:text-red-700 cursor-pointer ml-auto">Excluir</button>
+                      </div>
+                    </div>
+                  ) : (
+                    <span key={tag.id} className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium text-white cursor-pointer group"
+                      style={{ backgroundColor: tag.color }} onClick={() => { setEditingTagId(tag.id); setEditTagName(tag.name); setEditTagColor(tag.color); }}
+                      title="Clique para editar">
+                      {tag.name}
+                      <Pencil className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </span>
+                  )
                 ))}
                 {tags.length === 0 && <span className="text-sm text-gray-400">Nenhuma tag criada.</span>}
               </div>

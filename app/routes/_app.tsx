@@ -8,7 +8,7 @@ import { getProtectedLoginPath } from "~/lib/authRedirect";
 import {
   PieChart, List, Calendar, Settings, FileBarChart, X,
   Calculator, TrendingUp, Target, Users, Kanban, Layers, ShoppingCart,
-  ShieldCheck, Bug, Clock, Gauge, PanelLeftClose, PanelLeftOpen, Sparkles,
+  ShieldCheck, Bug, Clock, Gauge, PanelLeftClose, PanelLeftOpen,
 } from "lucide-react";
 import { cn } from "~/lib/utils";
 
@@ -171,7 +171,6 @@ export default function AppLayout() {
     { path: "/commercial", label: "Leads", icon: Users },
     { path: "/projects", label: "Projetos", icon: Kanban },
     { path: "/service-types", label: "Tipos de Serviço", icon: Layers },
-    { path: "/ai-chat", label: "Analista IA", icon: Sparkles },
   ];
 
   const adminItems: MenuItem[] = [
@@ -242,7 +241,7 @@ export default function AppLayout() {
         <nav className="flex flex-col flex-1 overflow-y-auto gap-3.5">
           <SidebarSection label="Financeiro" isCollapsed={isCollapsed} />
           <div className="flex flex-col gap-0.5">
-            {menuItems.filter(i => ["/dashboard","/cash-calendar","/monthly-closing","/fixed-monthly","/dre","/budget","/spending-limits","/sales","/goals","/reports","/ai-chat"].includes(i.path)).map(item => (
+            {menuItems.filter(i => ["/dashboard","/cash-calendar","/monthly-closing","/fixed-monthly","/dre","/budget","/spending-limits","/sales","/goals","/reports"].includes(i.path)).map(item => (
               <SidebarItem key={item.path} item={item} isCollapsed={isCollapsed} isActive={isActive(item.path)} onClick={() => navigateTo(item.path)} />
             ))}
           </div>
