@@ -18,6 +18,23 @@ service cloud.firestore {
       allow read: if isSignedIn();
     }
 
+    // ── Pluggy (integracao bancaria): server-only write, user-only read ──
+    match /pluggy_connections/{connId} {
+      allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow write: if false;
+    }
+
+    match /pluggy_provisions/{provId} {
+      allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create, delete: if false;
+      allow update: if isSignedIn() &&
+        resource.data.userId == request.auth.uid &&
+        incoming().userId == existing().userId &&
+        incoming().diff(existing()).affectedKeys().hasOnly([
+          'provisionStatus', 'convertedToTransactionId', 'updatedAt'
+        ]);
+    }
+
     // ── Account membership helpers ──
 
     function isAccountMember(accountId) {

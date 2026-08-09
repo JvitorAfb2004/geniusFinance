@@ -380,3 +380,35 @@ export interface FinanceContextState {
   updateTask: (projectId: string, taskId: string, updates: Partial<Task>) => Promise<void>;
   deleteTask: (projectId: string, taskId: string) => Promise<void>;
 }
+
+export interface PluggyConnection {
+  id: string;
+  userId: string;
+  scopeType: 'PERSONAL' | 'ACCOUNT';
+  scopeId: string | null;
+  pluggyItemId: string;
+  pluggyConnectorId: string;
+  institutionName: string;
+  status: 'ACTIVE' | 'DELETED';
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PluggyProvision {
+  id: string;
+  userId: string;
+  scopeType: 'PERSONAL' | 'ACCOUNT';
+  scopeId: string | null;
+  pluggyTransactionId: string;
+  pluggyItemId: string;
+  pluggyAccountId: string;
+  amount: number;
+  date: string;
+  description: string;
+  type: 'INCOME' | 'EXPENSE';
+  status: 'PENDING' | 'POSTED';
+  provisionStatus: 'PROVISION' | 'CONVERTED' | 'IGNORED';
+  convertedToTransactionId: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
