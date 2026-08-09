@@ -32,6 +32,8 @@ export function detectRecurring(transactions: Transaction[]): RecurrenceSuggesti
     // Check if same type and similar amounts
     const types = new Set(txs.map((t) => t.type));
     if (types.size > 1) continue;
+    const singleType = [...types][0];
+    if (singleType !== 'INCOME' && singleType !== 'EXPENSE') continue;
 
     const amounts = txs.map((t) => t.amount);
     const avgAmount = amounts.reduce((s, a) => s + a, 0) / amounts.length;
@@ -51,7 +53,7 @@ export function detectRecurring(transactions: Transaction[]): RecurrenceSuggesti
       suggestions.push({
         title: txs[0].title,
         amount: Math.round(avgAmount * 100) / 100,
-        type: txs[0].type,
+        type: singleType,
         months: txs.map((t) => t.date),
         confidence: Math.round(confidence * 100) / 100,
       });
