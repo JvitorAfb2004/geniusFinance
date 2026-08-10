@@ -35,14 +35,28 @@ async function handleEvent(eventName: string, event: Record<string, unknown>) {
     if (!link) return;
     const apiKey = await getApiKey();
     const txs = (await fetchTransactionsByLink(link, apiKey)) as PluggyTransaction[];
+    const existing = await getProvisionsByTransactionIds(txs.map((t) => t.id));
+    const byId = new Map(existing.map((p) => [String(p.pluggyTransactionId), p]));
     for (const tx of txs) {
+      const mapped = pluggyTxToProvision(tx, itemId, accountId);
+      const doc = byId.get(tx.id);
+      if (doc) {
+        // provisao ja existe (ex: reentrega do evento): preserva provisionStatus/convertedToTransactionId
+        await updateProvision(String(doc.id), {
+          amount: mapped.amount,
+          date: mapped.date,
+          description: mapped.description,
+          status: mapped.status,
+        });
+        continue;
+      }
       await upsertProvision({
         userId: conn.userId,
         scopeType: conn.scopeType,
         scopeId: conn.scopeId ?? null,
         provisionStatus: "PROVISION",
         convertedToTransactionId: null,
-        ...pluggyTxToProvision(tx, itemId, accountId),
+        ...mapped,
       });
     }
     return;
@@ -77,7 +91,12 @@ async function handleEvent(eventName: string, event: Record<string, unknown>) {
         const targetPath = conn.scopeType === "ACCOUNT"
           ? `accounts/${conn.scopeId}/transactions/${doc.convertedToTransactionId}`
           : `users/${conn.userId}/transactions/${doc.convertedToTransactionId}`;
-        await db.doc(targetPath).update({ amount: mapped.amount, date: mapped.date, updatedAt: new Date().toISOString() });
+        try {
+          await db.doc(targetPath).update({ amount: mapped.amount, date: mapped.date, updatedAt: new Date().toISOString() });
+        } catch (e) {
+          // link quebrado (transaction deletada) nao aborta o resto do batch
+          console.error("[webhook/pluggy] falha ao propagar conversao para " + targetPath, (e as Error).message);
+        }
       } else {
         await updateProvision(String(doc.id), {
           amount: mapped.amount,

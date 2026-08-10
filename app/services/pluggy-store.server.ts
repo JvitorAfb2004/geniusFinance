@@ -49,8 +49,13 @@ export async function upsertProvision(data: Record<string, unknown>) {
 export async function getProvisionsByTransactionIds(ids: string[]) {
   if (!ids.length) return [];
   const db = getAdminFirestore();
-  const snap = await db.collection(PROVISIONS_COL).where("pluggyTransactionId", "in", ids).get();
-  return snap.docs.map((d) => ({ id: d.id, ...d.data() } as Record<string, unknown>));
+  const CHUNK_SIZE = 10;
+  const chunks: string[][] = [];
+  for (let i = 0; i < ids.length; i += CHUNK_SIZE) chunks.push(ids.slice(i, i + CHUNK_SIZE));
+  const snaps = await Promise.all(
+    chunks.map((chunk) => db.collection(PROVISIONS_COL).where("pluggyTransactionId", "in", chunk).get()),
+  );
+  return snaps.flatMap((snap) => snap.docs.map((d) => ({ id: d.id, ...d.data() } as Record<string, unknown>)));
 }
 
 export async function updateProvision(id: string, data: Record<string, unknown>) {

@@ -47,17 +47,21 @@ export function IntegrationsTab() {
       const widget = new window.PluggyConnect({
         connectToken: token,
         onSuccess: async ({ itemId, connector }: { itemId: string; connector?: { id?: string; name?: string } }) => {
-          await apiFetch('/api/pluggy/connect-record', {
-            method: 'POST',
-            body: JSON.stringify({
-              pluggyItemId: itemId,
-              pluggyConnectorId: connector?.id || '',
-              institutionName: connector?.name || 'Banco',
-              scopeType,
-              scopeId,
-            }),
-          });
-          alert('Banco conectado com sucesso!');
+          try {
+            await apiFetch('/api/pluggy/connect-record', {
+              method: 'POST',
+              body: JSON.stringify({
+                pluggyItemId: itemId,
+                pluggyConnectorId: connector?.id || '',
+                institutionName: connector?.name || 'Banco',
+                scopeType,
+                scopeId,
+              }),
+            });
+            alert('Banco conectado com sucesso!');
+          } catch (e) {
+            alert('Erro ao conectar: ' + String((e as Error)?.message || e));
+          }
         },
         onClose: () => {},
         onError: (err: unknown) => alert('Erro ao conectar: ' + String((err as Error)?.message || err)),
