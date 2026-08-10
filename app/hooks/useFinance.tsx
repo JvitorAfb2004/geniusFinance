@@ -252,7 +252,7 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
     txData: Omit<Transaction, 'id' | 'userId' | 'createdAt' | 'updatedAt'>,
     generateMultiple?: 'INSTALLMENTS' | 'FIXED',
     count: number = 1
-  ) => {
+  ): Promise<string | undefined> => {
     if (!user) return;
     try {
       const batch = writeBatch(db);
@@ -260,6 +260,7 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       const baseDate = parseISO(txData.date);
       const colPath = resolveDataPath(activeScope, user.uid, 'transactions');
       const collectionRef = collection(db, colPath);
+      let newId: string | undefined;
 
       if (generateMultiple === 'INSTALLMENTS') {
         const installmentAmount = txData.amount / count;
@@ -306,6 +307,7 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
         }
       } else {
         const docRef = doc(collectionRef);
+        newId = docRef.id;
         batch.set(docRef, {
           ...txData,
           userId: user.uid,
@@ -315,6 +317,7 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       }
 
       await batch.commit();
+      return newId;
     } catch (error) {
       handleFirestoreError(error, 'create', resolveDataPath(activeScope, user.uid, 'transactions'), user);
     }

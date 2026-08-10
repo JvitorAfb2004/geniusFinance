@@ -18,10 +18,12 @@ import { motion } from 'motion/react';
 
 export function TransactionModal({ 
   onClose, 
-  initialData 
+  initialData,
+  onSaved,
 }: { 
   onClose: () => void;
   initialData?: Transaction;
+  onSaved?: (newId: string) => void;
 }) {
   const { addTransaction, updateTransaction, activeContext, categories, addCategory, selectedMonth, tags, activeScope, transactions, monthlyClosings } = useFinance();
   const [submitting, setSubmitting] = useState(false);
@@ -281,11 +283,12 @@ export function TransactionModal({
       if (categoryId) baseTx.categoryId = categoryId;
       if (hasEndDate && endDate) baseTx.endDate = endDate;
 
-      if (initialData) {
+      if (initialData?.id) {
         await updateTransaction(initialData.id, baseTx, applyToFuture);
       } else {
         if (recurrenceConfig === 'ONE_TIME') {
-          await addTransaction(baseTx);
+          const newId = await addTransaction(baseTx);
+          if (newId) onSaved?.(newId);
         } else if (recurrenceConfig === 'FIXED') {
           await addTransaction(baseTx, 'FIXED');
         } else if (recurrenceConfig === 'INSTALLMENTS') {

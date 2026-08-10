@@ -340,7 +340,7 @@ export interface FinanceContextState {
   closeMonth: (year: number, month: number, notes?: string) => Promise<void>;
   reopenMonth: (year: number, month: number) => Promise<void>;
   pendingInvites: AccountInvite[];
-  addTransaction: (tx: Omit<Transaction, 'id' | 'userId' | 'createdAt' | 'updatedAt'>, generateMultiple?: 'INSTALLMENTS' | 'FIXED', count?: number) => Promise<void>;
+  addTransaction: (tx: Omit<Transaction, 'id' | 'userId' | 'createdAt' | 'updatedAt'>, generateMultiple?: 'INSTALLMENTS' | 'FIXED', count?: number) => Promise<string | undefined>;
   updateTransaction: (id: string, updates: Partial<Transaction>, applyToFuture?: boolean) => Promise<void>;
   deleteTransaction: (id: string, deleteFuture?: boolean) => Promise<void>;
   toggleStatus: (id: string) => Promise<void>;
