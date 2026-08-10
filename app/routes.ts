@@ -7,6 +7,7 @@ export default [
     file: "routes/_app.tsx",
     children: [
       { file: "routes/_app.dashboard.tsx", path: "dashboard" },
+      { file: "routes/_app.provisoes.tsx", path: "provisoes" },
       { file: "routes/_app.cash-calendar.tsx", path: "cash-calendar" },
       { file: "routes/_app.fixed-monthly.tsx", path: "fixed-monthly" },
       { file: "routes/_app.dre.tsx", path: "dre" },
