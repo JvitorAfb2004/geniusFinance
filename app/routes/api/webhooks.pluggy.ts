@@ -114,14 +114,16 @@ export async function action({ request }: ActionFunctionArgs) {
     return Response.json({ error: "payload invalido" }, { status: 400 });
   }
 
-  const isNew = await markWebhookEventProcessed(String(event.eventId));
-  if (!isNew) return Response.json({ success: true, deduplicated: true });
-
   try {
     await handleEvent(String(event.event), event);
   } catch (e) {
-    // ponytail: sem retry aqui; Pluggy reenvia ate 9x e dedupe previne duplicatas
+    // ponytail: 5xx p/ Pluggy reenviar; dedupe so depois do sucesso evita perder o evento
     console.error("[webhook/pluggy]", (e as Error).message);
+    return Response.json({ error: "falha ao processar evento" }, { status: 502 });
   }
+
+  const isNew = await markWebhookEventProcessed(String(event.eventId));
+  if (!isNew) return Response.json({ success: true, deduplicated: true });
+
   return Response.json({ success: true });
 }
