@@ -39,6 +39,7 @@ export default [
   { file: "routes/api/reports.ts", path: "api/reports" },
   { file: "routes/api/ai.chat.ts", path: "api/ai/chat" },
   { file: "routes/api/webhooks.abacate.ts", path: "api/webhooks/abacate" },
+  { file: "routes/api/webhooks.pluggy.ts", path: "api/webhooks/pluggy" },
   { file: "routes/api/admin.plans.ts", path: "api/admin/plans" },
   { file: "routes/api/admin.subscriptions.ts", path: "api/admin/subscriptions" },
   { file: "routes/api/admin.reports.ts", path: "api/admin/reports" },
