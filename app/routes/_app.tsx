@@ -102,6 +102,7 @@ export default function AppLayout() {
   const [showTrialModal, setShowTrialModal] = useState(false);
   const [trialDaysLeft, setTrialDaysLeft] = useState(0);
   const [isTrial, setIsTrial] = useState(false);
+  const [sub, setSub] = useState<{ status?: string; totalAmount?: number } | null>(null);
   const [dashboardValuesVisible, setDashboardValuesVisible] = useState<boolean>(() => {
     try {
       const raw = localStorage.getItem(DASHBOARD_VALUES_KEY);
@@ -124,8 +125,9 @@ export default function AppLayout() {
     import("~/lib/api").then(({ apiFetch }) => {
       apiFetch("/api/sub/status").then((res) => {
         const trial = res.data?.trial;
-        const sub = res.data?.subscription;
-        if (trial && trial.status === "active" && (!sub || sub.status === "trial")) {
+        const subData = res.data?.subscription;
+        setSub(subData || null);
+        if (trial && trial.status === "active" && (!subData || subData.status === "trial")) {
           const expiresAt = trial.expiresAt ? new Date(trial.expiresAt) : null;
           const days = expiresAt ? Math.ceil((expiresAt.getTime() - Date.now()) / 86400000) : 0;
           if (days > 0) {
@@ -232,6 +234,41 @@ export default function AppLayout() {
               <button
                 onClick={() => navigateTo("/subscription")}
                 className="mt-2 w-full text-[0.62rem] font-bold bg-amber-500 hover:bg-amber-600 text-white py-1.5 rounded-md transition-colors cursor-pointer border-none"
+              >
+                Assinar plano
+              </button>
+            </div>
+          )}
+          {!isCollapsed && !isTrial && sub?.status === "active" && (
+            <button
+              onClick={() => navigateTo("/subscription")}
+              className="mt-2.5 px-3 py-2.5 rounded-md bg-emerald-50 border-l-2 border-emerald-500 text-left cursor-pointer hover:bg-emerald-100 transition-colors border-y-0 border-r-0"
+            >
+              <p className="text-[0.65rem] font-semibold text-emerald-800 leading-tight">
+                Plano ativo{sub?.totalAmount ? ` · ${(sub.totalAmount / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}/mês` : ""}
+              </p>
+              <p className="text-[0.6rem] text-emerald-700 mt-0.5">Gerenciar assinatura</p>
+            </button>
+          )}
+          {!isCollapsed && !isTrial && sub?.status === "past_due" && (
+            <div className="mt-2.5 px-3 py-2.5 rounded-md bg-red-50 border-l-2 border-red-500">
+              <p className="text-[0.65rem] font-semibold text-red-800 leading-tight">Pagamento pendente</p>
+              <button
+                onClick={() => navigateTo("/subscription")}
+                className="mt-2 w-full text-[0.62rem] font-bold bg-red-500 hover:bg-red-600 text-white py-1.5 rounded-md transition-colors cursor-pointer border-none"
+              >
+                Regularizar
+              </button>
+            </div>
+          )}
+          {!isCollapsed && !isTrial && (sub?.status === "cancelled" || !sub) && (
+            <div className="mt-2.5 px-3 py-2.5 rounded-md bg-slate-800 border-l-2 border-slate-500">
+              <p className="text-[0.65rem] font-semibold text-slate-300 leading-tight">
+                {sub ? "Assinatura cancelada" : "Sem plano ativo"}
+              </p>
+              <button
+                onClick={() => navigateTo("/subscription")}
+                className="mt-2 w-full text-[0.62rem] font-bold bg-primary hover:opacity-90 text-white py-1.5 rounded-md transition-opacity cursor-pointer border-none"
               >
                 Assinar plano
               </button>

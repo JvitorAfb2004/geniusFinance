@@ -50,6 +50,7 @@ export function Header({
     '/projects': 'Projetos',
     '/service-types': 'Tipos de Serviço',
     '/settings': 'Configurações',
+    '/monthly-closing': 'Fechamento Mensal',
     '/admin/plans': 'Planos',
     '/admin/subscriptions': 'Assinaturas',
     '/admin/reports': 'Reports',

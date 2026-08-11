@@ -110,14 +110,14 @@ export function ReportsView() {
           </p>
         </div>
         <div className="clay p-4">
-          <p className="text-xs text-gray-500 mb-1">Transacoes</p>
+          <p className="text-xs text-gray-500 mb-1">Transações</p>
           <p className="text-lg font-bold font-mono text-slate-700"><AnimatedNumber value={yearTotals.count} kind="number" /></p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         <div className="clay p-6 min-w-0">
-          <h2 className="text-lg font-bold text-gray-900 mb-4">Evolucao Mensal</h2>
+          <h2 className="text-lg font-bold text-gray-900 mb-4">Evolução Mensal</h2>
           <div style={{ width: '100%', height: 300 }}>
             <ResponsiveContainer>
               <BarChart data={monthlyData}>

@@ -25,19 +25,19 @@ function loadWidgets(): string[] {
 function saveWidgets(ids: string[]) { localStorage.setItem('dashboard_widgets', JSON.stringify(ids)); }
 
 const ALL_WIDGETS = [
-  { id: 'month_balance', label: 'Saldo do Mes' },
-  { id: 'balance', label: 'Saldo Disponivel' },
-  { id: 'income', label: 'Receitas (Mes)' },
-  { id: 'income_received', label: 'Recebidos (Mes)' },
-  { id: 'income_pending', label: 'Nao recebidos (Mes)' },
-  { id: 'expense', label: 'Despesas (Mes)' },
-  { id: 'expense_paid', label: 'Pagos (Mes)' },
-  { id: 'expense_pending', label: 'Nao pagos (Mes)' },
+  { id: 'month_balance', label: 'Saldo do Mês' },
+  { id: 'balance', label: 'Saldo Disponível' },
+  { id: 'income', label: 'Receitas (Mês)' },
+  { id: 'income_received', label: 'Recebidos (Mês)' },
+  { id: 'income_pending', label: 'Não recebidos (Mês)' },
+  { id: 'expense', label: 'Despesas (Mês)' },
+  { id: 'expense_paid', label: 'Pagos (Mês)' },
+  { id: 'expense_pending', label: 'Não pagos (Mês)' },
 
   { id: 'payable_7d', label: 'A pagar (7 dias)' },
   { id: 'receivable_7d', label: 'A receber (7 dias)' },
-  { id: 'net_profit', label: 'Lucro Liquido' },
-  { id: 'margin', label: 'Margem Liquida' },
+  { id: 'net_profit', label: 'Lucro Líquido' },
+  { id: 'margin', label: 'Margem Líquida' },
 ];
 
 export function DashboardCards({ valuesVisible = true }: { valuesVisible?: boolean }) {

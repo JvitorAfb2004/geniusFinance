@@ -65,22 +65,7 @@ As funcionalidades de projetos têm finalidade de organização, acompanhamento 
 
 A GENIUS WEB não garante cumprimento de prazos, performance de equipe, entrega de projetos ou qualquer resultado específico decorrente do uso da plataforma.
 
-7. SERVIÇOS DE INTELIGÊNCIA ARTIFICIAL
-
-A plataforma oferece funcionalidades baseadas em inteligência artificial (IA) por meio de integração com a API NVIDIA, incluindo:
-- Extração de dados de transações financeiras a partir de texto ou arquivos;
-- Extração de dados de leads a partir de texto livre;
-- Geração de relatórios financeiros;
-- Sugestões de economia com base nos gastos;
-- Chat conversacional com contexto financeiro.
-
-O usuário reconhece que:
-- Os resultados da IA dependem da qualidade dos dados fornecidos;
-- A IA pode cometer erros ou imprecisões;
-- O usuário deve revisar e validar os dados extraídos ou sugeridos pela IA antes de confirmá-los no sistema;
-- Dados enviados para processamento de IA são transmitidos à API NVIDIA, conforme descrito na Política de Privacidade.
-
-8. PLANO GRATUITO
+7. PLANO GRATUITO
 
 Atualmente, a plataforma GeniusHub é oferecida de forma 100% gratuita, sem planos pagos, assinaturas ou cobranças de qualquer natureza.
 
@@ -88,7 +73,7 @@ A GENIUS WEB poderá, no futuro, oferecer planos pagos com funcionalidades adici
 
 A GENIUS WEB poderá definir limites de uso, funcionalidades disponíveis, quantidade de usuários, armazenamento, projetos, lançamentos financeiros ou outros recursos, conforme comunicado aos usuários.
 
-9. ENCERRAMENTO DE CONTA
+8. ENCERRAMENTO DE CONTA
 
 O usuário poderá solicitar o encerramento da conta por meio do e-mail contato@geniusweb.online.
 
@@ -98,7 +83,7 @@ Após o encerramento:
 
 [REVISAR_COM_ADVOGADO: A plataforma atualmente não possui funcionalidade de exclusão permanente de todos os dados do usuário. A exclusão de conta empresarial realiza apenas arquivamento (soft delete).]
 
-10. DISPONIBILIDADE E MANUTENÇÃO
+9. DISPONIBILIDADE E MANUTENÇÃO
 
 A GENIUS WEB buscará manter a plataforma disponível e funcional, mas não garante disponibilidade ininterrupta.
 
@@ -107,13 +92,13 @@ A plataforma poderá ficar temporariamente indisponível por:
 - Atualizações;
 - Falhas técnicas;
 - Problemas de infraestrutura;
-- Instabilidade de provedores terceiros (Google Firebase, NVIDIA, EasyPanel);
+- Instabilidade de provedores terceiros (Google Firebase);
 - Eventos de força maior;
 - Questões de segurança.
 
 Sempre que possível, manutenções relevantes serão comunicadas aos usuários.
 
-11. BACKUP E EXPORTAÇÃO DE DADOS
+10. BACKUP E EXPORTAÇÃO DE DADOS
 
 Os dados são armazenados no Google Cloud Firestore, que possui replicação e backups gerenciados pelo Google.
 
@@ -121,17 +106,15 @@ O usuário deve manter cópias próprias das informações relevantes, especialm
 
 A plataforma oferece exportação de transações em formato CSV na tela de Configurações. [REVISAR_COM_ADVOGADO: A exportação atual cobre apenas transações; não há exportação de categorias, orçamentos, metas, leads, projetos ou tarefas.]
 
-12. SERVIÇOS DE TERCEIROS
+11. SERVIÇOS DE TERCEIROS
 
 A plataforma utiliza os seguintes serviços de terceiros:
 - Google Firebase (autenticação Google e banco de dados Firestore);
-- Google Cloud (hospedagem e infraestrutura do Firebase);
-- NVIDIA API (processamento de inteligência artificial);
-- EasyPanel (hospedagem do proxy de IA).
+- Google Cloud (hospedagem e infraestrutura do Firebase).
 
 A GENIUS WEB não se responsabiliza por falhas, indisponibilidade, alterações ou políticas próprias desses terceiros, salvo quando houver responsabilidade legal aplicável.
 
-13. PROPRIEDADE INTELECTUAL
+12. PROPRIEDADE INTELECTUAL
 
 Todos os direitos sobre a plataforma, incluindo código-fonte, layout, marca, identidade visual, banco de dados, funcionalidades, textos, elementos gráficos e documentação pertencem à GENIUS WEB ou a seus licenciantes.
 
@@ -139,13 +122,13 @@ O usuário recebe apenas uma licença limitada, não exclusiva, intransferível 
 
 É proibido copiar, modificar, distribuir, vender, alugar, sublicenciar, realizar engenharia reversa ou explorar comercialmente a plataforma sem autorização expressa.
 
-14. CONTEÚDO DO USUÁRIO
+13. CONTEÚDO DO USUÁRIO
 
 Os dados, arquivos, textos, documentos, registros financeiros, projetos e demais conteúdos inseridos pelo usuário continuam pertencendo ao próprio usuário ou à empresa que representa.
 
 Ao inserir conteúdo na plataforma, o usuário autoriza a GENIUS WEB a armazenar, processar e utilizar tecnicamente tais informações apenas para viabilizar o funcionamento do sistema, prestar suporte, cumprir obrigações legais e melhorar a plataforma, conforme a Política de Privacidade.
 
-15. SEGURANÇA DA CONTA
+14. SEGURANÇA DA CONTA
 
 O usuário é responsável por manter a confidencialidade de suas credenciais Google e por todas as atividades realizadas em sua conta.
 
@@ -153,7 +136,7 @@ A GENIUS WEB poderá implementar medidas de segurança como autenticação, logs
 
 Caso identifique uso suspeito, a GENIUS WEB poderá suspender temporariamente o acesso para proteger o usuário e a plataforma.
 
-16. LIMITAÇÃO DE RESPONSABILIDADE
+15. LIMITAÇÃO DE RESPONSABILIDADE
 
 Na máxima extensão permitida pela legislação aplicável, a GENIUS WEB não será responsável por:
 
@@ -162,14 +145,13 @@ Na máxima extensão permitida pela legislação aplicável, a GENIUS WEB não s
 - Perdas financeiras, fiscais, contábeis ou comerciais;
 - Lucros cessantes;
 - Perda de oportunidades de negócio;
-- Falhas de terceiros (Google, NVIDIA, EasyPanel);
+- Falhas de terceiros (Google);
 - Indisponibilidade temporária da plataforma;
 - Uso indevido da conta por culpa do usuário;
 - Exclusão de dados causada por ação do próprio usuário;
-- Obrigações fiscais, trabalhistas, contábeis ou legais do usuário;
-- Erros ou imprecisões nas funcionalidades de inteligência artificial.
+- Obrigações fiscais, trabalhistas, contábeis ou legais do usuário.
 
-17. SUSPENSÃO OU ENCERRAMENTO DO ACESSO
+16. SUSPENSÃO OU ENCERRAMENTO DO ACESSO
 
 A GENIUS WEB poderá suspender ou encerrar o acesso do usuário caso haja:
 
@@ -180,7 +162,7 @@ A GENIUS WEB poderá suspender ou encerrar o acesso do usuário caso haja:
 - Solicitação de autoridade competente;
 - Encerramento das atividades da plataforma.
 
-18. SUPORTE
+17. SUPORTE
 
 O suporte é prestado pelo canal:
 
@@ -188,7 +170,7 @@ E-mail: contato@geniusweb.online
 
 O suporte abrange dúvidas de uso, problemas técnicos e orientação básica sobre funcionalidades, não incluindo consultoria financeira, fiscal, contábil ou jurídica.
 
-19. ALTERAÇÕES NOS TERMOS
+18. ALTERAÇÕES NOS TERMOS
 
 A GENIUS WEB poderá alterar estes Termos para refletir mudanças na plataforma, nos serviços, na legislação ou nas regras comerciais.
 
@@ -196,13 +178,13 @@ A versão atualizada será publicada em geniusweb.online, com indicação da dat
 
 O uso contínuo da plataforma após a publicação das alterações representa concordância com a nova versão.
 
-20. LEI APLICÁVEL E FORO
+19. LEI APLICÁVEL E FORO
 
 Estes Termos serão regidos pelas leis da República Federativa do Brasil.
 
 Fica eleito o foro da comarca da sede da GENIUS WEB, salvo disposição legal obrigatória em sentido contrário, para resolver eventuais conflitos relacionados a estes Termos.
 
-21. CONTATO
+20. CONTATO
 
 GENIUS WEB
 CNPJ: 66.107.006/0001-70

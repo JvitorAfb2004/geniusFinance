@@ -1,17 +1,15 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { useFinance } from '../hooks/useFinance';
 import { computeDRE } from '../lib/dre';
 import { formatCurrency } from '../lib/utils';
-import { SECTION_LABELS } from '../lib/categories';
-import { suggestSavings } from '../lib/ai';
 import type { DRERow } from '../types';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  LineChart, Line, PieChart, Pie, Cell,
+  LineChart, Line,
 } from 'recharts';
-import { isSameMonth, parseISO, startOfYear, endOfYear, eachMonthOfInterval, format, addMonths, subMonths } from 'date-fns';
+import { isSameMonth, parseISO, startOfYear, endOfYear, eachMonthOfInterval, format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { TrendingUp, TrendingDown, DollarSign, Percent, ArrowUpRight, ArrowDownRight, Lightbulb, Loader2 } from 'lucide-react';
+import { TrendingUp, DollarSign, Percent, ArrowDownRight } from 'lucide-react';
 import { useAnimatedValue } from '../hooks/useAnimatedValue';
 
 function formatTooltipCurrency(value: unknown) {
@@ -39,8 +37,8 @@ export default function DREView() {
   const receitaLiq = dre.rows.find((r) => r.isSubtotal && r.section === 'RECEITA');
   const custosTotal = dre.rows.find((r) => r.isSubtotal && r.section === 'CUSTOS');
   const despesasTotal = dre.rows.find((r) => r.isSubtotal && r.section === 'DESPESAS');
-  const lucroLiq = dre.rows.find((r) => r.label === '(=) Lucro Liquido');
-  const margemLiq = dre.rows.find((r) => r.label === 'Margem Liquida');
+  const lucroLiq = dre.rows.find((r) => r.label === '(=) Lucro Líquido');
+  const margemLiq = dre.rows.find((r) => r.label === 'Margem Líquida');
 
   const monthlyEvolution = useMemo(() => {
     const year = selectedMonth.getFullYear();
@@ -110,7 +108,7 @@ export default function DREView() {
           isCost
         />
         <DRECard
-          title="(=) Lucro Liquido"
+          title="(=) Lucro Líquido"
           value={lucroLiq?.actual || 0}
           planned={lucroLiq?.planned || 0}
           icon={<DollarSign className="w-4 h-4" />}
@@ -119,7 +117,7 @@ export default function DREView() {
           showSign
         />
         <DRECard
-          title="Margem Liquida"
+          title="Margem Líquida"
           value={margemLiq?.actual || 0}
           planned={0}
           icon={<Percent className="w-4 h-4" />}
@@ -128,8 +126,6 @@ export default function DREView() {
           isPercent
         />
       </div>
-
-      <SavingsPanel />
 
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -157,7 +153,7 @@ export default function DREView() {
 
         {/* Evolução Lucro Líquido - Line Chart */}
         <div className="clay clay-hover p-5 min-w-0">
-          <h3 className="text-sm font-semibold text-slate-700 mb-4">Evolucao do Lucro Liquido</h3>
+          <h3 className="text-sm font-semibold text-slate-700 mb-4">Evolução do Lucro Líquido</h3>
           <div style={{ width: '100%', height: 260 }}>
           <ResponsiveContainer>
             <LineChart data={monthlyEvolution}>
@@ -171,7 +167,7 @@ export default function DREView() {
                 stroke="#10b981"
                 strokeWidth={2}
                 dot={{ fill: '#10b981', r: 4 }}
-                name="Lucro Liquido"
+                name="Lucro Líquido"
               />
             </LineChart>
           </ResponsiveContainer>
@@ -179,7 +175,7 @@ export default function DREView() {
         </div>
       </div>
 
-      {/* Previsao Anual */}
+      {/* Previsão Anual */}
       <ForecastSection />
 
       {/* Top Categories */}
@@ -188,7 +184,7 @@ export default function DREView() {
         <div className="clay clay-hover p-5">
           <h3 className="text-sm font-semibold text-slate-700 mb-3">Principais Custos</h3>
           {topCustos.length === 0 ? (
-            <p className="text-sm text-slate-400">Sem custos no mes.</p>
+            <p className="text-sm text-slate-400">Sem custos no mês.</p>
           ) : (
             <div className="space-y-2">
               {topCustos.map((row, i) => (
@@ -202,7 +198,7 @@ export default function DREView() {
         <div className="clay clay-hover p-5">
           <h3 className="text-sm font-semibold text-slate-700 mb-3">Principais Despesas</h3>
           {topDespesas.length === 0 ? (
-            <p className="text-sm text-slate-400">Sem despesas no mes.</p>
+            <p className="text-sm text-slate-400">Sem despesas no mês.</p>
           ) : (
             <div className="space-y-2">
               {topDespesas.map((row, i) => (
@@ -335,9 +331,9 @@ function ForecastSection() {
   if (!hasBudgetData) {
     return (
       <div className="bg-slate-50/50 border border-slate-100 rounded-2xl p-5 shadow-[0_1px_2px_rgba(0,0,0,0.01)]">
-        <h3 className="text-sm font-semibold text-slate-700 mb-2">Previsao Anual</h3>
+        <h3 className="text-sm font-semibold text-slate-700 mb-2">Previsão Anual</h3>
         <p className="text-sm text-slate-400">
-          Defina valores no Orcamento para visualizar a previsao do ano.
+          Defina valores no Orçamento para visualizar a previsão do ano.
         </p>
       </div>
     );
@@ -382,98 +378,6 @@ function ForecastSection() {
             </BarChart>
           </ResponsiveContainer>
         </div>
-      </div>
-    </div>
-  );
-}
-
-function SavingsPanel() {
-  const { transactions, categories, activeContext, selectedMonth } = useFinance();
-  const [savings, setSavings] = useState<{ category: string; currentSpending: number; suggestedReduction: number; projectedSaving: number; tip: string }[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-
-  async function handleAnalyze() {
-    setLoading(true);
-    setError('');
-    try {
-      const monthTxs = transactions.filter(
-        (t) => t.context === activeContext && isSameMonth(parseISO(t.date), selectedMonth) && t.type !== 'INCOME'
-      );
-      const byCategory: Record<string, { monthly: number; count: number; sampleDescriptions: string[] }> = {};
-      for (const t of monthTxs) {
-        const cat = categories.find((c) => c.id === t.categoryId);
-        const key = cat?.name || t.title;
-        if (!byCategory[key]) byCategory[key] = { monthly: 0, count: 0, sampleDescriptions: [] };
-        byCategory[key].monthly += t.amount;
-        byCategory[key].count += 1;
-        if (t.title && !byCategory[key].sampleDescriptions.includes(t.title) && byCategory[key].sampleDescriptions.length < 5) {
-          byCategory[key].sampleDescriptions.push(t.title);
-        }
-      }
-      const gastos = Object.entries(byCategory).map(([name, data]) => ({
-        category: name,
-        monthlySpending: data.monthly,
-        transactionCount: data.count,
-        sampleDescriptions: data.sampleDescriptions,
-      }));
-      const result = await suggestSavings({ gastos, mes: format(selectedMonth, 'MM/yyyy'), totalGastoMes: monthTxs.reduce((s, t) => s + t.amount, 0) });
-      setSavings(result);
-    } catch (e: unknown) { setError(e instanceof Error ? e.message : 'Erro'); }
-    finally { setLoading(false); }
-  }
-
-  if (!savings.length && !loading) {
-    return (
-      <div className="bg-slate-50/50 border border-slate-100 rounded-2xl p-5 shadow-[0_1px_2px_rgba(0,0,0,0.01)] transition-all duration-300">
-        <button onClick={handleAnalyze} className="flex items-center gap-2 text-xs text-slate-700 bg-white hover:bg-slate-900 hover:text-white hover:border-slate-900 border border-slate-200/80 px-4.5 py-2.5 rounded-xl cursor-pointer transition-all duration-300 font-semibold active:scale-[0.98] shadow-sm">
-          <Lightbulb className="w-4 h-4 text-amber-500" /> Analisar oportunidades de economia com IA
-        </button>
-        {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
-      </div>
-    );
-  }
-
-  if (loading) {
-    return (
-      <div className="bg-slate-50/50 border border-slate-100 rounded-2xl p-6 shadow-[0_1px_2px_rgba(0,0,0,0.01)] flex items-center gap-3.5">
-        <Loader2 className="w-5 h-5 animate-spin text-slate-800" />
-        <span className="text-sm font-medium text-slate-600">Analisando seus gastos com inteligência artificial...</span>
-      </div>
-    );
-  }
-
-  return (
-    <div className="clay p-6 space-y-5">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-500">
-            <Lightbulb className="w-4 h-4" />
-          </div>
-          <h3 className="text-sm font-bold text-slate-800">Oportunidades de Economia Inteligentes</h3>
-        </div>
-        <button onClick={() => setSavings([])} className="text-xs font-semibold text-slate-400 hover:text-slate-600 cursor-pointer transition-colors p-1">Fechar</button>
-      </div>
-      <p className="text-[0.7rem] text-slate-400 font-medium uppercase tracking-wider -mt-3.5">Sugestões automatizadas baseadas no seu perfil de gastos</p>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {savings.map((s, i) => (
-          <div key={i} className="border border-slate-100 bg-slate-50/40 rounded-xl p-4.5 space-y-3.5 transition-all hover:bg-white hover:shadow-[0_4px_16px_rgba(0,0,0,0.025)] hover:border-slate-200/60 duration-300">
-            <div className="flex justify-between items-start gap-2">
-              <span className="text-sm font-bold text-slate-800 truncate">{s.category}</span>
-              <span className="text-[0.68rem] px-2 py-0.5 rounded-full bg-amber-50 border border-amber-100 text-amber-800 font-bold shrink-0">-{s.suggestedReduction}%</span>
-            </div>
-            <div className="flex justify-between text-xs font-medium">
-              <span className="text-slate-500">Gasto atual: <span className="font-mono">{formatCurrency(s.currentSpending)}</span></span>
-              <span className="text-emerald-600">Economia: <span className="font-mono">{formatCurrency(s.projectedSaving)}</span>/mês</span>
-            </div>
-            <p className="text-xs text-slate-500 leading-relaxed italic border-t border-slate-100/60 pt-2.5">"{s.tip}"</p>
-          </div>
-        ))}
-      </div>
-      <div className="bg-slate-50 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border border-slate-100/60">
-        <p className="text-xs text-slate-600 font-medium">
-          Economia total projetada: <strong className="text-emerald-600 font-mono text-sm">{formatCurrency(savings.reduce((s, r) => s + r.projectedSaving, 0))}/mês</strong> = <strong className="text-emerald-600 font-mono text-sm">{formatCurrency(savings.reduce((s, r) => s + r.projectedSaving, 0) * 12)}/ano</strong>
-        </p>
       </div>
     </div>
   );

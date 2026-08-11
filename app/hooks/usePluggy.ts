@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { collection, query, where, onSnapshot, doc, updateDoc } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, doc, updateDoc, addDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { handleFirestoreError } from '../lib/handleFirestoreError';
 import { useFinance } from './useFinance';
@@ -65,5 +65,38 @@ export function usePluggy() {
   const ignoreProvision = (id: string) => updateProvision(id, { provisionStatus: 'IGNORED' });
   const restoreProvision = (id: string) => updateProvision(id, { provisionStatus: 'PROVISION', convertedToTransactionId: null });
 
-  return { connection, provisions, pendingCount, loaded, updateProvision, ignoreProvision, restoreProvision };
+  const createManualProvision = async (data: {
+    description: string;
+    amount: number;
+    date: string;
+    type: 'INCOME' | 'EXPENSE';
+  }): Promise<string | undefined> => {
+    if (!user) return;
+    try {
+      const payload: PluggyProvision = {
+        id: '',
+        userId: user.uid,
+        scopeType: activeScope.type === 'PERSONAL' ? 'PERSONAL' : 'ACCOUNT',
+        scopeId: activeScope.type === 'ACCOUNT' ? activeScope.accountId : null,
+        pluggyTransactionId: '',
+        pluggyItemId: '',
+        pluggyAccountId: '',
+        amount: data.amount,
+        date: data.date,
+        description: data.description,
+        type: data.type,
+        status: 'PENDING',
+        provisionStatus: 'PROVISION',
+        convertedToTransactionId: null,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      const docRef = await addDoc(collection(db, 'pluggy_provisions'), payload);
+      return docRef.id;
+    } catch (error) {
+      handleFirestoreError(error, 'create', 'pluggy_provisions', user);
+    }
+  };
+
+  return { connection, provisions, pendingCount, loaded, updateProvision, ignoreProvision, restoreProvision, createManualProvision };
 }

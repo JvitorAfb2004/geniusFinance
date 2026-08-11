@@ -162,19 +162,19 @@ export default function SalesView() {
           icon={<TrendingUp className="w-4 h-4" />}
           color="text-emerald-600"
           bg="bg-emerald-50"
-          subtitle="no mes"
+          subtitle="no mês"
         />
         <SalesCard
-          title="Meta do Mes"
+          title="Meta do Mês"
           value={mainTarget}
           fallback={mainTarget <= 0 ? '--' : undefined}
           icon={<Target className="w-4 h-4" />}
           color="text-blue-600"
           bg="bg-blue-50"
-          subtitle={mainTarget > 0 ? `${targetPct.toFixed(1)}% atingido` : 'Nao definida'}
+          subtitle={mainTarget > 0 ? `${targetPct.toFixed(1)}% atingido` : 'Não definida'}
         />
         <SalesCard
-          title="Ritmo Diario"
+          title="Ritmo Diário"
           value={dailyPace}
           icon={<Zap className="w-4 h-4" />}
           color={paceColor}
@@ -196,7 +196,7 @@ export default function SalesView() {
       {/* Daily Chart */}
       <div className="clay p-5">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-semibold text-slate-700">Vendas Diarias vs Meta</h3>
+          <h3 className="text-sm font-semibold text-slate-700">Vendas Diárias vs Meta</h3>
           <button
             onClick={() => setIsTargetModalOpen(true)}
             className="text-xs px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors font-medium flex items-center gap-1 cursor-pointer"
@@ -250,7 +250,7 @@ export default function SalesView() {
             Vendas por Categoria
           </h3>
           {salesByCategory.length === 0 ? (
-            <p className="text-sm text-slate-400">Sem vendas no mes.</p>
+            <p className="text-sm text-slate-400">Sem vendas no mês.</p>
           ) : (
             <div className="space-y-2">
               {salesByCategory.map((item) => (

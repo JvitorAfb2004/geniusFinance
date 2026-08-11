@@ -95,7 +95,7 @@ function InvestmentCalc() {
         </div>
       </div>
       <div className="clay p-5 min-w-0">
-        <h3 className="text-sm font-semibold text-slate-700 mb-3">Evolucao do Patrimonio</h3>
+        <h3 className="text-sm font-semibold text-slate-700 mb-3">Evolução do Patrimônio</h3>
         <div style={{ width: '100%', height: 280 }}>
           <ResponsiveContainer>
             <LineChart data={result.data}>

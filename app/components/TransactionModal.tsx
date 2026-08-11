@@ -37,7 +37,7 @@ export function TransactionModal({
   });
   const [date, setDate] = useState(() => {
     if (initialData) return initialData.date;
-    return format(selectedMonth, 'yyyy-MM-dd');
+    return format(new Date(), 'yyyy-MM-dd');
   });
   const [type, setType] = useState<TransactionType>(initialData?.type || 'EXPENSE');
   const [status, setStatus] = useState<TransactionStatus>(initialData?.status || 'PAID');
@@ -691,7 +691,7 @@ export function TransactionModal({
           {!initialData ? (
             <div className="space-y-3 pt-2">
               <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider">Recorrência</label>
-            <div className="grid grid-cols-2 gap-2">
+<div className="grid grid-cols-3 gap-2">
                 {[
                   { id: 'ONE_TIME', label: 'Única' },
                   { id: 'FIXED', label: 'Fixa' },

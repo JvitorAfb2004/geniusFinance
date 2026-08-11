@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { useFinance } from '../hooks/useFinance';
 import { formatCurrency } from '../lib/utils';
 import { format } from 'date-fns';
-import { Lock, Unlock, ChevronDown, ChevronUp, FileText } from 'lucide-react';
+import { Lock, Unlock, ChevronDown, ChevronUp, FileText, Plus } from 'lucide-react';
 import { buildMonthlyClosingEntries, getMonthlyClosingTransactions } from '../lib/monthlyClosingEntries';
 
 const MONTH_NAMES = [
@@ -50,12 +50,20 @@ export function MonthlyClosingView() {
   return (
     <div className="flex flex-col gap-5">
       <div className="clay p-5">
-        <div className="flex items-center gap-3 mb-4">
-          <FileText className="w-5 h-5 text-primary" />
-          <div>
-            <h2 className="text-lg font-bold text-gray-900">Fechamento Mensal</h2>
-            <p className="text-sm text-gray-500">Registre e acompanhe o fechamento de cada competência.</p>
+        <div className="flex items-center justify-between gap-3 mb-4">
+          <div className="flex items-center gap-3">
+            <FileText className="w-5 h-5 text-primary" />
+            <div>
+              <h2 className="text-lg font-bold text-gray-900">Fechamento Mensal</h2>
+              <p className="text-sm text-gray-500">Registre e acompanhe o fechamento de cada competência.</p>
+            </div>
           </div>
+          <button
+            onClick={() => setClosingTarget({ year: selectedMonth.getFullYear(), month: selectedMonth.getMonth() + 1 })}
+            className="px-3 py-1.5 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary-hover transition-colors cursor-pointer border-none flex items-center gap-1.5"
+          >
+            <Plus className="w-4 h-4" /> Novo Fechamento
+          </button>
         </div>
 
         <div className="overflow-x-auto">

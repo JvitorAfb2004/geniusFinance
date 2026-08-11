@@ -25,7 +25,7 @@ export const DEFAULT_CATEGORIES: CategorySeed[] = [
 
   // DESPESAS
   { name: 'Financiamento casa', section: 'DESPESAS', order: 12 },
-  { name: 'Agua', section: 'DESPESAS', order: 13 },
+  { name: 'Água', section: 'DESPESAS', order: 13 },
   { name: 'Energia', section: 'DESPESAS', order: 14 },
   { name: 'Internet / Recarga', section: 'DESPESAS', order: 15 },
   { name: 'Feira', section: 'DESPESAS', order: 16 },

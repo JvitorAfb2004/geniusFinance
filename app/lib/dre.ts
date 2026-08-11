@@ -76,7 +76,7 @@ export function computeDRE(
   const netMargin = receitaLiq.actual !== 0 ? (netProfit / receitaLiq.actual) * 100 : 0;
 
   const totalRow: DRERow = {
-    label: '(=) Lucro Liquido',
+    label: '(=) Lucro Líquido',
     section: 'TOTAL',
     indent: 0,
     isBold: true,
@@ -87,7 +87,7 @@ export function computeDRE(
   };
 
   const marginRow: DRERow = {
-    label: 'Margem Liquida',
+    label: 'Margem Líquida',
     section: 'TOTAL',
     indent: 0,
     isBold: false,

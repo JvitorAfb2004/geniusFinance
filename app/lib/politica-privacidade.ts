@@ -36,7 +36,6 @@ Os dados são tratados para as seguintes finalidades:
 
 - Autenticação e controle de acesso à plataforma (Firebase Auth);
 - Armazenamento e exibição dos dados financeiros e de projetos inseridos pelo usuário;
-- Processamento de IA para extração de transações, leads e geração de relatórios (via NVIDIA API);
 - Compartilhamento de dados entre membros da mesma conta empresarial;
 - Envio de convites para participação em contas empresariais (via Firestore);
 - Exportação de transações em CSV;
@@ -47,7 +46,6 @@ Os dados são tratados para as seguintes finalidades:
 
 O tratamento de dados pessoais é realizado com base nas seguintes hipóteses legais da LGPD:
 
-- Consentimento (art. 7º, I): para o envio de dados à API NVIDIA para processamento de IA;
 - Execução de contrato (art. 7º, V): para autenticação, armazenamento e funcionamento da plataforma;
 - Interesse legítimo (art. 7º, IX): para suporte técnico e segurança;
 - Cumprimento de obrigação legal (art. 7º, II): quando exigido por lei.
@@ -60,8 +58,6 @@ Os dados do usuário podem ser compartilhados nas seguintes situações:
 
 5.2. Prestadores de serviços:
 - Google LLC (Firebase Auth e Cloud Firestore): autenticação e armazenamento de dados. Política: https://policies.google.com/privacy
-- NVIDIA Corporation (NVIDIA API): processamento de IA para extração de dados, relatórios e chat. Política: https://www.nvidia.com/en-us/privacy-center/
-- EasyPanel: hospedagem do servidor proxy de IA.
 
 5.3. Autoridades competentes: quando exigido por lei, ordem judicial ou autoridade administrativa.
 
@@ -72,10 +68,6 @@ Os dados do usuário podem ser compartilhados nas seguintes situações:
 Os dados são armazenados no Google Cloud Firestore, cujos servidores podem estar localizados fora do Brasil. O Google LLC possui certificação e adere a padrões internacionais de proteção de dados.
 
 Ao utilizar a plataforma, o usuário consente com a transferência internacional de seus dados para viabilizar o funcionamento do serviço, nos termos do art. 33 da LGPD.
-
-Dados enviados para a API NVIDIA são processados nos servidores da NVIDIA (Estados Unidos ou global) durante a sessão de processamento de IA.
-
-[REVISAR_COM_ADVOGADO: Confirmar se a NVIDIA possui cláusulas contratuais padrão ou certificação adequada para transferência internacional nos termos da LGPD.]
 
 7. ARMAZENAMENTO E RETENÇÃO
 
@@ -115,21 +107,7 @@ A GENIUS WEB adota as seguintes medidas de segurança:
 - Senha e credenciais gerenciadas exclusivamente pelo Google (a plataforma não armazena senhas próprias);
 - Isolamento de escopos: usuários não autenticados não têm acesso a nenhum dado.
 
-10. USO DE INTELIGÊNCIA ARTIFICIAL
-
-A plataforma envia dados à API NVIDIA para funcionalidades de IA, incluindo:
-- Texto de transações financeiras para extração automática de dados;
-- Texto de leads para extração de dados de clientes;
-- Dados financeiros agregados para geração de relatórios e sugestões;
-- Mensagens do chat conversacional.
-
-[REVISAR_COM_ADVOGADO: Verificar se a NVIDIA utiliza dados enviados pela API para treinamento de modelos. Caso positivo, é necessário informar o usuário e obter consentimento específico.]
-
-Os dados enviados para processamento de IA são transmitidos de forma pontual (por solicitação) e não são armazenados permanentemente pela NVIDIA, conforme os termos de uso da API NVIDIA.
-
-O usuário pode utilizar as funcionalidades da plataforma sem acionar os recursos de IA, caso prefira não ter seus dados processados por terceiros.
-
-11. localStorage
+10. localStorage
 
 A plataforma utiliza o localStorage do navegador para armazenar preferências do usuário:
 
@@ -144,23 +122,23 @@ A plataforma utiliza o localStorage do navegador para armazenar preferências do
 
 Nenhuma informação pessoal identificável é armazenada no localStorage.
 
-12. UPLOAD DE ARQUIVOS
+11. UPLOAD DE ARQUIVOS
 
-A plataforma permite upload de arquivos Excel (.xlsx) e CSV para importação de transações financeiras. Os arquivos são processados localmente no navegador do usuário e os dados extraídos são armazenados no Firestore. Para processamento com IA, os dados extraídos podem ser enviados à API NVIDIA.
+A plataforma permite upload de arquivos Excel (.xlsx) e CSV para importação de transações financeiras. Os arquivos são processados localmente no navegador do usuário e os dados extraídos são armazenados no Firestore.
 
-13. CRIAÇÃO DE CONTA EMPRESARIAL E CONVITES
+12. CRIAÇÃO DE CONTA EMPRESARIAL E CONVITES
 
 Ao criar uma conta empresarial, o usuário (proprietário) pode convidar outros usuários por e-mail. O e-mail do convidado é armazenado no Firestore para viabilizar o convite.
 
 O convidado pode verificar convites pendentes ao fazer login na plataforma com o mesmo e-mail.
 
-14. ALTERAÇÕES NESTA POLÍTICA
+13. ALTERAÇÕES NESTA POLÍTICA
 
 Esta Política de Privacidade poderá ser atualizada periodicamente. A versão atualizada será publicada na plataforma, com indicação da data de atualização.
 
 Alterações significativas serão comunicadas aos usuários por meio da plataforma.
 
-15. CONTATO DO CONTROLADOR
+14. CONTATO DO CONTROLADOR
 
 GENIUS WEB
 CNPJ: 66.107.006/0001-70

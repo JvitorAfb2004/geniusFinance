@@ -1,6 +1,5 @@
 import React, { useState, useCallback } from 'react';
 import { useFinance } from '../hooks/useFinance';
-import { parseTransactions as aiParseTransactions } from '../lib/ai';
 import { formatCurrency } from '../lib/utils';
 import { Upload, FileSpreadsheet, FileText, Trash2, Pencil, Check, X, Loader2, Plus } from 'lucide-react';
 import type { Transaction } from '../types';
@@ -17,6 +16,62 @@ interface ParsedTx {
 
 let idCounter = 0;
 function nextKey() { return `import_${++idCounter}_${Date.now()}`; }
+
+interface RawTx {
+  title: string;
+  amount: number;
+  date: string;
+  type: 'INCOME' | 'EXPENSE';
+  status: 'PAID' | 'PENDING';
+}
+
+function parseAmount(raw: string): number | null {
+  const cleaned = raw.replace(/[^\d,.-]/g, '').replace(/\./g, '').replace(',', '.');
+  const n = parseFloat(cleaned);
+  return Number.isFinite(n) && n !== 0 ? Math.abs(n) : null;
+}
+
+function parseDateToken(raw: string): string | null {
+  const m = raw.match(/(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{2,4})/);
+  if (!m) return null;
+  let [, d, mo, y] = m;
+  if (Number(y) < 100) y = `20${y}`;
+  if (Number(mo) > 12) [d, mo] = [mo, d];
+  if (Number(d) < 1 || Number(d) > 31 || Number(mo) < 1 || Number(mo) > 12) return null;
+  return `${y.padStart(4, '0')}-${mo.padStart(2, '0')}-${d.padStart(2, '0')}`;
+}
+
+function parseLine(line: string): RawTx | null {
+  const parts = line.split(/[|\t;]/).map((p) => p.trim()).filter(Boolean);
+  if (parts.length === 0) return null;
+
+  let date = '';
+  let amount = 0;
+  let type: 'INCOME' | 'EXPENSE' = 'EXPENSE';
+  const nonMeta: string[] = [];
+
+  for (const part of parts) {
+    const d = parseDateToken(part);
+    if (d) { date = d; continue; }
+    const a = parseAmount(part);
+    if (a !== null) {
+      amount = a;
+      type = part.includes('-') ? 'EXPENSE' : 'INCOME';
+      continue;
+    }
+    nonMeta.push(part);
+  }
+
+  const title = nonMeta.join(' - ').trim();
+  if (!title || !amount) return null;
+  return { title, amount, date, type, status: 'PAID' };
+}
+
+function parseTextLocal(raw: string): RawTx[] {
+  return raw.split(/\r?\n/)
+    .map((l) => parseLine(l))
+    .filter((t): t is RawTx => t !== null);
+}
 
 export default function ImportView() {
   const { addTransaction, activeContext, categories } = useFinance();
@@ -57,24 +112,18 @@ export default function ImportView() {
     setLoading(true);
     setError('');
     setParsedTxs([]);
-    try {
-      const txs = await aiParseTransactions(raw);
-      if (!txs.length) {
-        setError('Nenhuma transação encontrada no texto.');
-        setLoading(false);
-        return;
-      }
-      setParsedTxs(txs.map((t) => ({
-        ...t,
-        key: nextKey(),
-        categoryId: '',
-      })));
-    } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : 'Erro desconhecido';
-      setError(msg);
-    } finally {
+    const txs = parseTextLocal(raw);
+    if (!txs.length) {
+      setError('Nenhuma transação encontrada no texto.');
       setLoading(false);
+      return;
     }
+    setParsedTxs(txs.map((t) => ({
+      ...t,
+      key: nextKey(),
+      categoryId: '',
+    })));
+    setLoading(false);
   }
 
   // Edit
