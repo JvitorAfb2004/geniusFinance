@@ -774,8 +774,8 @@ export function TransactionModal({
 
           {initialData && (
             <div className="text-xs text-gray-400 space-y-0.5 pt-2">
-              <p>Criado em: {format(new Date(initialData.createdAt), "dd/MM/yyyy 'as' HH:mm")}</p>
-              <p>Alterado em: {format(new Date(initialData.updatedAt), "dd/MM/yyyy 'as' HH:mm")}</p>
+              {initialData.createdAt && <p>Criado em: {format(new Date(initialData.createdAt), "dd/MM/yyyy 'as' HH:mm")}</p>}
+              {initialData.updatedAt && <p>Alterado em: {format(new Date(initialData.updatedAt), "dd/MM/yyyy 'as' HH:mm")}</p>}
             </div>
           )}
 
