@@ -6,6 +6,7 @@ import { addDays, endOfDay, format, isSameMonth, isWithinInterval, parseISO, sta
 import { ptBR } from 'date-fns/locale';
 import { Settings2, Wallet, TrendingUp, TrendingDown, DollarSign, Percent, ArrowDownToLine, ArrowUpToLine, CalendarDays, CheckCircle2, Clock3 } from 'lucide-react';
 import { motion } from 'motion/react';
+import { Button } from '@astryxdesign/core/Button';
 
 const DEFAULT_WIDGETS = [
   'month_balance',
@@ -215,13 +216,14 @@ export function DashboardCards({ valuesVisible = true }: { valuesVisible?: boole
 
   return (
     <div>
-      <button
+      <Button
+        label={editing ? 'Concluir Personalização' : 'Personalizar Dashboard'}
+        variant="ghost"
+        size="sm"
+        icon={<Settings2 className="w-3.5 h-3.5" />}
         onClick={() => setEditing(!editing)}
-        className="text-[0.72rem] font-semibold text-slate-400 hover:text-slate-600 cursor-pointer flex items-center gap-1.5 mb-4 ml-auto transition-colors"
-      >
-        <Settings2 className="w-3.5 h-3.5" />
-        {editing ? 'Concluir Personalização' : 'Personalizar Dashboard'}
-      </button>
+        className="mb-4 ml-auto"
+      />
 
       {(() => {
         const year = selectedMonth.getFullYear();
@@ -250,17 +252,13 @@ export function DashboardCards({ valuesVisible = true }: { valuesVisible?: boole
       {editing && (
         <div className="flex flex-wrap gap-1.5 mb-4 clay">
           {ALL_WIDGETS.map((w) => (
-            <button
+            <Button
               key={w.id}
+              label={w.label}
+              size="sm"
+              variant={widgets.includes(w.id) ? 'primary' : 'secondary'}
               onClick={() => toggleWidget(w.id)}
-              className={`text-[0.72rem] font-semibold px-3 py-1.5 rounded-2xl border cursor-pointer transition-all duration-200 ${
-                widgets.includes(w.id)
-                  ? 'clay-btn-primary'
-                  : 'bg-white text-slate-500 border-slate-200 hover:border-slate-300 hover:text-slate-700 hover:shadow-[0_1px_3px_rgba(0,0,0,0.04)]'
-              }`}
-            >
-              {w.label}
-            </button>
+            />
           ))}
         </div>
       )}

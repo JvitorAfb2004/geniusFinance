@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Bot, Check, Loader2, Send, Sparkles, X } from "lucide-react";
+import { Button } from "@astryxdesign/core/Button";
+import { IconButton } from "@astryxdesign/core/IconButton";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { useFinance } from "~/hooks/useFinance";
@@ -118,15 +120,13 @@ export function FinanceAIAssistant() {
   return (
     <>
       {!open && (
-        <button onClick={() => setOpen(true)} aria-label="Abrir assistente financeiro" title="Assistente financeiro" className="fixed bottom-20 right-5 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-white shadow-lg transition hover:bg-primary-hover active:scale-95 lg:bottom-6 lg:right-6">
-          <Sparkles className="h-6 w-6" />
-        </button>
+        <Button label="Abrir assistente financeiro" isIconOnly icon={<Sparkles className="h-6 w-6" />} elevation="med" onClick={() => setOpen(true)} className="fixed bottom-20 right-5 z-40 lg:bottom-6 lg:right-6" />
       )}
       {open && (
         <section aria-label="Assistente financeiro" className="fixed inset-0 z-50 flex flex-col bg-surface lg:inset-auto lg:bottom-6 lg:right-6 lg:h-[min(600px,calc(100vh-3rem))] lg:w-[min(440px,calc(100vw-2rem))] lg:rounded-lg lg:border lg:border-border lg:shadow-2xl">
           <header className="flex items-center justify-between border-b border-border bg-slate-900 px-4 py-3 text-white lg:rounded-t-lg">
             <div className="flex items-center gap-2.5"><Bot className="h-5 w-5 text-blue-300" /><div><p className="text-sm font-semibold">Assistente financeiro</p><p className="text-[0.68rem] text-slate-300">DeepSeek V4 Flash · escopo atual</p></div></div>
-            <button onClick={() => setOpen(false)} aria-label="Fechar assistente" className="rounded p-1 text-slate-300 hover:text-white"><X className="h-5 w-5" /></button>
+             <IconButton label="Fechar assistente" icon={<X className="h-5 w-5" />} onClick={() => setOpen(false)} />
           </header>
           <div className="flex-1 space-y-3 overflow-y-auto bg-slate-50 p-4" aria-live="polite">
             {messages.length === 1 && <div className="flex flex-wrap gap-2">{suggestions.map((suggestion) => <button key={suggestion} onClick={() => send(suggestion)} disabled={sending} className="rounded-full border border-border bg-white px-3 py-1.5 text-left text-xs text-text-secondary hover:border-primary hover:text-primary">{suggestion}</button>)}</div>}
@@ -136,7 +136,7 @@ export function FinanceAIAssistant() {
             {sending && <div className="flex items-center gap-2 text-xs text-text-muted"><Loader2 className="h-4 w-4 animate-spin" />Consultando seus dados...</div>}
             <div ref={endRef} />
           </div>
-          <form onSubmit={(event) => { event.preventDefault(); void send(); }} className="flex gap-2 border-t border-border bg-white p-3 lg:rounded-b-lg"><input ref={inputRef} value={input} onChange={(event) => setInput(event.target.value)} disabled={sending} maxLength={4000} placeholder="Pergunte sobre suas finanças..." className="clay-input min-w-0 flex-1 px-3 py-2 text-sm" /><button type="submit" disabled={sending || !input.trim()} aria-label="Enviar mensagem" className="rounded-md bg-primary px-3 text-white disabled:opacity-50"><Send className="h-4 w-4" /></button></form>
+          <form onSubmit={(event) => { event.preventDefault(); void send(); }} className="flex gap-2 border-t border-border bg-white p-3 lg:rounded-b-lg"><input ref={inputRef} value={input} onChange={(event) => setInput(event.target.value)} disabled={sending} maxLength={4000} placeholder="Pergunte sobre suas finanças..." className="clay-input min-w-0 flex-1 px-3 py-2 text-sm" /><Button label="Enviar mensagem" type="submit" isIconOnly icon={<Send className="h-4 w-4" />} isDisabled={sending || !input.trim()} /></form>
         </section>
       )}
     </>
