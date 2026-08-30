@@ -1,14 +1,13 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useFinance } from '../hooks/useFinance';
-import { LogOut, User, Shield, DownloadCloud, Pencil, Trash2, Plus, X, Check, Users, BellRing, Building2, Mail, UserPlus, Landmark } from 'lucide-react';
-import { IntegrationsTab } from './IntegrationsTab';
+import { LogOut, User, Shield, DownloadCloud, Pencil, Trash2, Plus, X, Check, Users, BellRing, Building2, Mail, UserPlus } from 'lucide-react';
 import ConfirmModal from './ConfirmModal';
 import type { Category, DRESection, LeadOption, AccountRole, AccountMember, MemberPermissions } from '../types';
 import { PermissionsModal } from './PermissionsModal';
 import { auth } from '../lib/firebase';
 import { SECTION_LABELS } from '../lib/categories';
 
-type SettingsTab = 'geral' | 'conta' | 'comercial' | 'categorias' | 'tags' | 'integracao';
+type SettingsTab = 'geral' | 'conta' | 'comercial' | 'categorias' | 'tags';
 
 const STATUS_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#84cc16'];
 const TAG_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#84cc16'];
@@ -182,7 +181,6 @@ export function SettingsView() {
     { id: 'comercial', label: 'Comercial' },
     { id: 'categorias', label: 'Categorias' },
     { id: 'tags', label: 'Tags' },
-    { id: 'integracao', label: 'Integrações', icon: <Landmark className="w-4 h-4" /> },
   ];
 
   return (
@@ -798,7 +796,6 @@ export function SettingsView() {
             </div>
           )}
 
-          {activeTab === 'integracao' && <IntegrationsTab />}
         </div>
       </div>
 
