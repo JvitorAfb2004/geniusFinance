@@ -1,6 +1,7 @@
 import React from 'react';
 import { AlertTriangle, Info } from 'lucide-react';
 import { motion } from 'motion/react';
+import { Button } from '@astryxdesign/core/Button';
 
 interface ConfirmModalProps {
   title: string;
@@ -56,18 +57,8 @@ export default function ConfirmModal({
           </div>
         </div>
         <div className="flex gap-2.5 px-6 pb-6">
-          <button
-            onClick={onCancel}
-            className="flex-1 py-2.5 text-[0.82rem] font-bold text-slate-500 bg-slate-100 hover:bg-slate-200/80 hover:text-slate-800 rounded-xl transition-all cursor-pointer border-none"
-          >
-            {cancelLabel}
-          </button>
-          <button
-            onClick={onConfirm}
-            className={`flex-1 py-2.5 text-[0.82rem] font-bold text-surface rounded-xl transition-all cursor-pointer border-none shadow-sm hover:shadow-md active:scale-[0.98] ${colors.btn}`}
-          >
-            {confirmLabel}
-          </button>
+          <Button label={cancelLabel} variant="secondary" onClick={onCancel} className="flex-1" />
+          <Button label={confirmLabel} variant={variant === 'danger' ? 'destructive' : 'primary'} onClick={onConfirm} className="flex-1" />
         </div>
       </motion.div>
     </motion.div>
