@@ -1,5 +1,7 @@
 import React from 'react';
 import { X, Clock, ArrowRight } from 'lucide-react';
+import { Card } from '@astryxdesign/core/Card';
+import { Button } from '@astryxdesign/core/Button';
 
 interface Props {
   daysLeft: number;
@@ -10,7 +12,7 @@ interface Props {
 export function TrialModal({ daysLeft, onClose, onSubscribe }: Props) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/35 backdrop-blur-sm p-4">
-      <div className="clay shadow-2xl w-full max-w-md overflow-hidden">
+      <Card className="shadow-2xl w-full max-w-md overflow-hidden">
         {/* Header */}
         <div className="bg-[#f97316] p-6 text-white text-center relative">
           <button
@@ -51,22 +53,22 @@ export function TrialModal({ daysLeft, onClose, onSubscribe }: Props) {
           </p>
 
           <div className="flex flex-col gap-2">
-            <button
+            <Button
+              label="Assinar Agora"
+              variant="primary"
               onClick={onSubscribe}
-              className="w-full bg-primary hover:bg-primary-hover text-white font-medium py-3 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer"
-            >
-              Assinar Agora
-              <ArrowRight className="w-4 h-4" />
-            </button>
-            <button
+              icon={<ArrowRight className="w-4 h-4" />}
+              className="w-full font-medium py-3 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer"
+            />
+            <Button
+              label="Continuar testando"
+              variant="ghost"
               onClick={onClose}
               className="w-full text-sm text-gray-500 hover:text-gray-700 py-2 cursor-pointer"
-            >
-              Continuar testando
-            </button>
+            />
           </div>
         </div>
-      </div>
+      </Card>
     </div>
   );
 }

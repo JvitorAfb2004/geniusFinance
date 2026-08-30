@@ -6,6 +6,7 @@ import {
 } from 'recharts';
 import { format, parseISO, startOfMonth, endOfMonth, addMonths } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { Card } from '@astryxdesign/core/Card';
 
 function CustomTooltip({ active, payload, label }: any) {
   if (!active || !payload || !payload.length) return null;
@@ -99,7 +100,7 @@ export function DashboardCharts() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="clay flex flex-col">
+      <Card className="flex flex-col">
         <div className="px-5 py-4 border-b border-slate-100 font-bold text-[0.82rem] text-slate-700 tracking-tight">
           Receitas vs Despesas (Ano)
         </div>
@@ -125,9 +126,9 @@ export function DashboardCharts() {
             </BarChart>
           </ResponsiveContainer>
         </div>
-      </div>
+      </Card>
 
-      <div className="clay flex flex-col">
+      <Card className="flex flex-col">
         <div className="px-5 py-4 border-b border-slate-100 font-bold text-[0.82rem] text-slate-700 tracking-tight">
           Previsão de Saldo Acumulado
         </div>
@@ -156,7 +157,7 @@ export function DashboardCharts() {
             </LineChart>
           </ResponsiveContainer>
         </div>
-      </div>
+      </Card>
     </div>
   );
 }

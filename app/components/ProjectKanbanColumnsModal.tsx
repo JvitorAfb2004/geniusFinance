@@ -2,6 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { Eye, EyeOff, GripVertical, Plus, RotateCcw, Trash2, X } from 'lucide-react';
 import { useFinance } from '../hooks/useFinance';
 import { cn } from '../lib/utils';
+import { Card } from '@astryxdesign/core/Card';
+import { Button } from '@astryxdesign/core/Button';
+import { IconButton } from '@astryxdesign/core/IconButton';
 import {
   DEFAULT_PROJECT_KANBAN_COLUMNS,
   normalizeProjectKanbanSettings,
@@ -80,15 +83,13 @@ export default function ProjectKanbanColumnsModal({ onClose }: Props) {
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
       <div className="fixed inset-0 bg-black/30 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative w-full max-w-xl clay shadow-xl overflow-hidden">
+      <Card className="relative w-full max-w-xl shadow-xl overflow-hidden">
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
           <div>
             <h3 className="font-bold text-slate-900">Editar colunas</h3>
             <p className="text-xs text-slate-500 mt-0.5">Renomeie, reordene, oculte ou adicione etapas do Kanban.</p>
           </div>
-          <button onClick={onClose} className="p-1 text-slate-400 hover:text-slate-600 cursor-pointer">
-            <X className="w-5 h-5" />
-          </button>
+          <IconButton label="Fechar" icon={<X className="w-5 h-5" />} variant="ghost" onClick={onClose} className="p-1 text-slate-400 hover:text-slate-600 cursor-pointer" />
         </div>
 
         <div className="p-5 space-y-3 max-h-[65vh] overflow-y-auto">
@@ -131,22 +132,22 @@ export default function ProjectKanbanColumnsModal({ onClose }: Props) {
                     />
                   ))}
                 </div>
-                <button
+                <IconButton
+                  label={column.visible ? 'Ocultar coluna' : 'Mostrar coluna'}
+                  icon={column.visible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                  variant="ghost"
                   onClick={() => toggleColumn(column)}
-                  disabled={!canHide}
+                  isDisabled={!canHide}
                   className="p-2 text-slate-400 hover:text-slate-700 disabled:opacity-30 cursor-pointer"
-                  title={column.visible ? 'Ocultar coluna' : 'Mostrar coluna'}
-                >
-                  {column.visible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
-                </button>
+                />
                 {!isDefault && (
-                  <button
+                  <IconButton
+                    label="Remover coluna customizada"
+                    icon={<Trash2 className="w-4 h-4" />}
+                    variant="ghost"
                     onClick={() => removeCustomColumn(column.status)}
                     className="p-2 text-slate-400 hover:text-red-500 cursor-pointer"
-                    title="Remover coluna customizada"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                  />
                 )}
               </div>
             );
@@ -165,14 +166,14 @@ export default function ProjectKanbanColumnsModal({ onClose }: Props) {
               placeholder="Nome da nova coluna..."
               className="flex-1 px-3 py-2 border border-slate-200 rounded-lg text-sm outline-none focus:border-primary"
             />
-            <button
+            <Button
+              label="Adicionar"
+              variant="primary"
+              icon={<Plus className="w-4 h-4" />}
               onClick={addColumn}
-              disabled={!newColumnName.trim()}
-              className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-primary text-white text-sm font-medium hover:bg-blue-700 disabled:opacity-50 cursor-pointer"
-            >
-              <Plus className="w-4 h-4" />
-              Adicionar
-            </button>
+              isDisabled={!newColumnName.trim()}
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 cursor-pointer"
+            />
           </div>
         </div>
 
@@ -188,7 +189,7 @@ export default function ProjectKanbanColumnsModal({ onClose }: Props) {
             Concluir
           </button>
         </div>
-      </div>
+      </Card>
     </div>
   );
 }

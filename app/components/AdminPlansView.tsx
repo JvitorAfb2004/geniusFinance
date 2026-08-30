@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { apiFetch } from '../lib/api';
 import { Plus, Pencil, Trash2, Check, X } from 'lucide-react';
 import { formatPriceFromCents } from '../lib/subscriptionService';
+import { Card } from '@astryxdesign/core/Card';
+import { Button } from '@astryxdesign/core/Button';
+import { IconButton } from '@astryxdesign/core/IconButton';
 
 interface Plan {
   id: string;
@@ -100,15 +103,13 @@ export function AdminPlansView() {
           <h2 className="text-xl font-bold text-gray-900">Gestão de Planos</h2>
           <p className="text-sm text-gray-500">Crie e gerencie os planos de assinatura disponíveis.</p>
         </div>
-        <button onClick={openNew}
-          className="flex items-center gap-1.5 text-sm font-medium bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-hover cursor-pointer transition-colors">
-          <Plus className="w-4 h-4" /> Novo Plano
-        </button>
+        <Button label="Novo Plano" variant="primary" icon={<Plus className="w-4 h-4" />}
+          className="flex items-center gap-1.5 text-sm font-medium px-4 py-2 rounded-lg hover:bg-primary-hover cursor-pointer transition-colors" />
       </div>
 
       {error && <p className="text-red-500 text-sm">{error}</p>}
 
-      <div className="clay overflow-hidden">
+      <Card className="overflow-hidden">
         <table className="w-full text-sm">
           <thead className="bg-gray-50 text-left">
             <tr>
@@ -127,28 +128,27 @@ export function AdminPlansView() {
                 <td className="px-4 py-2.5 text-gray-500 text-xs">{p.type}</td>
                 <td className="px-4 py-2.5 text-gray-700">{formatPriceFromCents(p.basePrice)}</td>
                 <td className="px-4 py-2.5 flex gap-2">
-                  <button onClick={() => openEdit(p)}
-                    className="text-gray-400 hover:text-blue-600 cursor-pointer"><Pencil className="w-3.5 h-3.5" /></button>
-                  <button onClick={() => handleDelete(p.id)}
-                    className="text-gray-400 hover:text-red-500 cursor-pointer"><Trash2 className="w-3.5 h-3.5" /></button>
+                  <IconButton label="Editar" icon={<Pencil className="w-3.5 h-3.5" />} variant="ghost"
+                    className="text-gray-400 hover:text-blue-600 cursor-pointer" onClick={() => openEdit(p)} />
+                  <IconButton label="Excluir" icon={<Trash2 className="w-3.5 h-3.5" />} variant="ghost"
+                    className="text-gray-400 hover:text-red-500 cursor-pointer" onClick={() => handleDelete(p.id)} />
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-      </div>
+      </Card>
 
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh]">
           <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" onClick={closeModal} />
-          <div className="relative clay shadow-xl w-full max-w-md mx-4">
+          <Card className="relative shadow-xl w-full max-w-md mx-4">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
               <h3 className="text-lg font-bold text-gray-900">
                 {editingId ? 'Editar Plano' : 'Novo Plano'}
               </h3>
-              <button onClick={closeModal} className="p-1 text-gray-400 hover:text-gray-600 cursor-pointer">
-                <X className="w-5 h-5" />
-              </button>
+              <IconButton label="Fechar" icon={<X className="w-5 h-5" />} variant="ghost"
+                className="p-1 text-gray-400 hover:text-gray-600 cursor-pointer" onClick={closeModal} />
             </div>
 
             <div className="px-6 py-4 space-y-4">
@@ -194,12 +194,11 @@ export function AdminPlansView() {
                 className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 cursor-pointer">
                 Cancelar
               </button>
-              <button onClick={handleSave} disabled={saving || !form.name}
-                className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 cursor-pointer transition-colors flex items-center gap-1.5">
-                <Check className="w-4 h-4" /> {saving ? 'Salvando...' : 'Salvar'}
-              </button>
+              <Button label={saving ? 'Salvando...' : 'Salvar'} variant="primary" icon={<Check className="w-4 h-4" />}
+                isDisabled={saving || !form.name}
+                className="px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 cursor-pointer transition-colors flex items-center gap-1.5" />
             </div>
-          </div>
+          </Card>
         </div>
       )}
     </div>

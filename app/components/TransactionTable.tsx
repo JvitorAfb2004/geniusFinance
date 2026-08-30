@@ -7,6 +7,9 @@ import { Trash2, Pencil, Search, Forward } from 'lucide-react';
 import { TransactionModal } from './TransactionModal';
 import ConfirmModal from './ConfirmModal';
 import { Transaction } from '../types';
+import { Card } from '@astryxdesign/core/Card';
+import { Button } from '@astryxdesign/core/Button';
+import { IconButton } from '@astryxdesign/core/IconButton';
 
 export function TransactionTable({ 
   hideHeaderTitle,
@@ -66,26 +69,26 @@ export function TransactionTable({
   };
 
   return (
-    <div className="clay flex flex-col flex-1 min-h-[300px]">
+    <Card className="flex flex-col flex-1 min-h-[300px]">
       <div className="px-5 py-4 border-b border-slate-100 flex flex-row items-center justify-between z-10 gap-3">
         {!hideHeaderTitle && <span className="text-slate-700 font-bold text-[0.85rem] tracking-tight shrink-0">Transações</span>}
 
         <div className="flex items-center gap-2 w-full sm:w-auto sm:ml-auto">
           <div className="relative flex-1 sm:flex-none sm:w-32 min-w-[100px]">
              <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-             <input
+              <input
                type="text"
                placeholder="Buscar..."
                value={searchTerm}
                onChange={(e) => setSearchTerm(e.target.value)}
-                className="clay-input w-full text-[0.78rem] pl-9 pr-3 py-1.5 font-medium text-slate-700 placeholder:text-slate-400"
+                className="w-full text-[0.78rem] pl-9 pr-3 py-1.5 font-medium text-slate-700 placeholder:text-slate-400 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900/5 focus:border-slate-800"
              />
           </div>
 
           <div className="flex items-center gap-2">
           {!forceFilter && (
             <select
-              className="clay-input text-[0.72rem] px-2 py-1.5 font-medium text-slate-600 cursor-pointer shrink-0"
+              className="text-[0.72rem] px-2 py-1.5 font-medium text-slate-600 cursor-pointer shrink-0 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900/5 focus:border-slate-800"
               value={filterType}
               onChange={(e) => setFilterType(e.target.value as any)}
             >
@@ -96,7 +99,7 @@ export function TransactionTable({
             </select>
           )}
           <select
-            className="clay-input text-[0.72rem] px-2 py-1.5 font-medium text-slate-600 cursor-pointer shrink-0"
+            className="text-[0.72rem] px-2 py-1.5 font-medium text-slate-600 cursor-pointer shrink-0 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900/5 focus:border-slate-800"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as 'ALL' | 'PAID' | 'PENDING')}
           >
@@ -105,7 +108,7 @@ export function TransactionTable({
             <option value="PENDING">Pendente</option>
           </select>
           <select
-            className="clay-input text-[0.72rem] px-2 py-1.5 font-medium text-slate-600 cursor-pointer shrink-0 max-w-[110px]"
+            className="text-[0.72rem] px-2 py-1.5 font-medium text-slate-600 cursor-pointer shrink-0 max-w-[110px] border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900/5 focus:border-slate-800"
             value={categoryFilterId}
             onChange={(e) => setCategoryFilterId(e.target.value)}
           >
@@ -116,12 +119,12 @@ export function TransactionTable({
                 <option key={cat.id} value={cat.id}>{cat.name}</option>
               ))}
           </select>
-          <button
+          <Button
             onClick={handleCreate}
-            className="clay-btn text-[0.72rem] px-2.5 py-1.5 cursor-pointer font-bold whitespace-nowrap shrink-0"
-          >
-            + Lançamento
-          </button>
+            variant="secondary"
+            label="+ Lançamento"
+            className="text-[0.72rem] px-2.5 py-1.5 font-bold whitespace-nowrap shrink-0"
+          />
           </div>
         </div>
       </div>
@@ -198,20 +201,22 @@ export function TransactionTable({
                   </button>
                 </td>
                 <td className="py-2.5 px-4 border-b border-slate-100 text-center whitespace-nowrap">
-                  <button
+                  <IconButton
+                    variant="ghost"
                     onClick={() => handleMoveToNextMonth(tx)}
-                    title="Passar para o próximo mês"
-                    className="clay-btn text-slate-400 hover:text-emerald-600 p-1 cursor-pointer"
-                  >
-                    <Forward className="w-4 h-4" />
-                  </button>
-                  <button
+                    label="Passar para o próximo mês"
+                    icon={<Forward className="w-4 h-4" />}
+                    className="text-slate-400 hover:text-emerald-600 p-1"
+                  />
+                  <IconButton
+                    variant="ghost"
                     onClick={() => handleEdit(tx)}
-                    className="clay-btn text-slate-500 hover:text-primary p-1 cursor-pointer"
-                  >
-                    <Pencil className="w-4 h-4" />
-                  </button>
-                  <button
+                    label="Editar"
+                    icon={<Pencil className="w-4 h-4" />}
+                    className="text-slate-500 hover:text-primary p-1"
+                  />
+                  <IconButton
+                    variant="ghost"
                     onClick={() => {
                       if (tx.groupId && tx.isFixed) {
                         setConfirmDelete({ tx, future: true });
@@ -219,10 +224,10 @@ export function TransactionTable({
                         setConfirmDelete({ tx, future: false });
                       }
                     }}
-                    className="clay-btn text-slate-500 hover:text-[#ef4444] p-1 cursor-pointer ml-1"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                    label="Excluir"
+                    icon={<Trash2 className="w-4 h-4" />}
+                    className="text-slate-500 hover:text-[#ef4444] p-1 ml-1"
+                  />
                 </td>
               </tr>
             ))}
@@ -239,7 +244,7 @@ export function TransactionTable({
         ) : (
           <div className="flex flex-col gap-2 py-3">
             {visibleTransactions.map((tx) => (
-              <div key={tx.id} className="clay p-3.5">
+              <Card key={tx.id} className="p-3.5">
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <div className="flex-1 min-w-0">
                     <p className="text-xs text-slate-500 font-medium">{format(parseISO(tx.date), "dd/MM/yyyy")}</p>
@@ -278,24 +283,36 @@ export function TransactionTable({
                     >
                       {tx.status === 'PAID' ? 'Pago' : 'Pendente'}
                     </button>
-                    <button onClick={() => handleMoveToNextMonth(tx)} title="Passar para o próximo mês" className="clay-btn text-slate-400 hover:text-emerald-600 p-1 cursor-pointer">
-                      <Forward className="w-3.5 h-3.5" />
-                    </button>
-                    <button onClick={() => handleEdit(tx)} className="clay-btn text-slate-400 hover:text-primary p-1 cursor-pointer">
-                      <Pencil className="w-3.5 h-3.5" />
-                    </button>
-                    <button onClick={() => {
-                      if (tx.groupId && tx.isFixed) {
-                        setConfirmDelete({ tx, future: false });
-                      } else {
-                        setConfirmDelete({ tx, future: false });
-                      }
-                    }} className="clay-btn text-slate-400 hover:text-[#ef4444] p-1 cursor-pointer">
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
+                    <IconButton
+                      variant="ghost"
+                      onClick={() => handleMoveToNextMonth(tx)}
+                      label="Passar para o próximo mês"
+                      icon={<Forward className="w-3.5 h-3.5" />}
+                      className="text-slate-400 hover:text-emerald-600 p-1"
+                    />
+                    <IconButton
+                      variant="ghost"
+                      onClick={() => handleEdit(tx)}
+                      label="Editar"
+                      icon={<Pencil className="w-3.5 h-3.5" />}
+                      className="text-slate-400 hover:text-primary p-1"
+                    />
+                    <IconButton
+                      variant="ghost"
+                      onClick={() => {
+                        if (tx.groupId && tx.isFixed) {
+                          setConfirmDelete({ tx, future: false });
+                        } else {
+                          setConfirmDelete({ tx, future: false });
+                        }
+                      }}
+                      label="Excluir"
+                      icon={<Trash2 className="w-3.5 h-3.5" />}
+                      className="text-slate-400 hover:text-[#ef4444] p-1"
+                    />
                   </div>
                 </div>
-              </div>
+              </Card>
             ))}
           </div>
         )}
@@ -325,6 +342,6 @@ export function TransactionTable({
           onCancel={() => { deleteTransaction(confirmDelete.tx.id, false); setConfirmDelete(null); }}
         />
       )}
-    </div>
+    </Card>
   );
 }

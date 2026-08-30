@@ -6,6 +6,7 @@ import { computeDRE } from '../lib/dre';
 import { startOfYear, endOfYear, parseISO, isWithinInterval, eachMonthOfInterval, format, isSameMonth } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { AnimatedNumber } from './AnimatedNumber';
+import { Card } from '@astryxdesign/core/Card';
 
 function formatTooltipCurrency(value: unknown) {
   const numeric = Array.isArray(value) ? Number(value[0]) : Number(value);
@@ -95,28 +96,28 @@ export function ReportsView() {
   return (
     <div className="flex flex-col gap-5">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <div className="clay p-4">
+        <Card className="p-4">
           <p className="text-xs text-gray-500 mb-1">Total Receitas</p>
           <p className="text-lg font-bold font-mono text-emerald-600"><AnimatedNumber value={yearTotals.income} /></p>
-        </div>
-        <div className="clay p-4">
+        </Card>
+        <Card className="p-4">
           <p className="text-xs text-gray-500 mb-1">Total Despesas</p>
           <p className="text-lg font-bold font-mono text-red-500"><AnimatedNumber value={yearTotals.expense} /></p>
-        </div>
-        <div className="clay p-4">
+        </Card>
+        <Card className="p-4">
           <p className="text-xs text-gray-500 mb-1">Resultado</p>
           <p className={`text-lg font-bold font-mono ${yearTotals.net >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
             <AnimatedNumber value={yearTotals.net} />
           </p>
-        </div>
-        <div className="clay p-4">
+        </Card>
+        <Card className="p-4">
           <p className="text-xs text-gray-500 mb-1">Transações</p>
           <p className="text-lg font-bold font-mono text-slate-700"><AnimatedNumber value={yearTotals.count} kind="number" /></p>
-        </div>
+        </Card>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        <div className="clay p-6 min-w-0">
+        <Card className="p-6 min-w-0">
           <h2 className="text-lg font-bold text-gray-900 mb-4">Evolução Mensal</h2>
           <div style={{ width: '100%', height: 300 }}>
             <ResponsiveContainer>
@@ -132,9 +133,9 @@ export function ReportsView() {
               </BarChart>
             </ResponsiveContainer>
           </div>
-        </div>
+        </Card>
 
-        <div className="clay p-6">
+        <Card className="p-6">
           <h2 className="text-lg font-bold text-gray-900 mb-2">Top Despesas (Ano)</h2>
           <p className="text-sm text-gray-500 mb-4">Maiores categorias de custo identificadas.</p>
           {pieData.length > 0 ? (
@@ -157,10 +158,10 @@ export function ReportsView() {
           ) : (
             <div className="flex items-center justify-center h-[300px] text-gray-400 text-sm">Sem dados de despesa no ano atual.</div>
           )}
-        </div>
+        </Card>
       </div>
 
-      <div className="clay overflow-hidden">
+      <Card className="overflow-hidden">
         <div className="p-6 border-b border-slate-100">
           <h2 className="text-lg font-bold text-gray-900">Detalhamento por Categoria</h2>
           <p className="text-sm text-gray-500 mt-1">Receitas e despesas agrupadas por categoria no ano.</p>
@@ -197,7 +198,7 @@ export function ReportsView() {
             </tbody>
           </table>
         </div>
-      </div>
+      </Card>
     </div>
   );
 }

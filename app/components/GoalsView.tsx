@@ -6,6 +6,7 @@ import { motion } from 'motion/react';
 import { AnimatedNumber } from './AnimatedNumber';
 import { Button } from '@astryxdesign/core/Button';
 import { IconButton } from '@astryxdesign/core/IconButton';
+import { Card } from '@astryxdesign/core/Card';
 
 const CAT_LABELS: Record<string, string> = { SAVINGS: 'Reserva', INVESTMENT: 'Investimento', DEBT_PAYOFF: 'Quitar Dívida', PURCHASE: 'Compra' };
 const CAT_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
@@ -62,7 +63,7 @@ export default function GoalsView() {
       </div>
 
       {showForm && (
-        <div className="clay p-5 space-y-3">
+        <Card className="p-5 space-y-3">
           <h3 className="text-base font-bold text-slate-800">{editingGoalId ? 'Editar Meta' : 'Nova Meta'}</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <input placeholder="Nome da meta" value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} className="border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-400" />
@@ -78,11 +79,11 @@ export default function GoalsView() {
             <IconButton label="Salvar meta" icon={<Check className="w-4 h-4" />} variant="primary" onClick={handleSubmit} />
             <IconButton label="Cancelar edição" icon={<X className="w-5 h-5" />} variant="ghost" onClick={resetForm} />
           </div>
-        </div>
+        </Card>
       )}
 
       {goals.length === 0 && !showForm && (
-        <div className="clay p-12 text-center text-slate-400">Nenhuma meta definida. Crie sua primeira meta!</div>
+        <Card className="p-12 text-center text-slate-400">Nenhuma meta definida. Crie sua primeira meta!</Card>
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -91,7 +92,7 @@ export default function GoalsView() {
           const daysLeft = Math.max(0, Math.ceil((new Date(g.deadline).getTime() - Date.now()) / (1000 * 60 * 60 * 24)));
           const monthlyNeeded = daysLeft > 0 ? (g.targetAmount - g.currentAmount) / Math.max(daysLeft / 30, 1) : 0;
           return (
-            <div key={g.id} className="clay p-4 space-y-3">
+            <Card key={g.id} className="p-4 space-y-3">
               <div className="flex items-start justify-between">
                 <div>
                   <div className="flex items-center gap-2">
@@ -141,7 +142,7 @@ export default function GoalsView() {
                 </div>
               )}
               {pct >= 100 && <p className="text-emerald-600 text-sm font-bold">Meta atingida!</p>}
-            </div>
+            </Card>
           );
         })}
       </div>

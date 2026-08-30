@@ -7,6 +7,9 @@ import { isSameMonth, parseISO, getMonth, getYear } from 'date-fns';
 import { Plus, Edit2, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { AnimatedNumber } from './AnimatedNumber';
+import { Card } from '@astryxdesign/core/Card';
+import { Button } from '@astryxdesign/core/Button';
+import { IconButton } from '@astryxdesign/core/IconButton';
 
 const MONTH_LABELS = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
 
@@ -69,13 +72,15 @@ export function SpendingLimitsView() {
             <h2 className="text-lg font-bold text-slate-800">Limites de Gasto</h2>
             <p className="text-sm text-slate-500">Defina tetos de gasto por categoria para controlar seu orçamento.</p>
           </div>
-          <button
+          <Button
+            label="Novo Limite"
+            variant="primary"
             onClick={() => setShowModal(true)}
-            className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary-hover transition-colors cursor-pointer flex items-center gap-2"
+            className="px-4 py-2 rounded-lg text-sm font-semibold transition-colors cursor-pointer flex items-center gap-2"
           >
             <Plus className="w-4 h-4" />
             Novo Limite
-          </button>
+          </Button>
         </div>
         <div className="flex items-center justify-center h-64 text-slate-400">
           {spendingLimits.length === 0
@@ -96,13 +101,15 @@ export function SpendingLimitsView() {
           <h2 className="text-lg font-bold text-slate-800">Limites de Gasto</h2>
           <p className="text-sm text-slate-500">Acompanhe seus tetos de gasto por categoria.</p>
         </div>
-        <button
+        <Button
+          label="Novo Limite"
+          variant="primary"
           onClick={() => setShowModal(true)}
-          className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary-hover transition-colors cursor-pointer flex items-center gap-2"
+          className="px-4 py-2 rounded-lg text-sm font-semibold transition-colors cursor-pointer flex items-center gap-2"
         >
           <Plus className="w-4 h-4" />
           Novo Limite
-        </button>
+        </Button>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
@@ -113,9 +120,9 @@ export function SpendingLimitsView() {
             pct >= 100 ? 'bg-red-500' : pct >= 80 ? 'bg-amber-400' : 'bg-emerald-500';
 
           return (
-            <div
+            <Card
               key={limit.id}
-              className="clay clay-hover p-5 transition-all duration-300"
+              className="p-5 transition-all duration-300"
             >
               <div className="flex items-start justify-between mb-3">
                 <div>
@@ -127,18 +134,20 @@ export function SpendingLimitsView() {
                   )}
                 </div>
                 <div className="flex gap-1">
-                  <button
+                  <IconButton
+                    label="Editar"
+                    icon={<Edit2 className="w-3.5 h-3.5" />}
+                    variant="ghost"
                     onClick={() => handleEdit(limit)}
                     className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
-                  >
-                    <Edit2 className="w-3.5 h-3.5" />
-                  </button>
-                  <button
+                  />
+                  <IconButton
+                    label="Excluir"
+                    icon={<Trash2 className="w-3.5 h-3.5" />}
+                    variant="ghost"
                     onClick={() => handleDelete(limit)}
                     className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors cursor-pointer"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
+                  />
                 </div>
               </div>
 
@@ -179,7 +188,7 @@ export function SpendingLimitsView() {
                 {pct.toFixed(0)}% utilizado
                 {pct >= 100 ? ' — Limite estourado!' : pct >= 80 ? ' — Próximo do limite' : ''}
               </p>
-            </div>
+            </Card>
           );
         })}
       </div>

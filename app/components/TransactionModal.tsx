@@ -15,6 +15,9 @@ import {
 } from '../lib/calculator';
 import { X, Search, Plus, ArrowUpCircle, ArrowDownCircle, CheckCircle, Clock, Calculator } from 'lucide-react';
 import { motion } from 'motion/react';
+import { Card } from '@astryxdesign/core/Card';
+import { Button } from '@astryxdesign/core/Button';
+import { IconButton } from '@astryxdesign/core/IconButton';
 
 export function TransactionModal({ 
   onClose, 
@@ -290,9 +293,11 @@ export function TransactionModal({
           const newId = await addTransaction(baseTx);
           if (newId) onSaved?.(newId);
         } else if (recurrenceConfig === 'FIXED') {
-          await addTransaction(baseTx, 'FIXED');
+          const newId = await addTransaction(baseTx, 'FIXED');
+          if (newId) onSaved?.(newId);
         } else if (recurrenceConfig === 'INSTALLMENTS') {
-          await addTransaction(baseTx, 'INSTALLMENTS', installmentsCount);
+          const newId = await addTransaction(baseTx, 'INSTALLMENTS', installmentsCount);
+          if (newId) onSaved?.(newId);
         }
       }
 
@@ -311,12 +316,8 @@ export function TransactionModal({
       exit={{ opacity: 0 }}
       className="fixed inset-0 z-50 bg-black/35 backdrop-blur-sm flex flex-col items-center justify-center p-4"
     >
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        transition={{ type: 'spring', duration: 0.3 }}
-        className="clay shadow-xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden"
+      <Card
+        className="w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="px-6 py-5 flex justify-between items-center shrink-0">
@@ -328,9 +329,7 @@ export function TransactionModal({
               {initialData ? 'Atualize os dados do lançamento' : 'Registre uma nova movimentação financeira'}
             </p>
           </div>
-          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center clay-btn border-none text-text-muted hover:text-text-primary hover:brightness-95 transition-colors cursor-pointer">
-            <X className="w-4 h-4"/>
-          </button>
+          <IconButton label="Fechar" icon={<X className="w-4 h-4" />} variant="ghost" size="sm" onClick={onClose} />
         </div>
         <div className="border-b border-border mx-6" />
 
@@ -360,19 +359,19 @@ export function TransactionModal({
                 { id: 'INCOME', label: 'Entrada', icon: ArrowUpCircle, activeClass: 'border-emerald-400 bg-emerald-50 text-emerald-700' },
                 { id: 'EXPENSE', label: 'Saída', icon: ArrowDownCircle, activeClass: 'border-red-400 bg-red-50 text-red-700' },
               ].map(opt => (
-                <button
+                <Button
                   key={opt.id}
                   type="button"
                   onClick={() => setType(opt.id as TransactionType)}
-                   className={`py-2.5 px-3 text-sm font-medium cursor-pointer transition-all flex flex-col items-center gap-1 ${
-                     type === opt.id
-                       ? `border-2 rounded-md ${opt.activeClass}`
-                       : 'clay-btn border-none text-text-secondary hover:brightness-95'
-                   }`}
-                >
-                  <opt.icon className="w-4 h-4" />
-                  {opt.label}
-                </button>
+                  variant={type === opt.id ? 'primary' : 'secondary'}
+                  label={opt.label}
+                  icon={<opt.icon className="w-4 h-4" />}
+                  className={`py-2.5 px-3 text-sm font-medium cursor-pointer transition-all flex flex-col items-center gap-1 ${
+                    type === opt.id
+                      ? `border-2 rounded-md ${opt.activeClass}`
+                      : 'text-text-secondary'
+                  }`}
+                />
               ))}
             </div>
           </div>
@@ -384,19 +383,19 @@ export function TransactionModal({
                 { id: 'PAID', label: 'Pago / Recebido', icon: CheckCircle, activeClass: 'border-emerald-400 bg-emerald-50 text-emerald-700' },
                 { id: 'PENDING', label: 'Pendente', icon: Clock, activeClass: 'border-amber-400 bg-amber-50 text-amber-700' },
               ].map(opt => (
-                <button
+                <Button
                   key={opt.id}
                   type="button"
                   onClick={() => setStatus(opt.id as TransactionStatus)}
-                   className={`py-2.5 px-3 text-sm font-medium cursor-pointer transition-all flex items-center justify-center gap-2 ${
-                     status === opt.id
-                       ? `border-2 rounded-md ${opt.activeClass}`
-                       : 'clay-btn border-none text-text-secondary hover:brightness-95'
-                   }`}
-                >
-                  <opt.icon className="w-4 h-4" />
-                  {opt.label}
-                </button>
+                  variant={status === opt.id ? 'primary' : 'secondary'}
+                  label={opt.label}
+                  icon={<opt.icon className="w-4 h-4" />}
+                  className={`py-2.5 px-3 text-sm font-medium cursor-pointer transition-all flex items-center justify-center gap-2 ${
+                    status === opt.id
+                      ? `border-2 rounded-md ${opt.activeClass}`
+                      : 'text-text-secondary'
+                  }`}
+                />
               ))}
             </div>
           </div>
@@ -434,7 +433,7 @@ export function TransactionModal({
                 </div>
 
                 {showCategoryDropdown && (
-                  <div className="absolute z-20 mt-1 w-full clay shadow-lg max-h-56 overflow-y-auto">
+                  <Card className="absolute z-20 mt-1 w-full shadow-lg max-h-56 overflow-y-auto">
                     {/* New category button */}
                     {!showNewCategory ? (
                       <button
@@ -529,7 +528,7 @@ export function TransactionModal({
                         Nenhuma categoria encontrada.
                       </div>
                     )}
-                  </div>
+                  </Card>
                 )}
               </div>
             </div>
@@ -603,16 +602,18 @@ export function TransactionModal({
                   onChange={handleAmountChange}
                   className="w-full clay-input px-4 py-2.5 outline-none transition-all placeholder:text-text-muted"
                 />
-                <button
+                <Button
                   ref={calculatorButtonRef}
                   type="button"
                   onClick={toggleCalculator}
+                  variant={showCalculator ? 'primary' : 'secondary'}
+                  isIconOnly
+                  label="Calculadora"
+                  icon={<Calculator className="w-4 h-4" />}
                   className={`w-10 h-10 flex items-center justify-center transition-colors cursor-pointer flex-shrink-0 ${
-                    showCalculator ? 'clay-btn-primary text-white' : 'clay-btn border-none text-text-muted hover:text-text-primary hover:brightness-95'
+                    showCalculator ? 'text-white' : 'text-text-muted hover:text-text-primary'
                   }`}
-                >
-                  <Calculator className="w-4 h-4" />
-                </button>
+                />
 
                 {showCalculator && (
                   <div
@@ -697,18 +698,18 @@ export function TransactionModal({
                   { id: 'FIXED', label: 'Fixa' },
                   { id: 'INSTALLMENTS', label: 'Parcelado' }
                 ].map(opt => (
-                  <button
+                  <Button
                     key={opt.id}
                     type="button"
                     onClick={() => setRecurrenceConfig(opt.id as any)}
+                    variant={recurrenceConfig === opt.id ? 'primary' : 'secondary'}
+                    label={opt.label}
                     className={`py-2.5 px-3 text-sm font-medium cursor-pointer transition-all ${
                       recurrenceConfig === opt.id
                         ? 'border-2 rounded-md border-primary bg-primary/10 text-primary-dark'
-                        : 'clay-btn border-none text-text-secondary hover:brightness-95'
+                        : 'text-text-secondary'
                     }`}
-                  >
-                    {opt.label}
-                  </button>
+                  />
                 ))}
               </div>
               
@@ -757,7 +758,7 @@ export function TransactionModal({
           ) : (
             initialData.groupId && initialData.isFixed && (
               <div className="pt-2">
-                <label className="flex items-center gap-2 cursor-pointer p-3 clay-btn border-none hover:brightness-95 transition-colors">
+                <label className="flex items-center gap-2 cursor-pointer p-3 transition-colors">
                   <input 
                     type="checkbox" 
                     checked={applyToFuture}
@@ -780,22 +781,17 @@ export function TransactionModal({
           )}
 
           <div className="pt-6 pb-2">
-            <button
+            <Button
               type="submit"
-              disabled={submitting}
-              className="w-full clay-btn-primary border-none font-semibold py-3.5 text-white disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center gap-2"
-            >
-              {submitting && (
-                <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                </svg>
-              )}
-              {submitting ? 'Salvando...' : 'Salvar Lançamento'}
-            </button>
+              isDisabled={submitting}
+              variant="primary"
+              label={submitting ? 'Salvando...' : 'Salvar Lançamento'}
+              isLoading={submitting}
+              className="w-full font-semibold py-3.5 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center gap-2"
+            />
           </div>
         </form>
-      </motion.div>
+      </Card>
     </motion.div>
   );
 }

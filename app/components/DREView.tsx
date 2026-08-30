@@ -131,7 +131,7 @@ export default function DREView() {
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Orçado vs Real - Bar Chart */}
-        <div className="clay clay-hover p-5 min-w-0">
+        <Card className="p-5 min-w-0">
           <h3 className="text-sm font-semibold text-slate-700 mb-4">Orçado vs Real</h3>
           <div style={{ width: '100%', height: 260 }}>
             <ResponsiveContainer>
@@ -147,13 +147,13 @@ export default function DREView() {
                 <Tooltip formatter={formatTooltipCurrency} />
                 <Bar dataKey="orcado" fill="#94a3b8" name="Orçado" radius={[4, 4, 0, 0]} />
                 <Bar dataKey="real" fill="#5b7def" name="Real" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+            </BarChart>
+          </ResponsiveContainer>
           </div>
-        </div>
+        </Card>
 
         {/* Evolução Lucro Líquido - Line Chart */}
-        <div className="clay clay-hover p-5 min-w-0">
+        <Card className="p-5 min-w-0">
           <h3 className="text-sm font-semibold text-slate-700 mb-4">Evolução do Lucro Líquido</h3>
           <div style={{ width: '100%', height: 260 }}>
           <ResponsiveContainer>
@@ -173,7 +173,7 @@ export default function DREView() {
             </LineChart>
           </ResponsiveContainer>
           </div>
-        </div>
+        </Card>
       </div>
 
       {/* Previsão Anual */}
@@ -182,7 +182,7 @@ export default function DREView() {
       {/* Top Categories */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Top Custos */}
-        <div className="clay clay-hover p-5">
+        <Card className="p-5">
           <h3 className="text-sm font-semibold text-slate-700 mb-3">Principais Custos</h3>
           {topCustos.length === 0 ? (
             <p className="text-sm text-slate-400">Sem custos no mês.</p>
@@ -193,10 +193,10 @@ export default function DREView() {
               ))}
             </div>
           )}
-        </div>
+        </Card>
 
         {/* Top Despesas */}
-        <div className="clay clay-hover p-5">
+        <Card className="p-5">
           <h3 className="text-sm font-semibold text-slate-700 mb-3">Principais Despesas</h3>
           {topDespesas.length === 0 ? (
             <p className="text-sm text-slate-400">Sem despesas no mês.</p>
@@ -207,7 +207,7 @@ export default function DREView() {
               ))}
             </div>
           )}
-        </div>
+        </Card>
       </div>
     </div>
   );
@@ -232,7 +232,7 @@ function DRECard({
   const prefix = showSign && value > 0 ? '+' : '';
 
   return (
-    <Card className="clay-hover p-4.5 flex flex-col justify-between h-full min-h-[110px]">
+    <Card className="p-4.5 flex flex-col justify-between h-full min-h-[110px]">
       <div className="flex items-center gap-2.5 mb-2.5">
         <div className={`w-8 h-8 rounded-xl ${bg} bg-opacity-70 flex items-center justify-center ${color} shrink-0 border border-current border-opacity-10`}>
           {icon}
@@ -343,29 +343,29 @@ function ForecastSection() {
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <div className="clay clay-hover p-4.5">
+        <Card className="p-4.5">
           <p className="text-[0.68rem] text-slate-400 font-bold uppercase tracking-wider mb-1.5">Receita Projetada</p>
           <p className="text-lg font-bold font-mono text-emerald-600">{formatCurrency(animReceita)}</p>
-        </div>
-        <div className="clay clay-hover p-4.5">
+        </Card>
+        <Card className="p-4.5">
           <p className="text-[0.68rem] text-slate-400 font-bold uppercase tracking-wider mb-1.5">Custos Projetados</p>
           <p className="text-lg font-bold font-mono text-amber-600">{formatCurrency(animCustos)}</p>
-        </div>
-        <div className="clay clay-hover p-4.5">
+        </Card>
+        <Card className="p-4.5">
           <p className="text-[0.68rem] text-slate-400 font-bold uppercase tracking-wider mb-1.5">Lucro Projetado</p>
           <p className={`text-lg font-bold font-mono ${yearTotals.lucro >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
             {formatCurrency(animLucro)}
           </p>
-        </div>
-        <div className="clay clay-hover p-4.5">
+        </Card>
+        <Card className="p-4.5">
           <p className="text-[0.68rem] text-slate-400 font-bold uppercase tracking-wider mb-1.5">Margem Projetada</p>
           <p className={`text-lg font-bold font-mono ${yearTotals.margem >= 0 ? 'text-purple-600' : 'text-red-600'}`}>
             {animMargem.toFixed(1)}%
           </p>
-        </div>
+        </Card>
       </div>
 
-      <div className="clay clay-hover p-5.5 min-w-0">
+      <Card className="p-5.5 min-w-0">
         <h3 className="text-sm font-semibold text-slate-700 mb-4">Receita Mensal: Real vs Prevista</h3>
         <div style={{ width: '100%', height: 260 }}>
           <ResponsiveContainer>
@@ -379,7 +379,7 @@ function ForecastSection() {
             </BarChart>
           </ResponsiveContainer>
         </div>
-      </div>
+      </Card>
     </div>
   );
 }

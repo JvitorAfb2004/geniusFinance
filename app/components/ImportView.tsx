@@ -2,6 +2,8 @@ import React, { useState, useCallback } from 'react';
 import { useFinance } from '../hooks/useFinance';
 import { formatCurrency } from '../lib/utils';
 import { Upload, FileSpreadsheet, FileText, Trash2, Pencil, Check, X, Loader2, Plus } from 'lucide-react';
+import { Card } from '@astryxdesign/core/Card';
+import { Button } from '@astryxdesign/core/Button';
 import type { Transaction } from '../types';
 
 interface ParsedTx {
@@ -194,7 +196,7 @@ export default function ImportView() {
       {parsedTxs.length === 0 && !loading && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {/* File upload */}
-          <div className="clay border-2 border-dashed border-slate-300 p-8 text-center hover:border-blue-400 transition-colors cursor-pointer">
+          <Card className="border-2 border-dashed border-slate-300 p-8 text-center hover:border-blue-400 transition-colors cursor-pointer">
             <label className="cursor-pointer flex flex-col items-center gap-3">
               <FileSpreadsheet className="w-10 h-10 text-slate-400" />
               <div>
@@ -203,10 +205,10 @@ export default function ImportView() {
               </div>
               <input type="file" accept=".csv" onChange={handleFile} className="hidden" />
             </label>
-          </div>
+          </Card>
 
           {/* Text paste */}
-          <div className="clay p-5 flex flex-col gap-3">
+          <Card className="p-5 flex flex-col gap-3">
             <div className="flex items-center gap-2 text-slate-600">
               <FileText className="w-5 h-5" />
               <span className="font-semibold text-sm">Ou cole os dados</span>
@@ -217,24 +219,24 @@ export default function ImportView() {
               placeholder="Cole aqui extrato bancário, lista de transações, ou descreva as entradas/saídas..."
               className="flex-1 min-h-[120px] border border-slate-200 rounded-lg p-3 text-sm resize-none outline-none focus:ring-2 focus:ring-blue-400"
             />
-            <button
+            <Button
+              variant="primary"
+              label="Processar dados"
               onClick={handleTextSubmit}
-              disabled={!inputText.trim()}
-              className="self-end px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 cursor-pointer flex items-center gap-2 text-sm font-medium"
-            >
-              Processar dados
-            </button>
-          </div>
+              isDisabled={!inputText.trim()}
+              className="self-end px-4 py-2 rounded-lg cursor-pointer flex items-center gap-2 text-sm font-medium"
+            />
+          </Card>
         </div>
       )}
 
       {/* Loading */}
       {loading && (
-        <div className="clay p-12 text-center space-y-3">
+        <Card className="p-12 text-center space-y-3">
           <Loader2 className="w-8 h-8 text-blue-500 animate-spin mx-auto" />
           <p className="text-slate-600 font-medium">Analisando os dados...</p>
           <p className="text-sm text-slate-400">{fileName}</p>
-        </div>
+        </Card>
       )}
 
       {/* Error */}
@@ -282,18 +284,18 @@ export default function ImportView() {
               >
                 Descartar
               </button>
-              <button
+              <Button
+                variant="primary"
+                label={`Importar ${validTxs.length}`}
                 onClick={handleImport}
-                disabled={validTxs.length === 0}
-                className="px-4 py-1.5 text-xs font-semibold bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50 cursor-pointer"
-              >
-                <Upload className="w-3 h-3 inline mr-1" />
-                Importar {validTxs.length}
-              </button>
+                isDisabled={validTxs.length === 0}
+                icon={<Upload className="w-3 h-3" />}
+                className="px-4 py-1.5 text-xs font-semibold rounded-lg cursor-pointer"
+              />
             </div>
           </div>
 
-          <div className="clay overflow-x-auto">
+          <Card className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="bg-slate-50">
                 <tr>
@@ -381,7 +383,7 @@ export default function ImportView() {
                 ))}
               </tbody>
             </table>
-          </div>
+          </Card>
         </>
       )}
     </div>

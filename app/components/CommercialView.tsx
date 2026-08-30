@@ -8,6 +8,9 @@ import ConfirmModal from './ConfirmModal';
 import LeadModal from './LeadModal';
 import ProjectModal from './ProjectModal';
 import type { Lead, LeadOption } from '../types';
+import { Card } from '@astryxdesign/core/Card';
+import { Button } from '@astryxdesign/core/Button';
+import { IconButton } from '@astryxdesign/core/IconButton';
 
 export default function CommercialView() {
   const { leads, leadOptions, deleteLead } = useFinance();
@@ -87,13 +90,12 @@ export default function CommercialView() {
           </p>
         </div>
         <div className="flex gap-2">
-          <button
+          <Button
             onClick={handleAdd}
-            className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-xl hover:bg-slate-800 transition-all font-semibold text-sm cursor-pointer shadow-[0_1px_2px_rgba(0,0,0,0.05)] focus:outline-none focus:ring-4 focus:ring-slate-900/5 active:scale-[0.98]"
-          >
-            <Plus className="w-4 h-4" />
-            Novo Lead
-          </button>
+            variant="primary"
+            label="Novo Lead"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm"
+          />
         </div>
       </div>
 
@@ -145,7 +147,7 @@ export default function CommercialView() {
       </div>
 
       {/* Table */}
-      <div className="clay overflow-hidden flex-1 flex flex-col">
+      <Card className="overflow-hidden flex-1 flex flex-col">
         <div className="overflow-auto flex-1">
           {filteredLeads.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-slate-400">
@@ -242,28 +244,28 @@ export default function CommercialView() {
                             </a>
                           )}
                           {lead.status === 'Fechado (Ganho)' && (
-                            <button
+                            <IconButton
+                              variant="ghost"
                               onClick={() => setConvertLead(lead)}
-                              className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all cursor-pointer"
-                              title="Converter em projeto"
-                            >
-                              <FolderKanban className="w-3.5 h-3.5" />
-                            </button>
+                              className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all"
+                              label="Converter em projeto"
+                              icon={<FolderKanban className="w-3.5 h-3.5" />}
+                            />
                           )}
-                          <button
+                          <IconButton
+                            variant="ghost"
                             onClick={() => handleEdit(lead)}
-                            className="p-1.5 text-slate-400 hover:text-slate-800 hover:bg-slate-50 rounded-lg transition-all cursor-pointer"
-                            title="Editar lead"
-                          >
-                            <Pencil className="w-3.5 h-3.5" />
-                          </button>
-                          <button
+                            className="p-1.5 text-slate-400 hover:text-slate-800 hover:bg-slate-50 rounded-lg transition-all"
+                            label="Editar lead"
+                            icon={<Pencil className="w-3.5 h-3.5" />}
+                          />
+                          <IconButton
+                            variant="ghost"
                             onClick={() => setConfirmDelete(lead)}
-                            className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all cursor-pointer"
-                            title="Excluir lead"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
+                            className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                            label="Excluir lead"
+                            icon={<Trash2 className="w-3.5 h-3.5" />}
+                          />
                         </div>
                       </td>
                     </tr>
@@ -273,7 +275,7 @@ export default function CommercialView() {
             </table>
           )}
         </div>
-      </div>
+      </Card>
 
       {/* Modals */}
       {isModalOpen && (
