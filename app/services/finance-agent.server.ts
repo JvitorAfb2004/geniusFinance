@@ -86,10 +86,10 @@ async function readTool(name: string, args: Record<string, unknown>, context: Ag
 
 function moduleForAction(action: string) {
   if (action.includes("transaction")) return "transactions";
+  if (action.includes("categor") || action.includes("tag")) return "transactions";
   if (action.includes("budget")) return "budget";
   if (action.includes("goal")) return "goals";
   if (action.includes("spending_limit")) return "spending-limits";
-  if (action.includes("category") || action.includes("tag")) return "transactions";
   if (action.includes("month")) return "monthly-closing";
   return "reports";
 }
@@ -174,6 +174,7 @@ export async function runFinanceAgent(messages: AgentMessage[], context: AgentCo
         if (!canUseAction(context.scope, action, operation)) throw new Error("sem permissão para esta operação");
         return { content: "Preparei esta alteração para sua confirmação.", proposal: createProposal({ uid: context.uid, scope: context.scope, action, arguments: (call.arguments.arguments as Record<string, unknown>) || call.arguments, preview: { operation, action } }) };
       }
+      if (!canUseAction(context.scope, call.name, "view")) throw new Error("sem permissão para consultar este módulo");
       conversation.push({ role: "tool", content: JSON.stringify(await readTool(call.name, call.arguments, context)), tool_call_id: call.id });
     }
   }
