@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import type { ValidatedAgentScope } from "./finance-agent-types";
-import { createProposal, validateAgentScope, verifyProposal } from "./finance-agent";
+import { getConfirmationEntries, type ValidatedAgentScope } from "./finance-agent-types";
+import { buildScopedReadContext, createProposal, validateAgentScope, verifyProposal } from "./finance-agent";
 
 const personalScope: ValidatedAgentScope = { type: "PERSONAL", userId: "uid-1" };
 const accountScope: ValidatedAgentScope = {
@@ -18,6 +18,22 @@ function requestWithScope(scope: unknown) {
 }
 
 describe("finance agent security primitives", () => {
+  it("labels every account separately in the read context", () => {
+    const context = buildScopedReadContext([
+      { label: "Pessoal", data: { income: 100 } },
+      { label: "Empresa Alpha", data: { income: 900 } },
+    ]);
+
+    expect(context).toContain("## Pessoal");
+    expect(context).toContain("## Empresa Alpha");
+    expect(context.indexOf("Pessoal")).toBeLessThan(context.indexOf("Empresa Alpha"));
+  });
+
+  it("omits technical ids from confirmation details", () => {
+    expect(getConfirmationEntries({ id: "tx-1", userId: "uid-1", amount: 80, date: "2026-08-31" }))
+      .toEqual([["amount", 80], ["date", "2026-08-31"]]);
+  });
+
   it("rejects a personal scope belonging to another uid", () => {
     expect(() => validateAgentScope(requestWithScope({ type: "PERSONAL", userId: "other" }), "uid-1"))
       .toThrow("escopo pessoal invalido");

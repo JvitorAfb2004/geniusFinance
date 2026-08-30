@@ -1,4 +1,23 @@
-export type AgentRole = "user" | "assistant" | "tool";
+export type AgentRole = "system" | "user" | "assistant" | "tool";
+
+export const confirmationActionLabels: Record<string, string> = {
+  create_transaction: "Criar transação",
+  update_transaction: "Atualizar transação",
+  delete_transaction: "Excluir transação",
+};
+
+export const confirmationFieldLabels: Record<string, string> = {
+  amount: "Valor",
+  date: "Data",
+  title: "Descrição",
+  type: "Tipo",
+  status: "Status",
+  categoryName: "Categoria",
+};
+
+export function getConfirmationEntries(arguments_: Record<string, unknown>) {
+  return Object.entries(arguments_).filter(([key]) => !/^(id|userId|categoryId|tagId|accountId)$/.test(key));
+}
 
 export interface AgentMessage {
   role: AgentRole;

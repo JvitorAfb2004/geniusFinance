@@ -7,6 +7,11 @@ import type {
 
 const PROPOSAL_TTL_MS = 10 * 60 * 1000;
 
+export function buildScopedReadContext(entries: Array<{ label: string; data: unknown }>) {
+  return entries.map(({ label, data }) => `## ${label}\n${JSON.stringify(data, null, 2)}`).join("\n\n");
+}
+
+
 function agentSecret() {
   return process.env.AI_AGENT_SECRET || "development-only-agent-secret";
 }

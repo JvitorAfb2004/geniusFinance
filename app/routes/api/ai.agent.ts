@@ -1,6 +1,6 @@
 import type { ActionFunctionArgs } from "react-router";
 import { requireAuth } from "~/lib/api-helpers.server";
-import { runFinanceAgent, resolveFinanceScope } from "~/services/finance-agent.server";
+import { resolveFinanceReadScopes, runFinanceAgent, resolveFinanceScope } from "~/services/finance-agent.server";
 import type { AgentMessage } from "~/lib/finance-agent-types";
 
 export async function action({ request }: ActionFunctionArgs) {
@@ -12,7 +12,7 @@ export async function action({ request }: ActionFunctionArgs) {
     const messages = body.messages.filter((message) => message?.role === "user" || message?.role === "assistant");
     if (messages.length === 0 || JSON.stringify(messages).length > 12_000) return Response.json({ error: "mensagem muito longa" }, { status: 400 });
     const context = await resolveFinanceScope(request, user.uid);
-    return Response.json(await runFinanceAgent(messages, context));
+    return Response.json(await runFinanceAgent(messages, context, await resolveFinanceReadScopes(user.uid)));
   } catch (error) {
     if (error instanceof Response) return error;
     const message = error instanceof Error ? error.message : "falha interna do agente";
