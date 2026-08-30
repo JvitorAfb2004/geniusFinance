@@ -107,20 +107,13 @@ export function Header({
             return (
               <Button
                 key={opt.scope.type === 'PERSONAL' ? 'personal' : (opt.scope as { type: 'ACCOUNT'; accountId: string }).accountId}
-                label={opt.label}
+                label={`${opt.label}${opt.role ? ` (${opt.role === 'owner' ? 'dono' : opt.role === 'admin' ? 'admin' : 'membro'})` : ''}`}
                 size="sm"
                 variant={isActive ? 'primary' : 'ghost'}
                 onClick={() => handleScopeSwitch(opt)}
-                className="whitespace-nowrap shrink-0"
-              >
-                {opt.scope.type === 'PERSONAL' ? <User className="w-3.5 h-3.5" /> : <Building2 className="w-3.5 h-3.5" />}
-                <span className="truncate max-w-[100px] sm:max-w-none">{opt.label}</span>
-                {opt.role && (
-                  <span className="text-[0.62rem] opacity-60 font-medium">
-                    ({opt.role === 'owner' ? 'dono' : opt.role === 'admin' ? 'admin' : 'membro'})
-                  </span>
-                )}
-              </Button>
+                icon={opt.scope.type === 'PERSONAL' ? <User className="w-3.5 h-3.5" /> : <Building2 className="w-3.5 h-3.5" />}
+                className="min-w-0 shrink-0 whitespace-nowrap"
+              />
             );
           })}
         </div>
