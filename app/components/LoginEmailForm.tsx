@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Mail, Lock, User, Eye, EyeOff, ShieldCheck } from 'lucide-react';
 import { resetPassword, signInWithEmail, signUpWithEmail } from '../lib/firebase';
 import { createUserOnboardingDocs } from '../lib/onboarding';
+import { Button } from '@astryxdesign/core/Button';
+import { IconButton } from '@astryxdesign/core/IconButton';
 
 type LoginMode = 'login' | 'register' | 'forgot';
 
@@ -84,20 +86,20 @@ export function LoginEmailForm({ termsAccepted, onTermsChange, onOpenTerms, onOp
   return (
     <div>
       <div className="flex gap-2 mb-3">
-        <button
+        <Button
+          label="Entrar"
+          variant={mode === 'login' ? 'primary' : 'secondary'}
+          className="flex-1"
           type="button"
           onClick={() => { setMode('login'); setError(''); setResetSent(false); }}
-          className={`flex-1 py-2 rounded-lg text-sm font-medium cursor-pointer ${mode === 'login' ? 'bg-primary text-white' : 'bg-surface text-text-secondary hover:bg-primary/10'}`}
-        >
-          Entrar
-        </button>
-        <button
+        />
+        <Button
+          label="Criar conta"
+          variant={mode === 'register' ? 'primary' : 'secondary'}
+          className="flex-1"
           type="button"
           onClick={() => { setMode('register'); setError(''); setResetSent(false); }}
-          className={`flex-1 py-2 rounded-lg text-sm font-medium cursor-pointer ${mode === 'register' ? 'bg-primary text-white' : 'bg-surface text-text-secondary hover:bg-primary/10'}`}
-        >
-          Criar conta
-        </button>
+        />
       </div>
 
       {resetSent ? (
@@ -151,14 +153,7 @@ export function LoginEmailForm({ termsAccepted, onTermsChange, onOpenTerms, onOp
                 minLength={6}
                 className="w-full text-sm outline-none"
               />
-              <button
-                type="button"
-                onClick={() => setShowPassword((prev) => !prev)}
-                className="text-text-muted hover:text-text-secondary cursor-pointer"
-                aria-label="Mostrar ou ocultar senha"
-              >
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
+              <IconButton label="Mostrar ou ocultar senha" icon={showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />} variant="ghost" size="sm" onClick={() => setShowPassword((prev) => !prev)} />
             </label>
           )}
 
@@ -215,13 +210,7 @@ export function LoginEmailForm({ termsAccepted, onTermsChange, onOpenTerms, onOp
 
           {error && <p className="text-xs text-red-500 -mt-1 mb-1">{error}</p>}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full clay-btn-primary font-medium py-2.5 disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            {loading ? 'Processando...' : mode === 'register' ? 'Criar conta' : mode === 'forgot' ? 'Enviar recuperação' : 'Entrar com email'}
-          </button>
+          <Button label={loading ? 'Processando...' : mode === 'register' ? 'Criar conta' : mode === 'forgot' ? 'Enviar recuperação' : 'Entrar com email'} type="submit" variant="primary" isLoading={loading} width="100%" />
         </form>
       )}
     </div>
