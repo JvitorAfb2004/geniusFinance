@@ -6,6 +6,7 @@ import type { DRESection, Budget } from '../types';
 import { isSameMonth, parseISO, eachMonthOfInterval, startOfYear, endOfYear, format, getYear, getMonth } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { ChevronDown, ChevronRight, Edit2, Check, X } from 'lucide-react';
+import { IconButton } from '@astryxdesign/core/IconButton';
 
 type CellEdit = { categoryId: string; month: number } | null;
 
@@ -214,12 +215,8 @@ export default function BudgetView() {
                                     autoFocus
                                     step="0.01"
                                   />
-                                  <button type="button" onClick={confirmEdit} className="p-1 rounded-md text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700 cursor-pointer transition-colors shrink-0">
-                                    <Check className="w-3.5 h-3.5" />
-                                  </button>
-                                  <button type="button" onClick={cancelEdit} className="p-1 rounded-md text-slate-400 hover:bg-slate-100 hover:text-slate-600 cursor-pointer transition-colors shrink-0">
-                                    <X className="w-3.5 h-3.5" />
-                                  </button>
+                                  <IconButton label="Salvar orçamento" icon={<Check className="w-3.5 h-3.5" />} variant="primary" size="sm" onClick={confirmEdit} />
+                                  <IconButton label="Cancelar edição" icon={<X className="w-3.5 h-3.5" />} variant="ghost" size="sm" onClick={cancelEdit} />
                                 </div>
                               ) : (
                                 <button
@@ -310,8 +307,8 @@ export default function BudgetView() {
                         {editing && editing.categoryId === cat.id && editing.month === mobileMonth ? (
                           <div className="flex items-center gap-1">
                             <input type="number" value={editValue} onChange={(e) => setEditValue(e.target.value)} onKeyDown={handleKeyDown} className="w-16 px-1.5 py-0.5 text-xs border border-slate-300 rounded outline-none focus:ring-2 focus:ring-primary/30" autoFocus />
-                            <button onClick={confirmEdit} className="text-emerald-600 p-0.5"><Check className="w-3 h-3" /></button>
-                            <button onClick={cancelEdit} className="text-slate-400 p-0.5"><X className="w-3 h-3" /></button>
+                            <IconButton label="Salvar orçamento" icon={<Check className="w-3 h-3" />} variant="primary" size="sm" onClick={confirmEdit} />
+                            <IconButton label="Cancelar edição" icon={<X className="w-3 h-3" />} variant="ghost" size="sm" onClick={cancelEdit} />
                           </div>
                         ) : (
                           <button onClick={() => startEdit(cat.id, mobileMonth, cell.planned)} className="text-slate-400 hover:text-slate-700 cursor-pointer bg-transparent border-none text-xs font-mono">
