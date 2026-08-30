@@ -6,7 +6,7 @@ import { buildScopedReadContext, createProposal, validateAgentScope } from "~/li
 import type { AgentMessage, ValidatedAgentScope } from "~/lib/finance-agent-types";
 
 const db = getAdminFirestore();
-const MAX_RESULTS = 100;
+const MAX_RESULTS = 500;
 const SYSTEM_PROMPT = `Você é o Agente Financeiro do Genius Finance.
 Responda em português brasileiro, com objetividade e no máximo 5 linhas por conta.
 Quando houver mais de uma conta, use sempre um título ## Nome da conta para cada uma e nunca misture os valores.
@@ -18,12 +18,15 @@ Nunca diga que uma alteração foi feita sem uma confirmação posterior do usu�
 Para datas ambíguas, faça uma pergunta antes de agir.
 Explique brevemente o período e os filtros usados nas análises.`;
 
+const PENDING_INSTRUCTION = "REGRA OBRIGATÓRIA: status PENDING significa não pago, não significa apenas a vencer. Para perguntas sobre pendências ou o que precisa pagar, inclua todas as transações PENDING do período, inclusive as vencidas. É errado omitir uma pendência por a data ter passado. Só filtre para datas futuras se o usuário pedir literalmente apenas as futuras.";
+
 const parameter = (properties: Record<string, unknown>, required: string[] = []) => ({
   type: "object", properties, required, additionalProperties: false,
 });
 
 export const FINANCE_AGENT_TOOLS: DeepSeekTool[] = [
-  { type: "function", function: { name: "list_transactions", description: "Lista transações financeiras do escopo ativo com filtros.", parameters: parameter({ startDate: { type: "string" }, endDate: { type: "string" }, type: { type: "string", enum: ["INCOME", "EXPENSE", "CREDIT_CARD"] }, categoryId: { type: "string" }, status: { type: "string", enum: ["PAID", "PENDING"] }, limit: { type: "number" } }) } },
+  { type: "function", function: { name: "list_transactions", description: "Lista transações financeiras do escopo ativo com filtros. Status PENDING inclui pendências vencidas e não vencidas.", parameters: parameter({ startDate: { type: "string" }, endDate: { type: "string" }, type: { type: "string", enum: ["INCOME", "EXPENSE", "CREDIT_CARD"] }, categoryId: { type: "string" }, status: { type: "string", enum: ["PAID", "PENDING"] }, limit: { type: "number" } }) } },
+  { type: "function", function: { name: "list_pending_transactions", description: "Lista TODAS as transações com status PENDING no período, incluindo as vencidas. Use para responder o que ainda precisa ser pago.", parameters: parameter({ startDate: { type: "string" }, endDate: { type: "string" }, limit: { type: "number" } }) } },
   { type: "function", function: { name: "get_financial_summary", description: "Calcula receitas, despesas, saldo, margem e quantidade do período.", parameters: parameter({ startDate: { type: "string" }, endDate: { type: "string" } }, ["startDate", "endDate"]) } },
   ...(["categories", "tags", "budgets", "spending-limits", "goals", "monthly-closings", "fixed-monthly", "sales"] as const).map((name) => ({ type: "function" as const, function: { name: `list_${name.replace("-", "_")}`, description: `Lista ${name} do escopo ativo.`, parameters: parameter({}) } })),
   { type: "function", function: { name: "get_dre", description: "Calcula o DRE do ano e mês informados.", parameters: parameter({ year: { type: "number" }, month: { type: "number" } }, ["year"]) } },
@@ -46,7 +49,7 @@ function asJson(data: FirebaseFirestore.DocumentData, id: string) {
 
 async function listCollection(name: string, context: AgentContext) {
   const snapshot = await db.collection(collectionPath(context.scope, name)).get();
-  return snapshot.docs.map((doc) => asJson(doc.data(), doc.id)).filter((item: Record<string, unknown>) => item.context === context.context || name === "tags" || name === "monthly-closings").slice(0, MAX_RESULTS);
+  return snapshot.docs.map((doc) => asJson(doc.data(), doc.id)).filter((item: Record<string, unknown>) => item.context === context.context || name === "tags" || name === "monthly-closings");
 }
 
 async function listTransactions(args: Record<string, unknown>, context: AgentContext) {
@@ -56,6 +59,12 @@ async function listTransactions(args: Record<string, unknown>, context: AgentCon
 
 async function readTool(name: string, args: Record<string, unknown>, context: AgentContext) {
   if (name === "list_transactions") return listTransactions(args, context);
+  if (name === "list_pending_transactions") {
+    return {
+      rule: "Todas as transações abaixo têm status PENDING e precisam ser pagas. Inclua também as que têm data anterior a hoje; vencimento passado não muda o status.",
+      transactions: await listTransactions({ ...args, status: "PENDING" }, context),
+    };
+  }
   if (name === "list_fixed_monthly") return (await listTransactions({}, context)).filter((item: Record<string, unknown>) => item.isFixed === true);
   if (name === "list_sales") return listCollection("sales-targets", context);
   if (name.startsWith("list_")) return listCollection(name.slice(5).replace("_", "-"), context);
@@ -199,7 +208,7 @@ export async function consumeProposal(id: string, uid: string, expiresAt: number
 }
 
 export async function runFinanceAgent(messages: AgentMessage[], active: AgentContext, readScopes: ReadScope[] = [{ label: active.scope.type === "PERSONAL" ? "Pessoal" : active.scope.accountName || "Empresa", context: active }]) {
-  const conversation: AgentMessage[] = [{ role: "system", content: SYSTEM_PROMPT }, ...messages.filter((message) => message.role === "user" || message.role === "assistant").slice(-12)];
+  const conversation: AgentMessage[] = [{ role: "system", content: `${SYSTEM_PROMPT}\n${PENDING_INSTRUCTION}` }, ...messages.filter((message) => message.role === "user" || message.role === "assistant").slice(-12)];
   for (let iteration = 0; iteration < 5; iteration++) {
     const response = await completeWithDeepSeek(conversation, FINANCE_AGENT_TOOLS);
     if (!response.toolCalls.length) return { content: response.content };
