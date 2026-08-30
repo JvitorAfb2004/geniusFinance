@@ -6,6 +6,8 @@ import { ChevronLeft, ChevronRight, Eye, EyeOff, Menu, Building2, User } from 'l
 import { format, addMonths, subMonths } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { ScopeSwitchModal } from './ScopeSwitchModal';
+import { Button } from '@astryxdesign/core/Button';
+import { IconButton } from '@astryxdesign/core/IconButton';
 
 export function Header({
   onOpenMenu,
@@ -74,12 +76,7 @@ export function Header({
   return (
     <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center px-4 sm:px-6 py-3.5 sm:py-4 shrink-0 w-full gap-4 bg-surface border-b border-border transition-colors">
       <div className="flex items-center gap-3 sm:gap-6 w-full sm:w-auto">
-        <button
-          onClick={onOpenMenu}
-          className="lg:hidden p-2 -ml-2 text-slate-500 hover:text-slate-700 transition-colors cursor-pointer"
-        >
-          <Menu className="w-5 h-5" />
-          </button>
+        <IconButton label="Abrir menu" icon={<Menu className="w-5 h-5" />} onClick={onOpenMenu} className="-ml-2 lg:hidden" />
         
         <div className="flex items-center gap-2.5">
           <h1 className="text-[1.2rem] sm:text-[1.4rem] font-semibold text-slate-900 tracking-tight">{pageTitle}</h1>
@@ -92,21 +89,11 @@ export function Header({
 
         {/* Month Selector */}
         <div className="flex items-center gap-1.5 text-sm font-medium clay-btn px-1.5 py-1 ml-auto sm:ml-0">
-          <button
-            onClick={() => setSelectedMonth(subMonths(selectedMonth, 1))}
-            className="p-1 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-md transition-colors border-none bg-transparent cursor-pointer"
-          >
-            <ChevronLeft className="w-4 h-4" />
-          </button>
+          <IconButton label="Mês anterior" icon={<ChevronLeft className="w-4 h-4" />} size="sm" variant="ghost" onClick={() => setSelectedMonth(subMonths(selectedMonth, 1))} />
           <span className="w-20 sm:w-22 text-center capitalize text-slate-700 font-medium text-[0.82rem] select-none">
             {format(selectedMonth, 'MMM / yyyy', { locale: ptBR })}
           </span>
-          <button
-            onClick={() => setSelectedMonth(addMonths(selectedMonth, 1))}
-            className="p-1 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-md transition-colors border-none bg-transparent cursor-pointer"
-          >
-            <ChevronRight className="w-4 h-4" />
-          </button>
+          <IconButton label="Próximo mês" icon={<ChevronRight className="w-4 h-4" />} size="sm" variant="ghost" onClick={() => setSelectedMonth(addMonths(selectedMonth, 1))} />
         </div>
       </div>
 
@@ -118,14 +105,13 @@ export function Header({
               : activeScope.type === 'ACCOUNT' && activeScope.accountId === (opt.scope as { type: 'ACCOUNT'; accountId: string }).accountId;
 
             return (
-              <button
+              <Button
                 key={opt.scope.type === 'PERSONAL' ? 'personal' : (opt.scope as { type: 'ACCOUNT'; accountId: string }).accountId}
+                label={opt.label}
+                size="sm"
+                variant={isActive ? 'primary' : 'ghost'}
                 onClick={() => handleScopeSwitch(opt)}
-                className={`whitespace-nowrap px-3.5 py-1.5 rounded-md text-[0.8rem] font-medium transition-colors border-none cursor-pointer inline-flex items-center justify-center gap-1.5 shrink-0 ${
-                  isActive
-                    ? 'bg-slate-100 text-text-primary font-semibold'
-                    : 'bg-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-50'
-                }`}
+                className="whitespace-nowrap shrink-0"
               >
                 {opt.scope.type === 'PERSONAL' ? <User className="w-3.5 h-3.5" /> : <Building2 className="w-3.5 h-3.5" />}
                 <span className="truncate max-w-[100px] sm:max-w-none">{opt.label}</span>
@@ -134,19 +120,12 @@ export function Header({
                     ({opt.role === 'owner' ? 'dono' : opt.role === 'admin' ? 'admin' : 'membro'})
                   </span>
                 )}
-              </button>
+              </Button>
             );
           })}
         </div>
 
-        <button
-          onClick={onToggleDashboardValues}
-          className="h-[36px] shrink-0 px-2.5 sm:px-3 clay-btn text-[0.78rem] font-medium text-slate-600 hover:text-slate-800 transition-colors cursor-pointer inline-flex items-center gap-1.5"
-          title={dashboardValuesVisible ? 'Ocultar valores do dashboard' : 'Mostrar valores do dashboard'}
-        >
-          {dashboardValuesVisible ? <EyeOff className="w-4 h-4 text-slate-500" /> : <Eye className="w-4 h-4 text-slate-500" />}
-          <span className="hidden md:inline">{dashboardValuesVisible ? 'Ocultar valores' : 'Mostrar valores'}</span>
-        </button>
+        <Button label={dashboardValuesVisible ? 'Ocultar valores' : 'Mostrar valores'} variant="secondary" size="sm" icon={dashboardValuesVisible ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />} onClick={onToggleDashboardValues} className="shrink-0" />
       </div>
 
       {switchingLabel && <ScopeSwitchModal targetLabel={switchingLabel} />}
