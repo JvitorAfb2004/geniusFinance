@@ -102,7 +102,7 @@ export function FinanceAIAssistant() {
     if (confirming) return;
     setConfirming(proposal.id);
     try {
-      const result = await apiFetch("/api/ai/agent-confirm", {
+      await apiFetch("/api/ai/agent-confirm", {
         method: "POST",
         headers: { "X-Active-Scope": JSON.stringify(activeScope) },
         body: JSON.stringify({ proposal }),

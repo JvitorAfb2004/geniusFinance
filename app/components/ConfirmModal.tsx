@@ -23,9 +23,9 @@ export default function ConfirmModal({
   onCancel,
 }: ConfirmModalProps) {
   const colorMap = {
-    danger: { bg: 'bg-danger-light', text: 'text-danger-dark', btn: 'bg-danger hover:bg-danger-dark' },
-    warning: { bg: 'bg-warning-light', text: 'text-warning-dark', btn: 'bg-warning hover:bg-warning-dark' },
-    info: { bg: 'bg-primary-light', text: 'text-primary-dark', btn: 'bg-primary hover:bg-primary-hover' },
+    danger: { bg: 'bg-danger-light', text: 'text-danger-dark' },
+    warning: { bg: 'bg-warning-light', text: 'text-warning-dark' },
+    info: { bg: 'bg-primary-light', text: 'text-primary-dark' },
   };
   const colors = colorMap[variant];
 
