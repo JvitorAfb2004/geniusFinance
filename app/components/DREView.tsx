@@ -11,6 +11,7 @@ import { isSameMonth, parseISO, startOfYear, endOfYear, eachMonthOfInterval, for
 import { ptBR } from 'date-fns/locale';
 import { TrendingUp, DollarSign, Percent, ArrowDownRight } from 'lucide-react';
 import { useAnimatedValue } from '../hooks/useAnimatedValue';
+import { Card } from '@astryxdesign/core/Card';
 
 function formatTooltipCurrency(value: unknown) {
   const numeric = Array.isArray(value) ? Number(value[0]) : Number(value);
@@ -231,7 +232,7 @@ function DRECard({
   const prefix = showSign && value > 0 ? '+' : '';
 
   return (
-    <div className="clay clay-hover p-4.5 flex flex-col justify-between h-full min-h-[110px]">
+    <Card className="clay-hover p-4.5 flex flex-col justify-between h-full min-h-[110px]">
       <div className="flex items-center gap-2.5 mb-2.5">
         <div className={`w-8 h-8 rounded-xl ${bg} bg-opacity-70 flex items-center justify-center ${color} shrink-0 border border-current border-opacity-10`}>
           {icon}
@@ -246,7 +247,7 @@ function DRECard({
           </p>
         )}
       </div>
-    </div>
+    </Card>
   );
 }
 
