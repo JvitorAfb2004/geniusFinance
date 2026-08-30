@@ -11,6 +11,7 @@ import {
    ShieldCheck, Bug, Clock, Gauge, PanelLeftClose, PanelLeftOpen,
 } from "lucide-react";
 import { cn } from "~/lib/utils";
+import { FinanceAIAssistant } from "~/components/FinanceAIAssistant";
 
 const DASHBOARD_VALUES_KEY = "dashboard_values_visible";
 const TERMS_KEY = "gh_terms_accepted";
@@ -345,6 +346,7 @@ export default function AppLayout() {
       </div>
 
       <MobileBottomNav />
+      <FinanceAIAssistant />
 
       {showTrialModal && (
         <TrialModal

@@ -33,6 +33,8 @@ export default [
   { file: "routes/api/sub.cancel.ts", path: "api/sub/cancel" },
   { file: "routes/api/auth.welcome.ts", path: "api/auth/welcome" },
   { file: "routes/api/reports.ts", path: "api/reports" },
+  { file: "routes/api/ai.agent.ts", path: "api/ai/agent" },
+  { file: "routes/api/ai.agent-confirm.ts", path: "api/ai/agent-confirm" },
   { file: "routes/api/webhooks.abacate.ts", path: "api/webhooks/abacate" },
   { file: "routes/api/admin.plans.ts", path: "api/admin/plans" },
   { file: "routes/api/admin.subscriptions.ts", path: "api/admin/subscriptions" },
