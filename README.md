@@ -18,3 +18,10 @@ View your app in AI Studio: https://ai.studio/apps/20aeb2ae-1d93-43cc-88f8-84928
 2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
 3. Run the app:
    `npm run dev`
+
+## DeepSeek
+
+Configure these server-side variables in Vercel:
+
+- `DEEPSEEK_API_KEY`: chave da API oficial da DeepSeek.
+- `DEEPSEEK_MODEL`: opcional; padrão `deepseek-v4-flash`.

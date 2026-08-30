@@ -161,6 +161,15 @@ export async function executeFinanceProposal(proposal: { action: string; argumen
   return { id, ...current.data(), ...updates };
 }
 
+export async function consumeProposal(id: string, uid: string, expiresAt: number) {
+  try {
+    await db.collection("ai_action_nonces").doc(id).create({ uid, expiresAt, createdAt: new Date().toISOString() });
+  } catch (error) {
+    if ((error as { code?: number }).code === 6) throw new Error("proposta já utilizada");
+    throw error;
+  }
+}
+
 export async function runFinanceAgent(messages: AgentMessage[], context: AgentContext) {
   const conversation: AgentMessage[] = [{ role: "user", content: SYSTEM_PROMPT }, ...messages.filter((message) => message.role === "user" || message.role === "assistant").slice(-12)];
   for (let iteration = 0; iteration < 5; iteration++) {
