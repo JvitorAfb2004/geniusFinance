@@ -15,6 +15,7 @@ import {
 } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { CalendarDays } from 'lucide-react';
+import { Card } from '@astryxdesign/core/Card';
 
 const WEEK_DAYS = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
 
@@ -67,7 +68,7 @@ export function CashCalendarView() {
   return (
     <div className="flex flex-col gap-5">
       <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_320px] gap-5">
-        <div className="clay overflow-hidden">
+        <Card padding={0} className="overflow-hidden">
           <div className="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <div>
               <p className="text-sm text-gray-500">
@@ -148,9 +149,9 @@ export function CashCalendarView() {
               </div>
             ))}
           </div>
-        </div>
+        </Card>
 
-        <aside className="clay p-5 h-fit">
+        <aside><Card className="h-fit p-5">
           <h3 className="text-base font-bold text-slate-900">Dias com mais movimento</h3>
           <p className="text-sm text-slate-500 mt-1 mb-4">Resumo rápido dos dias com mais lançamentos no mês.</p>
 
@@ -178,7 +179,7 @@ export function CashCalendarView() {
               Nenhum lançamento encontrado neste mês.
             </div>
           )}
-        </aside>
+        </Card></aside>
       </div>
     </div>
   );
