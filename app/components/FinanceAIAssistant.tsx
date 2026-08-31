@@ -101,6 +101,22 @@ export function FinanceAIAssistant() {
     }
   }
 
+  async function continueConversation() {
+    if (sending || !user) return;
+    setSending(true);
+    try {
+      const result = await apiFetch("/api/ai/agent", {
+        method: "POST",
+        headers: { "X-Active-Scope": JSON.stringify(activeScope) },
+        body: JSON.stringify({ messages: [...messages, { role: "user" as const, content: "continue" }].map(({ role, content: message }) => ({ role, content: message })) }),
+      });
+      if (result.proposal) {
+        setMessages((current) => [...current, { role: "assistant", content: result.content || "Continuando...", proposal: result.proposal }]);
+      }
+    } catch {}
+    setSending(false);
+  }
+
   async function confirm(proposal: AgentProposal) {
     if (confirming) return;
     setConfirming(proposal.id);
@@ -119,7 +135,7 @@ export function FinanceAIAssistant() {
         setMessages((current) => [...current, { role: "assistant", content: `Conta alterada para **${result.scope!.type === "PERSONAL" ? "Pessoal" : result.scope!.accountName}**. Agora refaça a operação.` }]);
       } else {
         setMessages((current) => [...current, { role: "assistant", content: "Concluído." }]);
-        await send("Operação concluída. Se há mais algo para fazer na mesma solicitação original, prossiga com a próxima tarefa agora.");
+        await continueConversation();
       }
     } catch (error) {
       setMessages((current) => [...current, { role: "assistant", content: error instanceof Error ? error.message : "Não foi possível confirmar a alteração." }]);
