@@ -101,22 +101,6 @@ export function FinanceAIAssistant() {
     }
   }
 
-  async function continueConversation() {
-    if (sending || !user) return;
-    setSending(true);
-    try {
-      const result = await apiFetch("/api/ai/agent", {
-        method: "POST",
-        headers: { "X-Active-Scope": JSON.stringify(activeScope) },
-        body: JSON.stringify({ messages: [...messages, { role: "user" as const, content: "continue" }].map(({ role, content: message }) => ({ role, content: message })) }),
-      });
-      if (result.proposal) {
-        setMessages((current) => [...current, { role: "assistant", content: result.content || "Continuando...", proposal: result.proposal }]);
-      }
-    } catch {}
-    setSending(false);
-  }
-
   async function confirm(proposal: AgentProposal) {
     if (confirming) return;
     setConfirming(proposal.id);
@@ -142,6 +126,24 @@ export function FinanceAIAssistant() {
     } finally {
       setConfirming(null);
     }
+  }
+
+  async function continueConversation() {
+    if (sending || !user) return;
+    setSending(true);
+    try {
+      const result = await apiFetch("/api/ai/agent", {
+        method: "POST",
+        headers: { "X-Active-Scope": JSON.stringify(activeScope) },
+        body: JSON.stringify({ messages: [...messages, { role: "user" as const, content: "Operação concluída. Verifique se há mais tarefas pendentes na solicitação original e, se houver, prossiga com a próxima. Se não houver, apenas responda que todas foram concluídas." }].map(({ role, content: message }) => ({ role, content: message })) }),
+      });
+      if (result.proposal) {
+        setMessages((current) => [...current, { role: "assistant", content: result.content || "Continuando...", proposal: result.proposal }]);
+      } else if (result.content) {
+        setMessages((current) => [...current, { role: "assistant", content: result.content }]);
+      }
+    } catch {}
+    setSending(false);
   }
 
   if (!user) return null;
