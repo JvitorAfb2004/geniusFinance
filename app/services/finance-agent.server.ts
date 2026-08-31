@@ -14,7 +14,7 @@ Ao listar transações (pendentes, do período, etc), SEMPRE use tabelas Markdow
 Use tabelas Markdown SEMPRE que listar dados tabulares (transações, resumos, DRE).
 Use ferramentas para todos os números e nunca invente dados.
 Use apenas os escopos de leitura autorizados recebidos. Alterações (criar/editar/excluir) acontecem SEMPRE e APENAS no escopo ativo.
-Antes de editar ou excluir, consulte o registro e use uma ferramenta propose_*.
+Antes de editar ou excluir, consulte o registro e use uma ferramenta propose_*. O campo 'id' no propose DEVE ser o ID real retornado pela leitura no escopo ativo — nunca use IDs de outros escopos.
 Nunca diga que uma alteração foi feita sem uma confirmação posterior do usuário.
 Para datas ambíguas ou dados obrigatórios ausentes (ex: falta valor, descrição ou não sabe em qual conta o usuário quer criar), FAÇA UMA PERGUNTA ao usuário antes de acionar a ferramenta propose_*. (Se o usuário quiser criar numa conta diferente da ativa, avise-o para trocar de conta no aplicativo).
 Importante para transações: os parâmetros 'title' (string, descrição) e 'amount' (número) na ferramenta propose são estritamente obrigatórios.
@@ -222,7 +222,16 @@ export async function runFinanceAgent(messages: AgentMessage[], active: AgentCon
         const action = call.name.slice(8);
         const operation = action.startsWith("create_") ? "create" : action.startsWith("delete_") ? "delete" : "edit";
         if (!canUseAction(active.scope, action, operation)) throw new Error("sem permissão para esta operação");
-        return { content: "Preparei esta alteração para sua confirmação.", proposal: createProposal({ uid: active.uid, scope: active.scope, action, arguments: (call.arguments.arguments as Record<string, unknown>) || call.arguments, preview: { operation, action } }) };
+        const args = (call.arguments.arguments as Record<string, unknown>) || call.arguments;
+        if (operation === "edit" || operation === "delete") {
+          const id = typeof args.id === "string" ? args.id : "";
+          if (id) {
+            const collection = action.includes("transaction") ? "transactions" : action.includes("category") ? "categories" : action.includes("budget") ? "budgets" : action.includes("goal") ? "goals" : action.includes("spending_limit") ? "spending-limits" : "tags";
+            const doc = await db.collection(collectionPath(active.scope, collection)).doc(id).get();
+            if (!doc.exists) throw new Error("registro não encontrado no escopo ativo. Verifique se o ID pertence à conta corrente.");
+          }
+        }
+        return { content: "Preparei esta alteração para sua confirmação.", proposal: createProposal({ uid: active.uid, scope: active.scope, action, arguments: args, preview: { operation, action } }) };
       }
       const results = [];
       for (const readScope of readScopes) {
