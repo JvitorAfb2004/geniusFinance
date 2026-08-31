@@ -10,13 +10,15 @@ const MAX_RESULTS = 500;
 const SYSTEM_PROMPT = `Você é o Agente Financeiro do Genius Finance.
 Responda em português brasileiro, com objetividade e no máximo 5 linhas por conta.
 Quando houver mais de uma conta, use sempre um título ## Nome da conta para cada uma e nunca misture os valores.
-Use tabelas Markdown somente quando deixarem a resposta mais clara.
+Ao listar transações (pendentes, do período, etc), SEMPRE use tabelas Markdown com colunas: Descrição | Data | Valor. Nunca use listas com bullets para listar transações — apenas tabelas.
+Use tabelas Markdown SEMPRE que listar dados tabulares (transações, resumos, DRE).
 Use ferramentas para todos os números e nunca invente dados.
 Use apenas os escopos de leitura autorizados recebidos. Alterações (criar/editar/excluir) acontecem SEMPRE e APENAS no escopo ativo.
 Antes de editar ou excluir, consulte o registro e use uma ferramenta propose_*.
 Nunca diga que uma alteração foi feita sem uma confirmação posterior do usuário.
 Para datas ambíguas ou dados obrigatórios ausentes (ex: falta valor, descrição ou não sabe em qual conta o usuário quer criar), FAÇA UMA PERGUNTA ao usuário antes de acionar a ferramenta propose_*. (Se o usuário quiser criar numa conta diferente da ativa, avise-o para trocar de conta no aplicativo).
 Importante para transações: os parâmetros 'title' (string, descrição) e 'amount' (número) na ferramenta propose são estritamente obrigatórios.
+Quando o usuário pedir múltiplas coisas na mesma mensagem (ex: "liste pendências E mude a data da ritalina"), execute TODAS as tarefas em sequência: primeiro leia os dados, depois proponha a alteração. Não pare no meio — complete tudo antes de responder.
 Explique brevemente o período e os filtros usados nas análises.`;
 
 const PENDING_INSTRUCTION = "REGRA OBRIGATÓRIA: status PENDING significa não pago, não significa apenas a vencer. Para perguntas sobre pendências ou o que precisa pagar, inclua todas as transações PENDING do período, inclusive as vencidas. É errado omitir uma pendência por a data ter passado. Só filtre para datas futuras se o usuário pedir literalmente apenas as futuras.";
@@ -211,7 +213,7 @@ export async function consumeProposal(id: string, uid: string, expiresAt: number
 export async function runFinanceAgent(messages: AgentMessage[], active: AgentContext, readScopes: ReadScope[] = [{ label: active.scope.type === "PERSONAL" ? "Pessoal" : active.scope.accountName || "Empresa", context: active }]) {
   const currentDate = new Date().toLocaleDateString("pt-BR");
   const conversation: AgentMessage[] = [{ role: "system", content: `A data de hoje é ${currentDate}.\n\n${SYSTEM_PROMPT}\n${PENDING_INSTRUCTION}` }, ...messages.filter((message) => message.role === "user" || message.role === "assistant").slice(-12)];
-  for (let iteration = 0; iteration < 5; iteration++) {
+  for (let iteration = 0; iteration < 8; iteration++) {
     const response = await completeWithDeepSeek(conversation, FINANCE_AGENT_TOOLS);
     if (!response.toolCalls.length) return { content: response.content };
     conversation.push(response.assistantMessage);
@@ -231,5 +233,5 @@ export async function runFinanceAgent(messages: AgentMessage[], active: AgentCon
       conversation.push({ role: "tool", content: buildScopedReadContext(results), tool_call_id: call.id });
     }
   }
-  throw new Error("A IA atingiu o limite de etapas desta consulta.");
+  throw new Error("A IA atingiu o limite de 8 etapas. Tente simplificar o pedido.");
 }
