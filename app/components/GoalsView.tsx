@@ -4,8 +4,7 @@ import { Plus, Trash2, X, Check, Pencil } from 'lucide-react';
 import type { FinancialGoal } from '../types';
 import { motion } from 'motion/react';
 import { AnimatedNumber } from './AnimatedNumber';
-import { Button } from '@astryxdesign/core/Button';
-import { IconButton } from '@astryxdesign/core/IconButton';
+
 
 const CAT_LABELS: Record<string, string> = { SAVINGS: 'Reserva', INVESTMENT: 'Investimento', DEBT_PAYOFF: 'Quitar Dívida', PURCHASE: 'Compra' };
 const CAT_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
@@ -58,7 +57,7 @@ export default function GoalsView() {
           <h2 className="text-lg font-bold text-slate-800">Metas Financeiras</h2>
           <p className="text-sm text-slate-500">Acompanhe seus objetivos de economia e investimento.</p>
         </div>
-        <Button label="Nova Meta" variant="primary" icon={<Plus className="w-4 h-4" />} onClick={() => { resetForm(); setShowForm(!showForm); }} />
+        <button onClick={() => { resetForm(); setShowForm(!showForm); }} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer flex items-center gap-2 text-sm font-medium"><Plus className="w-4 h-4" /> Nova Meta</button>
       </div>
 
       {showForm && (
@@ -75,8 +74,8 @@ export default function GoalsView() {
               {Object.entries(CAT_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
             </select>
             <div className="flex gap-1.5">{CAT_COLORS.map((c) => <button key={c} onClick={() => setForm((f) => ({ ...f, color: c }))} className={`w-6 h-6 rounded-full border-2 cursor-pointer ${form.color === c ? 'border-slate-800 scale-125' : 'border-transparent'}`} style={{ backgroundColor: c }} />)}</div>
-            <IconButton label="Salvar meta" icon={<Check className="w-4 h-4" />} variant="primary" onClick={handleSubmit} />
-            <IconButton label="Cancelar edição" icon={<X className="w-5 h-5" />} variant="ghost" onClick={resetForm} />
+            <button onClick={handleSubmit} className="p-1 text-blue-600 hover:text-blue-800 cursor-pointer"><Check className="w-4 h-4" /></button>
+            <button onClick={resetForm} className="p-1 text-slate-400 hover:text-slate-600 cursor-pointer"><X className="w-5 h-5" /></button>
           </div>
         </div>
       )}
@@ -101,8 +100,8 @@ export default function GoalsView() {
                   <span className="text-xs text-slate-500">{CAT_LABELS[g.category]} • {daysLeft} dias restantes</span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <IconButton label={`Editar meta ${g.name}`} icon={<Pencil className="w-4 h-4" />} variant="ghost" size="sm" onClick={() => startEdit(g)} />
-                  <IconButton label={`Excluir meta ${g.name}`} icon={<Trash2 className="w-4 h-4" />} variant="ghost" size="sm" onClick={() => deleteGoal(g.id)} />
+                  <button onClick={() => startEdit(g)} className="p-1 text-slate-400 hover:text-slate-600 cursor-pointer"><Pencil className="w-4 h-4" /></button>
+                  <button onClick={() => deleteGoal(g.id)} className="p-1 text-slate-400 hover:text-slate-600 cursor-pointer"><Trash2 className="w-4 h-4" /></button>
                 </div>
               </div>
               <div>

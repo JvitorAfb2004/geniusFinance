@@ -2,8 +2,6 @@ import React, { useState } from 'react';
 import { Mail, Lock, User, Eye, EyeOff, ShieldCheck } from 'lucide-react';
 import { resetPassword, signInWithEmail, signUpWithEmail } from '../lib/firebase';
 import { createUserOnboardingDocs } from '../lib/onboarding';
-import { Button } from '@astryxdesign/core/Button';
-import { IconButton } from '@astryxdesign/core/IconButton';
 
 type LoginMode = 'login' | 'register' | 'forgot';
 
@@ -86,20 +84,16 @@ export function LoginEmailForm({ termsAccepted, onTermsChange, onOpenTerms, onOp
   return (
     <div>
       <div className="flex gap-2 mb-3">
-        <Button
-          label="Entrar"
-          variant={mode === 'login' ? 'primary' : 'secondary'}
-          className="flex-1"
+        <button
           type="button"
           onClick={() => { setMode('login'); setError(''); setResetSent(false); }}
-        />
-        <Button
-          label="Criar conta"
-          variant={mode === 'register' ? 'primary' : 'secondary'}
-          className="flex-1"
+          className={`flex-1 px-4 py-2 rounded-lg cursor-pointer text-sm font-medium ${mode === 'login' ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
+        >Entrar</button>
+        <button
           type="button"
           onClick={() => { setMode('register'); setError(''); setResetSent(false); }}
-        />
+          className={`flex-1 px-4 py-2 rounded-lg cursor-pointer text-sm font-medium ${mode === 'register' ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
+        >Criar conta</button>
       </div>
 
       {resetSent ? (
@@ -153,7 +147,7 @@ export function LoginEmailForm({ termsAccepted, onTermsChange, onOpenTerms, onOp
                 minLength={6}
                 className="w-full text-sm outline-none"
               />
-              <IconButton label="Mostrar ou ocultar senha" icon={showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />} variant="ghost" size="sm" onClick={() => setShowPassword((prev) => !prev)} />
+              <button type="button" onClick={() => setShowPassword((prev) => !prev)} className="p-2 text-slate-400 hover:text-slate-600 cursor-pointer">{showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}</button>
             </label>
           )}
 
@@ -210,7 +204,7 @@ export function LoginEmailForm({ termsAccepted, onTermsChange, onOpenTerms, onOp
 
           {error && <p className="text-xs text-red-500 -mt-1 mb-1">{error}</p>}
 
-          <Button label={loading ? 'Processando...' : mode === 'register' ? 'Criar conta' : mode === 'forgot' ? 'Enviar recuperação' : 'Entrar com email'} type="submit" variant="primary" isLoading={loading} width="100%" />
+          <button type="submit" disabled={loading} className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer text-sm font-medium disabled:opacity-50">{loading && <span className="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-1" />}{loading ? 'Processando...' : mode === 'register' ? 'Criar conta' : mode === 'forgot' ? 'Enviar recuperação' : 'Entrar com email'}</button>
         </form>
       )}
     </div>

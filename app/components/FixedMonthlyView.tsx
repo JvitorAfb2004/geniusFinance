@@ -6,8 +6,7 @@ import { formatCurrency } from '../lib/utils';
 import { detectRecurring } from '../lib/recurrenceDetector';
 import { isSameMonth, parseISO } from 'date-fns';
 import { useAnimatedValue } from '../hooks/useAnimatedValue';
-import { Card } from '@astryxdesign/core/Card';
-import { Button } from '@astryxdesign/core/Button';
+
 
 export function FixedMonthlyView() {
   const { transactions, activeContext, selectedMonth, addTransaction } = useFinance();
@@ -41,20 +40,20 @@ export function FixedMonthlyView() {
   return (
     <div className="flex flex-col h-full gap-5">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <Card className="p-5 flex items-center gap-4">
+        <div className="p-5 flex items-center gap-4">
           <div className="p-3 bg-emerald-50 text-emerald-600 rounded-lg"><TrendingUp className="w-6 h-6" /></div>
           <div>
             <p className="text-sm text-gray-500 font-medium">Lançamentos Fixos (Receitas)</p>
             <p className="text-xl font-bold text-gray-900">{formatCurrency(animIncomes)}</p>
           </div>
-        </Card>
-        <Card className="p-5 flex items-center gap-4">
+        </div>
+        <div className="p-5 flex items-center gap-4">
           <div className="p-3 bg-rose-50 text-rose-600 rounded-lg"><TrendingDown className="w-6 h-6" /></div>
           <div>
             <p className="text-sm text-gray-500 font-medium">Lançamentos Fixos (Despesas)</p>
             <p className="text-xl font-bold text-gray-900">{formatCurrency(animExpenses)}</p>
           </div>
-        </Card>
+        </div>
       </div>
 
       {suggestions.length > 0 && (
@@ -70,7 +69,7 @@ export function FixedMonthlyView() {
                   <p className="text-sm font-medium text-slate-700 truncate max-w-[180px]">{s.title}</p>
                   <p className="text-xs text-slate-500">{formatCurrency(s.amount)} • {s.confidence >= 0.8 ? 'Muito provável' : 'Provável'}</p>
                 </div>
-                <Button label="Confirmar" variant="primary" size="sm" onClick={() => handleConfirm(s)} className="flex-shrink-0" />
+                <button onClick={() => handleConfirm(s)} className="px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer text-sm font-medium flex-shrink-0">Confirmar</button>
               </div>
             ))}
           </div>

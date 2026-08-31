@@ -1,7 +1,5 @@
 import React from 'react';
 import { X } from 'lucide-react';
-import { Button } from '@astryxdesign/core/Button';
-import { IconButton } from '@astryxdesign/core/IconButton';
 
 interface Props {
   title: string;
@@ -16,7 +14,7 @@ export default function LegalModal({ title, content, onClose }: Props) {
       <div className="relative clay shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] flex flex-col">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 shrink-0">
           <h2 className="text-lg font-bold text-gray-900">{title}</h2>
-           <IconButton label="Fechar" icon={<X className="w-5 h-5" />} variant="ghost" size="sm" onClick={onClose} />
+           <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-600 cursor-pointer"><X className="w-5 h-5" /></button>
         </div>
         <div className="overflow-y-auto px-6 py-4 flex-1">
           <div className="prose prose-sm max-w-none text-gray-700 whitespace-pre-wrap text-sm leading-relaxed">
@@ -24,7 +22,7 @@ export default function LegalModal({ title, content, onClose }: Props) {
           </div>
         </div>
         <div className="flex justify-end px-6 py-4 border-t border-gray-100 shrink-0">
-           <Button label="Fechar" variant="primary" size="sm" onClick={onClose} />
+           <button onClick={onClose} className="px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer text-xs font-medium">Fechar</button>
         </div>
       </div>
     </div>

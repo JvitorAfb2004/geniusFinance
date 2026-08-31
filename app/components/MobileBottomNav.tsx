@@ -2,7 +2,6 @@ import { useNavigate, useLocation } from "react-router";
 import { PieChart, List, Calculator, TrendingUp, Kanban } from "lucide-react";
 import { motion } from "motion/react";
 import { cn } from "~/lib/utils";
-import { Button } from "@astryxdesign/core/Button";
 
 interface NavItem {
   path: string;
@@ -28,13 +27,15 @@ export function MobileBottomNav() {
         {items.map((item) => {
           const isActive = location.pathname === item.path;
           return (
-            <Button
+            <button
               key={item.label}
-              label={item.label}
-              variant={isActive ? "primary" : "ghost"}
-              size="sm"
               onClick={() => navigate(item.path)}
-              className={cn("relative min-w-0 flex-1 flex-col gap-0.5 px-3 py-1.5", isActive ? "text-primary" : "text-slate-400")}
+              className={cn(
+                "flex flex-col items-center gap-0.5 py-1.5 px-3 min-w-0 relative transition-colors duration-200 cursor-pointer border-none bg-transparent",
+                isActive
+                  ? "text-primary"
+                  : "text-slate-400 hover:text-slate-600"
+              )}
             >
               {isActive && (
                 <motion.div
@@ -50,7 +51,7 @@ export function MobileBottomNav() {
               )}>
                 {item.label}
               </span>
-            </Button>
+            </button>
           );
         })}
       </div>

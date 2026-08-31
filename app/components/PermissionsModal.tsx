@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import type { ModuleName, ModuleAction, MemberPermissions } from '../types';
-import { Button } from '@astryxdesign/core/Button';
-import { IconButton } from '@astryxdesign/core/IconButton';
 
 const MODULES: { id: ModuleName; label: string; actions: ModuleAction[] }[] = [
   { id: 'dashboard', label: 'Dashboard', actions: ['view'] },
@@ -68,7 +66,7 @@ export function PermissionsModal({ memberEmail, currentPermissions, onSave, onCl
         onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between p-4 border-b border-slate-100 sticky top-0 bg-white">
           <h3 className="font-bold text-slate-800 text-sm">Permissões: {memberEmail}</h3>
-           <IconButton label="Fechar permissões" icon={<X className="w-5 h-5" />} variant="ghost" size="sm" onClick={onClose} />
+           <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-600 cursor-pointer"><X className="w-5 h-5" /></button>
         </div>
 
         <div className="p-4">
@@ -110,8 +108,8 @@ export function PermissionsModal({ memberEmail, currentPermissions, onSave, onCl
         </div>
 
         <div className="flex justify-end gap-3 p-4 border-t border-slate-100 sticky bottom-0 bg-white">
-           <Button label="Cancelar" variant="ghost" size="sm" onClick={onClose} />
-           <Button label={saving ? 'Salvando...' : 'Salvar Permissões'} variant="primary" size="sm" isLoading={saving} onClick={handleSave} />
+           <button onClick={onClose} className="px-3 py-1.5 text-slate-600 hover:bg-slate-100 rounded-lg cursor-pointer text-xs font-medium">Cancelar</button>
+           <button disabled={saving} onClick={handleSave} className="px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer text-xs font-medium disabled:opacity-50">{saving && <span className="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-1" />}{saving ? 'Salvando...' : 'Salvar Permissões'}</button>
         </div>
       </div>
     </div>
