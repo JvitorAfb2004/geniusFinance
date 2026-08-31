@@ -13,6 +13,8 @@ export const confirmationFieldLabels: Record<string, string> = {
   type: "Tipo",
   status: "Status",
   categoryName: "Categoria",
+  year: "Ano",
+  month: "Mês",
 };
 
 export function getConfirmationEntries(arguments_: Record<string, unknown>) {

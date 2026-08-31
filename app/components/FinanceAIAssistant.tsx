@@ -28,8 +28,11 @@ const valueLabels: Record<string, string> = {
   PENDING: "Pendente",
 };
 
-function formatPreview(value: unknown) {
-  if (typeof value === "number") return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+function formatPreview(key: string, value: unknown) {
+  if (typeof value === "number") {
+    if (key === "year" || key === "month") return String(value);
+    return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+  }
   if (typeof value === "string") return valueLabels[value] ?? value;
   return JSON.stringify(value, null, 2);
 }
@@ -139,7 +142,7 @@ export function FinanceAIAssistant() {
           <div className="flex-1 space-y-3 overflow-y-auto bg-slate-50 p-4" aria-live="polite">
             {messages.length === 1 && <div className="flex flex-wrap gap-2">{suggestions.map((suggestion) => <button key={suggestion} onClick={() => send(suggestion)} disabled={sending} className="rounded-full border border-border bg-white px-3 py-1.5 text-left text-xs text-text-secondary hover:border-primary hover:text-primary">{suggestion}</button>)}</div>}
             {messages.map((message, index) => <div key={`${index}-${message.content}`} className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}><div className={`max-w-[88%] rounded-lg px-3 py-2 ${message.role === "user" ? "whitespace-pre-wrap bg-primary text-sm leading-relaxed text-white" : "border border-border bg-white text-text-primary"}`}>{message.role === "user" ? message.content : <AssistantMarkdown content={message.content} />}
-              {message.proposal && <div className="mt-3 space-y-2 rounded-md border border-amber-300 bg-amber-50 p-3 text-xs text-amber-950"><p className="font-semibold">Confirmação necessária</p><p>Operação: {confirmationActionLabels[message.proposal.action] || message.proposal.action}</p>{getConfirmationEntries(message.proposal.arguments).map(([key, value]) => <p key={key}><strong>{confirmationFieldLabels[key] || key}:</strong> {formatPreview(value)}</p>)}<div className="flex gap-2 pt-1"><button onClick={() => confirm(message.proposal!)} disabled={confirming !== null} className="inline-flex items-center gap-1 rounded bg-primary px-2.5 py-1.5 font-semibold text-white disabled:opacity-50"><Check className="h-3.5 w-3.5" />{confirming === message.proposal.id ? "Executando" : "Confirmar"}</button><button onClick={() => setMessages((current) => current.map((item) => item.proposal?.id === message.proposal?.id ? { ...item, proposal: undefined, content: "Alteração cancelada." } : item))} disabled={confirming !== null} className="rounded border border-amber-300 bg-white px-2.5 py-1.5 font-semibold disabled:opacity-50">Cancelar</button></div></div>}
+              {message.proposal && <div className="mt-3 space-y-2 rounded-md border border-amber-300 bg-amber-50 p-3 text-xs text-amber-950"><p className="font-semibold">Confirmação necessária</p><p>Operação: {confirmationActionLabels[message.proposal.action] || message.proposal.action}</p>{getConfirmationEntries(message.proposal.arguments).map(([key, value]) => <p key={key}><strong>{confirmationFieldLabels[key] || key}:</strong> {formatPreview(key, value)}</p>)}<div className="flex gap-2 pt-1"><button onClick={() => confirm(message.proposal!)} disabled={confirming !== null} className="inline-flex items-center gap-1 rounded bg-primary px-2.5 py-1.5 font-semibold text-white disabled:opacity-50"><Check className="h-3.5 w-3.5" />{confirming === message.proposal.id ? "Executando" : "Confirmar"}</button><button onClick={() => setMessages((current) => current.map((item) => item.proposal?.id === message.proposal?.id ? { ...item, proposal: undefined, content: "Alteração cancelada." } : item))} disabled={confirming !== null} className="rounded border border-amber-300 bg-white px-2.5 py-1.5 font-semibold disabled:opacity-50">Cancelar</button></div></div>}
             </div></div>)}
             {sending && <div className="flex items-center gap-2 text-xs text-text-muted"><Loader2 className="h-4 w-4 animate-spin" />Consultando seus dados...</div>}
             <div ref={endRef} />
