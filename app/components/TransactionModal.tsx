@@ -403,7 +403,7 @@ export function TransactionModal({
           </div>
 
           {categories.length > 0 && (
-            <div className="space-y-1.5" ref={categoryDropdownRef}>
+            <div className="space-y-1.5">
               <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider">Categoria (DRE)</label>
               <div className="relative">
                 <div className="clay-input flex items-center">
@@ -435,7 +435,7 @@ export function TransactionModal({
                 </div>
 
                 {showCategoryDropdown && (
-                  <div className="absolute z-20 mt-1 w-full clay shadow-lg max-h-56 overflow-y-auto">
+                  <div ref={categoryDropdownRef} className="absolute z-20 mt-1 w-full clay shadow-lg max-h-56 overflow-y-auto">
                     {/* New category button */}
                     {!showNewCategory ? (
                       <button
