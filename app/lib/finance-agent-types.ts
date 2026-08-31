@@ -4,6 +4,7 @@ export const confirmationActionLabels: Record<string, string> = {
   create_transaction: "Criar transação",
   update_transaction: "Atualizar transação",
   delete_transaction: "Excluir transação",
+  move_transaction: "Mover transação entre contas",
 };
 
 export const confirmationFieldLabels: Record<string, string> = {

@@ -13,7 +13,7 @@ Quando houver mais de uma conta, use sempre um título ## Nome da conta para cad
 Ao listar transações (pendentes, do período, etc), SEMPRE use tabelas Markdown com colunas: Descrição | Data | Valor. Nunca use listas com bullets para listar transações — apenas tabelas.
 Use tabelas Markdown SEMPRE que listar dados tabulares (transações, resumos, DRE).
 Use ferramentas para todos os números e nunca invente dados.
-Use apenas os escopos de leitura autorizados recebidos. Alterações (criar/editar/excluir) acontecem SEMPRE e APENAS no escopo ativo. Se o usuário pedir para mover/transferir dados entre contas, explique que não é possível diretamente — ofereça para criar o registro na conta ativa e o usuário exclui o antigo manualmente depois. Se não puder executar algo, explique o motivo claramente — nunca diga "não encontrei uma resposta" sem explicar por quê.
+Use apenas os escopos de leitura autorizados recebidos. Alterações (criar/editar/excluir) acontecem SEMPRE e APENAS no escopo ativo. Se o usuário pedir para mover/transferir dados entre contas, use a ferramenta propose_move_transaction — ela cria na conta ativa e exclui da origem automaticamente, sem precisar trocar de conta. Se não puder executar algo, explique o motivo claramente — nunca diga "não encontrei uma resposta" sem explicar por quê.
 Antes de editar ou excluir, consulte o registro e use uma ferramenta propose_*. O campo 'id' no propose DEVE ser o ID real retornado pela leitura no escopo ativo — nunca use IDs de outros escopos.
 Nunca diga que uma alteração foi feita sem uma confirmação posterior do usuário.
 Para datas ambíguas ou dados obrigatórios ausentes (ex: falta valor, descrição ou não sabe em qual conta o usuário quer criar), FAÇA UMA PERGUNTA ao usuário antes de acionar a ferramenta propose_*. (Se o usuário quiser criar numa conta diferente da ativa, avise-o para trocar de conta no aplicativo).
@@ -37,6 +37,7 @@ export const FINANCE_AGENT_TOOLS: DeepSeekTool[] = [
   { type: "function", function: { name: "detect_recurring", description: "Detecta possíveis receitas e despesas recorrentes.", parameters: parameter({}) } },
   ...(["create_transaction", "update_transaction", "delete_transaction", "create_category", "update_category", "delete_category", "create_budget", "update_budget", "delete_budget", "create_goal", "update_goal", "delete_goal", "create_spending_limit", "update_spending_limit", "delete_spending_limit"] as const).map((name) => ({ type: "function" as const, function: { name: `propose_${name}`, description: `Prepara ${name.replaceAll("_", " ")} para confirmação explícita. Nunca executa diretamente.`, parameters: parameter({ arguments: { type: "object" } }, ["arguments"]) } })),
   ...(["create_tag", "update_tag", "delete_tag", "close_month", "reopen_month"] as const).map((name) => ({ type: "function" as const, function: { name: `propose_${name}`, description: `Prepara ${name.replaceAll("_", " ")} para confirmação explícita. Nunca executa diretamente.`, parameters: parameter({ arguments: { type: "object" } }, ["arguments"]) } })),
+  { type: "function" as const, function: { name: "propose_move_transaction", description: "Move uma transação de uma conta para a conta ativa. Cria na conta ativa com os mesmos dados e exclui da origem. Use quando o usuário pedir para mover/transferir transação entre contas.", parameters: parameter({ arguments: { type: "object" } }, ["arguments"]) } },
 ];
 
 export type AgentContext = { uid: string; scope: ValidatedAgentScope; context: "PERSONAL" | "BUSINESS" };
@@ -170,6 +171,23 @@ export async function executeFinanceProposal(proposal: { action: string; argumen
     await ref.set(data, { merge: true });
     return { id: ref.id, ...data };
   }
+  if (action === "move_transaction") {
+    const sourceId = typeof args.id === "string" ? args.id : "";
+    const sourceScopeType = typeof args.fromScopeType === "string" ? args.fromScopeType : "";
+    const sourceAccountId = typeof args.fromAccountId === "string" ? args.fromAccountId : "";
+    if (!sourceId || !sourceScopeType) throw new Error("id e fromScopeType são obrigatórios");
+    const sourceScope: ValidatedAgentScope = sourceScopeType === "PERSONAL"
+      ? { type: "PERSONAL", userId: context.uid }
+      : { type: "ACCOUNT", userId: context.uid, accountId: sourceAccountId };
+    const sourcePath = collectionPath(sourceScope, "transactions");
+    const sourceDoc = await db.collection(sourcePath).doc(sourceId).get();
+    if (!sourceDoc.exists) throw new Error("transação de origem não encontrada");
+    const sourceData = sourceDoc.data()!;
+    const { id: _oldId, userId: _oldUser, createdAt: _oldCreated, ...txData } = sourceData as Record<string, unknown>;
+    const newRef = await db.collection(collectionPath(context.scope, "transactions")).add({ ...txData, userId: context.uid, context: context.context, createdAt: now, updatedAt: now });
+    await db.collection(sourcePath).doc(sourceId).delete();
+    return { moved: true, from: sourceId, to: newRef.id, fromScope: sourceScopeType, toScope: context.scope.type };
+  }
   const collection = action.includes("transaction") ? "transactions" : action.includes("category") ? "categories" : action.includes("budget") ? "budgets" : action.includes("goal") ? "goals" : action.includes("spending_limit") ? "spending-limits" : "tags";
   const path = collectionPath(context.scope, collection);
   if (action.startsWith("create_")) {
@@ -223,7 +241,7 @@ export async function runFinanceAgent(messages: AgentMessage[], active: AgentCon
         const operation = action.startsWith("create_") ? "create" : action.startsWith("delete_") ? "delete" : "edit";
         if (!canUseAction(active.scope, action, operation)) throw new Error("sem permissão para esta operação");
         const args = (call.arguments.arguments as Record<string, unknown>) || call.arguments;
-        if (operation === "edit" || operation === "delete") {
+        if ((operation === "edit" || operation === "delete") && action !== "move_transaction") {
           const id = typeof args.id === "string" ? args.id : "";
           if (id) {
             const collection = action.includes("transaction") ? "transactions" : action.includes("category") ? "categories" : action.includes("budget") ? "budgets" : action.includes("goal") ? "goals" : action.includes("spending_limit") ? "spending-limits" : "tags";
