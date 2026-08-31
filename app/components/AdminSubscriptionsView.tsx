@@ -2,9 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { apiFetch } from '../lib/api';
 import { formatPriceFromCents } from '../lib/subscriptionService';
 import { Plus, X, Trash2 } from 'lucide-react';
-import { Card } from '@astryxdesign/core/Card';
-import { Button } from '@astryxdesign/core/Button';
-import { IconButton } from '@astryxdesign/core/IconButton';
 
 interface SubEntry {
   id: string;
@@ -102,13 +99,15 @@ export function AdminSubscriptionsView() {
           <h2 className="text-xl font-bold text-gray-900">Gestão de Assinaturas</h2>
           <p className="text-sm text-gray-500">Atribua e gerencie assinaturas dos usuários.</p>
         </div>
-        <Button label="Atribuir Plano" variant="primary" icon={<Plus className="w-4 h-4" />}
-          className="flex items-center gap-1.5 text-sm font-medium px-4 py-2 rounded-lg hover:bg-primary-hover cursor-pointer transition-colors" />
+        <button onClick={() => setShowAssign(true)}
+          className="flex items-center gap-1.5 text-sm font-medium bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-hover cursor-pointer transition-colors">
+          <Plus className="w-4 h-4" /> Atribuir Plano
+        </button>
       </div>
 
       {error && <p className="text-red-500 text-sm">{error}</p>}
 
-      <Card className="overflow-hidden">
+      <div className="clay overflow-hidden">
         <table className="w-full text-sm">
           <thead className="bg-gray-50 text-left">
             <tr>
@@ -144,16 +143,17 @@ export function AdminSubscriptionsView() {
             ))}
           </tbody>
         </table>
-      </Card>
+      </div>
 
       {showAssign && (
         <div className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh]">
           <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowAssign(false)} />
-          <Card className="relative shadow-xl w-full max-w-md mx-4">
+          <div className="relative clay shadow-xl w-full max-w-md mx-4">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
               <h3 className="text-lg font-bold text-gray-900">Atribuir Assinatura</h3>
-              <IconButton label="Fechar" icon={<X className="w-5 h-5" />} variant="ghost"
-                className="p-1 text-gray-400 hover:text-gray-600 cursor-pointer" onClick={() => setShowAssign(false)} />
+              <button onClick={() => setShowAssign(false)} className="p-1 text-gray-400 hover:text-gray-600 cursor-pointer">
+                <X className="w-5 h-5" />
+              </button>
             </div>
 
             <div className="px-6 py-4 space-y-4">
@@ -198,11 +198,12 @@ export function AdminSubscriptionsView() {
                 className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 cursor-pointer">
                 Cancelar
               </button>
-              <Button label={assigning ? 'Atribuindo...' : 'Atribuir'} variant="primary"
-                isDisabled={assigning || !form.targetEmail || !form.planId}
-                className="px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 cursor-pointer transition-colors" />
+              <button onClick={handleAssign} disabled={assigning || !form.targetEmail || !form.planId}
+                className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 cursor-pointer transition-colors">
+                {assigning ? 'Atribuindo...' : 'Atribuir'}
+              </button>
             </div>
-          </Card>
+          </div>
         </div>
       )}
     </div>

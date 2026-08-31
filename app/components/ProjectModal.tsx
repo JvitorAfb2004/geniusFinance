@@ -2,9 +2,6 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useFinance } from '../hooks/useFinance';
 import { cn } from '../lib/utils';
 import { X, Check, Plus, Search, ChevronDown, ChevronRight, Trash2, GripVertical } from 'lucide-react';
-import { Card } from '@astryxdesign/core/Card';
-import { Button } from '@astryxdesign/core/Button';
-import { IconButton } from '@astryxdesign/core/IconButton';
 import { CANCELLED_PROJECT_STATUS } from '../lib/projectKanbanColumns';
 import type { Project, ServiceType, Lead, StepStatus, CustomFieldValue, Task, TaskPriority, Subtask } from '../types';
 
@@ -296,13 +293,15 @@ export default function ProjectModal({ project, lead, onClose }: Props) {
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-[5vh]">
       <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-      <Card className="relative shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] flex flex-col">
+      <div className="relative clay shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
           <h3 className="text-lg font-bold text-gray-900">
             {isEdit ? 'Editar Projeto' : 'Novo Projeto'}
           </h3>
-          <IconButton label="Fechar" icon={<X className="w-5 h-5" />} variant="ghost" onClick={onClose} className="p-1 text-gray-400 hover:text-gray-600 cursor-pointer" />
+          <button onClick={onClose} className="p-1 text-gray-400 hover:text-gray-600 cursor-pointer">
+            <X className="w-5 h-5" />
+          </button>
         </div>
 
         {/* Body */}
@@ -586,14 +585,13 @@ export default function ProjectModal({ project, lead, onClose }: Props) {
                   <option value="MEDIUM">Média</option>
                   <option value="HIGH">Alta</option>
                 </select>
-                <Button
-                  label="Adicionar tarefa"
-                  variant="primary"
-                  icon={<Plus className="w-4 h-4" />}
+                <button
                   onClick={handleAddTask}
-                  isDisabled={!newTaskTitle.trim()}
-                  className="px-3 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 cursor-pointer transition-colors shrink-0"
-                />
+                  disabled={!newTaskTitle.trim()}
+                  className="px-3 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 cursor-pointer transition-colors shrink-0"
+                >
+                  <Plus className="w-4 h-4" />
+                </button>
               </div>
 
               {/* Task list */}
@@ -657,13 +655,12 @@ export default function ProjectModal({ project, lead, onClose }: Props) {
                           )}
 
                           {/* Expand/collapse */}
-                          <IconButton
-                            label={isExpanded ? 'Recolher tarefa' : 'Expandir tarefa'}
-                            icon={isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-                            variant="ghost"
+                          <button
                             onClick={() => setExpandedTaskId(isExpanded ? null : task.id)}
                             className="p-0.5 text-gray-400 hover:text-gray-600 cursor-pointer shrink-0"
-                          />
+                          >
+                            {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                          </button>
 
                           {/* Delete task */}
                           {taskDeleteConfirm === task.id ? (
@@ -674,21 +671,20 @@ export default function ProjectModal({ project, lead, onClose }: Props) {
                               >
                                 Excluir
                               </button>
-                              <Button
-                                label="Não"
-                                variant="secondary"
+                              <button
                                 onClick={() => setTaskDeleteConfirm(null)}
-                                className="px-2 py-0.5 text-xs text-gray-600 rounded cursor-pointer"
-                              />
+                                className="px-2 py-0.5 text-xs bg-gray-200 text-gray-600 rounded cursor-pointer"
+                              >
+                                Não
+                              </button>
                             </div>
                           ) : (
-                            <IconButton
-                              label="Excluir tarefa"
-                              icon={<Trash2 className="w-3.5 h-3.5" />}
-                              variant="ghost"
+                            <button
                               onClick={() => setTaskDeleteConfirm(task.id)}
                               className="p-0.5 text-gray-300 hover:text-red-500 cursor-pointer shrink-0"
-                            />
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
                           )}
                         </div>
 
@@ -778,13 +774,12 @@ export default function ProjectModal({ project, lead, onClose }: Props) {
                                     <span className={cn('text-sm flex-1', sub.done ? 'text-gray-400 line-through' : 'text-gray-700')}>
                                       {sub.title}
                                     </span>
-                                    <IconButton
-                                      label="Excluir subtarefa"
-                                      icon={<Trash2 className="w-3 h-3" />}
-                                      variant="ghost"
+                                    <button
                                       onClick={() => deleteSubtask(task.id, sub.id)}
                                       className="p-0.5 text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer shrink-0"
-                                    />
+                                    >
+                                      <Trash2 className="w-3 h-3" />
+                                    </button>
                                   </div>
                                 ))}
                               </div>
@@ -806,16 +801,15 @@ export default function ProjectModal({ project, lead, onClose }: Props) {
                                   className="flex-1 px-2 py-1 border border-gray-200 rounded text-xs outline-none focus:border-primary"
                                 />
                                 {editingSubtask?.taskId === task.id && editingSubtask.text.trim() && (
-                                  <Button
-                                    label="Confirmar subtarefa"
-                                    variant="primary"
-                                    icon={<Check className="w-3 h-3" />}
+                                  <button
                                     onClick={() => {
                                       addSubtask(task.id, editingSubtask.text);
                                       setEditingSubtask(null);
                                     }}
-                                    className="px-2 py-1 rounded text-xs cursor-pointer"
-                                  />
+                                    className="px-2 py-1 bg-primary text-white rounded text-xs cursor-pointer"
+                                  >
+                                    <Check className="w-3 h-3" />
+                                  </button>
                                 )}
                               </div>
                             </div>
@@ -864,15 +858,15 @@ export default function ProjectModal({ project, lead, onClose }: Props) {
           >
             Cancelar
           </button>
-          <Button
-            label={submitting ? 'Salvando...' : isEdit ? 'Atualizar' : 'Criar'}
-            variant="primary"
+          <button
             onClick={handleSubmit}
-            isDisabled={submitting || !title.trim()}
-            className="px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 cursor-pointer transition-colors"
-          />
+            disabled={submitting || !title.trim()}
+            className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 cursor-pointer transition-colors"
+          >
+            {submitting ? 'Salvando...' : isEdit ? 'Atualizar' : 'Criar'}
+          </button>
         </div>
-      </Card>
+      </div>
     </div>
   );
 }

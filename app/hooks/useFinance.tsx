@@ -266,7 +266,6 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
         const installmentAmount = txData.amount / count;
         for (let i = 0; i < count; i++) {
           const docRef = doc(collectionRef);
-          if (i === 0) newId = docRef.id;
           batch.set(docRef, {
             ...txData,
             amount: parseFloat(installmentAmount.toFixed(2)),
@@ -296,7 +295,6 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
           const docDate = addMonths(baseDate, i);
           if (endDate && docDate > new Date(endDate)) break;
           const docRef = doc(collectionRef);
-          if (i === 0) newId = docRef.id;
           batch.set(docRef, {
             ...txData,
             date: format(docDate, 'yyyy-MM-dd'),

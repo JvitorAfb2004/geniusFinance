@@ -2,8 +2,6 @@ import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { useFinance } from '../hooks/useFinance';
 import { format, parseISO } from 'date-fns';
 import { X, Plus, Pencil, Trash2, Check, Search } from 'lucide-react';
-import { Card } from '@astryxdesign/core/Card';
-import { Button } from '@astryxdesign/core/Button';
 import type { Lead, LeadOption } from '../types';
 
 const STATUS_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#84cc16'];
@@ -263,7 +261,7 @@ export default function LeadModal({ lead, onClose }: { lead?: Lead; onClose: () 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-[10vh] px-4">
       <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-      <Card className="relative shadow-xl w-full max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
+      <div className="relative clay shadow-xl w-full max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-[#e2e8f0] shrink-0">
           <div>
@@ -380,21 +378,21 @@ export default function LeadModal({ lead, onClose }: { lead?: Lead; onClose: () 
 
         {/* Footer */}
         <div className="flex justify-end gap-3 px-6 py-4 border-t border-[#e2e8f0] bg-gray-50/50 shrink-0">
-          <Button
-            label="Cancelar"
-            variant="secondary"
+          <button
             onClick={onClose}
             className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 cursor-pointer"
-          />
-          <Button
-            label={submitting ? 'Salvando...' : isEdit ? 'Atualizar' : 'Salvar Lead'}
-            variant="primary"
+          >
+            Cancelar
+          </button>
+          <button
             onClick={handleSubmit}
-            isDisabled={!clientName.trim() || submitting}
-            className="px-6 py-2 rounded-lg disabled:opacity-50 transition-colors font-medium text-sm cursor-pointer"
-          />
+            disabled={!clientName.trim() || submitting}
+            className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors font-medium text-sm cursor-pointer"
+          >
+            {submitting ? 'Salvando...' : isEdit ? 'Atualizar' : 'Salvar Lead'}
+          </button>
         </div>
-      </Card>
+      </div>
     </div>
   );
 }

@@ -7,7 +7,6 @@ import { ptBR } from 'date-fns/locale';
 import { Settings2, Wallet, TrendingUp, TrendingDown, DollarSign, Percent, ArrowDownToLine, ArrowUpToLine, CalendarDays, CheckCircle2, Clock3 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Button } from '@astryxdesign/core/Button';
-import { Card } from '@astryxdesign/core/Card';
 
 const DEFAULT_WIDGETS = [
   'month_balance',
@@ -251,7 +250,7 @@ export function DashboardCards({ valuesVisible = true }: { valuesVisible?: boole
       })()}
 
       {editing && (
-        <Card className="flex flex-wrap gap-1.5 mb-4">
+        <div className="flex flex-wrap gap-1.5 mb-4 clay">
           {ALL_WIDGETS.map((w) => (
             <Button
               key={w.id}
@@ -261,7 +260,7 @@ export function DashboardCards({ valuesVisible = true }: { valuesVisible?: boole
               onClick={() => toggleWidget(w.id)}
             />
           ))}
-        </Card>
+        </div>
       )}
 
       <div className={`grid gap-4 ${cards.length <= 2 ? 'grid-cols-1 md:grid-cols-2' : cards.length === 3 ? 'grid-cols-1 md:grid-cols-3' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4'}`}>
@@ -280,7 +279,7 @@ export function DashboardCards({ valuesVisible = true }: { valuesVisible?: boole
             }}
             onDragEnd={() => setDraggingWidgetId(null)}
             className={cn(
-              "p-5 pl-6 transition-all duration-300 relative overflow-hidden group",
+              "clay clay-hover p-5 pl-6 transition-all duration-300 relative overflow-hidden group",
               "cursor-grab active:cursor-grabbing",
               draggingWidgetId === card.id && "opacity-60"
             )}

@@ -2,8 +2,6 @@ import React, { useState, useMemo } from 'react';
 import { formatCurrency } from '../lib/utils';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { Calculator, TrendingUp, CreditCard, Home } from 'lucide-react';
-import { Card } from '@astryxdesign/core/Card';
-import { Button } from '@astryxdesign/core/Button';
 
 function formatTooltipCurrency(value: unknown) {
   const numeric = Array.isArray(value) ? Number(value[0]) : Number(value);
@@ -28,16 +26,16 @@ export default function CalculatorsView() {
           { id: 'FINANCING' as const, label: 'Financiamento', icon: Home },
           { id: 'INSTALLMENT' as const, label: 'Parcelamento', icon: CreditCard },
         ]).map((opt) => (
-          <Button
+          <button
             key={opt.id}
-            label={opt.label}
-            variant={tab === opt.id ? 'primary' : 'secondary'}
             onClick={() => setTab(opt.id)}
-            className="px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 cursor-pointer transition-colors"
+            className={`px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 cursor-pointer transition-colors ${
+              tab === opt.id ? 'bg-blue-600 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+            }`}
           >
             <opt.icon className="w-4 h-4" />
             {opt.label}
-          </Button>
+          </button>
         ))}
       </div>
 
@@ -83,7 +81,7 @@ function InvestmentCalc() {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-      <Card className="p-5 space-y-4">
+      <div className="clay p-5 space-y-4">
         <div className="grid grid-cols-2 gap-3">
           <InputField label="Valor inicial (R$)" value={initial} onChange={setInitial} />
           <InputField label="Aporte mensal (R$)" value={monthly} onChange={setMonthly} />
@@ -95,8 +93,8 @@ function InvestmentCalc() {
           <ResultCard label="Rendimento" value={result.profit} color="text-emerald-600" />
           <ResultCard label="Montante Final" value={result.final} color="text-blue-600" />
         </div>
-      </Card>
-      <Card className="p-5 min-w-0">
+      </div>
+      <div className="clay p-5 min-w-0">
         <h3 className="text-sm font-semibold text-slate-700 mb-3">Evolução do Patrimônio</h3>
         <div style={{ width: '100%', height: 280 }}>
           <ResponsiveContainer>
@@ -110,7 +108,7 @@ function InvestmentCalc() {
             </LineChart>
           </ResponsiveContainer>
         </div>
-      </Card>
+      </div>
     </div>
   );
 }
@@ -147,7 +145,7 @@ function FinancingCalc() {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-      <Card className="p-5 space-y-4">
+      <div className="clay p-5 space-y-4">
         <div className="grid grid-cols-2 gap-3">
           <InputField label="Valor financiado (R$)" value={amount} onChange={setAmount} />
           <InputField label="Taxa anual (%)" value={rate} onChange={setRate} />
@@ -158,8 +156,8 @@ function FinancingCalc() {
           <ResultCard label="Total de Juros" value={result.totalInterest} color="text-red-500" />
           <ResultCard label="Total Pago" value={result.totalPaid} color="text-slate-700" />
         </div>
-      </Card>
-      <Card className="p-5 min-w-0">
+      </div>
+      <div className="clay p-5 min-w-0">
         <h3 className="text-sm font-semibold text-slate-700 mb-3">Tabela Price (12 primeiros meses)</h3>
         <div className="overflow-x-auto">
           <table className="w-full text-xs">
@@ -185,7 +183,7 @@ function FinancingCalc() {
             </tbody>
           </table>
         </div>
-      </Card>
+      </div>
     </div>
   );
 }
@@ -211,7 +209,7 @@ function InstallmentCalc() {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-      <Card className="p-5 space-y-4">
+      <div className="clay p-5 space-y-4">
         <div className="grid grid-cols-2 gap-3">
           <InputField label="Valor total (R$)" value={total} onChange={setTotal} />
           <InputField label="Parcelas" value={installments} onChange={setInstallments} />
@@ -229,8 +227,8 @@ function InstallmentCalc() {
             </p>
           </div>
         )}
-      </Card>
-      <Card className="p-5">
+      </div>
+      <div className="clay p-5">
         <h3 className="text-sm font-semibold text-slate-700 mb-3">Comparativo</h3>
         <div className="space-y-3">
           <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
@@ -246,7 +244,7 @@ function InstallmentCalc() {
             <span className="font-mono font-bold text-amber-600">{formatCurrency(result.totalPaid - pTotal * 0.9)}</span>
           </div>
         </div>
-      </Card>
+      </div>
     </div>
   );
 }

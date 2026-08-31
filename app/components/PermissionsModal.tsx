@@ -3,7 +3,6 @@ import { X } from 'lucide-react';
 import type { ModuleName, ModuleAction, MemberPermissions } from '../types';
 import { Button } from '@astryxdesign/core/Button';
 import { IconButton } from '@astryxdesign/core/IconButton';
-import { Card } from '@astryxdesign/core/Card';
 
 const MODULES: { id: ModuleName; label: string; actions: ModuleAction[] }[] = [
   { id: 'dashboard', label: 'Dashboard', actions: ['view'] },
@@ -65,7 +64,7 @@ export function PermissionsModal({ memberEmail, currentPermissions, onSave, onCl
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/35 backdrop-blur-sm" onClick={onClose}>
-      <Card className="w-full max-w-lg max-h-[85vh] overflow-y-auto"
+      <div className="clay shadow-xl w-full max-w-lg max-h-[85vh] overflow-y-auto"
         onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between p-4 border-b border-slate-100 sticky top-0 bg-white">
           <h3 className="font-bold text-slate-800 text-sm">Permissões: {memberEmail}</h3>
@@ -114,7 +113,7 @@ export function PermissionsModal({ memberEmail, currentPermissions, onSave, onCl
            <Button label="Cancelar" variant="ghost" size="sm" onClick={onClose} />
            <Button label={saving ? 'Salvando...' : 'Salvar Permissões'} variant="primary" size="sm" isLoading={saving} onClick={handleSave} />
         </div>
-      </Card>
+      </div>
     </div>
   );
 }

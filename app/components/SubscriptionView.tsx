@@ -5,7 +5,6 @@ import { calculateSubscriptionPrice, formatPriceFromCents } from '../lib/subscri
 import { PixQRCode } from './PixQRCode';
 import { CreditCard, QrCode, Loader2, AlertTriangle, ShieldCheck, Building2, Users } from 'lucide-react';
 import { cn } from '../lib/utils';
-import { Card } from '@astryxdesign/core/Card';
 
 interface SubData {
   status?: string;
@@ -105,7 +104,7 @@ export function SubscriptionView() {
   return (
     <div className="w-full max-w-5xl flex flex-col gap-6">
       {/* Status Card */}
-      <Card className="p-6">
+      <div className="clay p-6">
         <h2 className="text-xl font-bold text-gray-900 mb-1">Sua Assinatura</h2>
         <p className="text-sm text-gray-500 mb-4">Gerencie seu plano GeniusHub</p>
 
@@ -184,11 +183,11 @@ export function SubscriptionView() {
             </button>
           )}
         </div>
-      </Card>
+      </div>
 
       {/* Subscribe CTA (if no active plan) */}
       {!isActive && !isTrial && !isPastDue && (
-        <Card className="p-6">
+        <div className="clay p-6">
           <h3 className="text-lg font-bold text-gray-900 mb-1">Escolha seu plano</h3>
           <p className="text-sm text-gray-500 mb-4">Plano Empresa R$29,90/mês — inclui Pessoal grátis.</p>
 
@@ -209,7 +208,7 @@ export function SubscriptionView() {
           </div>
 
           {error && <p className="text-red-500 text-sm mt-4">{error}</p>}
-        </Card>
+        </div>
       )}
 
       {/* PIX Result (QR Code) */}

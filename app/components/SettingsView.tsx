@@ -6,9 +6,6 @@ import type { Category, DRESection, LeadOption, AccountRole, AccountMember, Memb
 import { PermissionsModal } from './PermissionsModal';
 import { auth } from '../lib/firebase';
 import { SECTION_LABELS } from '../lib/categories';
-import { Button } from '@astryxdesign/core/Button';
-import { Card } from '@astryxdesign/core/Card';
-import { IconButton } from '@astryxdesign/core/IconButton';
 
 type SettingsTab = 'geral' | 'conta' | 'comercial' | 'categorias' | 'tags';
 
@@ -149,9 +146,10 @@ export function SettingsView() {
               ))}
             </div>
           )}
-          <Button onClick={handleAddOption} isDisabled={!newOptionValue.trim()}
-            variant="primary" label="Adicionar" icon={<Check className="w-3.5 h-3.5" />}
-            className="px-3 py-1.5 rounded-xl text-xs transition-all" />
+          <button onClick={handleAddOption} disabled={!newOptionValue.trim()}
+            className="px-3 py-1.5 bg-slate-900 text-white rounded-xl text-xs hover:bg-slate-800 disabled:opacity-50 cursor-pointer transition-all">
+            <Check className="w-3.5 h-3.5" />
+          </button>
         </div>
       )}
       {options.map((opt) => (
@@ -162,11 +160,13 @@ export function SettingsView() {
             )}
             <span className="text-sm text-slate-700 font-medium">{opt.value}</span>
           </div>
-          <IconButton
+          <button
             onClick={() => deleteLeadOption(opt.id)}
-            variant="ghost" label="Excluir" icon={<Trash2 className="w-3.5 h-3.5" />}
-            className="text-slate-400 hover:text-red-500 p-1 rounded hover:bg-red-50/30 transition-all"
-          />
+            className="text-slate-400 hover:text-red-500 cursor-pointer p-1 rounded hover:bg-red-50/30 transition-all"
+            title="Excluir"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+          </button>
         </div>
       ))}
       {options.length === 0 && (
@@ -186,7 +186,7 @@ export function SettingsView() {
   return (
     <div className="flex flex-col max-w-3xl gap-6">
       {/* Profile Header */}
-      <Card className="overflow-hidden">
+      <div className="clay overflow-hidden">
         <div className="p-6 flex items-center gap-4 bg-slate-50/40">
           <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center overflow-hidden shrink-0 border-2 border-white shadow-[0_1px_3px_rgba(0,0,0,0.05)]">
             {user?.photoURL ? (
@@ -200,10 +200,10 @@ export function SettingsView() {
             <p className="text-slate-400 text-sm font-medium mt-0.5">{user?.email}</p>
           </div>
         </div>
-      </Card>
+      </div>
 
       {/* Tabs + Content */}
-      <Card className="overflow-hidden">
+      <div className="clay overflow-hidden">
         {/* Tab bar */}
         <div className="flex gap-1.5 p-3 bg-slate-50/50 border-b border-slate-100/80 flex-wrap">
           {tabs.map((tab) => (
@@ -236,8 +236,10 @@ export function SettingsView() {
                     <p className="text-xs text-slate-500 font-medium mt-0.5">Baixe o histórico do contexto atual ({activeContext === 'PERSONAL' ? 'Pessoal' : 'Empresa'}).</p>
                   </div>
                 </div>
-                <Button onClick={handleExportCSV} label="Baixar .CSV" variant="secondary"
-                  className="text-xs font-bold px-4 py-2 rounded-xl shrink-0 shadow-[0_1px_2px_rgba(0,0,0,0.02)] active:scale-[0.98] transition-all" />
+                <button onClick={handleExportCSV}
+                  className="text-xs font-bold bg-white border border-slate-200 text-slate-700 px-4 py-2 rounded-xl hover:bg-slate-50 hover:border-slate-300 transition-all cursor-pointer shrink-0 shadow-[0_1px_2px_rgba(0,0,0,0.02)] active:scale-[0.98]">
+                  Baixar .CSV
+                </button>
               </div>
 
               <div className="flex items-center justify-between p-4 bg-slate-50/50 rounded-2xl border border-slate-100">
@@ -371,7 +373,7 @@ export function SettingsView() {
                         if (e.key === 'Escape') { setShowNewAccount(false); setNewAccountName(''); }
                       }}
                     />
-                    <IconButton
+                    <button
                       onClick={async () => {
                         if (!newAccountName.trim()) return;
                         setCreatingAccount(true);
@@ -380,11 +382,11 @@ export function SettingsView() {
                         setShowNewAccount(false);
                         setCreatingAccount(false);
                       }}
-                      isDisabled={!newAccountName.trim() || creatingAccount}
-                      variant="primary" label="Criar conta"
-                      icon={creatingAccount ? undefined : <Check className="w-3.5 h-3.5" />}
-                      className="px-2 py-1 rounded text-xs"
-                    />
+                      disabled={!newAccountName.trim() || creatingAccount}
+                      className="px-2 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700 disabled:opacity-50 cursor-pointer"
+                    >
+                      {creatingAccount ? '...' : <Check className="w-3.5 h-3.5" />}
+                    </button>
                   </div>
                 )}
 
@@ -408,11 +410,13 @@ export function SettingsView() {
                         {acc.status === 'ACTIVE' ? 'Ativo' : 'Arquivado'}
                       </span>
                       {acc.ownerId === user?.uid && (
-                        <IconButton
+                        <button
                           onClick={() => setConfirmDeleteAccount({ id: acc.id, name: acc.name })}
-                          variant="ghost" label="Apagar empresa" icon={<Trash2 className="w-3.5 h-3.5" />}
-                          className="ml-2 text-gray-400 hover:text-red-500"
-                        />
+                          className="ml-2 text-gray-400 hover:text-red-500 cursor-pointer"
+                          title="Apagar empresa"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
                       )}
                     </div>
                   ))
@@ -445,7 +449,7 @@ export function SettingsView() {
                         ))}
                       </div>
                     ) : null}
-                    <Button
+                    <button
                       onClick={async () => {
                         if (!activeScope || activeScope.type !== 'ACCOUNT') return;
                         setMigrating(true);
@@ -454,11 +458,11 @@ export function SettingsView() {
                         setMigrationResult(result);
                         setMigrating(false);
                       }}
-                      isDisabled={migrating}
-                      variant="primary"
-                      label={migrating ? 'Migrando...' : migrationResult ? 'Re-executar Migração' : 'Migrar Dados Empresariais'}
-                      className="text-xs font-bold px-4 py-2 rounded-lg transition-colors"
-                    />
+                      disabled={migrating}
+                      className="text-xs font-bold bg-amber-600 text-white px-4 py-2 rounded-lg hover:bg-amber-700 disabled:opacity-50 cursor-pointer transition-colors"
+                    >
+                      {migrating ? 'Migrando...' : migrationResult ? 'Re-executar Migração' : 'Migrar Dados Empresariais'}
+                    </button>
                   </div>
                 </div>
               )}
@@ -539,7 +543,7 @@ export function SettingsView() {
                       <option value="admin">Admin</option>
                       <option value="member">Membro</option>
                     </select>
-                    <Button
+                    <button
                       onClick={async () => {
                         if (!inviteEmail.trim()) return;
                         setSendingInvite(true);
@@ -548,12 +552,12 @@ export function SettingsView() {
                         setInviteDone(true);
                         setInviteEmail('');
                       }}
-                      isDisabled={!inviteEmail.trim() || sendingInvite}
-                      variant="primary"
-                      icon={<UserPlus className="w-3.5 h-3.5" />}
-                      label={sendingInvite ? '...' : 'Convidar'}
-                      className="px-4 py-1.5 rounded text-xs font-medium whitespace-nowrap"
-                    />
+                      disabled={!inviteEmail.trim() || sendingInvite}
+                      className="px-4 py-1.5 bg-blue-600 text-white rounded text-xs font-medium hover:bg-blue-700 disabled:opacity-50 cursor-pointer whitespace-nowrap inline-flex items-center gap-1"
+                    >
+                      <UserPlus className="w-3.5 h-3.5" />
+                      {sendingInvite ? '...' : 'Convidar'}
+                    </button>
                   </div>
                   {inviteDone && (
                     <div className="px-3 pb-2 text-xs text-emerald-600 font-medium">Convite enviado com sucesso.</div>
@@ -624,14 +628,14 @@ export function SettingsView() {
                       Como <strong>{inv.role === 'admin' ? 'Administrador' : 'Membro'}</strong> &middot; {inv.email}
                     </p>
                   </div>
-                  <Button
+                  <button
                     onClick={async () => {
                       await acceptInvite(inv.id, inv.accountId);
                     }}
-                    variant="primary"
-                    label="Aceitar"
-                    className="px-4 py-1.5 rounded text-xs font-bold"
-                  />
+                    className="px-4 py-1.5 bg-emerald-600 text-white rounded text-xs font-bold hover:bg-emerald-700 cursor-pointer"
+                  >
+                    Aceitar
+                  </button>
                 </div>
               ))}
             </div>
@@ -669,9 +673,9 @@ export function SettingsView() {
                     </select>
                   </div>
                   <div className="flex gap-2">
-                    <Button onClick={async () => { if (!newCatName.trim()) return; await addCategory(newCatName.trim(), newCatSection); setNewCatName(''); setShowNewCat(false); }}
-                      isDisabled={!newCatName.trim()} variant="primary" label="Adicionar"
-                      className="text-xs font-semibold px-4 py-2 rounded-xl transition-all" />
+                    <button onClick={async () => { if (!newCatName.trim()) return; await addCategory(newCatName.trim(), newCatSection); setNewCatName(''); setShowNewCat(false); }}
+                      disabled={!newCatName.trim()}
+                      className="text-xs font-semibold px-4 py-2 bg-slate-900 text-white rounded-xl hover:bg-slate-800 disabled:opacity-50 cursor-pointer transition-all">Adicionar</button>
                     <button onClick={() => setShowNewCat(false)} className="text-xs font-semibold px-4 py-2 text-slate-500 hover:text-slate-800 cursor-pointer transition-colors">Cancelar</button>
                   </div>
                 </div>
@@ -701,22 +705,18 @@ export function SettingsView() {
                                 <option value="CUSTOS">Custos</option>
                                 <option value="DESPESAS">Despesas</option>
                               </select>
-                              <IconButton onClick={async () => { if (editCatName.trim()) { await updateCategory(cat.id, { name: editCatName.trim(), section: editCatSection }); } setEditingCatId(null); }}
-                                variant="ghost" label="Salvar" icon={<Check className="w-4 h-4" />}
-                                className="text-emerald-600 hover:text-emerald-700" />
-                              <IconButton onClick={() => setEditingCatId(null)} variant="ghost" label="Cancelar" icon={<X className="w-4 h-4" />}
-                                className="text-red-500 hover:text-red-600" />
+                              <button onClick={async () => { if (editCatName.trim()) { await updateCategory(cat.id, { name: editCatName.trim(), section: editCatSection }); } setEditingCatId(null); }}
+                                className="text-emerald-600 hover:text-emerald-700 cursor-pointer"><Check className="w-4 h-4" /></button>
+                              <button onClick={() => setEditingCatId(null)} className="text-red-500 hover:text-red-600 cursor-pointer"><X className="w-4 h-4" /></button>
                             </div>
                           ) : (
                             <>
                               <span className="text-sm text-gray-700">{cat.name}{!cat.isDefault && <span className="text-xs text-gray-400 ml-1">*</span>}</span>
                               <div className="flex items-center gap-2">
-                                <IconButton onClick={() => { setEditingCatId(cat.id); setEditCatName(cat.name); setEditCatSection(cat.section); }}
-                                   variant="ghost" label="Editar" icon={<Pencil className="w-3.5 h-3.5" />}
-                                   className="text-gray-400 hover:text-blue-600" />
+                                <button onClick={() => { setEditingCatId(cat.id); setEditCatName(cat.name); setEditCatSection(cat.section); }}
+                                  className="text-gray-400 hover:text-blue-600 cursor-pointer"><Pencil className="w-3.5 h-3.5" /></button>
                                 {!cat.isDefault && (
-                                  <IconButton onClick={() => setConfirmDeleteCat(cat)} variant="ghost" label="Excluir"
-                                    icon={<Trash2 className="w-3.5 h-3.5" />} className="text-gray-400 hover:text-red-500" />
+                                  <button onClick={() => setConfirmDeleteCat(cat)} className="text-gray-400 hover:text-red-500 cursor-pointer"><Trash2 className="w-3.5 h-3.5" /></button>
                                 )}
                               </div>
                             </>
@@ -747,9 +747,9 @@ export function SettingsView() {
                     ))}
                   </div>
                   <div className="flex gap-2">
-                    <Button onClick={async () => { if (!newTagName.trim()) return; await addTag(newTagName.trim(), newTagColor); setNewTagName(''); setShowNewTag(false); }}
-                      isDisabled={!newTagName.trim()} variant="primary" label="Adicionar"
-                      className="text-xs px-3 py-1 rounded" />
+                    <button onClick={async () => { if (!newTagName.trim()) return; await addTag(newTagName.trim(), newTagColor); setNewTagName(''); setShowNewTag(false); }}
+                      disabled={!newTagName.trim()}
+                      className="text-xs px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 cursor-pointer">Adicionar</button>
                     <button onClick={() => setShowNewTag(false)} className="text-xs px-3 py-1 text-gray-500 hover:text-gray-700 cursor-pointer">Cancelar</button>
                   </div>
                 </div>
@@ -774,9 +774,9 @@ export function SettingsView() {
                         ))}
                       </div>
                       <div className="flex gap-2">
-                        <Button onClick={async () => { if (!editTagName.trim()) return; await updateTag(tag.id, { name: editTagName.trim(), color: editTagColor }); setEditingTagId(null); }}
-                          isDisabled={!editTagName.trim()} variant="primary" label="Salvar"
-                          className="text-xs px-3 py-1 rounded" />
+                        <button onClick={async () => { if (!editTagName.trim()) return; await updateTag(tag.id, { name: editTagName.trim(), color: editTagColor }); setEditingTagId(null); }}
+                          disabled={!editTagName.trim()}
+                          className="text-xs px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 cursor-pointer">Salvar</button>
                         <button onClick={() => setEditingTagId(null)} className="text-xs px-3 py-1 text-gray-500 hover:text-gray-700 cursor-pointer">Cancelar</button>
                         <button onClick={() => { deleteTag(tag.id); setEditingTagId(null); }}
                           className="text-xs px-3 py-1 text-red-500 hover:text-red-700 cursor-pointer ml-auto">Excluir</button>
@@ -797,7 +797,7 @@ export function SettingsView() {
           )}
 
         </div>
-      </Card>
+      </div>
 
       {permissionTarget && (
         <PermissionsModal

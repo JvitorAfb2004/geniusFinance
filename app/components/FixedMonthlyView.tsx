@@ -58,7 +58,7 @@ export function FixedMonthlyView() {
       </div>
 
       {suggestions.length > 0 && (
-        <Card className="p-5 space-y-3">
+        <div className="clay p-5 space-y-3">
           <div className="flex items-center gap-2 text-purple-700">
             <Sparkles className="w-5 h-5" />
             <h3 className="font-semibold text-sm">Transações que parecem recorrentes</h3>
@@ -74,10 +74,10 @@ export function FixedMonthlyView() {
               </div>
             ))}
           </div>
-        </Card>
+        </div>
       )}
 
-      <Card className="flex-1 min-h-0 overflow-hidden flex flex-col">
+      <div className="flex-1 min-h-0 clay overflow-hidden flex flex-col">
         <div className="p-6 border-b border-slate-100">
           <h2 className="text-xl font-bold font-sans text-gray-900">Lançamentos Fixos do Mês</h2>
           <p className="text-sm text-gray-500 mt-1">Contas e assinaturas que se repetem todos os meses.</p>
@@ -85,7 +85,7 @@ export function FixedMonthlyView() {
         <div className="flex-1 overflow-hidden p-4">
           <TransactionTable hideHeaderTitle fixedOnly />
         </div>
-      </Card>
+      </div>
     </div>
   );
 }

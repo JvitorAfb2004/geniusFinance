@@ -5,9 +5,6 @@ import {
   Plus, Search, FilterX, Pencil, Trash2, Kanban, List, Users, Layers,
   ExternalLink
 } from 'lucide-react';
-import { Card } from '@astryxdesign/core/Card';
-import { Button } from '@astryxdesign/core/Button';
-import { IconButton } from '@astryxdesign/core/IconButton';
 import ConfirmModal from './ConfirmModal';
 import ProjectModal from './ProjectModal';
 import ProjectKanban from './ProjectKanban';
@@ -85,13 +82,13 @@ export default function ProjectsView() {
             {projects.length} projeto{projects.length !== 1 ? 's' : ''}
           </p>
         </div>
-        <Button
-          label="Novo Projeto"
-          variant="primary"
-          icon={<Plus className="w-4 h-4" />}
+        <button
           onClick={handleAdd}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm cursor-pointer"
-        />
+          className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm cursor-pointer"
+        >
+          <Plus className="w-4 h-4" />
+          Novo Projeto
+        </button>
       </div>
 
       {/* Tabs + Filters */}
@@ -171,7 +168,7 @@ export default function ProjectsView() {
           <ProjectKanban searchTerm={searchTerm} serviceTypeFilter={serviceTypeFilter} />
         </div>
       ) : (
-        <Card className="overflow-hidden flex-1 flex flex-col">
+        <div className="clay overflow-hidden flex-1 flex flex-col">
           <div className="overflow-auto flex-1">
             {filteredProjects.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 text-gray-400">
@@ -250,20 +247,18 @@ export default function ProjectsView() {
                                 <Layers className="w-3.5 h-3.5" />
                               </span>
                             )}
-                            <IconButton
-                              label="Editar projeto"
-                              icon={<Pencil className="w-3.5 h-3.5" />}
-                              variant="ghost"
+                            <button
                               onClick={() => handleEdit(project)}
                               className="p-1.5 text-gray-400 hover:text-primary rounded transition-colors cursor-pointer"
-                            />
-                            <IconButton
-                              label="Excluir projeto"
-                              icon={<Trash2 className="w-3.5 h-3.5" />}
-                              variant="ghost"
+                            >
+                              <Pencil className="w-3.5 h-3.5" />
+                            </button>
+                            <button
                               onClick={() => setConfirmDelete(project)}
                               className="p-1.5 text-gray-400 hover:text-red-500 rounded transition-colors cursor-pointer"
-                            />
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
                           </div>
                         </td>
                       </tr>
@@ -273,7 +268,7 @@ export default function ProjectsView() {
               </table>
             )}
           </div>
-        </Card>
+        </div>
       )}
 
       {/* Modals */}

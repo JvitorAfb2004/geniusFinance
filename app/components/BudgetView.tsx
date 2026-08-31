@@ -7,7 +7,6 @@ import { isSameMonth, parseISO, eachMonthOfInterval, startOfYear, endOfYear, for
 import { ptBR } from 'date-fns/locale';
 import { ChevronDown, ChevronRight, Edit2, Check, X } from 'lucide-react';
 import { IconButton } from '@astryxdesign/core/IconButton';
-import { Card } from '@astryxdesign/core/Card';
 
 type CellEdit = { categoryId: string; month: number } | null;
 
@@ -131,7 +130,7 @@ export default function BudgetView() {
       </div>
 
       {/* Spreadsheet */}
-      <Card className="overflow-hidden">
+      <div className="clay overflow-hidden">
         {/* Desktop: full table */}
         <div className="overflow-x-auto hidden md:block">
           <table className="w-full text-sm border-collapse">
@@ -336,7 +335,7 @@ export default function BudgetView() {
             </div>
           </div>
         </div>
-      </Card>
+      </div>
     </div>
   );
 }

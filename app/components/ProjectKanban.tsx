@@ -3,7 +3,6 @@ import { useFinance } from '../hooks/useFinance';
 import { cn } from '../lib/utils';
 import { format, parseISO, isAfter, differenceInDays } from 'date-fns';
 import { MoreHorizontal, Pencil, Trash2, Clock, DollarSign, Layers, GripVertical, Settings2 } from 'lucide-react';
-import { Card } from '@astryxdesign/core/Card';
 import ConfirmModal from './ConfirmModal';
 import ProjectModal from './ProjectModal';
 import ProjectKanbanColumnsModal from './ProjectKanbanColumnsModal';
@@ -134,14 +133,14 @@ export default function ProjectKanban({ searchTerm, serviceTypeFilter }: Props) 
     const daysLeft = getDaysRemaining(project.dueDate);
 
     const isDragging = draggedProject?.id === project.id;    return (
-      <Card
+      <div
         key={project.id}
         draggable
         onDragStart={(e) => handleDragStart(e, project)}
         onDragEnd={handleDragEnd}
         onClick={() => { setEditingProject(project); setIsModalOpen(true); }}
         className={cn(
-          'p-4 group cursor-pointer',
+          'clay clay-hover p-4 group cursor-pointer',
           isDragging && 'opacity-40 shadow-md border-slate-300'
         )}
       >
@@ -221,7 +220,7 @@ export default function ProjectKanban({ searchTerm, serviceTypeFilter }: Props) 
             </span>
           )}
         </div>
-      </Card>
+      </div>
     );
   };
 

@@ -2,9 +2,6 @@ import React, { useState } from 'react';
 import { useFinance } from '../hooks/useFinance';
 import { cn } from '../lib/utils';
 import { Trash2, Pencil, Plus, X, GripVertical, ChevronUp, ChevronDown, Layers, Check } from 'lucide-react';
-import { Card } from '@astryxdesign/core/Card';
-import { Button } from '@astryxdesign/core/Button';
-import { IconButton } from '@astryxdesign/core/IconButton';
 import ConfirmModal from './ConfirmModal';
 import type { ServiceType, ServiceTypeStep, CustomFieldDef } from '../types';
 
@@ -132,16 +129,16 @@ export default function ServiceTypesView() {
             {serviceTypes.length} tipo{serviceTypes.length !== 1 ? 's' : ''} de serviço cadastrado{serviceTypes.length !== 1 ? 's' : ''}
           </p>
         </div>
-        <Button
-          variant="primary"
-          label="Novo Tipo"
+        <button
           onClick={openAdd}
-          icon={<Plus className="w-4 h-4" />}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors font-medium text-sm cursor-pointer"
-        />
+          className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm cursor-pointer"
+        >
+          <Plus className="w-4 h-4" />
+          Novo Tipo
+        </button>
       </div>
 
-      <Card className="overflow-hidden flex-1">
+      <div className="clay overflow-hidden flex-1">
         <div className="overflow-auto flex-1">
           {sortedTypes.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-gray-400">
@@ -195,24 +192,20 @@ export default function ServiceTypesView() {
             </table>
           )}
         </div>
-      </Card>
+      </div>
 
       {/* Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-start justify-center pt-[10vh]">
           <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" onClick={closeModal} />
-          <Card className="relative shadow-xl w-full max-w-lg mx-4 max-h-[80vh] flex flex-col">
+          <div className="relative clay shadow-xl w-full max-w-lg mx-4 max-h-[80vh] flex flex-col">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
               <h3 className="text-lg font-bold text-gray-900">
                 {editingType ? 'Editar Tipo de Serviço' : 'Novo Tipo de Serviço'}
               </h3>
-              <IconButton
-                variant="ghost"
-                label="Fechar"
-                icon={<X className="w-5 h-5" />}
-                onClick={closeModal}
-                className="p-1 text-gray-400 hover:text-gray-600 cursor-pointer"
-              />
+              <button onClick={closeModal} className="p-1 text-gray-400 hover:text-gray-600 cursor-pointer">
+                <X className="w-5 h-5" />
+              </button>
             </div>
 
             <div className="overflow-y-auto px-6 py-4 space-y-5 flex-1">
@@ -371,21 +364,21 @@ export default function ServiceTypesView() {
             </div>
 
             <div className="flex justify-end gap-3 px-6 py-4 border-t border-gray-100">
-              <Button
-                variant="ghost"
-                label="Cancelar"
+              <button
                 onClick={closeModal}
                 className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 cursor-pointer"
-              />
-              <Button
-                variant="primary"
-                label={saving ? 'Salvando...' : editingType ? 'Atualizar' : 'Criar'}
+              >
+                Cancelar
+              </button>
+              <button
                 onClick={handleSubmit}
-                isDisabled={saving || !name.trim()}
-                className="px-4 py-2 rounded-lg text-sm font-medium cursor-pointer transition-colors"
-              />
+                disabled={saving || !name.trim()}
+                className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 cursor-pointer transition-colors"
+              >
+                {saving ? 'Salvando...' : editingType ? 'Atualizar' : 'Criar'}
+              </button>
             </div>
-          </Card>
+          </div>
         </div>
       )}
 

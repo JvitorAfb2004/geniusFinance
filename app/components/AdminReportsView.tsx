@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { apiFetch } from '../lib/api';
 import { X } from 'lucide-react';
-import { Card } from '@astryxdesign/core/Card';
-import { Button } from '@astryxdesign/core/Button';
-import { IconButton } from '@astryxdesign/core/IconButton';
 
 interface Report {
   id: string;
@@ -66,7 +63,7 @@ export function AdminReportsView() {
 
   return (
     <div className="max-w-5xl mx-auto">
-      <Card className="overflow-hidden">
+      <div className="clay overflow-hidden">
         <div className="p-4 border-b border-[#e2e8f0]">
           <h2 className="text-lg font-bold text-gray-900">Reports Recebidos</h2>
           <p className="text-xs text-gray-500">{reports.length} reports</p>
@@ -87,16 +84,17 @@ export function AdminReportsView() {
             </div>
           ))}
         </div>
-      </Card>
+      </div>
 
       {selected && (
         <div className="fixed inset-0 z-50 flex items-start justify-center pt-[10vh]">
           <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setSelected(null)} />
-          <Card className="relative shadow-xl w-full max-w-lg mx-4 max-h-[80vh] flex flex-col">
+          <div className="relative clay shadow-xl w-full max-w-lg mx-4 max-h-[80vh] flex flex-col">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
               <h3 className="text-lg font-bold text-gray-900">{selected.title}</h3>
-              <IconButton label="Fechar" icon={<X className="w-5 h-5" />} variant="ghost"
-                className="p-1 text-gray-400 hover:text-gray-600 cursor-pointer" onClick={() => setSelected(null)} />
+              <button onClick={() => setSelected(null)} className="p-1 text-gray-400 hover:text-gray-600 cursor-pointer">
+                <X className="w-5 h-5" />
+              </button>
             </div>
 
             <div className="overflow-y-auto px-6 py-4 space-y-4 flex-1">
@@ -148,11 +146,12 @@ export function AdminReportsView() {
                 className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 cursor-pointer">
                 Cancelar
               </button>
-              <Button label={saving ? 'Salvando...' : 'Atualizar'} variant="primary"
-                isDisabled={saving}
-                className="px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 cursor-pointer transition-colors" />
+              <button onClick={handleUpdate} disabled={saving}
+                className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 cursor-pointer transition-colors">
+                {saving ? 'Salvando...' : 'Atualizar'}
+              </button>
             </div>
-          </Card>
+          </div>
         </div>
       )}
     </div>

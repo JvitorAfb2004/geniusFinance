@@ -2,8 +2,6 @@ import React, { useState } from 'react';
 import { useFinance } from '../hooks/useFinance';
 import { X } from 'lucide-react';
 import { motion } from 'motion/react';
-import { Card } from '@astryxdesign/core/Card';
-import { Button } from '@astryxdesign/core/Button';
 
 export default function SalesTargetModal({ onClose }: { onClose: () => void }) {
   const { upsertSalesTarget, activeContext, selectedMonth } = useFinance();
@@ -72,9 +70,9 @@ export default function SalesTargetModal({ onClose }: { onClose: () => void }) {
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
         transition={{ type: 'spring', duration: 0.3 }}
+        className="clay shadow-xl w-full max-w-md overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
-        <Card className="shadow-xl w-full max-w-md overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
           <h3 className="text-lg font-bold text-gray-900">Definir Meta de Vendas</h3>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer">
@@ -151,17 +149,21 @@ export default function SalesTargetModal({ onClose }: { onClose: () => void }) {
           </div>
 
           <div className="pt-4">
-            <Button
+            <button
               type="submit"
-              label={submitting ? 'Salvando...' : 'Salvar Meta'}
-              variant="primary"
-              isDisabled={submitting}
-              isLoading={submitting}
-              className="w-full border-none disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center gap-2"
-            />
+              disabled={submitting}
+              className="w-full clay-btn-primary border-none disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center gap-2"
+            >
+              {submitting && (
+                <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+              )}
+              {submitting ? 'Salvando...' : 'Salvar Meta'}
+            </button>
           </div>
         </form>
-        </Card>
       </motion.div>
     </motion.div>
   );

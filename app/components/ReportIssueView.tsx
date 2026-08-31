@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { apiFetch } from '../lib/api';
 import { Bug, Lightbulb, AlertTriangle, Send, Check } from 'lucide-react';
-import { Card } from '@astryxdesign/core/Card';
-import { Button } from '@astryxdesign/core/Button';
 import type { ModuleName } from '../types';
 
 const MODULES: { id: ModuleName | ''; label: string }[] = [
@@ -87,8 +85,7 @@ export function ReportIssueView() {
 
   return (
     <div className="w-full max-w-5xl grid grid-cols-1 xl:grid-cols-[minmax(0,1.1fr)_minmax(320px,0.9fr)] gap-6 items-start">
-      <Card className="p-6">
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit} className="clay p-6 flex flex-col gap-4">
         <h2 className="text-xl font-bold text-gray-900">Reportar Problema</h2>
         <p className="text-sm text-gray-500 -mt-2">Encontrou um bug? Tem uma sugestão? Conte pra gente.</p>
 
@@ -127,14 +124,14 @@ export function ReportIssueView() {
 
         {error && <p className="text-red-500 text-sm">{error}</p>}
 
-        <Button type="submit" label={sending ? 'Enviando...' : 'Enviar Report'} variant="primary" icon={<Send className="w-4 h-4" />}
-          isDisabled={sending || !title.trim() || !description.trim()}
-          className="flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium disabled:opacity-50 cursor-pointer" />
+        <button type="submit" disabled={sending || !title.trim() || !description.trim()}
+          className="flex items-center justify-center gap-2 bg-primary text-white py-2.5 rounded-lg text-sm font-medium hover:bg-primary-hover disabled:opacity-50 cursor-pointer">
+          <Send className="w-4 h-4" />{sending ? 'Enviando...' : 'Enviar Report'}
+        </button>
       </form>
-      </Card>
 
       {myReports.length > 0 && (
-        <Card className="p-6">
+        <div className="clay p-6">
           <h3 className="font-bold text-gray-900 mb-3">Seus Reports Anteriores</h3>
           <div className="flex flex-col gap-2">
             {myReports.map(r => (
@@ -151,7 +148,7 @@ export function ReportIssueView() {
               </div>
             ))}
           </div>
-        </Card>
+        </div>
       )}
     </div>
   );

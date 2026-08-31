@@ -14,9 +14,6 @@ import { ptBR } from 'date-fns/locale';
 import { Target, TrendingUp, Zap, Percent, Plus, Trash2, Users, Tag } from 'lucide-react';
 import SalesTargetModal from './SalesTargetModal';
 import { useAnimatedValue } from '../hooks/useAnimatedValue';
-import { Card } from '@astryxdesign/core/Card';
-import { Button } from '@astryxdesign/core/Button';
-import { IconButton } from '@astryxdesign/core/IconButton';
 
 function formatTooltipCurrency(value: unknown) {
   const numeric = Array.isArray(value) ? Number(value[0]) : Number(value);
@@ -197,18 +194,16 @@ export default function SalesView() {
       </div>
 
       {/* Daily Chart */}
-      <Card className="p-5">
+      <div className="clay p-5">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-sm font-semibold text-slate-700">Vendas Diárias vs Meta</h3>
-          <Button
-            label="Definir Meta"
-            variant="secondary"
+          <button
             onClick={() => setIsTargetModalOpen(true)}
             className="text-xs px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors font-medium flex items-center gap-1 cursor-pointer"
           >
             <Plus className="w-3 h-3" />
             Definir Meta
-          </Button>
+          </button>
         </div>
         <div style={{ width: '100%', height: 280 }}>
           <ResponsiveContainer>
@@ -224,11 +219,11 @@ export default function SalesView() {
             </BarChart>
           </ResponsiveContainer>
         </div>
-      </Card>
+      </div>
 
       {/* Cumulative Chart */}
       {mainTarget > 0 && (
-        <Card className="p-5">
+        <div className="clay p-5">
           <h3 className="text-sm font-semibold text-slate-700 mb-4">Acumulado vs Meta Acumulada</h3>
           <div style={{ width: '100%', height: 260 }}>
             <ResponsiveContainer>
@@ -243,13 +238,13 @@ export default function SalesView() {
               </LineChart>
             </ResponsiveContainer>
           </div>
-        </Card>
+        </div>
       )}
 
       {/* Tables Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Sales by Category */}
-        <Card className="p-5">
+        <div className="clay p-5">
           <h3 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
             <Tag className="w-4 h-4 text-slate-400" />
             Vendas por Categoria
@@ -266,10 +261,10 @@ export default function SalesView() {
               ))}
             </div>
           )}
-        </Card>
+        </div>
 
         {/* Sales by Channel */}
-        <Card className="p-5">
+        <div className="clay p-5">
           <h3 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
             <Users className="w-4 h-4 text-slate-400" />
             Meta por Canal
@@ -299,10 +294,10 @@ export default function SalesView() {
               ))}
             </div>
           )}
-        </Card>
+        </div>
 
         {/* Sales by Seller */}
-        <Card className="p-5">
+        <div className="clay p-5">
           <h3 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
             <Users className="w-4 h-4 text-slate-400" />
             Meta por Vendedor
@@ -332,12 +327,12 @@ export default function SalesView() {
               ))}
             </div>
           )}
-        </Card>
+        </div>
       </div>
 
       {/* Active Targets */}
       {salesTargets.filter((t) => t.context === activeContext && t.year === year && t.month === month).length > 0 && (
-        <Card className="p-5">
+        <div className="clay p-5">
           <h3 className="text-sm font-semibold text-slate-700 mb-3">Metas Ativas</h3>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -364,20 +359,19 @@ export default function SalesView() {
                         {formatCurrency(t.targetAmount)}
                       </td>
                       <td className="py-2 text-center">
-                        <IconButton
-                          label="Excluir meta"
-                          icon={<Trash2 className="w-3.5 h-3.5" />}
-                          variant="ghost"
+                        <button
                           onClick={() => deleteSalesTarget(t.id)}
                           className="text-slate-400 hover:text-red-500 transition-colors cursor-pointer"
-                        />
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
                       </td>
                     </tr>
                   ))}
               </tbody>
             </table>
           </div>
-        </Card>
+        </div>
       )}
 
       {isTargetModalOpen && (
@@ -395,7 +389,7 @@ function SalesCard({
   const animValue = useAnimatedValue(value);
 
   return (
-    <Card className="p-4">
+    <div className="clay p-4">
       <div className="flex items-center gap-2 mb-2">
         <div className={`w-7 h-7 rounded-lg ${bg} flex items-center justify-center ${color}`}>
           {icon}
@@ -406,6 +400,6 @@ function SalesCard({
         {fallback !== undefined ? fallback : isPercent ? `${animValue.toFixed(1)}%` : formatCurrency(animValue)}
       </p>
       <p className="text-xs text-slate-400 mt-1">{subtitle}</p>
-    </Card>
+    </div>
   );
 }

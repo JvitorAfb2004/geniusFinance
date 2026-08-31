@@ -4,9 +4,6 @@ import { formatCurrency } from '../lib/utils';
 import { format } from 'date-fns';
 import { Lock, Unlock, ChevronDown, ChevronUp, FileText, Plus } from 'lucide-react';
 import { buildMonthlyClosingEntries, getMonthlyClosingTransactions } from '../lib/monthlyClosingEntries';
-import { Card } from '@astryxdesign/core/Card';
-import { Button } from '@astryxdesign/core/Button';
-import { IconButton } from '@astryxdesign/core/IconButton';
 
 const MONTH_NAMES = [
   'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
@@ -52,7 +49,7 @@ export function MonthlyClosingView() {
 
   return (
     <div className="flex flex-col gap-5">
-      <Card className="p-5">
+      <div className="clay p-5">
         <div className="flex items-center justify-between gap-3 mb-4">
           <div className="flex items-center gap-3">
             <FileText className="w-5 h-5 text-primary" />
@@ -61,14 +58,12 @@ export function MonthlyClosingView() {
               <p className="text-sm text-gray-500">Registre e acompanhe o fechamento de cada competência.</p>
             </div>
           </div>
-          <Button
-            label="Novo Fechamento"
-            variant="primary"
+          <button
             onClick={() => setClosingTarget({ year: selectedMonth.getFullYear(), month: selectedMonth.getMonth() + 1 })}
-            className="px-3 py-1.5 text-sm font-medium rounded-lg transition-colors cursor-pointer border-none flex items-center gap-1.5"
+            className="px-3 py-1.5 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary-hover transition-colors cursor-pointer border-none flex items-center gap-1.5"
           >
             <Plus className="w-4 h-4" /> Novo Fechamento
-          </Button>
+          </button>
         </div>
 
         <div className="overflow-x-auto">
@@ -122,33 +117,28 @@ export function MonthlyClosingView() {
                       <td className="py-2.5 px-3 text-center">
                         <div className="flex items-center justify-center gap-1">
                           {entry.closing?.status !== 'CLOSED' && (
-                            <Button
-                              label="Fechar"
-                              variant="primary"
+                            <button
                               onClick={() => setClosingTarget({ year: entry.year, month: entry.month })}
-                              className="px-2 py-1 text-[0.65rem] font-bold rounded-md transition-colors cursor-pointer border-none"
+                              className="px-2 py-1 text-[0.65rem] font-bold bg-primary text-white rounded-md hover:bg-primary-hover transition-colors cursor-pointer border-none"
                             >
                               Fechar
-                            </Button>
+                            </button>
                           )}
                           {entry.closing?.status === 'CLOSED' && (
-                            <Button
-                              label="Reabrir"
-                              variant="secondary"
+                            <button
                               onClick={() => reopenMonth(entry.year, entry.month)}
-                              className="px-2 py-1 text-[0.65rem] font-bold text-slate-700 rounded-md transition-colors cursor-pointer border-none"
+                              className="px-2 py-1 text-[0.65rem] font-bold bg-slate-200 text-slate-700 rounded-md hover:bg-slate-300 transition-colors cursor-pointer border-none"
                             >
                               <Unlock className="w-3 h-3 inline mr-0.5" /> Reabrir
-                            </Button>
+                            </button>
                           )}
                           {entry.closing && (
-                            <IconButton
-                              label={isExpanded ? 'Recolher' : 'Expandir'}
-                              icon={isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                              variant="ghost"
+                            <button
                               onClick={() => setExpandedId(isExpanded ? null : key)}
                               className="p-1 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer border-none bg-transparent"
-                            />
+                            >
+                              {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                            </button>
                           )}
                         </div>
                       </td>
@@ -199,11 +189,11 @@ export function MonthlyClosingView() {
             </tbody>
           </table>
         </div>
-      </Card>
+      </div>
 
       {closingTarget && (
         <div className="fixed inset-0 z-50 bg-black/35 backdrop-blur-sm flex items-center justify-center p-4">
-          <Card className="p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+          <div className="clay p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <h3 className="text-lg font-bold text-gray-900 mb-2">
               Fechar {MONTH_NAMES[closingTarget.month - 1]} / {closingTarget.year}
             </h3>
@@ -222,14 +212,13 @@ export function MonthlyClosingView() {
                 );
               })()}
             </div>
-            <Button
-              label={showReviewTransactions ? 'Ocultar transações do mês' : 'Ver transações do mês'}
-              variant="secondary"
+            <button
+              type="button"
               onClick={() => setShowReviewTransactions((value) => !value)}
-              className="mb-3 w-full px-3 py-2 text-xs font-bold text-primary border border-primary/30 rounded-md cursor-pointer"
+              className="mb-3 w-full px-3 py-2 text-xs font-bold text-primary border border-primary/30 rounded-md bg-primary/5 hover:bg-primary/10 cursor-pointer"
             >
               {showReviewTransactions ? 'Ocultar transações do mês' : 'Ver transações do mês'}
-            </Button>
+            </button>
             {showReviewTransactions && (
               <div className="mb-4 max-h-56 overflow-auto border border-slate-200 rounded-md bg-white">
                 <table className="w-full text-xs">
@@ -260,24 +249,24 @@ export function MonthlyClosingView() {
               placeholder="Observações (opcional)"
               value={closeNotes}
               onChange={(e) => setCloseNotes(e.target.value)}
-              className="w-full p-3 text-sm mb-4 resize-none border-none"
+              className="w-full clay-input p-3 text-sm mb-4 resize-none border-none"
               rows={3}
             />
             <div className="flex gap-3">
-              <Button
-                label="Cancelar"
-                variant="secondary"
+              <button
                 onClick={() => { setClosingTarget(null); setCloseNotes(''); setShowReviewTransactions(false); }}
-                className="flex-1 font-medium py-2 text-sm cursor-pointer border-none"
-              />
-              <Button
-                label="Confirmar Fechamento"
-                variant="primary"
+                className="flex-1 clay-btn font-medium py-2 text-sm cursor-pointer border-none"
+              >
+                Cancelar
+              </button>
+              <button
                 onClick={handleClose}
-                className="flex-1 font-bold py-2 text-sm cursor-pointer border-none"
-              />
+                className="flex-1 clay-btn-primary font-bold py-2 text-sm cursor-pointer border-none"
+              >
+                Confirmar Fechamento
+              </button>
             </div>
-          </Card>
+          </div>
         </div>
       )}
     </div>
