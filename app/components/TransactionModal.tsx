@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useFinance } from '../hooks/useFinance';
 import { TransactionType, TransactionStatus, Transaction, DRESection } from '../types';
 import { format } from 'date-fns';
@@ -304,7 +305,7 @@ export function TransactionModal({
     }
   };
 
-  return (
+  return createPortal(
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -796,6 +797,7 @@ Sugestão pela descrição: <strong>{suggestedCategoryName}</strong>
           </div>
         </form>
       </motion.div>
-    </motion.div>
+    </motion.div>,
+    document.body
   );
 }
