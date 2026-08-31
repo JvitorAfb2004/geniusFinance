@@ -69,12 +69,6 @@ export function FinanceAIAssistant() {
   const [confirming, setConfirming] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const endRef = useRef<HTMLDivElement>(null);
-  const scopeKey = activeScope.type === "PERSONAL" ? `personal:${activeScope.userId}` : `account:${activeScope.accountId}`;
-
-  useEffect(() => {
-    setMessages([welcome]);
-    setInput("");
-  }, [scopeKey]);
 
   useEffect(() => {
     if (open) {
