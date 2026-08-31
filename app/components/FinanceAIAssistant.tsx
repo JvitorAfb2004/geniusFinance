@@ -64,7 +64,7 @@ function AssistantMarkdown({ content }: { content: string }) {
 }
 
 export function FinanceAIAssistant() {
-  const { user, activeScope } = useFinance();
+  const { user, activeScope, setActiveScope } = useFinance();
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([welcome]);
@@ -106,13 +106,21 @@ export function FinanceAIAssistant() {
     setConfirming(proposal.id);
     setMessages((current) => current.map((item) => item.proposal?.id === proposal.id ? { ...item, proposal: undefined } : item));
     try {
-      await apiFetch("/api/ai/agent-confirm", {
+      const result = await apiFetch("/api/ai/agent-confirm", {
         method: "POST",
         headers: { "X-Active-Scope": JSON.stringify(activeScope) },
         body: JSON.stringify({ proposal }),
-      });
-      setMessages((current) => [...current, { role: "assistant", content: "Concluído." }]);
-      await send("Operação concluída. Se há mais algo para fazer na mesma solicitação original, prossiga com a próxima tarefa agora.");
+      }) as { switched?: boolean; scope?: { type: string; userId: string; accountId?: string; accountName?: string } };
+      if (proposal.action === "switch_scope" && result.switched && result.scope) {
+        const newScope = result.scope.type === "PERSONAL"
+          ? { type: "PERSONAL" as const, userId: result.scope.userId }
+          : { type: "ACCOUNT" as const, userId: result.scope.userId, accountId: result.scope.accountId || "", accountName: result.scope.accountName || "", role: "owner" as const };
+        setActiveScope(newScope);
+        setMessages((current) => [...current, { role: "assistant", content: `Conta alterada para **${result.scope!.type === "PERSONAL" ? "Pessoal" : result.scope!.accountName}**. Agora refaça a operação.` }]);
+      } else {
+        setMessages((current) => [...current, { role: "assistant", content: "Concluído." }]);
+        await send("Operação concluída. Se há mais algo para fazer na mesma solicitação original, prossiga com a próxima tarefa agora.");
+      }
     } catch (error) {
       setMessages((current) => [...current, { role: "assistant", content: error instanceof Error ? error.message : "Não foi possível confirmar a alteração." }]);
     } finally {

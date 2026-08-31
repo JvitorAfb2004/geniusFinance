@@ -5,6 +5,7 @@ export const confirmationActionLabels: Record<string, string> = {
   update_transaction: "Atualizar transação",
   delete_transaction: "Excluir transação",
   move_transaction: "Mover transação entre contas",
+  switch_scope: "Trocar de conta",
 };
 
 export const confirmationFieldLabels: Record<string, string> = {
