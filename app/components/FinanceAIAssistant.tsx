@@ -104,7 +104,6 @@ export function FinanceAIAssistant() {
   async function confirm(proposal: AgentProposal) {
     if (confirming) return;
     setConfirming(proposal.id);
-    // Oculta botões imediatamente
     setMessages((current) => current.map((item) => item.proposal?.id === proposal.id ? { ...item, proposal: undefined } : item));
     try {
       await apiFetch("/api/ai/agent-confirm", {
@@ -113,6 +112,7 @@ export function FinanceAIAssistant() {
         body: JSON.stringify({ proposal }),
       });
       setMessages((current) => [...current, { role: "assistant", content: "Concluído." }]);
+      await send("Operação concluída. Se há mais algo para fazer na mesma solicitação original, prossiga com a próxima tarefa agora.");
     } catch (error) {
       setMessages((current) => [...current, { role: "assistant", content: error instanceof Error ? error.message : "Não foi possível confirmar a alteração." }]);
     } finally {
