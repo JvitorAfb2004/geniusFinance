@@ -12,7 +12,7 @@ function formatTooltipCurrency(value: unknown) {
   return formatCurrency(Number.isFinite(numeric) ? numeric : 0);
 }
 
-const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#84cc16'];
+const COLORS = ['#4fb8b2', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#84cc16'];
 
 export function ReportsView() {
   const { transactions, categories, budgets, activeContext, selectedMonth } = useFinance();
@@ -105,7 +105,7 @@ export function ReportsView() {
         </div>
         <div className="clay p-4">
           <p className="text-xs text-gray-500 mb-1">Resultado</p>
-          <p className={`text-lg font-bold font-mono ${yearTotals.net >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
+          <p className={`text-lg font-bold font-mono ${yearTotals.net >= 0 ? 'text-teal-600' : 'text-red-600'}`}>
             <AnimatedNumber value={yearTotals.net} />
           </p>
         </div>

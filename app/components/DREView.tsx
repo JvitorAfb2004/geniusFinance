@@ -18,7 +18,7 @@ function formatTooltipCurrency(value: unknown) {
   return formatCurrency(Number.isFinite(numeric) ? numeric : 0);
 }
 
-const COLORS = ['#ef4444', '#f59e0b', '#3b82f6', '#10b981', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'];
+const COLORS = ['#ef4444', '#f59e0b', '#4fb8b2', '#10b981', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'];
 
 export default function DREView() {
   const { transactions, budgets, categories, activeContext, selectedMonth } = useFinance();
@@ -113,8 +113,8 @@ export default function DREView() {
           value={lucroLiq?.actual || 0}
           planned={lucroLiq?.planned || 0}
           icon={<DollarSign className="w-4 h-4" />}
-          color={dre.netProfit >= 0 ? 'text-blue-600' : 'text-red-600'}
-          bg={dre.netProfit >= 0 ? 'bg-blue-50' : 'bg-red-50'}
+          color={dre.netProfit >= 0 ? 'text-teal-600' : 'text-red-600'}
+          bg={dre.netProfit >= 0 ? 'bg-teal-50' : 'bg-red-50'}
           showSign
         />
         <DRECard
@@ -146,7 +146,7 @@ export default function DREView() {
                 <YAxis tick={{ fontSize: 12 }} tickFormatter={(v) => `R$${(v / 1000).toFixed(0)}k`} />
                 <Tooltip formatter={formatTooltipCurrency} />
                 <Bar dataKey="orcado" fill="#94a3b8" name="Orçado" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="real" fill="#5b7def" name="Real" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="real" fill="#4fb8b2" name="Real" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -353,7 +353,7 @@ function ForecastSection() {
         </div>
         <div className="clay clay-hover p-4.5">
           <p className="text-[0.68rem] text-slate-400 font-bold uppercase tracking-wider mb-1.5">Lucro Projetado</p>
-          <p className={`text-lg font-bold font-mono ${yearTotals.lucro >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
+          <p className={`text-lg font-bold font-mono ${yearTotals.lucro >= 0 ? 'text-teal-600' : 'text-red-600'}`}>
             {formatCurrency(animLucro)}
           </p>
         </div>

@@ -249,7 +249,7 @@ export default function ProjectModal({ project, lead, onClose }: Props) {
     switch (p) {
       case 'HIGH': return { bg: 'bg-red-100', text: 'text-red-700', dot: 'bg-red-500' };
       case 'MEDIUM': return { bg: 'bg-amber-100', text: 'text-amber-700', dot: 'bg-amber-500' };
-      case 'LOW': return { bg: 'bg-blue-100', text: 'text-blue-700', dot: 'bg-blue-500' };
+      case 'LOW': return { bg: 'bg-teal-100', text: 'text-teal-700', dot: 'bg-teal-500' };
     }
   };
 
@@ -434,7 +434,7 @@ export default function ProjectModal({ project, lead, onClose }: Props) {
                       onClick={() => handleServiceTypeChange(st.id)}
                       className={cn(
                         'w-full text-left px-3 py-2 text-sm hover:bg-gray-50 cursor-pointer flex items-center justify-between',
-                        serviceTypeId === st.id && 'bg-blue-50 text-primary'
+                        serviceTypeId === st.id && 'bg-teal-50 text-primary'
                       )}
                     >
                       {st.name}
@@ -496,7 +496,7 @@ export default function ProjectModal({ project, lead, onClose }: Props) {
                       onClick={() => { setLinkedLeadId(l.id); setLeadOpen(false); }}
                       className={cn(
                         'w-full text-left px-3 py-2 text-sm hover:bg-gray-50 cursor-pointer flex items-center justify-between',
-                        linkedLeadId === l.id && 'bg-blue-50 text-primary'
+                        linkedLeadId === l.id && 'bg-teal-50 text-primary'
                       )}
                     >
                       <div>
@@ -588,7 +588,7 @@ export default function ProjectModal({ project, lead, onClose }: Props) {
                 <button
                   onClick={handleAddTask}
                   disabled={!newTaskTitle.trim()}
-                  className="px-3 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 cursor-pointer transition-colors shrink-0"
+                  className="px-3 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-teal-700 disabled:opacity-50 cursor-pointer transition-colors shrink-0"
                 >
                   <Plus className="w-4 h-4" />
                 </button>
@@ -861,7 +861,7 @@ export default function ProjectModal({ project, lead, onClose }: Props) {
           <button
             onClick={handleSubmit}
             disabled={submitting || !title.trim()}
-            className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 cursor-pointer transition-colors"
+            className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-teal-700 disabled:opacity-50 cursor-pointer transition-colors"
           >
             {submitting ? 'Salvando...' : isEdit ? 'Atualizar' : 'Criar'}
           </button>

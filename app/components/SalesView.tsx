@@ -77,8 +77,8 @@ export default function SalesView() {
       : 'on_track';
 
   const paceLabel = { ahead: 'A frente', on_track: 'No ritmo', behind: 'Atrasado' }[paceStatus];
-  const paceColor = { ahead: 'text-emerald-600', on_track: 'text-blue-600', behind: 'text-red-500' }[paceStatus];
-  const paceBg = { ahead: 'bg-emerald-50', on_track: 'bg-blue-50', behind: 'bg-red-50' }[paceStatus];
+  const paceColor = { ahead: 'text-emerald-600', on_track: 'text-teal-600', behind: 'text-red-500' }[paceStatus];
+  const paceBg = { ahead: 'bg-emerald-50', on_track: 'bg-teal-50', behind: 'bg-red-50' }[paceStatus];
 
   // Daily chart data
   const dailyData = useMemo(() => {
@@ -169,8 +169,8 @@ export default function SalesView() {
           value={mainTarget}
           fallback={mainTarget <= 0 ? '--' : undefined}
           icon={<Target className="w-4 h-4" />}
-          color="text-blue-600"
-          bg="bg-blue-50"
+          color="text-teal-600"
+          bg="bg-teal-50"
           subtitle={mainTarget > 0 ? `${targetPct.toFixed(1)}% atingido` : 'Não definida'}
         />
         <SalesCard
@@ -187,8 +187,8 @@ export default function SalesView() {
           isPercent
           fallback={mainTarget <= 0 ? '--' : undefined}
           icon={<Percent className="w-4 h-4" />}
-          color={targetPct >= 100 ? 'text-emerald-600' : targetPct >= 75 ? 'text-blue-600' : 'text-amber-600'}
-          bg={targetPct >= 100 ? 'bg-emerald-50' : targetPct >= 75 ? 'bg-blue-50' : 'bg-amber-50'}
+          color={targetPct >= 100 ? 'text-emerald-600' : targetPct >= 75 ? 'text-teal-600' : 'text-amber-600'}
+          bg={targetPct >= 100 ? 'bg-emerald-50' : targetPct >= 75 ? 'bg-teal-50' : 'bg-amber-50'}
           subtitle={targetPct >= 100 ? 'Meta batida!' : `Dia ${elapsedDays}/${daysInMonth}`}
         />
       </div>
@@ -199,7 +199,7 @@ export default function SalesView() {
           <h3 className="text-sm font-semibold text-slate-700">Vendas Diárias vs Meta</h3>
           <button
             onClick={() => setIsTargetModalOpen(true)}
-            className="text-xs px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors font-medium flex items-center gap-1 cursor-pointer"
+            className="text-xs px-3 py-1.5 bg-teal-50 text-teal-600 rounded-lg hover:bg-teal-100 transition-colors font-medium flex items-center gap-1 cursor-pointer"
           >
             <Plus className="w-3 h-3" />
             Definir Meta
@@ -282,7 +282,7 @@ export default function SalesView() {
                   {item.target > 0 && (
                     <div className="w-full bg-slate-100 rounded-full h-1.5">
                       <div
-                        className={`h-1.5 rounded-full transition-all ${item.pct >= 100 ? 'bg-emerald-500' : item.pct >= 50 ? 'bg-blue-500' : 'bg-amber-500'}`}
+                        className={`h-1.5 rounded-full transition-all ${item.pct >= 100 ? 'bg-emerald-500' : item.pct >= 50 ? 'bg-teal-500' : 'bg-amber-500'}`}
                         style={{ width: `${Math.min(item.pct, 100)}%` }}
                       />
                     </div>
@@ -315,7 +315,7 @@ export default function SalesView() {
                   {item.target > 0 && (
                     <div className="w-full bg-slate-100 rounded-full h-1.5">
                       <div
-                        className={`h-1.5 rounded-full transition-all ${item.pct >= 100 ? 'bg-emerald-500' : item.pct >= 50 ? 'bg-blue-500' : 'bg-amber-500'}`}
+                        className={`h-1.5 rounded-full transition-all ${item.pct >= 100 ? 'bg-emerald-500' : item.pct >= 50 ? 'bg-teal-500' : 'bg-amber-500'}`}
                         style={{ width: `${Math.min(item.pct, 100)}%` }}
                       />
                     </div>

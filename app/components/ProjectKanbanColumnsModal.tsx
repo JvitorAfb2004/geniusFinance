@@ -10,7 +10,7 @@ import {
 } from '../lib/projectKanbanColumns';
 import type { ProjectKanbanColumn } from '../types';
 
-const COLOR_OPTIONS = ['#64748b', '#0f766e', '#3b82f6', '#8b5cf6', '#b45309', '#dc2626', '#047857', '#db2777'];
+const COLOR_OPTIONS = ['#64748b', '#0f766e', '#4fb8b2', '#8b5cf6', '#b45309', '#dc2626', '#047857', '#db2777'];
 
 interface Props {
   onClose: () => void;
@@ -168,7 +168,7 @@ export default function ProjectKanbanColumnsModal({ onClose }: Props) {
             <button
               onClick={addColumn}
               disabled={!newColumnName.trim()}
-              className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-primary text-white text-sm font-medium hover:bg-blue-700 disabled:opacity-50 cursor-pointer"
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-primary text-white text-sm font-medium hover:bg-teal-700 disabled:opacity-50 cursor-pointer"
             >
               <Plus className="w-4 h-4" />
               Adicionar

@@ -85,7 +85,7 @@ export function AdminSubscriptionsView() {
       past_due: 'bg-red-100 text-red-700',
       cancelled: 'bg-gray-100 text-gray-500',
       expired: 'bg-gray-100 text-gray-500',
-      pending: 'bg-blue-100 text-blue-700',
+      pending: 'bg-teal-100 text-teal-700',
     };
     return `text-xs font-semibold uppercase px-2 py-0.5 rounded ${map[status] || 'bg-gray-100 text-gray-500'}`;
   };
@@ -199,7 +199,7 @@ export function AdminSubscriptionsView() {
                 Cancelar
               </button>
               <button onClick={handleAssign} disabled={assigning || !form.targetEmail || !form.planId}
-                className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 cursor-pointer transition-colors">
+                className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-teal-700 disabled:opacity-50 cursor-pointer transition-colors">
                 {assigning ? 'Atribuindo...' : 'Atribuir'}
               </button>
             </div>

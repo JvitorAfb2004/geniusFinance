@@ -440,7 +440,7 @@ export function TransactionModal({
                       <button
                         type="button"
                         onClick={() => setShowNewCategory(true)}
-                        className="w-full px-3 py-2 text-sm text-blue-600 hover:bg-blue-50 flex items-center gap-2 border-b border-gray-100 cursor-pointer font-medium"
+                        className="w-full px-3 py-2 text-sm text-teal-600 hover:bg-teal-50 flex items-center gap-2 border-b border-gray-100 cursor-pointer font-medium"
                       >
                         <Plus className="w-4 h-4" />
                         Nova categoria
@@ -453,7 +453,7 @@ export function TransactionModal({
                             placeholder="Nome da categoria"
                             value={newCategoryName}
                             onChange={(e) => setNewCategoryName(e.target.value)}
-                            className="flex-1 px-3 py-1.5 border border-gray-300 rounded text-sm outline-none focus:ring-1 focus:ring-blue-400"
+                            className="flex-1 px-3 py-1.5 border border-gray-300 rounded text-sm outline-none focus:ring-1 focus:ring-teal-400"
                             autoFocus
                             onKeyDown={(e) => { if (e.key === 'Enter') handleAddCategory(); if (e.key === 'Escape') setShowNewCategory(false); }}
                           />
@@ -472,7 +472,7 @@ export function TransactionModal({
                             type="button"
                             onClick={handleAddCategory}
                             disabled={!newCategoryName.trim()}
-                            className="text-xs px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 cursor-pointer"
+                            className="text-xs px-3 py-1 bg-teal-600 text-white rounded hover:bg-teal-700 disabled:opacity-50 cursor-pointer"
                           >
                             Adicionar
                           </button>
@@ -512,8 +512,8 @@ export function TransactionModal({
                                 setCategorySearch('');
                                 setShowCategoryDropdown(false);
                               }}
-                              className={`w-full px-3 py-2 text-sm text-left hover:bg-blue-50 cursor-pointer transition-colors ${
-                                categoryId === cat.id ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-700'
+                              className={`w-full px-3 py-2 text-sm text-left hover:bg-teal-50 cursor-pointer transition-colors ${
+                                categoryId === cat.id ? 'bg-teal-50 text-teal-700 font-medium' : 'text-gray-700'
                               }`}
                             >
                               {cat.name}
@@ -536,14 +536,14 @@ export function TransactionModal({
           )}
 
           {!categoryId && suggestedCategoryId && suggestedCategoryName && (
-            <div className="-mt-1 rounded-lg border border-blue-100 bg-blue-50 px-3 py-2 flex items-center justify-between">
-              <p className="text-xs text-blue-700">
-                Sugestão pela descrição: <strong>{suggestedCategoryName}</strong>
+            <div className="-mt-1 rounded-lg border border-teal-100 bg-teal-50 px-3 py-2 flex items-center justify-between">
+              <p className="text-xs text-teal-700">
+Sugestão pela descrição: <strong>{suggestedCategoryName}</strong>
               </p>
               <button
                 type="button"
                 onClick={() => setCategoryId(suggestedCategoryId)}
-                className="text-xs font-semibold text-blue-700 hover:text-blue-800 cursor-pointer"
+                className="text-xs font-semibold text-teal-700 hover:text-teal-800 cursor-pointer"
               >
                 Aplicar
               </button>
@@ -666,7 +666,7 @@ export function TransactionModal({
                         <button
                           type="button"
                           onClick={handleCalcUseCurrentValue}
-                          className="col-span-4 mt-0.5 py-2 text-xs font-semibold rounded-lg cursor-pointer transition-colors bg-blue-50 text-blue-700 hover:bg-blue-100"
+                          className="col-span-4 mt-0.5 py-2 text-xs font-semibold rounded-lg cursor-pointer transition-colors bg-teal-50 text-teal-700 hover:bg-teal-100"
                         >
                           Puxar valor atual (R$ {amountStr})
                         </button>
@@ -738,7 +738,7 @@ export function TransactionModal({
                       type="checkbox"
                       checked={hasEndDate}
                       onChange={(e) => setHasEndDate(e.target.checked)}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      className="rounded border-gray-300 text-teal-600 focus:ring-teal-500"
                     />
                     <span className="text-xs text-gray-600">Definir data fim</span>
                   </label>
@@ -747,7 +747,7 @@ export function TransactionModal({
                       type="date"
                       value={endDate}
                       onChange={(e) => setEndDate(e.target.value)}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-400"
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-teal-400"
                       min={date}
                     />
                   )}
@@ -762,7 +762,7 @@ export function TransactionModal({
                     type="checkbox" 
                     checked={applyToFuture}
                     onChange={(e) => setApplyToFuture(e.target.checked)}
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    className="rounded border-gray-300 text-teal-600 focus:ring-teal-500"
                   />
                   <span className="text-sm font-medium text-gray-700">
                     Aplicar para as próximas recorrências.

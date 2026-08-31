@@ -9,8 +9,8 @@ import { SECTION_LABELS } from '../lib/categories';
 
 type SettingsTab = 'geral' | 'conta' | 'comercial' | 'categorias' | 'tags';
 
-const STATUS_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#84cc16'];
-const TAG_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#84cc16'];
+const STATUS_COLORS = ['#4fb8b2', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#84cc16'];
+const TAG_COLORS = ['#4fb8b2', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#84cc16'];
 const DASHBOARD_ALERTS_KEY = 'dashboard_alerts_enabled';
 
 export function SettingsView() {
@@ -36,7 +36,7 @@ export function SettingsView() {
 
   // Tag state
   const [newTagName, setNewTagName] = useState('');
-  const [newTagColor, setNewTagColor] = useState('#3b82f6');
+  const [newTagColor, setNewTagColor] = useState('#4fb8b2');
   const [showNewTag, setShowNewTag] = useState(false);
   const [editingTagId, setEditingTagId] = useState<string | null>(null);
   const [editTagName, setEditTagName] = useState('');
@@ -45,7 +45,7 @@ export function SettingsView() {
   // Lead option state
   const [showNewOption, setShowNewOption] = useState<LeadOption['field'] | null>(null);
   const [newOptionValue, setNewOptionValue] = useState('');
-  const [newOptionColor, setNewOptionColor] = useState('#3b82f6');
+  const [newOptionColor, setNewOptionColor] = useState('#4fb8b2');
   const [showDashboardAlerts, setShowDashboardAlerts] = useState(true);
 
   // Account state
@@ -120,7 +120,7 @@ export function SettingsView() {
       <div className="px-4 py-3 bg-slate-50/60 flex items-center justify-between border-b border-slate-100/80">
         <span className="text-[0.7rem] font-bold text-slate-500 uppercase tracking-wider">{label}</span>
         <button
-          onClick={() => { setShowNewOption(showNewOption === field ? null : field); setNewOptionValue(''); setNewOptionColor('#3b82f6'); }}
+          onClick={() => { setShowNewOption(showNewOption === field ? null : field); setNewOptionValue(''); setNewOptionColor('#4fb8b2'); }}
           className="text-xs text-slate-600 hover:text-slate-800 font-semibold cursor-pointer flex items-center gap-1 transition-colors"
         >
           <Plus className="w-3 h-3" /> Adicionar
@@ -333,7 +333,7 @@ export function SettingsView() {
                       </select>
                     </div>
                     {(savingAccountSetting || accountSettingSaved) && (
-                      <p className={`text-xs font-medium ${savingAccountSetting ? 'text-blue-600' : 'text-emerald-600'}`}>
+                      <p className={`text-xs font-medium ${savingAccountSetting ? 'text-teal-600' : 'text-emerald-600'}`}>
                         {savingAccountSetting ? 'Salvando alteração...' : 'Alteração salva.'}
                       </p>
                     )}
@@ -354,7 +354,7 @@ export function SettingsView() {
                 </div>
 
                 {showNewAccount && (
-                  <div className="px-3 py-2 bg-blue-50 border-b border-blue-100 flex items-center gap-2">
+                  <div className="px-3 py-2 bg-teal-50 border-b border-teal-100 flex items-center gap-2">
                     <input
                       type="text"
                       placeholder="Nome da empresa"
@@ -383,7 +383,7 @@ export function SettingsView() {
                         setCreatingAccount(false);
                       }}
                       disabled={!newAccountName.trim() || creatingAccount}
-                      className="px-2 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700 disabled:opacity-50 cursor-pointer"
+                      className="px-2 py-1 bg-teal-600 text-white rounded text-xs hover:bg-teal-700 disabled:opacity-50 cursor-pointer"
                     >
                       {creatingAccount ? '...' : <Check className="w-3.5 h-3.5" />}
                     </button>
@@ -401,7 +401,7 @@ export function SettingsView() {
                         <Building2 className="w-4 h-4 text-gray-400" />
                         <span className="text-sm text-gray-700 font-medium">{acc.name}</span>
                         {acc.ownerId === user?.uid && (
-                          <span className="text-[0.6rem] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-semibold uppercase">Dono</span>
+                          <span className="text-[0.6rem] bg-teal-100 text-teal-700 px-1.5 py-0.5 rounded font-semibold uppercase">Dono</span>
                         )}
                       </div>
                       <span className={`text-[0.65rem] font-semibold uppercase px-2 py-0.5 rounded ${
@@ -492,7 +492,7 @@ export function SettingsView() {
                           </div>
                         </div>
                         <span className={`text-[0.65rem] font-semibold uppercase px-2 py-0.5 rounded ${
-                          m.role === 'owner' ? 'bg-blue-100 text-blue-700' :
+                          m.role === 'owner' ? 'bg-teal-100 text-teal-700' :
                           m.role === 'admin' ? 'bg-purple-100 text-purple-700' :
                           'bg-gray-100 text-gray-600'
                         }`}>
@@ -501,7 +501,7 @@ export function SettingsView() {
                         {(activeScope.role === 'owner' || activeScope.role === 'admin') && m.role !== 'owner' && (
                           <button
                             onClick={() => setPermissionTarget(m)}
-                            className="text-xs font-medium text-primary hover:text-[#2563eb] cursor-pointer ml-2 shrink-0"
+                            className="text-xs font-medium text-primary hover:text-[#4fb8b2] cursor-pointer ml-2 shrink-0"
                           >
                             Permissões
                           </button>
@@ -553,7 +553,7 @@ export function SettingsView() {
                         setInviteEmail('');
                       }}
                       disabled={!inviteEmail.trim() || sendingInvite}
-                      className="px-4 py-1.5 bg-blue-600 text-white rounded text-xs font-medium hover:bg-blue-700 disabled:opacity-50 cursor-pointer whitespace-nowrap inline-flex items-center gap-1"
+                      className="px-4 py-1.5 bg-teal-600 text-white rounded text-xs font-medium hover:bg-teal-700 disabled:opacity-50 cursor-pointer whitespace-nowrap inline-flex items-center gap-1"
                     >
                       <UserPlus className="w-3.5 h-3.5" />
                       {sendingInvite ? '...' : 'Convidar'}
@@ -714,7 +714,7 @@ export function SettingsView() {
                               <span className="text-sm text-gray-700">{cat.name}{!cat.isDefault && <span className="text-xs text-gray-400 ml-1">*</span>}</span>
                               <div className="flex items-center gap-2">
                                 <button onClick={() => { setEditingCatId(cat.id); setEditCatName(cat.name); setEditCatSection(cat.section); }}
-                                  className="text-gray-400 hover:text-blue-600 cursor-pointer"><Pencil className="w-3.5 h-3.5" /></button>
+                                  className="text-gray-400 hover:text-teal-600 cursor-pointer"><Pencil className="w-3.5 h-3.5" /></button>
                                 {!cat.isDefault && (
                                   <button onClick={() => setConfirmDeleteCat(cat)} className="text-gray-400 hover:text-red-500 cursor-pointer"><Trash2 className="w-3.5 h-3.5" /></button>
                                 )}
@@ -735,7 +735,7 @@ export function SettingsView() {
               <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">Tags</h3>
 
               {showNewTag ? (
-                <div className="p-3 bg-blue-50 rounded-lg border border-blue-100 space-y-2">
+                <div className="p-3 bg-teal-50 rounded-lg border border-teal-100 space-y-2">
                   <input type="text" placeholder="Nome da tag" value={newTagName}
                     onChange={(e) => setNewTagName(e.target.value)}
                     className="w-full px-3 py-1.5 border border-gray-300 rounded text-sm outline-none" autoFocus />
@@ -749,12 +749,12 @@ export function SettingsView() {
                   <div className="flex gap-2">
                     <button onClick={async () => { if (!newTagName.trim()) return; await addTag(newTagName.trim(), newTagColor); setNewTagName(''); setShowNewTag(false); }}
                       disabled={!newTagName.trim()}
-                      className="text-xs px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 cursor-pointer">Adicionar</button>
+                      className="text-xs px-3 py-1 bg-teal-600 text-white rounded hover:bg-teal-700 disabled:opacity-50 cursor-pointer">Adicionar</button>
                     <button onClick={() => setShowNewTag(false)} className="text-xs px-3 py-1 text-gray-500 hover:text-gray-700 cursor-pointer">Cancelar</button>
                   </div>
                 </div>
               ) : (
-                <button onClick={() => setShowNewTag(true)} className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 font-medium cursor-pointer p-2">
+                <button onClick={() => setShowNewTag(true)} className="flex items-center gap-2 text-sm text-teal-600 hover:text-teal-700 font-medium cursor-pointer p-2">
                   <Plus className="w-4 h-4" /> Nova tag
                 </button>
               )}
@@ -762,7 +762,7 @@ export function SettingsView() {
               <div className="flex flex-wrap gap-2">
                 {tags.map((tag) => (
                   editingTagId === tag.id ? (
-                    <div key={tag.id} className="p-2 bg-blue-50 rounded-lg border border-blue-100 space-y-2 w-full">
+                    <div key={tag.id} className="p-2 bg-teal-50 rounded-lg border border-teal-100 space-y-2 w-full">
                       <input type="text" value={editTagName}
                         onChange={(e) => setEditTagName(e.target.value)}
                         className="w-full px-3 py-1.5 border border-gray-300 rounded text-sm outline-none" autoFocus />
@@ -776,7 +776,7 @@ export function SettingsView() {
                       <div className="flex gap-2">
                         <button onClick={async () => { if (!editTagName.trim()) return; await updateTag(tag.id, { name: editTagName.trim(), color: editTagColor }); setEditingTagId(null); }}
                           disabled={!editTagName.trim()}
-                          className="text-xs px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 cursor-pointer">Salvar</button>
+                          className="text-xs px-3 py-1 bg-teal-600 text-white rounded hover:bg-teal-700 disabled:opacity-50 cursor-pointer">Salvar</button>
                         <button onClick={() => setEditingTagId(null)} className="text-xs px-3 py-1 text-gray-500 hover:text-gray-700 cursor-pointer">Cancelar</button>
                         <button onClick={() => { deleteTag(tag.id); setEditingTagId(null); }}
                           className="text-xs px-3 py-1 text-red-500 hover:text-red-700 cursor-pointer ml-auto">Excluir</button>

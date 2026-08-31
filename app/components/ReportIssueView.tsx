@@ -142,7 +142,7 @@ export function ReportIssueView() {
                 </div>
                 <span className={`text-xs font-semibold uppercase px-2 py-0.5 rounded ${
                   r.status === 'open' ? 'bg-amber-100 text-amber-700' :
-                  r.status === 'in_progress' ? 'bg-blue-100 text-blue-700' :
+                  r.status === 'in_progress' ? 'bg-teal-100 text-teal-700' :
                   r.status === 'resolved' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
                 }`}>{r.status}</span>
               </div>

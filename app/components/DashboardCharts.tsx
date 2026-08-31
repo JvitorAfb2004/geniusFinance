@@ -136,8 +136,8 @@ export function DashboardCharts() {
             <LineChart data={forecastData} margin={{ top: 5, right: 0, left: -20, bottom: 0 }}>
               <defs>
                 <linearGradient id="lineGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#5b7def" stopOpacity={0.15} />
-                  <stop offset="100%" stopColor="#5b7def" stopOpacity={0} />
+                  <stop offset="0%" stopColor="#4fb8b2" stopOpacity={0.15} />
+                  <stop offset="100%" stopColor="#4fb8b2" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
@@ -148,10 +148,10 @@ export function DashboardCharts() {
                 type="monotone"
                 dataKey="saldoAcumulado"
                 name="Saldo Previsto"
-                stroke="#5b7def"
+                stroke="#4fb8b2"
                 strokeWidth={2.5}
-                dot={{ r: 3.5, fill: '#3b82f6', strokeWidth: 2, stroke: '#fff' }}
-                activeDot={{ r: 5, fill: '#3b82f6', strokeWidth: 2.5, stroke: '#fff' }}
+                dot={{ r: 3.5, fill: '#4fb8b2', strokeWidth: 2, stroke: '#fff' }}
+                activeDot={{ r: 5, fill: '#4fb8b2', strokeWidth: 2.5, stroke: '#fff' }}
               />
             </LineChart>
           </ResponsiveContainer>

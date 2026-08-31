@@ -84,7 +84,7 @@ export default function ProjectsView() {
         </div>
         <button
           onClick={handleAdd}
-          className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm cursor-pointer"
+          className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-teal-700 transition-colors font-medium text-sm cursor-pointer"
         >
           <Plus className="w-4 h-4" />
           Novo Projeto

@@ -87,12 +87,12 @@ export function LoginEmailForm({ termsAccepted, onTermsChange, onOpenTerms, onOp
         <button
           type="button"
           onClick={() => { setMode('login'); setError(''); setResetSent(false); }}
-          className={`flex-1 px-4 py-2 rounded-lg cursor-pointer text-sm font-medium ${mode === 'login' ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
+          className={`flex-1 px-4 py-2 rounded-lg cursor-pointer text-sm font-medium ${mode === 'login' ? 'bg-teal-600 text-white hover:bg-teal-700' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
         >Entrar</button>
         <button
           type="button"
           onClick={() => { setMode('register'); setError(''); setResetSent(false); }}
-          className={`flex-1 px-4 py-2 rounded-lg cursor-pointer text-sm font-medium ${mode === 'register' ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
+          className={`flex-1 px-4 py-2 rounded-lg cursor-pointer text-sm font-medium ${mode === 'register' ? 'bg-teal-600 text-white hover:bg-teal-700' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
         >Criar conta</button>
       </div>
 
@@ -204,7 +204,7 @@ export function LoginEmailForm({ termsAccepted, onTermsChange, onOpenTerms, onOp
 
           {error && <p className="text-xs text-red-500 -mt-1 mb-1">{error}</p>}
 
-          <button type="submit" disabled={loading} className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer text-sm font-medium disabled:opacity-50">{loading && <span className="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-1" />}{loading ? 'Processando...' : mode === 'register' ? 'Criar conta' : mode === 'forgot' ? 'Enviar recuperação' : 'Entrar com email'}</button>
+          <button type="submit" disabled={loading} className="w-full px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 cursor-pointer text-sm font-medium disabled:opacity-50">{loading && <span className="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-1" />}{loading ? 'Processando...' : mode === 'register' ? 'Criar conta' : mode === 'forgot' ? 'Enviar recuperação' : 'Entrar com email'}</button>
         </form>
       )}
     </div>

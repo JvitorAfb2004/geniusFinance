@@ -4,7 +4,7 @@ import { format, parseISO } from 'date-fns';
 import { X, Plus, Pencil, Trash2, Check, Search } from 'lucide-react';
 import type { Lead, LeadOption } from '../types';
 
-const STATUS_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#84cc16'];
+const STATUS_COLORS = ['#4fb8b2', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#84cc16'];
 
 export default function LeadModal({ lead, onClose }: { lead?: Lead; onClose: () => void }) {
   const { addLead, updateLead, leadOptions, addLeadOption, updateLeadOption, deleteLeadOption } = useFinance();
@@ -30,7 +30,7 @@ export default function LeadModal({ lead, onClose }: { lead?: Lead; onClose: () 
   const [editingOptionColor, setEditingOptionColor] = useState('');
   const [showNewOption, setShowNewOption] = useState<'status' | 'source' | 'service' | null>(null);
   const [newOptionValue, setNewOptionValue] = useState('');
-  const [newOptionColor, setNewOptionColor] = useState('#3b82f6');
+  const [newOptionColor, setNewOptionColor] = useState('#4fb8b2');
 
   const statusOptions = useMemo(
     () => leadOptions.filter((o) => o.field === 'status').sort((a, b) => a.order - b.order),
@@ -199,7 +199,7 @@ export default function LeadModal({ lead, onClose }: { lead?: Lead; onClose: () 
                     setSearch('');
                     setShowDropdown(false);
                   }}
-                  className="w-full px-3 py-2 text-sm text-left hover:bg-blue-50 transition-colors flex items-center justify-between group cursor-pointer"
+                  className="w-full px-3 py-2 text-sm text-left hover:bg-teal-50 transition-colors flex items-center justify-between group cursor-pointer"
                 >
                   <span>{opt.value}</span>
                   <span className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 cursor-pointer"
@@ -219,7 +219,7 @@ export default function LeadModal({ lead, onClose }: { lead?: Lead; onClose: () 
 
       {/* New option inline form */}
       {showNewOption === field && (
-        <div className="flex items-center gap-1 p-2 bg-blue-50 rounded-lg border border-blue-100">
+        <div className="flex items-center gap-1 p-2 bg-teal-50 rounded-lg border border-teal-100">
           <input
             type="text"
             placeholder={`Nova ${label.toLowerCase()}`}
@@ -249,7 +249,7 @@ export default function LeadModal({ lead, onClose }: { lead?: Lead; onClose: () 
             type="button"
             onClick={handleAddOption}
             disabled={!newOptionValue.trim()}
-            className="px-2 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700 disabled:opacity-50 cursor-pointer"
+            className="px-2 py-1 bg-teal-600 text-white rounded text-xs hover:bg-teal-700 disabled:opacity-50 cursor-pointer"
           >
             <Check className="w-3.5 h-3.5" />
           </button>
@@ -387,7 +387,7 @@ export default function LeadModal({ lead, onClose }: { lead?: Lead; onClose: () 
           <button
             onClick={handleSubmit}
             disabled={!clientName.trim() || submitting}
-            className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors font-medium text-sm cursor-pointer"
+            className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-teal-700 disabled:opacity-50 transition-colors font-medium text-sm cursor-pointer"
           >
             {submitting ? 'Salvando...' : isEdit ? 'Atualizar' : 'Salvar Lead'}
           </button>

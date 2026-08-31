@@ -114,7 +114,7 @@ export function SubscriptionView() {
           isTrial ? "border-amber-200 bg-amber-50" :
           isPastDue ? "border-red-200 bg-red-50" :
           isCancelled ? "border-gray-200 bg-gray-50" :
-          "border-blue-200 bg-blue-50"
+          "border-teal-200 bg-teal-50"
         )}>
           <div className="flex items-center justify-between">
             <div>
