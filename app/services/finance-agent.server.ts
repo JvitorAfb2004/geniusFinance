@@ -233,5 +233,6 @@ export async function runFinanceAgent(messages: AgentMessage[], active: AgentCon
       conversation.push({ role: "tool", content: buildScopedReadContext(results), tool_call_id: call.id });
     }
   }
-  throw new Error("A IA atingiu o limite de 8 etapas. Tente simplificar o pedido.");
+  const lastAssistant = [...conversation].reverse().find((m) => m.role === "assistant");
+  return { content: lastAssistant?.content || "Consulta processada. Se não obteve o resultado esperado, tente um pedido mais simples." };
 }
