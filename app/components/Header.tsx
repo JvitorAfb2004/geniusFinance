@@ -107,7 +107,7 @@ export function Header({
             return (
               <Button
                 key={opt.scope.type === 'PERSONAL' ? 'personal' : (opt.scope as { type: 'ACCOUNT'; accountId: string }).accountId}
-                label={`${opt.label}${opt.role ? ` (${opt.role === 'owner' ? 'dono' : opt.role === 'admin' ? 'admin' : 'membro'})` : ''}`}
+                label={opt.label}
                 size="sm"
                 variant={isActive ? 'primary' : 'ghost'}
                 onClick={() => handleScopeSwitch(opt)}

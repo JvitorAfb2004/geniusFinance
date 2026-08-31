@@ -22,9 +22,17 @@ const suggestions = [
   "Compare este mês com o anterior",
 ];
 
+const valueLabels: Record<string, string> = {
+  INCOME: "Receita",
+  EXPENSE: "Despesa",
+  CREDIT_CARD: "Cartão de crédito",
+  PAID: "Pago",
+  PENDING: "Pendente",
+};
+
 function formatPreview(value: unknown) {
   if (typeof value === "number") return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-  if (typeof value === "string") return value;
+  if (typeof value === "string") return valueLabels[value] ?? value;
   return JSON.stringify(value, null, 2);
 }
 
@@ -101,6 +109,8 @@ export function FinanceAIAssistant() {
   async function confirm(proposal: AgentProposal) {
     if (confirming) return;
     setConfirming(proposal.id);
+    // Oculta botões imediatamente
+    setMessages((current) => current.map((item) => item.proposal?.id === proposal.id ? { ...item, proposal: undefined } : item));
     try {
       await apiFetch("/api/ai/agent-confirm", {
         method: "POST",
@@ -120,12 +130,18 @@ export function FinanceAIAssistant() {
   return (
     <>
       {!open && (
-        <Button label="Abrir assistente financeiro" isIconOnly icon={<Sparkles className="h-6 w-6" />} elevation="med" onClick={() => setOpen(true)} className="fixed bottom-20 right-5 z-40 lg:bottom-6 lg:right-6" />
+        <button
+          aria-label="Abrir assistente financeiro"
+          onClick={() => setOpen(true)}
+          className="fixed bottom-20 right-5 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-slate-900 text-white shadow-lg hover:bg-slate-700 active:scale-95 transition-transform lg:bottom-6 lg:right-6"
+        >
+          <Sparkles className="h-6 w-6" />
+        </button>
       )}
       {open && (
         <section aria-label="Assistente financeiro" className="fixed inset-0 z-50 flex flex-col bg-surface lg:inset-auto lg:bottom-6 lg:right-6 lg:h-[min(600px,calc(100vh-3rem))] lg:w-[min(440px,calc(100vw-2rem))] lg:rounded-lg lg:border lg:border-border lg:shadow-2xl">
           <header className="flex items-center justify-between border-b border-border bg-slate-900 px-4 py-3 text-white lg:rounded-t-lg">
-            <div className="flex items-center gap-2.5"><Bot className="h-5 w-5 text-blue-300" /><div><p className="text-sm font-semibold">Assistente financeiro</p><p className="text-[0.68rem] text-slate-300">DeepSeek V4 Flash · escopo atual</p></div></div>
+            <div className="flex items-center gap-2.5"><Bot className="h-5 w-5 text-blue-300" /><p className="text-sm font-semibold">Assistente financeiro</p></div>
              <IconButton label="Fechar assistente" icon={<X className="h-5 w-5" />} onClick={() => setOpen(false)} />
           </header>
           <div className="flex-1 space-y-3 overflow-y-auto bg-slate-50 p-4" aria-live="polite">
