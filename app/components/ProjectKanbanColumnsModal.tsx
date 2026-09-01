@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom';
 import React, { useEffect, useState } from 'react';
 import { Eye, EyeOff, GripVertical, Plus, RotateCcw, Trash2, X } from 'lucide-react';
 import { useFinance } from '../hooks/useFinance';
@@ -77,7 +78,7 @@ export default function ProjectKanbanColumnsModal({ onClose }: Props) {
     saveColumns(DEFAULT_PROJECT_KANBAN_COLUMNS);
   };
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
       <div className="fixed inset-0 bg-black/30 backdrop-blur-sm" onClick={onClose} />
       <div className="relative w-full max-w-xl clay shadow-xl overflow-hidden">
@@ -189,6 +190,7 @@ export default function ProjectKanbanColumnsModal({ onClose }: Props) {
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

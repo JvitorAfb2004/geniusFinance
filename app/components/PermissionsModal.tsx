@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom';
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import type { ModuleName, ModuleAction, MemberPermissions } from '../types';
@@ -60,8 +61,8 @@ export function PermissionsModal({ memberEmail, currentPermissions, onSave, onCl
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/35 backdrop-blur-sm" onClick={onClose}>
+  return createPortal(
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/35 backdrop-blur-sm" onClick={onClose}>
       <div className="clay shadow-xl w-full max-w-lg max-h-[85vh] overflow-y-auto"
         onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between p-4 border-b border-slate-100 sticky top-0 bg-white">
@@ -112,6 +113,7 @@ export function PermissionsModal({ memberEmail, currentPermissions, onSave, onCl
            <button disabled={saving} onClick={handleSave} className="px-3 py-1.5 bg-teal-600 text-white rounded-lg hover:bg-teal-700 cursor-pointer text-xs font-medium disabled:opacity-50">{saving && <span className="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-1" />}{saving ? 'Salvando...' : 'Salvar Permissões'}</button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

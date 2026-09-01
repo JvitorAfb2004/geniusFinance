@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom';
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { useFinance } from '../hooks/useFinance';
 import { format, parseISO } from 'date-fns';
@@ -258,8 +259,8 @@ export default function LeadModal({ lead, onClose }: { lead?: Lead; onClose: () 
     </div>
   );
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center pt-[10vh] px-4">
+  return createPortal(
+    <div className="fixed inset-0 z-[60] flex items-start justify-center pt-[10vh] px-4">
       <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
       <div className="relative clay shadow-xl w-full max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
         {/* Header */}
@@ -393,6 +394,7 @@ export default function LeadModal({ lead, onClose }: { lead?: Lead; onClose: () 
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

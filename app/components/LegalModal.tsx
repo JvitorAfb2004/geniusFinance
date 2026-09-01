@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom';
 import React from 'react';
 import { X } from 'lucide-react';
 
@@ -8,7 +9,7 @@ interface Props {
 }
 
 export default function LegalModal({ title, content, onClose }: Props) {
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-[60] flex items-start justify-center pt-[5vh]">
       <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
       <div className="relative clay shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] flex flex-col">
@@ -25,6 +26,7 @@ export default function LegalModal({ title, content, onClose }: Props) {
            <button onClick={onClose} className="px-3 py-1.5 bg-teal-600 text-white rounded-lg hover:bg-teal-700 cursor-pointer text-xs font-medium">Fechar</button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

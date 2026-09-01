@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom';
 import React, { useMemo, useState } from 'react';
 import { useFinance } from '../hooks/useFinance';
 import { formatCurrency } from '../lib/utils';
@@ -191,8 +192,8 @@ export function MonthlyClosingView() {
         </div>
       </div>
 
-      {closingTarget && (
-        <div className="fixed inset-0 z-50 bg-black/35 backdrop-blur-sm flex items-center justify-center p-4">
+      {closingTarget && createPortal(
+        <div className="fixed inset-0 z-[60] bg-black/35 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="clay p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <h3 className="text-lg font-bold text-gray-900 mb-2">
               Fechar {MONTH_NAMES[closingTarget.month - 1]} / {closingTarget.year}
@@ -267,7 +268,8 @@ export function MonthlyClosingView() {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

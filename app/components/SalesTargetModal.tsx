@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom';
 import React, { useState } from 'react';
 import { useFinance } from '../hooks/useFinance';
 import { X } from 'lucide-react';
@@ -57,12 +58,12 @@ export default function SalesTargetModal({ onClose }: { onClose: () => void }) {
     }
   };
 
-  return (
+  return createPortal(
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex flex-col items-center justify-center p-4"
+      className="fixed inset-0 z-[60] bg-black/40 backdrop-blur-sm flex flex-col items-center justify-center p-4"
       onClick={onClose}
     >
       <motion.div
@@ -165,6 +166,7 @@ export default function SalesTargetModal({ onClose }: { onClose: () => void }) {
           </div>
         </form>
       </motion.div>
-    </motion.div>
+    </motion.div>,
+    document.body
   );
 }

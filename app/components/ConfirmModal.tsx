@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { AlertTriangle, Info } from 'lucide-react';
 import { motion } from 'motion/react';
 
@@ -29,12 +30,12 @@ export default function ConfirmModal({
   };
   const colors = colorMap[variant];
 
-  return (
+  return createPortal(
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 bg-black/35 backdrop-blur-sm flex flex-col items-center justify-center p-4"
+      className="fixed inset-0 z-[60] bg-black/35 backdrop-blur-sm flex flex-col items-center justify-center p-4"
       onClick={onCancel}
     >
       <motion.div
@@ -61,6 +62,7 @@ export default function ConfirmModal({
           <button onClick={onConfirm} className={`flex-1 px-4 py-2 ${variant === 'danger' ? 'bg-red-600 hover:bg-red-700' : 'bg-teal-600 hover:bg-teal-700'} text-white rounded-lg cursor-pointer text-sm font-medium`}>{confirmLabel}</button>
         </div>
       </motion.div>
-    </motion.div>
+    </motion.div>,
+    document.body
   );
 }

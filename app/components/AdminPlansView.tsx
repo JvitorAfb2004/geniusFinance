@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom';
 import React, { useState, useEffect } from 'react';
 import { apiFetch } from '../lib/api';
 import { Plus, Pencil, Trash2, Check, X } from 'lucide-react';
@@ -138,8 +139,8 @@ export function AdminPlansView() {
         </table>
       </div>
 
-      {showModal && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh]">
+      {showModal && createPortal(
+        <div className="fixed inset-0 z-[60] flex items-start justify-center pt-[15vh]">
           <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" onClick={closeModal} />
           <div className="relative clay shadow-xl w-full max-w-md mx-4">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
@@ -200,7 +201,8 @@ export function AdminPlansView() {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

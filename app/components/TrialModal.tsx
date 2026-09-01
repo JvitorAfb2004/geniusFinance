@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom';
 import React from 'react';
 import { X, Clock, ArrowRight } from 'lucide-react';
 
@@ -8,8 +9,8 @@ interface Props {
 }
 
 export function TrialModal({ daysLeft, onClose, onSubscribe }: Props) {
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/35 backdrop-blur-sm p-4">
+  return createPortal(
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/35 backdrop-blur-sm p-4">
       <div className="clay shadow-2xl w-full max-w-md overflow-hidden">
         {/* Header */}
         <div className="bg-[#f97316] p-6 text-white text-center relative">
@@ -67,6 +68,7 @@ export function TrialModal({ daysLeft, onClose, onSubscribe }: Props) {
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

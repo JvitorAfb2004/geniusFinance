@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom';
 import React, { useState } from 'react';
 import { useFinance } from '../hooks/useFinance';
 import { cn } from '../lib/utils';
@@ -195,8 +196,8 @@ export default function ServiceTypesView() {
       </div>
 
       {/* Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center pt-[10vh]">
+      {isModalOpen && createPortal(
+        <div className="fixed inset-0 z-[60] flex items-start justify-center pt-[10vh]">
           <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" onClick={closeModal} />
           <div className="relative clay shadow-xl w-full max-w-lg mx-4 max-h-[80vh] flex flex-col">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
@@ -379,7 +380,8 @@ export default function ServiceTypesView() {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {confirmDelete && (

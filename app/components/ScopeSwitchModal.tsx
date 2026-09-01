@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom';
 import { motion } from "motion/react";
 import { Loader2 } from "lucide-react";
 
@@ -6,12 +7,12 @@ interface Props {
 }
 
 export function ScopeSwitchModal({ targetLabel }: Props) {
-  return (
+  return createPortal(
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 bg-black/35 backdrop-blur-sm flex items-center justify-center p-4"
+      className="fixed inset-0 z-[60] bg-black/35 backdrop-blur-sm flex items-center justify-center p-4"
     >
       <motion.div
         initial={{ opacity: 0, scale: 0.96, y: 10 }}
@@ -29,6 +30,7 @@ export function ScopeSwitchModal({ targetLabel }: Props) {
           <span className="font-semibold text-slate-700">{targetLabel}</span>...
         </p>
       </motion.div>
-    </motion.div>
+    </motion.div>,
+    document.body
   );
 }
