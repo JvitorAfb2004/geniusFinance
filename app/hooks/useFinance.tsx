@@ -421,7 +421,7 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
         status: 'CLOSED',
         totalIncome,
         totalExpense,
-
+        totalCreditCard: 0,
         balance,
         openingBalance,
         closingBalance,
