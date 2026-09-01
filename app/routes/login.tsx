@@ -78,7 +78,7 @@ export default function Login() {
 
       {isGoogleTermsModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setIsGoogleTermsModalOpen(false)} />
+          <div className="fixed inset-0 bg-black/40" onClick={() => setIsGoogleTermsModalOpen(false)} />
           <div className="relative bg-surface border border-border p-6 rounded-lg shadow-lg max-w-sm w-full z-10 text-center">
             <div className="w-12 h-12 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center mx-auto mb-4">
               <svg viewBox="0 0 24 24" className="w-6 h-6" fill="currentColor">

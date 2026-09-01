@@ -150,7 +150,7 @@ export default function ServiceTypesView() {
           ) : (
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-100 bg-gray-50/50 sticky top-0 z-10">
+                <tr className="border-b border-gray-100 bg-gray-50 sticky top-0 z-10">
                   <th className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Nome</th>
                   <th className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden sm:table-cell">Passos</th>
                   <th className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">Campos Extras</th>
@@ -159,7 +159,7 @@ export default function ServiceTypesView() {
               </thead>
               <tbody>
                 {sortedTypes.map((st) => (
-                  <tr key={st.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+                  <tr key={st.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
                     <td className="py-3 px-4 font-medium text-gray-900">{st.name}</td>
                     <td className="py-3 px-4 hidden sm:table-cell text-gray-600">
                       {st.steps.length > 0
@@ -198,7 +198,7 @@ export default function ServiceTypesView() {
       {/* Modal */}
       {isModalOpen && createPortal(
         <div className="fixed inset-0 z-[60] flex items-start justify-center pt-[10vh]">
-          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" onClick={closeModal} />
+          <div className="fixed inset-0 bg-black/40" onClick={closeModal} />
           <div className="relative clay shadow-xl w-full max-w-lg mx-4 max-h-[80vh] flex flex-col">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
               <h3 className="text-lg font-bold text-gray-900">

@@ -80,7 +80,7 @@ export default function ProjectKanbanColumnsModal({ onClose }: Props) {
 
   return createPortal(
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
-      <div className="fixed inset-0 bg-black/30 backdrop-blur-sm" onClick={onClose} />
+      <div className="fixed inset-0 bg-black/30" onClick={onClose} />
       <div className="relative w-full max-w-xl clay shadow-xl overflow-hidden">
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
           <div>

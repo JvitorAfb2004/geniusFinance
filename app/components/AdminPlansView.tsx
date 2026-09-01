@@ -141,7 +141,7 @@ export function AdminPlansView() {
 
       {showModal && createPortal(
         <div className="fixed inset-0 z-[60] flex items-start justify-center pt-[15vh]">
-          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" onClick={closeModal} />
+          <div className="fixed inset-0 bg-black/40" onClick={closeModal} />
           <div className="relative clay shadow-xl w-full max-w-md mx-4">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
               <h3 className="text-lg font-bold text-gray-900">

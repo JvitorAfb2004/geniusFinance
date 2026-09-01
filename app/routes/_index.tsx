@@ -131,7 +131,7 @@ export default function Index() {
   return (
     <div className="min-h-[100dvh] bg-bg text-text-primary overflow-x-hidden selection:bg-primary/20 selection:text-primary">
       {/* Header */}
-      <header className="sticky top-0 z-20 backdrop-blur-md bg-bg/85 border-b border-border transition-colors duration-150">
+      <header className="sticky top-0 z-20 bg-bg border-b border-border transition-colors duration-150">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 py-4 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0">
             <img src="/icon.svg" alt="Genius Finance" className="w-9 h-9" />

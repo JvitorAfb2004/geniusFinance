@@ -310,7 +310,7 @@ export function TransactionModal({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[60] bg-black/35 backdrop-blur-sm flex flex-col items-center justify-center p-4"
+      className="fixed inset-0 z-[60] bg-black/35 flex flex-col items-center justify-center p-4"
     >
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -731,7 +731,7 @@ Sugestão pela descrição: <strong>{suggestedCategoryName}</strong>
               
                {recurrenceConfig === 'FIXED' && (
                 <div className="pt-1 space-y-2">
-                  <p className="text-xs bg-primary-light/50 text-primary-dark p-2.5 rounded-lg border border-primary/20">
+                  <p className="text-xs bg-primary-light text-primary-dark p-2.5 rounded-lg border border-primary/20">
                     Um lançamento será criado para os próximos meses.
                   </p>
                   <label className="flex items-center gap-2 cursor-pointer">

@@ -5,7 +5,6 @@
   --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Fraunces", Georgia, serif;
 
-  /* Teal/green palette from campanha */
   --color-primary: #4fb8b2;
   --color-primary-hover: #328f97;
   --color-primary-light: #e7f0e8;
@@ -22,9 +21,9 @@
   --color-warning-dark: #92400e;
 
   --color-bg: #e7f3ec;
-  --color-surface: rgba(255, 255, 255, 0.74);
-  --color-surface-strong: rgba(255, 255, 255, 0.9);
-  --color-border: rgba(23, 58, 64, 0.14);
+  --color-surface: #ffffff;
+  --color-surface-strong: #ffffff;
+  --color-border: #dce5de;
   --color-text-primary: #173a40;
   --color-text-secondary: #416166;
   --color-text-muted: #7a9699;
@@ -38,15 +37,15 @@
   --palm: #2f6a4a;
   --sand: #e7f0e8;
   --foam: #f3faf5;
-  --surface: rgba(255, 255, 255, 0.74);
-  --surface-strong: rgba(255, 255, 255, 0.9);
-  --line: rgba(23, 58, 64, 0.14);
-  --inset-glint: rgba(255, 255, 255, 0.82);
-  --kicker: rgba(47, 106, 74, 0.9);
+  --surface: #ffffff;
+  --surface-strong: #ffffff;
+  --line: #dce5de;
+  --inset-glint: #ffffff;
+  --kicker: #2f6a4a;
   --bg-base: #e7f3ec;
-  --header-bg: rgba(251, 255, 248, 0.84);
-  --chip-bg: rgba(255, 255, 255, 0.8);
-  --chip-line: rgba(47, 106, 74, 0.18);
+  --header-bg: #f9fcfa;
+  --chip-bg: #ffffff;
+  --chip-line: #d4e0d6;
 }
 
 * {
@@ -64,41 +63,10 @@ body {
   color: var(--sea-ink);
   font-family: var(--font-sans);
   background-color: var(--bg-base);
-  background:
-    radial-gradient(1100px 620px at -8% -10%, rgba(79, 184, 178, 0.36), transparent 58%),
-    radial-gradient(1050px 620px at 112% -12%, rgba(47, 106, 74, 0.2), transparent 62%),
-    radial-gradient(720px 380px at 50% 115%, rgba(79, 184, 178, 0.1), transparent 68%),
-    linear-gradient(180deg, color-mix(in oklab, var(--sand) 68%, white) 0%, var(--foam) 44%, var(--bg-base) 100%);
+  background: var(--bg-base);
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: -1;
-  opacity: 0.28;
-  background:
-    radial-gradient(circle at 20% 15%, rgba(255, 255, 255, 0.8), transparent 34%),
-    radial-gradient(circle at 78% 26%, rgba(79, 184, 178, 0.2), transparent 42%),
-    radial-gradient(circle at 42% 82%, rgba(47, 106, 74, 0.14), transparent 36%);
-}
-
-body::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: -1;
-  opacity: 0.14;
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
-  background-size: 28px 28px;
-  mask-image: radial-gradient(circle at 50% 30%, black, transparent 78%);
 }
 
 input, select, textarea, button {
@@ -108,7 +76,7 @@ input, select, textarea, button {
 input:focus, select:focus, textarea:focus {
   outline: none;
   border-color: var(--lagoon-deep);
-  box-shadow: 0 0 0 3px color-mix(in oklab, var(--lagoon) 24%, transparent);
+  box-shadow: 0 0 0 3px rgba(79, 184, 178, 0.15);
 }
 
 ::-webkit-scrollbar {
@@ -126,18 +94,10 @@ input:focus, select:focus, textarea:focus {
   background: var(--lagoon);
 }
 
-/* =============================================
-   Glass card system — island-shell from campanha
-   ============================================= */
-
 .clay {
   border: 1px solid var(--line);
-  background: linear-gradient(165deg, var(--surface-strong), var(--surface));
-  box-shadow:
-    0 1px 0 var(--inset-glint) inset,
-    0 22px 44px rgba(30, 90, 72, 0.1),
-    0 6px 18px rgba(23, 58, 64, 0.08);
-  backdrop-filter: blur(4px);
+  background: var(--surface);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
   border-radius: 0.75rem;
 }
 
@@ -145,47 +105,40 @@ input:focus, select:focus, textarea:focus {
   transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
 }
 .clay-hover:hover {
-  border-color: color-mix(in oklab, var(--lagoon-deep) 35%, var(--line));
-  box-shadow:
-    0 1px 0 var(--inset-glint) inset,
-    0 18px 34px rgba(30, 90, 72, 0.12),
-    0 4px 14px rgba(23, 58, 64, 0.08);
+  border-color: #b8d4c0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   transform: translateY(-1px);
 }
 
 .clay-btn {
   border: 1px solid var(--line);
-  background: linear-gradient(165deg, var(--surface-strong), var(--surface));
-  box-shadow:
-    0 1px 0 var(--inset-glint) inset,
-    0 2px 6px rgba(23, 58, 64, 0.06);
+  background: var(--surface);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   border-radius: 0.65rem;
   transition: all 0.18s ease;
 }
 .clay-btn:hover {
-  background: linear-gradient(165deg, color-mix(in oklab, var(--surface-strong) 92%, white 8%), var(--surface));
-  border-color: color-mix(in oklab, var(--lagoon-deep) 30%, var(--line));
+  background: #f8faf9;
+  border-color: #b8d4c0;
   transform: translateY(-1px);
-  box-shadow:
-    0 1px 0 var(--inset-glint) inset,
-    0 4px 12px rgba(23, 58, 64, 0.1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 }
 .clay-btn:active {
   transform: scale(0.98);
 }
 
 .clay-btn-primary {
-  border: 1px solid color-mix(in oklab, var(--lagoon-deep) 40%, var(--line));
-  background: color-mix(in oklab, var(--lagoon) 25%, var(--surface-strong));
-  color: var(--sea-ink);
+  border: 1px solid var(--lagoon-deep);
+  background: var(--lagoon);
+  color: white;
   border-radius: 0.65rem;
-  box-shadow: 0 2px 8px rgba(79, 184, 178, 0.18);
+  box-shadow: 0 2px 6px rgba(79, 184, 178, 0.2);
   transition: all 0.18s ease;
 }
 .clay-btn-primary:hover {
-  background: color-mix(in oklab, var(--lagoon) 35%, var(--surface-strong));
+  background: var(--lagoon-deep);
   transform: translateY(-1px);
-  box-shadow: 0 4px 14px rgba(79, 184, 178, 0.24);
+  box-shadow: 0 4px 10px rgba(79, 184, 178, 0.25);
 }
 .clay-btn-primary:active {
   transform: scale(0.98);
@@ -193,23 +146,20 @@ input:focus, select:focus, textarea:focus {
 
 .clay-input {
   border: 1px solid var(--line);
-  background: color-mix(in oklab, var(--surface-strong) 88%, white 12%);
+  background: var(--surface);
   color: var(--sea-ink);
   border-radius: 0.65rem;
-  transition: border-color 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
 }
 .clay-input:focus {
-  border-color: color-mix(in oklab, var(--lagoon-deep) 58%, var(--line));
-  box-shadow: 0 0 0 3px color-mix(in oklab, var(--lagoon) 20%, transparent);
+  border-color: var(--lagoon-deep);
+  box-shadow: 0 0 0 3px rgba(79, 184, 178, 0.15);
 }
 
 .card-admin {
   border: 1px solid var(--line);
-  background: linear-gradient(165deg, var(--surface-strong), var(--surface));
-  box-shadow:
-    0 1px 0 var(--inset-glint) inset,
-    0 18px 34px rgba(30, 90, 72, 0.1),
-    0 4px 14px rgba(23, 58, 64, 0.06);
+  background: var(--surface);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
   border-radius: 0.75rem;
 }
 

@@ -89,7 +89,7 @@ export function AdminReportsView() {
 
       {selected && createPortal(
         <div className="fixed inset-0 z-[60] flex items-start justify-center pt-[10vh]">
-          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setSelected(null)} />
+          <div className="fixed inset-0 bg-black/40" onClick={() => setSelected(null)} />
           <div className="relative clay shadow-xl w-full max-w-lg mx-4 max-h-[80vh] flex flex-col">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
               <h3 className="text-lg font-bold text-gray-900">{selected.title}</h3>

@@ -35,7 +35,7 @@ export default function ConfirmModal({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[60] bg-black/35 backdrop-blur-sm flex flex-col items-center justify-center p-4"
+      className="fixed inset-0 z-[60] bg-black/35 flex flex-col items-center justify-center p-4"
       onClick={onCancel}
     >
       <motion.div
@@ -43,7 +43,7 @@ export default function ConfirmModal({
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.96, y: 15 }}
         transition={{ type: 'spring', duration: 0.3 }}
-        className="bg-surface rounded-2xl shadow-xl w-full max-w-sm overflow-hidden relative border border-slate-100/60"
+        className="bg-surface rounded-2xl shadow-xl w-full max-w-sm overflow-hidden relative border border-slate-100"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="p-6">

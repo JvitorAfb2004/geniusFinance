@@ -62,7 +62,7 @@ export function PermissionsModal({ memberEmail, currentPermissions, onSave, onCl
   };
 
   return createPortal(
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/35 backdrop-blur-sm" onClick={onClose}>
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/35" onClick={onClose}>
       <div className="clay shadow-xl w-full max-w-lg max-h-[85vh] overflow-y-auto"
         onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between p-4 border-b border-slate-100 sticky top-0 bg-white">

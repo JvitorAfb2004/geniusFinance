@@ -154,7 +154,7 @@ export function TransactionTable({
       {/* Desktop: Table */}
       <div className="overflow-x-auto overflow-y-auto flex-1 hidden md:block">
         <table className="w-full text-left border-collapse text-[0.85rem] min-w-[600px]">
-          <thead className="sticky top-0 bg-slate-50/60 backdrop-blur-[2px] z-10">
+          <thead className="sticky top-0 bg-slate-50 z-10">
             <tr>
               <th onClick={() => toggleSort('date')} className="py-3 px-4 font-semibold text-slate-400 text-[0.7rem] uppercase tracking-[0.04em] border-b border-slate-100 whitespace-nowrap cursor-pointer hover:text-slate-600 select-none">
                 <span className="inline-flex items-center gap-1">Data <SortIcon field="date" /></span>
@@ -176,7 +176,7 @@ export function TransactionTable({
                 </td>
               </tr>
             ) : visibleTransactions.map((tx) => (
-              <tr key={tx.id} className="hover:bg-slate-50/70 transition-colors duration-150">
+              <tr key={tx.id} className="hover:bg-slate-50 transition-colors duration-150">
                 <td className="py-2.5 px-4 border-b border-slate-100 font-sans text-slate-500 whitespace-nowrap">
                   {format(parseISO(tx.date), "dd/MM/yyyy")}
                 </td>

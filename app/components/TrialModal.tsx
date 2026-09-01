@@ -10,7 +10,7 @@ interface Props {
 
 export function TrialModal({ daysLeft, onClose, onSubscribe }: Props) {
   return createPortal(
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/35 backdrop-blur-sm p-4">
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/35 p-4">
       <div className="clay shadow-2xl w-full max-w-md overflow-hidden">
         {/* Header */}
         <div className="bg-[#f97316] p-6 text-white text-center relative">

@@ -148,7 +148,7 @@ export function AdminSubscriptionsView() {
 
       {showAssign && createPortal(
         <div className="fixed inset-0 z-[60] flex items-start justify-center pt-[15vh]">
-          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowAssign(false)} />
+          <div className="fixed inset-0 bg-black/40" onClick={() => setShowAssign(false)} />
           <div className="relative clay shadow-xl w-full max-w-md mx-4">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
               <h3 className="text-lg font-bold text-gray-900">Atribuir Assinatura</h3>
