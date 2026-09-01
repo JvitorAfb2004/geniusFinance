@@ -3,7 +3,7 @@ import { useFinance } from '../hooks/useFinance';
 import { addMonths, format, isSameMonth, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { formatCurrency, cn } from '../lib/utils';
-import { Trash2, Pencil, Search, Forward } from 'lucide-react';
+import { Trash2, Pencil, Search, Forward, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { TransactionModal } from './TransactionModal';
 import ConfirmModal from './ConfirmModal';
 import { Transaction } from '../types';
@@ -25,6 +25,24 @@ export function TransactionTable({
   const [categoryFilterId, setCategoryFilterId] = useState('');
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'PAID' | 'PENDING'>('ALL');
   const [confirmDelete, setConfirmDelete] = useState<{ tx: Transaction; future: boolean } | null>(null);
+  const [sortField, setSortField] = useState<'date' | 'amount'>('date');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
+
+  const toggleSort = (field: 'date' | 'amount') => {
+    if (sortField === field) {
+      setSortDir(sortDir === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDir(field === 'date' ? 'desc' : 'desc');
+    }
+  };
+
+  const SortIcon = ({ field }: { field: 'date' | 'amount' }) => {
+    if (sortField !== field) return <ArrowUpDown className="w-3 h-3 text-slate-300" />;
+    return sortDir === 'asc'
+      ? <ArrowUp className="w-3 h-3 text-teal-600" />
+      : <ArrowDown className="w-3 h-3 text-teal-600" />;
+  };
 
   const visibleTransactions = transactions
     .filter(t => t.context === activeContext)
@@ -34,7 +52,14 @@ export function TransactionTable({
     .filter(t => categoryFilterId ? t.categoryId === categoryFilterId : true)
     .filter(t => statusFilter === 'ALL' ? true : t.status === statusFilter)
     .filter(t => t.title.toLowerCase().includes(searchTerm.toLowerCase()))
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    .sort((a, b) => {
+      if (sortField === 'date') {
+        const cmp = new Date(a.date).getTime() - new Date(b.date).getTime();
+        return sortDir === 'asc' ? cmp : -cmp;
+      }
+      const cmp = a.amount - b.amount;
+      return sortDir === 'asc' ? cmp : -cmp;
+    });
 
   const handleEdit = (tx: Transaction) => {
     setEditingTx(tx);
@@ -131,10 +156,14 @@ export function TransactionTable({
         <table className="w-full text-left border-collapse text-[0.85rem] min-w-[600px]">
           <thead className="sticky top-0 bg-slate-50/60 backdrop-blur-[2px] z-10">
             <tr>
-              <th className="py-3 px-4 font-semibold text-slate-400 text-[0.7rem] uppercase tracking-[0.04em] border-b border-slate-100 whitespace-nowrap">Data</th>
+              <th onClick={() => toggleSort('date')} className="py-3 px-4 font-semibold text-slate-400 text-[0.7rem] uppercase tracking-[0.04em] border-b border-slate-100 whitespace-nowrap cursor-pointer hover:text-slate-600 select-none">
+                <span className="inline-flex items-center gap-1">Data <SortIcon field="date" /></span>
+              </th>
               <th className="py-3 px-4 font-semibold text-slate-400 text-[0.7rem] uppercase tracking-[0.04em] border-b border-slate-100 whitespace-nowrap">Descrição</th>
               <th className="py-3 px-4 font-semibold text-slate-400 text-[0.7rem] uppercase tracking-[0.04em] border-b border-slate-100 whitespace-nowrap">Categoria</th>
-              <th className="py-3 px-4 font-semibold text-slate-400 text-[0.7rem] uppercase tracking-[0.04em] border-b border-slate-100 text-right whitespace-nowrap">Valor</th>
+              <th onClick={() => toggleSort('amount')} className="py-3 px-4 font-semibold text-slate-400 text-[0.7rem] uppercase tracking-[0.04em] border-b border-slate-100 text-right whitespace-nowrap cursor-pointer hover:text-slate-600 select-none">
+                <span className="inline-flex items-center gap-1 justify-end">Valor <SortIcon field="amount" /></span>
+              </th>
               <th className="py-3 px-4 font-semibold text-slate-400 text-[0.7rem] uppercase tracking-[0.04em] border-b border-slate-100 whitespace-nowrap">Status</th>
               <th className="py-3 px-4 font-semibold text-slate-400 text-[0.7rem] uppercase tracking-[0.04em] border-b border-slate-100 text-center w-20 whitespace-nowrap"></th>
             </tr>
