@@ -70,6 +70,7 @@ export function FinanceAIAssistant() {
   const [messages, setMessages] = useState<Message[]>([welcome]);
   const [sending, setSending] = useState(false);
   const [confirming, setConfirming] = useState<string | null>(null);
+  const [continueCount, setContinueCount] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const endRef = useRef<HTMLDivElement>(null);
 
@@ -83,6 +84,7 @@ export function FinanceAIAssistant() {
   async function send(text = input) {
     const content = text.trim();
     if (!content || sending || !user) return;
+    setContinueCount(0);
     const next = [...messages, { role: "user" as const, content }];
     setMessages(next);
     setInput("");
@@ -129,7 +131,8 @@ export function FinanceAIAssistant() {
   }
 
   async function continueConversation() {
-    if (sending || !user) return;
+    if (sending || !user || continueCount >= 3) return;
+    setContinueCount((c) => c + 1);
     setSending(true);
     try {
       const result = await apiFetch("/api/ai/agent", {

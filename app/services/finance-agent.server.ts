@@ -7,16 +7,17 @@ import type { AgentMessage, ValidatedAgentScope } from "~/lib/finance-agent-type
 
 const db = getAdminFirestore();
 const MAX_RESULTS = 500;
+let collectionCache = new Map<string, Record<string, unknown>[]>();
 const SYSTEM_PROMPT = `Você é o Agente Financeiro do Genius Finance.
 Responda em português brasileiro, com objetividade e no máximo 5 linhas por conta.
 Quando houver mais de uma conta, use sempre um título ## Nome da conta para cada uma e nunca misture os valores.
 Ao listar transações (pendentes, do período, etc), SEMPRE use tabelas Markdown com colunas: Descrição | Data | Valor. Nunca use listas com bullets para listar transações — apenas tabelas.
 Use tabelas Markdown SEMPRE que listar dados tabulares (transações, resumos, DRE).
 Use ferramentas para todos os números e nunca invente dados.
-Use apenas os escopos de leitura autorizados recebidos. Alterações (criar/editar/excluir) acontecem SEMPRE e APENAS no escopo ativo. Se o usuário pedir para mover/transferir dados entre contas, primeiro use propose_switch_scope para trocar para a conta de destino, e depois proponha a operação na nova conta. Se não puder executar algo, explique o motivo claramente — nunca diga "não encontrei uma resposta" sem explicar por quê.
+Use apenas os escopos de leitura autorizados recebidos. Alterações (criar/editar/excluir) acontecem SEMPRE e APENAS no escopo ativo. Se o usuário pedir para mover/transferir dados entre contas, ou se identificar que a operação precisa ser feita em outra conta diferente da ativa, primeiro use propose_switch_scope para trocar para a conta de destino, e depois proponha a operação na nova conta. Ao listar transações de várias contas, se o usuário pedir para editar/excluir uma transação que não está no escopo ativo, proponha a troca de escopo antes de tentar a operação. Se não puder executar algo, explique o motivo claramente — nunca diga "não encontrei uma resposta" sem explicar por quê.
 Antes de editar ou excluir, consulte o registro e use uma ferramenta propose_*. O campo 'id' no propose DEVE ser o ID real retornado pela leitura no escopo ativo — nunca use IDs de outros escopos.
 Nunca diga que uma alteração foi feita sem uma confirmação posterior do usuário.
-Para datas ambíguas ou dados obrigatórios ausentes (ex: falta valor, descrição ou não sabe em qual conta o usuário quer criar), FAÇA UMA PERGUNTA ao usuário antes de acionar a ferramenta propose_*. (Se o usuário quiser criar numa conta diferente da ativa, avise-o para trocar de conta no aplicativo).
+Para datas ambíguas ou dados obrigatórios ausentes (ex: falta valor, descrição ou não sabe em qual conta o usuário quer criar), FAÇA UMA PERGUNTA ao usuário antes de acionar a ferramenta propose_*. Se o usuário quiser criar/editar numa conta diferente da ativa, use propose_switch_scope para trocar automaticamente.
 Importante para transações: os parâmetros 'title' (string, descrição) e 'amount' (número) na ferramenta propose são estritamente obrigatórios.
 Quando o usuário pedir múltiplas coisas na mesma mensagem (ex: "liste pendências E mude a data da ritalina"), execute TODAS as tarefas em sequência: primeiro leia os dados, depois proponha a alteração. Não pare no meio — complete tudo antes de responder.
 Explique brevemente o período e os filtros usados nas análises.`;
@@ -53,8 +54,12 @@ function asJson(data: FirebaseFirestore.DocumentData, id: string) {
 }
 
 async function listCollection(name: string, context: AgentContext) {
+  const cacheKey = `${context.scope.type}:${context.scope.accountId || context.scope.userId}:${name}`;
+  if (collectionCache.has(cacheKey)) return collectionCache.get(cacheKey)!;
   const snapshot = await db.collection(collectionPath(context.scope, name)).get();
-  return snapshot.docs.map((doc) => asJson(doc.data(), doc.id)).filter((item: Record<string, unknown>) => item.context === context.context || name === "tags" || name === "monthly-closings");
+  const result = snapshot.docs.map((doc) => asJson(doc.data(), doc.id)).filter((item: Record<string, unknown>) => item.context === context.context || name === "tags" || name === "monthly-closings");
+  collectionCache.set(cacheKey, result);
+  return result;
 }
 
 async function listTransactions(args: Record<string, unknown>, context: AgentContext) {
@@ -241,9 +246,10 @@ export async function consumeProposal(id: string, uid: string, expiresAt: number
 }
 
 export async function runFinanceAgent(messages: AgentMessage[], active: AgentContext, readScopes: ReadScope[] = [{ label: active.scope.type === "PERSONAL" ? "Pessoal" : active.scope.accountName || "Empresa", context: active }]) {
+  collectionCache = new Map();
   const currentDate = new Date().toLocaleDateString("pt-BR");
   const conversation: AgentMessage[] = [{ role: "system", content: `A data de hoje é ${currentDate}.\n\n${SYSTEM_PROMPT}\n${PENDING_INSTRUCTION}` }, ...messages.filter((message) => message.role === "user" || message.role === "assistant").slice(-12)];
-  for (let iteration = 0; iteration < 8; iteration++) {
+  for (let iteration = 0; iteration < 4; iteration++) {
     const response = await completeWithDeepSeek(conversation, FINANCE_AGENT_TOOLS);
     if (!response.toolCalls.length) return { content: response.content };
     conversation.push(response.assistantMessage);
