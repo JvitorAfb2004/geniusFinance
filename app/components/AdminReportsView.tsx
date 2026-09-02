@@ -1,4 +1,4 @@
-import { createPortal } from 'react-dom';
+﻿import { createPortal } from 'react-dom';
 import React, { useState, useEffect } from 'react';
 import { apiFetch } from '../lib/api';
 import { X } from 'lucide-react';
@@ -55,7 +55,7 @@ export function AdminReportsView() {
 
   const statusColors: Record<string, string> = {
     open: 'bg-amber-100 text-amber-700',
-    in_progress: 'bg-teal-100 text-teal-700',
+    in_progress: 'bg-blue-100 text-blue-700',
     resolved: 'bg-green-100 text-green-700',
     closed: 'bg-gray-100 text-gray-500',
   };
@@ -148,7 +148,7 @@ export function AdminReportsView() {
                 Cancelar
               </button>
               <button onClick={handleUpdate} disabled={saving}
-                className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-teal-700 disabled:opacity-50 cursor-pointer transition-colors">
+                className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 cursor-pointer transition-colors">
                 {saving ? 'Salvando...' : 'Atualizar'}
               </button>
             </div>

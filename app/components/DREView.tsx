@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+﻿import React, { useMemo } from 'react';
 import { useFinance } from '../hooks/useFinance';
 import { computeDRE } from '../lib/dre';
 import { formatCurrency } from '../lib/utils';
@@ -113,8 +113,8 @@ export default function DREView() {
           value={lucroLiq?.actual || 0}
           planned={lucroLiq?.planned || 0}
           icon={<DollarSign className="w-4 h-4" />}
-          color={dre.netProfit >= 0 ? 'text-teal-600' : 'text-red-600'}
-          bg={dre.netProfit >= 0 ? 'bg-teal-50' : 'bg-red-50'}
+          color={dre.netProfit >= 0 ? 'text-blue-600' : 'text-red-600'}
+          bg={dre.netProfit >= 0 ? 'bg-blue-50' : 'bg-red-50'}
           showSign
         />
         <DRECard
@@ -353,7 +353,7 @@ function ForecastSection() {
         </div>
         <div className="clay clay-hover p-4.5">
           <p className="text-[0.68rem] text-slate-400 font-bold uppercase tracking-wider mb-1.5">Lucro Projetado</p>
-          <p className={`text-lg font-bold font-mono ${yearTotals.lucro >= 0 ? 'text-teal-600' : 'text-red-600'}`}>
+          <p className={`text-lg font-bold font-mono ${yearTotals.lucro >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
             {formatCurrency(animLucro)}
           </p>
         </div>

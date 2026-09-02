@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+﻿import React, { useState, useCallback } from 'react';
 import { useFinance } from '../hooks/useFinance';
 import { formatCurrency } from '../lib/utils';
 import { Upload, FileSpreadsheet, FileText, Trash2, Pencil, Check, X, Loader2, Plus } from 'lucide-react';
@@ -194,7 +194,7 @@ export default function ImportView() {
       {parsedTxs.length === 0 && !loading && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {/* File upload */}
-          <div className="clay border-2 border-dashed border-slate-300 p-8 text-center hover:border-teal-400 transition-colors cursor-pointer">
+          <div className="clay border-2 border-dashed border-slate-300 p-8 text-center hover:border-blue-400 transition-colors cursor-pointer">
             <label className="cursor-pointer flex flex-col items-center gap-3">
               <FileSpreadsheet className="w-10 h-10 text-slate-400" />
               <div>
@@ -215,12 +215,12 @@ export default function ImportView() {
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               placeholder="Cole aqui extrato bancário, lista de transações, ou descreva as entradas/saídas..."
-              className="flex-1 min-h-[120px] border border-slate-200 rounded-lg p-3 text-sm resize-none outline-none focus:ring-2 focus:ring-teal-400"
+              className="flex-1 min-h-[120px] border border-slate-200 rounded-lg p-3 text-sm resize-none outline-none focus:ring-2 focus:ring-blue-400"
             />
             <button
               onClick={handleTextSubmit}
               disabled={!inputText.trim()}
-              className="self-end px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-50 cursor-pointer flex items-center gap-2 text-sm font-medium"
+              className="self-end px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 cursor-pointer flex items-center gap-2 text-sm font-medium"
             >
               Processar dados
             </button>
@@ -231,7 +231,7 @@ export default function ImportView() {
       {/* Loading */}
       {loading && (
         <div className="clay p-12 text-center space-y-3">
-          <Loader2 className="w-8 h-8 text-teal-500 animate-spin mx-auto" />
+          <Loader2 className="w-8 h-8 text-blue-500 animate-spin mx-auto" />
           <p className="text-slate-600 font-medium">Analisando os dados...</p>
           <p className="text-sm text-slate-400">{fileName}</p>
         </div>
@@ -251,7 +251,7 @@ export default function ImportView() {
 
       {/* Import progress */}
       {importing && (
-        <div className="bg-teal-50 border border-teal-200 rounded-xl p-4 text-teal-700 text-sm flex items-center gap-3">
+        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 text-blue-700 text-sm flex items-center gap-3">
           <Loader2 className="w-5 h-5 animate-spin flex-shrink-0" />
           <span>Importando... {importedCount}/{parsedTxs.length}</span>
         </div>
@@ -371,7 +371,7 @@ export default function ImportView() {
                         </td>
                         <td className="py-1.5 px-3 text-center">
                           <div className="flex gap-1 justify-center">
-                            <button onClick={() => startEdit(tx)} className="text-slate-400 hover:text-teal-600 cursor-pointer"><Pencil className="w-3.5 h-3.5" /></button>
+                            <button onClick={() => startEdit(tx)} className="text-slate-400 hover:text-blue-600 cursor-pointer"><Pencil className="w-3.5 h-3.5" /></button>
                             <button onClick={() => deleteTx(tx.key)} className="text-slate-400 hover:text-red-500 cursor-pointer"><Trash2 className="w-3.5 h-3.5" /></button>
                           </div>
                         </td>

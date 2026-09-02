@@ -1,4 +1,4 @@
-import { createPortal } from 'react-dom';
+﻿import { createPortal } from 'react-dom';
 import React, { useState } from 'react';
 import { useFinance } from '../hooks/useFinance';
 import { cn } from '../lib/utils';
@@ -132,7 +132,7 @@ export default function ServiceTypesView() {
         </div>
         <button
           onClick={openAdd}
-          className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-teal-700 transition-colors font-medium text-sm cursor-pointer"
+          className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm cursor-pointer"
         >
           <Plus className="w-4 h-4" />
           Novo Tipo
@@ -374,7 +374,7 @@ export default function ServiceTypesView() {
               <button
                 onClick={handleSubmit}
                 disabled={saving || !name.trim()}
-                className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-teal-700 disabled:opacity-50 cursor-pointer transition-colors"
+                className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 cursor-pointer transition-colors"
               >
                 {saving ? 'Salvando...' : editingType ? 'Atualizar' : 'Criar'}
               </button>

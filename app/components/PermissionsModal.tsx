@@ -1,4 +1,4 @@
-import { createPortal } from 'react-dom';
+﻿import { createPortal } from 'react-dom';
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import type { ModuleName, ModuleAction, MemberPermissions } from '../types';
@@ -110,7 +110,7 @@ export function PermissionsModal({ memberEmail, currentPermissions, onSave, onCl
 
         <div className="flex justify-end gap-3 p-4 border-t border-slate-100 sticky bottom-0 bg-white">
            <button onClick={onClose} className="px-3 py-1.5 text-slate-600 hover:bg-slate-100 rounded-lg cursor-pointer text-xs font-medium">Cancelar</button>
-           <button disabled={saving} onClick={handleSave} className="px-3 py-1.5 bg-teal-600 text-white rounded-lg hover:bg-teal-700 cursor-pointer text-xs font-medium disabled:opacity-50">{saving && <span className="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-1" />}{saving ? 'Salvando...' : 'Salvar Permissões'}</button>
+           <button disabled={saving} onClick={handleSave} className="px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer text-xs font-medium disabled:opacity-50">{saving && <span className="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-1" />}{saving ? 'Salvando...' : 'Salvar Permissões'}</button>
         </div>
       </div>
     </div>,

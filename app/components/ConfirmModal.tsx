@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { createPortal } from 'react-dom';
 import { AlertTriangle, Info } from 'lucide-react';
 import { motion } from 'motion/react';
@@ -59,7 +59,7 @@ export default function ConfirmModal({
         </div>
         <div className="flex gap-2.5 px-6 pb-6">
           <button onClick={onCancel} className="flex-1 px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 cursor-pointer text-sm font-medium">{cancelLabel}</button>
-          <button onClick={onConfirm} className={`flex-1 px-4 py-2 ${variant === 'danger' ? 'bg-red-600 hover:bg-red-700' : 'bg-teal-600 hover:bg-teal-700'} text-white rounded-lg cursor-pointer text-sm font-medium`}>{confirmLabel}</button>
+          <button onClick={onConfirm} className={`flex-1 px-4 py-2 ${variant === 'danger' ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'} text-white rounded-lg cursor-pointer text-sm font-medium`}>{confirmLabel}</button>
         </div>
       </motion.div>
     </motion.div>,

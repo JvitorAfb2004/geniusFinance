@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+﻿import React, { useMemo } from 'react';
 import { useFinance } from '../hooks/useFinance';
 import { formatCurrency, cn } from '../lib/utils';
 import {
@@ -97,7 +97,7 @@ export function CashCalendarView() {
                   "min-h-[132px] min-w-[128px] border-r border-b border-slate-100 p-2.5 flex flex-col gap-2",
                   !day.isCurrentMonth && "bg-slate-50/60 text-slate-300",
                   day.isCurrentMonth && "bg-white",
-                  isToday(day.date) && "ring-2 ring-primary/30 ring-inset bg-teal-50/30"
+                  isToday(day.date) && "ring-2 ring-primary/30 ring-inset bg-blue-50/30"
                 )}
               >
                 <div className="flex items-center justify-between gap-2">

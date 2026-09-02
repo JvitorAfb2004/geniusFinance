@@ -1,4 +1,4 @@
-import { createPortal } from 'react-dom';
+﻿import { createPortal } from 'react-dom';
 import React, { useState } from 'react';
 import { useFinance } from '../hooks/useFinance';
 import { X } from 'lucide-react';
@@ -98,7 +98,7 @@ export default function SalesTargetModal({ onClose }: { onClose: () => void }) {
                   onClick={() => setTargetType(opt.id)}
                   className={`py-2 px-3 text-sm font-medium rounded-lg border-2 transition-colors cursor-pointer ${
                     targetType === opt.id
-                      ? 'border-teal-500 bg-teal-50 text-teal-700'
+                      ? 'border-blue-500 bg-blue-50 text-blue-700'
                       : 'border-gray-200 text-gray-600 hover:bg-gray-50'
                   }`}
                 >
@@ -117,7 +117,7 @@ export default function SalesTargetModal({ onClose }: { onClose: () => void }) {
                 placeholder="Ex: Instagram, WhatsApp, Loja..."
                 value={channel}
                 onChange={(e) => setChannel(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-all"
+                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
               />
             </div>
           )}
@@ -131,7 +131,7 @@ export default function SalesTargetModal({ onClose }: { onClose: () => void }) {
                 placeholder="Ex: Joao, Maria..."
                 value={seller}
                 onChange={(e) => setSeller(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-all"
+                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
               />
             </div>
           )}
@@ -145,7 +145,7 @@ export default function SalesTargetModal({ onClose }: { onClose: () => void }) {
               placeholder="0,00"
               value={amountStr}
               onChange={handleAmountChange}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-all text-lg font-mono"
+              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-lg font-mono"
             />
           </div>
 

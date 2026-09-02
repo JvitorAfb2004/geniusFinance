@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { useFinance } from '../hooks/useFinance';
 import { Plus, Trash2, X, Check, Pencil } from 'lucide-react';
 import type { FinancialGoal } from '../types';
@@ -57,24 +57,24 @@ export default function GoalsView() {
           <h2 className="text-lg font-bold text-slate-800">Metas Financeiras</h2>
           <p className="text-sm text-slate-500">Acompanhe seus objetivos de economia e investimento.</p>
         </div>
-        <button onClick={() => { resetForm(); setShowForm(!showForm); }} className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 cursor-pointer flex items-center gap-2 text-sm font-medium"><Plus className="w-4 h-4" /> Nova Meta</button>
+        <button onClick={() => { resetForm(); setShowForm(!showForm); }} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer flex items-center gap-2 text-sm font-medium"><Plus className="w-4 h-4" /> Nova Meta</button>
       </div>
 
       {showForm && (
         <div className="clay p-5 space-y-3">
           <h3 className="text-base font-bold text-slate-800">{editingGoalId ? 'Editar Meta' : 'Nova Meta'}</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <input placeholder="Nome da meta" value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} className="border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-teal-400" />
-            <input type="number" placeholder="Valor alvo (R$)" value={form.targetAmount} onChange={(e) => setForm((f) => ({ ...f, targetAmount: e.target.value }))} className="border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-teal-400" />
-            <input type="number" placeholder="Valor atual (R$)" value={form.currentAmount} onChange={(e) => setForm((f) => ({ ...f, currentAmount: e.target.value }))} className="border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-teal-400" />
-            <input type="date" value={form.deadline} onChange={(e) => setForm((f) => ({ ...f, deadline: e.target.value }))} className="border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-teal-400" />
+            <input placeholder="Nome da meta" value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} className="border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-400" />
+            <input type="number" placeholder="Valor alvo (R$)" value={form.targetAmount} onChange={(e) => setForm((f) => ({ ...f, targetAmount: e.target.value }))} className="border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-400" />
+            <input type="number" placeholder="Valor atual (R$)" value={form.currentAmount} onChange={(e) => setForm((f) => ({ ...f, currentAmount: e.target.value }))} className="border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-400" />
+            <input type="date" value={form.deadline} onChange={(e) => setForm((f) => ({ ...f, deadline: e.target.value }))} className="border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-400" />
           </div>
           <div className="flex items-center gap-3">
             <select value={form.category} onChange={(e) => setForm((f) => ({ ...f, category: e.target.value as FinancialGoal['category'] }))} className="border border-slate-200 rounded-lg px-3 py-2 text-sm cursor-pointer">
               {Object.entries(CAT_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
             </select>
             <div className="flex gap-1.5">{CAT_COLORS.map((c) => <button key={c} onClick={() => setForm((f) => ({ ...f, color: c }))} className={`w-6 h-6 rounded-full border-2 cursor-pointer ${form.color === c ? 'border-slate-800 scale-125' : 'border-transparent'}`} style={{ backgroundColor: c }} />)}</div>
-            <button onClick={handleSubmit} className="p-1 text-teal-600 hover:text-teal-800 cursor-pointer"><Check className="w-4 h-4" /></button>
+            <button onClick={handleSubmit} className="p-1 text-blue-600 hover:text-blue-800 cursor-pointer"><Check className="w-4 h-4" /></button>
             <button onClick={resetForm} className="p-1 text-slate-400 hover:text-slate-600 cursor-pointer"><X className="w-5 h-5" /></button>
           </div>
         </div>

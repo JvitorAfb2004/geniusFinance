@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+﻿import { useEffect, useRef, useState } from "react";
 import { Bot, Check, Loader2, Send, Sparkles, X } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -165,7 +165,7 @@ export function FinanceAIAssistant() {
       {open && (
         <section aria-label="Assistente financeiro" className="fixed inset-0 z-50 flex flex-col bg-surface lg:inset-auto lg:bottom-6 lg:right-6 lg:h-[min(600px,calc(100vh-3rem))] lg:w-[min(440px,calc(100vw-2rem))] lg:rounded-lg lg:border lg:border-border lg:shadow-2xl">
           <header className="flex items-center justify-between border-b border-border bg-slate-900 px-4 py-3 text-white lg:rounded-t-lg">
-            <div className="flex items-center gap-2.5"><Bot className="h-5 w-5 text-teal-300" /><p className="text-sm font-semibold">Assistente financeiro</p></div>
+            <div className="flex items-center gap-2.5"><Bot className="h-5 w-5 text-blue-300" /><p className="text-sm font-semibold">Assistente financeiro</p></div>
              <button onClick={() => setOpen(false)} className="p-2 text-white/70 hover:text-white cursor-pointer"><X className="h-5 w-5" /></button>
           </header>
           <div className="flex-1 space-y-3 overflow-y-auto bg-slate-50 p-4" aria-live="polite">

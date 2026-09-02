@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+﻿import React, { useMemo, useState } from 'react';
 import { useFinance } from '../hooks/useFinance';
 import { TransactionTable } from './TransactionTable';
 import { TrendingUp, TrendingDown, Sparkles } from 'lucide-react';
@@ -69,7 +69,7 @@ export function FixedMonthlyView() {
                   <p className="text-sm font-medium text-slate-700 truncate max-w-[180px]">{s.title}</p>
                   <p className="text-xs text-slate-500">{formatCurrency(s.amount)} • {s.confidence >= 0.8 ? 'Muito provável' : 'Provável'}</p>
                 </div>
-                <button onClick={() => handleConfirm(s)} className="px-3 py-1.5 bg-teal-600 text-white rounded-lg hover:bg-teal-700 cursor-pointer text-sm font-medium flex-shrink-0">Confirmar</button>
+                <button onClick={() => handleConfirm(s)} className="px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer text-sm font-medium flex-shrink-0">Confirmar</button>
               </div>
             ))}
           </div>

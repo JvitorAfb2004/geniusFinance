@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+﻿import React, { useMemo } from 'react';
 import { useFinance } from '../hooks/useFinance';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { formatCurrency } from '../lib/utils';
@@ -105,7 +105,7 @@ export function ReportsView() {
         </div>
         <div className="clay p-4">
           <p className="text-xs text-gray-500 mb-1">Resultado</p>
-          <p className={`text-lg font-bold font-mono ${yearTotals.net >= 0 ? 'text-teal-600' : 'text-red-600'}`}>
+          <p className={`text-lg font-bold font-mono ${yearTotals.net >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
             <AnimatedNumber value={yearTotals.net} />
           </p>
         </div>

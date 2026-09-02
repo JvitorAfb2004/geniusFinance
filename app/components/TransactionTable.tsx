@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { useFinance } from '../hooks/useFinance';
 import { addMonths, format, isSameMonth, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -40,8 +40,8 @@ export function TransactionTable({
   const SortIcon = ({ field }: { field: 'date' | 'amount' }) => {
     if (sortField !== field) return <ArrowUpDown className="w-3 h-3 text-slate-300" />;
     return sortDir === 'asc'
-      ? <ArrowUp className="w-3 h-3 text-teal-600" />
-      : <ArrowDown className="w-3 h-3 text-teal-600" />;
+      ? <ArrowUp className="w-3 h-3 text-blue-600" />
+      : <ArrowDown className="w-3 h-3 text-blue-600" />;
   };
 
   const visibleTransactions = transactions

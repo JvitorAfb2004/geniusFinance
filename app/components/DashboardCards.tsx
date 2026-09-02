@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useFinance } from '../hooks/useFinance';
 import { formatCurrency, cn } from '../lib/utils';
@@ -108,8 +108,8 @@ export function DashboardCards({ valuesVisible = true }: { valuesVisible?: boole
       case 'balance': return {
         title: `Saldo Disponível (${scopeLabel})`, value: incomesReceived - expensesPaid,
         color: 'text-slate-800', icon: Wallet,
-        iconBg: 'bg-teal-50', iconColor: 'text-teal-600',
-        accentBar: 'bg-teal-500'
+        iconBg: 'bg-blue-50', iconColor: 'text-blue-600',
+        accentBar: 'bg-blue-500'
       };
       case 'income': return {
         title: 'Receitas (Mês)', value: incomes,

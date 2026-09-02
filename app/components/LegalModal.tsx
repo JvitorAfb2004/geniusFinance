@@ -1,4 +1,4 @@
-import { createPortal } from 'react-dom';
+﻿import { createPortal } from 'react-dom';
 import React from 'react';
 import { X } from 'lucide-react';
 
@@ -23,7 +23,7 @@ export default function LegalModal({ title, content, onClose }: Props) {
           </div>
         </div>
         <div className="flex justify-end px-6 py-4 border-t border-gray-100 shrink-0">
-           <button onClick={onClose} className="px-3 py-1.5 bg-teal-600 text-white rounded-lg hover:bg-teal-700 cursor-pointer text-xs font-medium">Fechar</button>
+           <button onClick={onClose} className="px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer text-xs font-medium">Fechar</button>
         </div>
       </div>
     </div>,

@@ -1,4 +1,4 @@
-import { createPortal } from 'react-dom';
+﻿import { createPortal } from 'react-dom';
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { useFinance } from '../hooks/useFinance';
 import { SpendingLimit, ContextType } from '../types';
@@ -188,7 +188,7 @@ export function SpendingLimitModal({
                 type="checkbox"
                 checked={hasMonthLimit}
                 onChange={(e) => setHasMonthLimit(e.target.checked)}
-                className="rounded border-gray-300 text-teal-600 focus:ring-teal-500"
+                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
               />
               <span className="text-xs font-semibold text-text-secondary uppercase tracking-wider">Limitar a um mês específico</span>
             </label>
@@ -252,8 +252,8 @@ export function SpendingLimitModal({
                               key={cat.id}
                               type="button"
                               onClick={() => toggleCategory(cat.id)}
-                              className={`w-full px-3 py-2 text-sm text-left hover:bg-teal-50 cursor-pointer transition-colors flex items-center gap-2 ${
-                                selected ? 'bg-teal-50 text-teal-700 font-medium' : 'text-gray-700'
+                              className={`w-full px-3 py-2 text-sm text-left hover:bg-blue-50 cursor-pointer transition-colors flex items-center gap-2 ${
+                                selected ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-700'
                               }`}
                             >
                               <input type="checkbox" checked={selected} readOnly className="rounded" />
@@ -281,13 +281,13 @@ export function SpendingLimitModal({
                   return (
                     <span
                       key={id}
-                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-teal-100 text-teal-700"
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700"
                     >
                       {cat.name}
                       <button
                         type="button"
                         onClick={() => setSelectedCategoryIds((prev) => prev.filter((cid) => cid !== id))}
-                        className="hover:text-teal-900 cursor-pointer"
+                        className="hover:text-blue-900 cursor-pointer"
                       >
                         <X className="w-3 h-3" />
                       </button>

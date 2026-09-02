@@ -1,4 +1,4 @@
-import { createPortal } from 'react-dom';
+﻿import { createPortal } from 'react-dom';
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { useFinance } from '../hooks/useFinance';
 import { format, parseISO } from 'date-fns';
@@ -200,7 +200,7 @@ export default function LeadModal({ lead, onClose }: { lead?: Lead; onClose: () 
                     setSearch('');
                     setShowDropdown(false);
                   }}
-                  className="w-full px-3 py-2 text-sm text-left hover:bg-teal-50 transition-colors flex items-center justify-between group cursor-pointer"
+                  className="w-full px-3 py-2 text-sm text-left hover:bg-blue-50 transition-colors flex items-center justify-between group cursor-pointer"
                 >
                   <span>{opt.value}</span>
                   <span className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 cursor-pointer"
@@ -220,7 +220,7 @@ export default function LeadModal({ lead, onClose }: { lead?: Lead; onClose: () 
 
       {/* New option inline form */}
       {showNewOption === field && (
-        <div className="flex items-center gap-1 p-2 bg-teal-50 rounded-lg border border-teal-100">
+        <div className="flex items-center gap-1 p-2 bg-blue-50 rounded-lg border border-blue-100">
           <input
             type="text"
             placeholder={`Nova ${label.toLowerCase()}`}
@@ -250,7 +250,7 @@ export default function LeadModal({ lead, onClose }: { lead?: Lead; onClose: () 
             type="button"
             onClick={handleAddOption}
             disabled={!newOptionValue.trim()}
-            className="px-2 py-1 bg-teal-600 text-white rounded text-xs hover:bg-teal-700 disabled:opacity-50 cursor-pointer"
+            className="px-2 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700 disabled:opacity-50 cursor-pointer"
           >
             <Check className="w-3.5 h-3.5" />
           </button>
@@ -388,7 +388,7 @@ export default function LeadModal({ lead, onClose }: { lead?: Lead; onClose: () 
           <button
             onClick={handleSubmit}
             disabled={!clientName.trim() || submitting}
-            className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-teal-700 disabled:opacity-50 transition-colors font-medium text-sm cursor-pointer"
+            className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors font-medium text-sm cursor-pointer"
           >
             {submitting ? 'Salvando...' : isEdit ? 'Atualizar' : 'Salvar Lead'}
           </button>

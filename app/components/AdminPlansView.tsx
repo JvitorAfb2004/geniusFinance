@@ -1,4 +1,4 @@
-import { createPortal } from 'react-dom';
+﻿import { createPortal } from 'react-dom';
 import React, { useState, useEffect } from 'react';
 import { apiFetch } from '../lib/api';
 import { Plus, Pencil, Trash2, Check, X } from 'lucide-react';
@@ -129,7 +129,7 @@ export function AdminPlansView() {
                 <td className="px-4 py-2.5 text-gray-700">{formatPriceFromCents(p.basePrice)}</td>
                 <td className="px-4 py-2.5 flex gap-2">
                   <button onClick={() => openEdit(p)}
-                    className="text-gray-400 hover:text-teal-600 cursor-pointer"><Pencil className="w-3.5 h-3.5" /></button>
+                    className="text-gray-400 hover:text-blue-600 cursor-pointer"><Pencil className="w-3.5 h-3.5" /></button>
                   <button onClick={() => handleDelete(p.id)}
                     className="text-gray-400 hover:text-red-500 cursor-pointer"><Trash2 className="w-3.5 h-3.5" /></button>
                 </td>
@@ -196,7 +196,7 @@ export function AdminPlansView() {
                 Cancelar
               </button>
               <button onClick={handleSave} disabled={saving || !form.name}
-                className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-teal-700 disabled:opacity-50 cursor-pointer transition-colors flex items-center gap-1.5">
+                className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 cursor-pointer transition-colors flex items-center gap-1.5">
                 <Check className="w-4 h-4" /> {saving ? 'Salvando...' : 'Salvar'}
               </button>
             </div>

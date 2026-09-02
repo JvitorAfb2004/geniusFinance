@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+﻿import React, { useMemo, useState } from 'react';
 import { useFinance } from '../hooks/useFinance';
 import { formatCurrency, cn } from '../lib/utils';
 import { SECTION_LABELS } from '../lib/categories';
@@ -215,7 +215,7 @@ export default function BudgetView() {
                                     autoFocus
                                     step="0.01"
                                   />
-                                  <button onClick={confirmEdit} className="p-1 text-teal-600 hover:text-teal-800 cursor-pointer"><Check className="w-3.5 h-3.5" /></button>
+                                  <button onClick={confirmEdit} className="p-1 text-blue-600 hover:text-blue-800 cursor-pointer"><Check className="w-3.5 h-3.5" /></button>
                                   <button onClick={cancelEdit} className="p-1 text-slate-400 hover:text-slate-600 cursor-pointer"><X className="w-3.5 h-3.5" /></button>
                                 </div>
                               ) : (
@@ -307,7 +307,7 @@ export default function BudgetView() {
                         {editing && editing.categoryId === cat.id && editing.month === mobileMonth ? (
                           <div className="flex items-center gap-1">
                             <input type="number" value={editValue} onChange={(e) => setEditValue(e.target.value)} onKeyDown={handleKeyDown} className="w-16 px-1.5 py-0.5 text-xs border border-slate-300 rounded outline-none focus:ring-2 focus:ring-primary/30" autoFocus />
-                            <button onClick={confirmEdit} className="p-1 text-teal-600 hover:text-teal-800 cursor-pointer"><Check className="w-3 h-3" /></button>
+                            <button onClick={confirmEdit} className="p-1 text-blue-600 hover:text-blue-800 cursor-pointer"><Check className="w-3 h-3" /></button>
                             <button onClick={cancelEdit} className="p-1 text-slate-400 hover:text-slate-600 cursor-pointer"><X className="w-3 h-3" /></button>
                           </div>
                         ) : (

@@ -1,4 +1,4 @@
-import { createPortal } from 'react-dom';
+﻿import { createPortal } from 'react-dom';
 import React, { useEffect, useState } from 'react';
 import { Eye, EyeOff, GripVertical, Plus, RotateCcw, Trash2, X } from 'lucide-react';
 import { useFinance } from '../hooks/useFinance';
@@ -169,7 +169,7 @@ export default function ProjectKanbanColumnsModal({ onClose }: Props) {
             <button
               onClick={addColumn}
               disabled={!newColumnName.trim()}
-              className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-primary text-white text-sm font-medium hover:bg-teal-700 disabled:opacity-50 cursor-pointer"
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-primary text-white text-sm font-medium hover:bg-blue-700 disabled:opacity-50 cursor-pointer"
             >
               <Plus className="w-4 h-4" />
               Adicionar
