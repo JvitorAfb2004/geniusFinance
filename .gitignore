@@ -24,6 +24,8 @@ build/
 # Editor / personal config
 .claude/
 .playwright-mcp/
+test-results/
+playwright-report/
 
 # Design mockups / large assets not needed in source
 TELA/

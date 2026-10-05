@@ -170,10 +170,10 @@ export function DashboardCards({ valuesVisible = true }: { valuesVisible?: boole
       };
       case 'margin': return {
         title: 'Margem Líquida', value: incomes > 0 ? ((incomes - totalExpenses) / incomes) * 100 : 0,
-        color: 'text-indigo-600', isPercent: true,
+        color: 'text-[#1a1d21]', isPercent: true,
         icon: Percent,
-        iconBg: 'bg-indigo-50', iconColor: 'text-indigo-600',
-        accentBar: 'bg-indigo-500'
+        iconBg: 'bg-white', iconColor: 'text-[#1a1d21]',
+        accentBar: 'bg-[#1a1d21]'
       };
       default: return null;
     }
@@ -265,13 +265,15 @@ export function DashboardCards({ valuesVisible = true }: { valuesVisible?: boole
         </div>
       )}
 
-      <div className={`grid gap-4 ${cards.length <= 2 ? 'grid-cols-1 md:grid-cols-2' : cards.length === 3 ? 'grid-cols-1 md:grid-cols-3' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4'}`}>
-        {cards.map((card, index) => (
+      <div className={`grid gap-4 ${cards.length <= 2 ? 'grid-cols-1 md:grid-cols-2' : cards.length === 3 ? 'grid-cols-1 md:grid-cols-3' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}>
+        {cards.map((card, index) => {
+          const isHero = index === 0;
+          return (
           <motion.div
             key={card.id}
-            initial={{ opacity: 0, y: 12, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ duration: 0.35, delay: index * 0.06, ease: 'easeOut' }}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: index * 0.05, ease: 'easeOut' }}
             draggable
             onDragStart={() => setDraggingWidgetId(card.id)}
             onDragOver={(e) => e.preventDefault()}
@@ -281,27 +283,28 @@ export function DashboardCards({ valuesVisible = true }: { valuesVisible?: boole
             }}
             onDragEnd={() => setDraggingWidgetId(null)}
             className={cn(
-              "clay clay-hover p-5 pl-6 transition-all duration-300 relative overflow-hidden group",
+              "p-6 transition-colors duration-200 relative overflow-hidden rounded-2xl",
+              isHero ? "bg-[#1c1f23] text-white" : "bg-[#f7f8f7] text-[#1a1d21]",
               "cursor-grab active:cursor-grabbing",
               draggingWidgetId === card.id && "opacity-60"
             )}
           >
-            <div className={`absolute top-3 bottom-3 left-0 w-[3px] rounded-full ${card.accentBar}`} />
-            <div className="flex items-start justify-between">
+            <div className="flex items-start justify-between gap-3">
               <div className="flex-1 min-w-0">
-                <div className="text-[0.7rem] text-slate-400 uppercase tracking-[0.06em] mb-2 font-semibold select-none">{card.title}</div>
-                <div className={cn('text-[1.45rem] font-bold font-mono tracking-[-0.02em] leading-none', card.color)}>
+                <div className={cn("text-[0.8rem] mb-2 font-medium select-none", isHero ? "text-white/60" : "text-[#9aa1ac]")}>{card.title}</div>
+                <div className={cn('text-[1.7rem] font-bold tracking-tight leading-none tabular-nums', isHero ? 'text-white' : 'text-[#1a1d21]')}>
                   {valuesVisible
                     ? (card.isPercent ? `${(animatedValues[index] ?? 0).toFixed(1)}%` : formatCurrency(animatedValues[index] ?? 0))
                     : '••••••'}
                 </div>
               </div>
-              <div className={`w-10 h-10 rounded-2xl ${card.iconBg} flex items-center justify-center flex-shrink-0`}>
-                <card.icon className={`w-[18px] h-[18px] ${card.iconColor}`} />
+              <div className={cn(`w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0`, isHero ? 'bg-white/10' : 'bg-white')}>
+                <card.icon className={cn(`w-5 h-5`, isHero ? 'text-white' : card.iconColor)} />
               </div>
             </div>
           </motion.div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

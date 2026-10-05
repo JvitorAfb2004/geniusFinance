@@ -125,6 +125,14 @@ export function TransactionModal({
   }, [filteredCategories]);
 
   useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !showCalculator) onClose();
+    };
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [showCalculator, onClose]);
+
+  useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (categoryDropdownRef.current && !categoryDropdownRef.current.contains(e.target as Node)) {
         setShowCategoryDropdown(false);
@@ -310,35 +318,35 @@ export function TransactionModal({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[60] bg-black/35 flex flex-col items-center justify-center p-4"
+      className="fixed inset-0 z-[60] bg-black/40 flex items-end sm:items-center justify-center sm:p-4"
     >
       <motion.div
-        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        initial={{ opacity: 0, scale: 0.98, y: 24 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95, y: 20 }}
+        exit={{ opacity: 0, scale: 0.98, y: 24 }}
         transition={{ type: 'spring', duration: 0.3 }}
-        className="clay shadow-xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden"
+        className="bg-white rounded-t-3xl sm:rounded-2xl shadow-xl w-full sm:max-w-lg max-h-[92dvh] flex flex-col overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="px-6 py-5 flex justify-between items-center shrink-0">
-          <div>
-            <h3 className="text-lg font-bold font-sans text-text-primary">
+        <div className="px-5 py-4 flex justify-between items-center shrink-0">
+          <div className="min-w-0">
+            <h3 className="text-[1.05rem] font-bold tracking-tight text-[#1a1d21]">
               {initialData ? 'Editar Lançamento' : 'Novo Lançamento'}
             </h3>
-            <p className="text-xs text-text-secondary mt-0.5">
-              {initialData ? 'Atualize os dados do lançamento' : 'Registre uma nova movimentação financeira'}
+            <p className="text-xs text-[#9aa1ac] mt-0.5">
+              {initialData ? 'Atualize os dados do lançamento' : 'Registre uma nova movimentação'}
             </p>
           </div>
-          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center clay-btn border-none text-text-muted hover:text-text-primary hover:brightness-95 transition-colors cursor-pointer">
+          <button onClick={onClose} aria-label="Fechar" className="w-9 h-9 shrink-0 flex items-center justify-center bg-[#f6f7f9] hover:bg-[#eef0f2] rounded-full text-[#5f6672] hover:text-[#1a1d21] transition-colors cursor-pointer">
             <X className="w-4 h-4"/>
           </button>
         </div>
-        <div className="border-b border-border mx-6" />
+        <div className="border-b border-[#f3f4f2] mx-5" />
 
         <form
           onSubmit={handleSubmit}
           onScroll={() => setShowCalculator(false)}
-          className="p-6 space-y-4 overflow-y-auto"
+          className="px-5 py-4 space-y-4 overflow-y-auto"
         >
           {(() => {
             const d = new Date(date + 'T00:00:00');
@@ -355,20 +363,20 @@ export function TransactionModal({
             );
           })()}
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider">Tipo</label>
-            <div className="grid grid-cols-3 gap-2">
+            <label className="text-[0.68rem] font-bold text-[#9aa1ac] uppercase tracking-[0.06em]">Tipo</label>
+            <div className="grid grid-cols-2 gap-2">
               {[
-                { id: 'INCOME', label: 'Entrada', icon: ArrowUpCircle, activeClass: 'border-emerald-400 bg-emerald-50 text-emerald-700' },
-                { id: 'EXPENSE', label: 'Saída', icon: ArrowDownCircle, activeClass: 'border-red-400 bg-red-50 text-red-700' },
+                { id: 'INCOME', label: 'Entrada', icon: ArrowUpCircle, activeClass: 'bg-emerald-50 text-emerald-700' },
+                { id: 'EXPENSE', label: 'Saída', icon: ArrowDownCircle, activeClass: 'bg-red-50 text-red-700' },
               ].map(opt => (
                 <button
                   key={opt.id}
                   type="button"
                   onClick={() => setType(opt.id as TransactionType)}
-                   className={`py-2.5 px-3 text-sm font-medium cursor-pointer transition-all flex flex-col items-center gap-1 ${
+                   className={`py-3 px-3 text-sm font-bold cursor-pointer transition-colors flex items-center justify-center gap-2 rounded-xl ${
                      type === opt.id
-                       ? `border-2 rounded-md ${opt.activeClass}`
-                       : 'clay-btn border-none text-text-secondary hover:brightness-95'
+                       ? `${opt.activeClass}`
+                       : 'bg-[#f6f7f9] text-[#9aa1ac] hover:text-[#1a1d21]'
                    }`}
                 >
                   <opt.icon className="w-4 h-4" />
@@ -379,20 +387,20 @@ export function TransactionModal({
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider">Status</label>
+            <label className="text-[0.68rem] font-bold text-[#9aa1ac] uppercase tracking-[0.06em]">Status</label>
             <div className="grid grid-cols-2 gap-2">
               {[
-                { id: 'PAID', label: 'Pago / Recebido', icon: CheckCircle, activeClass: 'border-emerald-400 bg-emerald-50 text-emerald-700' },
-                { id: 'PENDING', label: 'Pendente', icon: Clock, activeClass: 'border-amber-400 bg-amber-50 text-amber-700' },
+                { id: 'PAID', label: 'Pago', icon: CheckCircle, activeClass: 'bg-emerald-50 text-emerald-700' },
+                { id: 'PENDING', label: 'Pendente', icon: Clock, activeClass: 'bg-[#fff9ec] text-amber-700' },
               ].map(opt => (
                 <button
                   key={opt.id}
                   type="button"
                   onClick={() => setStatus(opt.id as TransactionStatus)}
-                   className={`py-2.5 px-3 text-sm font-medium cursor-pointer transition-all flex items-center justify-center gap-2 ${
+                   className={`py-3 px-3 text-sm font-bold cursor-pointer transition-colors flex items-center justify-center gap-2 rounded-xl ${
                      status === opt.id
-                       ? `border-2 rounded-md ${opt.activeClass}`
-                       : 'clay-btn border-none text-text-secondary hover:brightness-95'
+                       ? `${opt.activeClass}`
+                       : 'bg-[#f6f7f9] text-[#9aa1ac] hover:text-[#1a1d21]'
                    }`}
                 >
                   <opt.icon className="w-4 h-4" />
@@ -404,7 +412,7 @@ export function TransactionModal({
 
           {categories.length > 0 && (
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider">Categoria (DRE)</label>
+              <label className="text-[0.68rem] font-bold text-[#9aa1ac] uppercase tracking-[0.06em]">Categoria (DRE)</label>
               <div className="relative">
                 <div className="clay-input flex items-center">
                   <Search className="w-4 h-4 text-gray-400 ml-3 flex-shrink-0" />
@@ -435,33 +443,33 @@ export function TransactionModal({
                 </div>
 
                 {showCategoryDropdown && (
-                  <div ref={categoryDropdownRef} className="absolute z-20 mt-1 w-full clay shadow-lg max-h-56 overflow-y-auto">
+                  <div ref={categoryDropdownRef} className="absolute z-20 mt-1 w-full bg-white border border-[#f0f1ee] rounded-2xl shadow-xl max-h-56 overflow-y-auto">
                     {/* New category button */}
                     {!showNewCategory ? (
                       <button
                         type="button"
                         onClick={() => setShowNewCategory(true)}
-                        className="w-full px-3 py-2 text-sm text-blue-600 hover:bg-blue-50 flex items-center gap-2 border-b border-gray-100 cursor-pointer font-medium"
+                        className="w-full px-3 py-2 text-sm text-[#1a1d21] hover:bg-[#f6f7f9] flex items-center gap-2 border-b border-[#f3f4f2] cursor-pointer font-semibold"
                       >
                         <Plus className="w-4 h-4" />
                         Nova categoria
                       </button>
                     ) : (
-                      <div className="p-3 border-b border-gray-100 bg-gray-50 space-y-2">
+                      <div className="p-3 border-b border-[#f3f4f2] bg-[#f6f7f9] space-y-2">
                         <div className="flex gap-2">
                           <input
                             type="text"
                             placeholder="Nome da categoria"
                             value={newCategoryName}
                             onChange={(e) => setNewCategoryName(e.target.value)}
-                            className="flex-1 px-3 py-1.5 border border-gray-300 rounded text-sm outline-none focus:ring-1 focus:ring-blue-400"
+                            className="flex-1 px-3 py-1.5 bg-white border border-[#f0f1ee] rounded-xl text-sm outline-none"
                             autoFocus
                             onKeyDown={(e) => { if (e.key === 'Enter') handleAddCategory(); if (e.key === 'Escape') setShowNewCategory(false); }}
                           />
                           <select
                             value={newCategorySection}
                             onChange={(e) => setNewCategorySection(e.target.value as DRESection)}
-                            className="px-2 py-1.5 border border-gray-300 rounded text-xs outline-none"
+                            className="px-2 py-1.5 bg-white border border-[#f0f1ee] rounded-xl text-xs outline-none"
                           >
                             <option value="RECEITA">Receita</option>
                             <option value="CUSTOS">Custos</option>
@@ -473,14 +481,14 @@ export function TransactionModal({
                             type="button"
                             onClick={handleAddCategory}
                             disabled={!newCategoryName.trim()}
-                            className="text-xs px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 cursor-pointer"
+                            className="text-xs px-3 py-1.5 bg-[#1a1d21] text-white rounded-full hover:opacity-90 disabled:opacity-50 cursor-pointer font-bold"
                           >
                             Adicionar
                           </button>
                           <button
                             type="button"
                             onClick={() => setShowNewCategory(false)}
-                            className="text-xs px-3 py-1 text-gray-500 hover:text-gray-700 cursor-pointer"
+                            className="text-xs px-3 py-1.5 text-[#9aa1ac] hover:text-[#1a1d21] cursor-pointer font-semibold"
                           >
                             Cancelar
                           </button>
@@ -492,7 +500,7 @@ export function TransactionModal({
                       <button
                         type="button"
                         onClick={() => { setCategoryId(''); setCategorySearch(''); setShowCategoryDropdown(false); }}
-                        className="w-full px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 text-left border-b border-gray-100 cursor-pointer"
+                        className="w-full px-3 py-2 text-sm text-[#5f6672] hover:bg-[#f6f7f9] text-left border-b border-[#f3f4f2] cursor-pointer"
                       >
                         Limpar seleção
                       </button>
@@ -501,7 +509,7 @@ export function TransactionModal({
                     {groupedCategories.map((group) =>
                       group.items.length > 0 ? (
                         <div key={group.section}>
-                          <div className="px-3 py-1.5 text-xs font-semibold text-gray-400 uppercase bg-gray-50">
+                          <div className="px-3 py-1.5 text-[0.68rem] font-bold text-[#9aa1ac] uppercase tracking-[0.06em] bg-[#f6f7f9]">
                             {group.label}
                           </div>
                           {group.items.map((cat) => (
@@ -513,8 +521,8 @@ export function TransactionModal({
                                 setCategorySearch('');
                                 setShowCategoryDropdown(false);
                               }}
-                              className={`w-full px-3 py-2 text-sm text-left hover:bg-blue-50 cursor-pointer transition-colors ${
-                                categoryId === cat.id ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-700'
+                              className={`w-full px-3 py-2 text-sm text-left hover:bg-[#f6f7f9] cursor-pointer transition-colors ${
+                                categoryId === cat.id ? 'bg-[#f0f1ee] text-[#1a1d21] font-bold' : 'text-[#1a1d21]'
                               }`}
                             >
                               {cat.name}
@@ -526,7 +534,7 @@ export function TransactionModal({
                     )}
 
                     {filteredCategories.length === 0 && categorySearch && (
-                      <div className="px-3 py-3 text-sm text-gray-400 text-center">
+                      <div className="px-3 py-3 text-sm text-[#9aa1ac] text-center">
                         Nenhuma categoria encontrada.
                       </div>
                     )}
@@ -537,14 +545,14 @@ export function TransactionModal({
           )}
 
           {!categoryId && suggestedCategoryId && suggestedCategoryName && (
-            <div className="-mt-1 rounded-lg border border-blue-100 bg-blue-50 px-3 py-2 flex items-center justify-between">
-              <p className="text-xs text-blue-700">
-Sugestão pela descrição: <strong>{suggestedCategoryName}</strong>
+            <div className="-mt-1 rounded-xl bg-[#f6f7f9] px-3 py-2 flex items-center justify-between">
+              <p className="text-xs text-[#5f6672]">
+Sugestão pela descrição: <strong className="text-[#1a1d21]">{suggestedCategoryName}</strong>
               </p>
               <button
                 type="button"
                 onClick={() => setCategoryId(suggestedCategoryId)}
-                className="text-xs font-semibold text-blue-700 hover:text-blue-800 cursor-pointer"
+                className="text-xs font-bold text-[#1a1d21] underline underline-offset-2 cursor-pointer"
               >
                 Aplicar
               </button>
@@ -553,7 +561,7 @@ Sugestão pela descrição: <strong>{suggestedCategoryName}</strong>
 
           {tags.length > 0 && (
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Tags</label>
+              <label className="text-[0.68rem] font-bold text-[#9aa1ac] uppercase tracking-[0.06em]">Tags</label>
               <div className="flex flex-wrap gap-1.5">
                 {tags.map((tag) => {
                   const active = selectedTagIds.includes(tag.id);
@@ -580,20 +588,21 @@ Sugestão pela descrição: <strong>{suggestedCategoryName}</strong>
           )}
 
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider">Descrição</label>
+            <label className="text-[0.68rem] font-bold text-[#9aa1ac] uppercase tracking-[0.06em]">Descrição</label>
             <input
               required
+              autoFocus
               type="text"
               placeholder="Ex: Salário, Aluguel, Supermercado..."
               value={title}
               onChange={e => setTitle(e.target.value)}
-              className="w-full clay-input px-4 py-2.5 outline-none transition-all placeholder:text-text-muted"
+              className="w-full clay-input px-4 py-3 outline-none transition-all placeholder:text-text-muted text-[0.95rem] font-medium"
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider">Valor (R$)</label>
+              <label className="text-[0.68rem] font-bold text-[#9aa1ac] uppercase tracking-[0.06em]">Valor (R$)</label>
               <div className="relative flex gap-1">
                 <input
                   required
@@ -678,20 +687,20 @@ Sugestão pela descrição: <strong>{suggestedCategoryName}</strong>
               </div>
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider">Data Base</label>
+              <label className="text-[0.68rem] font-bold text-[#9aa1ac] uppercase tracking-[0.06em]">Data Base</label>
               <input
                 required
                 type="date"
                 value={date}
                 onChange={e => setDate(e.target.value)}
-                className="w-full clay-input px-4 py-2.5 outline-none transition-all"
+                className="w-full clay-input px-4 py-3 outline-none transition-all text-[0.95rem]"
               />
             </div>
           </div>
 
           {!initialData ? (
-            <div className="space-y-3 pt-2">
-              <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider">Recorrência</label>
+            <div className="space-y-2 pt-1">
+              <label className="text-[0.68rem] font-bold text-[#9aa1ac] uppercase tracking-[0.06em]">Recorrência</label>
 <div className="grid grid-cols-3 gap-2">
                 {[
                   { id: 'ONE_TIME', label: 'Única' },
@@ -702,10 +711,10 @@ Sugestão pela descrição: <strong>{suggestedCategoryName}</strong>
                     key={opt.id}
                     type="button"
                     onClick={() => setRecurrenceConfig(opt.id as any)}
-                    className={`py-2.5 px-3 text-sm font-medium cursor-pointer transition-all ${
+                    className={`py-2.5 px-3 text-sm font-bold cursor-pointer transition-colors rounded-xl ${
                       recurrenceConfig === opt.id
-                        ? 'border-2 rounded-md border-primary bg-primary/10 text-primary-dark'
-                        : 'clay-btn border-none text-text-secondary hover:brightness-95'
+                        ? 'bg-[#1a1d21] text-white'
+                        : 'bg-[#f6f7f9] text-[#9aa1ac] hover:text-[#1a1d21]'
                     }`}
                   >
                     {opt.label}
@@ -731,7 +740,7 @@ Sugestão pela descrição: <strong>{suggestedCategoryName}</strong>
               
                {recurrenceConfig === 'FIXED' && (
                 <div className="pt-1 space-y-2">
-                  <p className="text-xs bg-primary-light text-primary-dark p-2.5 rounded-lg border border-primary/20">
+                  <p className="text-xs bg-[#f6f7f9] text-[#1a1d21] font-medium p-3 rounded-xl">
                     Um lançamento será criado para os próximos meses.
                   </p>
                   <label className="flex items-center gap-2 cursor-pointer">
@@ -739,16 +748,16 @@ Sugestão pela descrição: <strong>{suggestedCategoryName}</strong>
                       type="checkbox"
                       checked={hasEndDate}
                       onChange={(e) => setHasEndDate(e.target.checked)}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      className="rounded accent-[#1a1d21]"
                     />
-                    <span className="text-xs text-gray-600">Definir data fim</span>
+                    <span className="text-xs text-[#5f6672] font-medium">Definir data fim</span>
                   </label>
                   {hasEndDate && (
                     <input
                       type="date"
                       value={endDate}
                       onChange={(e) => setEndDate(e.target.value)}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-400"
+                      className="w-full clay-input px-4 py-2.5 outline-none transition-all text-sm"
                       min={date}
                     />
                   )}
@@ -757,15 +766,15 @@ Sugestão pela descrição: <strong>{suggestedCategoryName}</strong>
             </div>
           ) : (
             initialData.groupId && initialData.isFixed && (
-              <div className="pt-2">
-                <label className="flex items-center gap-2 cursor-pointer p-3 clay-btn border-none hover:brightness-95 transition-colors">
+              <div className="pt-1">
+                <label className="flex items-center gap-2 cursor-pointer p-3.5 bg-[#f6f7f9] rounded-xl transition-colors">
                   <input 
                     type="checkbox" 
                     checked={applyToFuture}
                     onChange={(e) => setApplyToFuture(e.target.checked)}
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    className="rounded accent-[#1a1d21]"
                   />
-                  <span className="text-sm font-medium text-gray-700">
+                  <span className="text-sm font-semibold text-[#1a1d21]">
                     Aplicar para as próximas recorrências.
                   </span>
                 </label>
@@ -780,11 +789,11 @@ Sugestão pela descrição: <strong>{suggestedCategoryName}</strong>
             </div>
           )}
 
-          <div className="pt-6 pb-2">
+          <div className="sticky bottom-0 -mx-5 -mb-4 px-5 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] bg-white border-t border-[#f3f4f2]">
             <button
               type="submit"
               disabled={submitting}
-              className="w-full clay-btn-primary border-none font-semibold py-3.5 text-white disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center gap-2"
+              className="w-full bg-[#1a1d21] hover:opacity-90 font-bold py-3.5 rounded-xl text-white text-[0.95rem] disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center gap-2 transition-opacity"
             >
               {submitting && (
                 <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">

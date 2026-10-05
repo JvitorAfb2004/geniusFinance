@@ -71,17 +71,18 @@ export function Header({
   }
 
   return (
-    <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center px-4 sm:px-6 py-3.5 sm:py-4 shrink-0 w-full gap-4 bg-surface border-b border-border transition-colors">
-      <div className="flex items-center gap-3 sm:gap-6 w-full sm:w-auto">
+    <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center px-4 sm:px-8 py-3 sm:py-6 shrink-0 w-full gap-2.5 sm:gap-4 bg-white border-b border-[#f3f4f2] transition-colors">
+      <div className="flex items-center gap-2.5 sm:gap-4 w-full sm:w-auto">
         <button
           onClick={onOpenMenu}
-          className="lg:hidden p-2 -ml-2 text-slate-500 hover:text-slate-700 transition-colors cursor-pointer"
+          aria-label="Abrir menu de navegação"
+          className="lg:hidden p-2 -ml-2 text-[#9aa1ac] hover:text-[#1a1d21] transition-colors cursor-pointer"
         >
           <Menu className="w-5 h-5" />
         </button>
         
         <div className="flex items-center gap-2.5">
-          <h1 className="text-[1.2rem] sm:text-[1.4rem] font-semibold text-slate-900 tracking-tight">{pageTitle}</h1>
+          <h1 className="text-[1.15rem] sm:text-[1.65rem] font-bold text-[#1a1d21] tracking-tight truncate">{pageTitle}</h1>
           {activeScope.type === 'ACCOUNT' && (
             <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-[0.62rem] font-semibold bg-slate-100 text-slate-700 border border-slate-200 uppercase tracking-wider">
               Corporativo
@@ -89,19 +90,23 @@ export function Header({
           )}
         </div>
 
-        <div className="flex items-center gap-1.5 text-sm font-medium clay-btn px-1.5 py-1 ml-auto sm:ml-0">
+        <div className="flex items-center gap-1 text-sm font-medium bg-[#f6f7f9] rounded-full px-1.5 sm:px-2 py-1 sm:py-1.5 ml-auto sm:ml-0 shrink-0">
           <button
+            type="button"
             onClick={() => setSelectedMonth(subMonths(selectedMonth, 1))}
-            className="p-1 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-md transition-colors border-none bg-transparent cursor-pointer"
+            aria-label="Mês anterior"
+            className="p-1.5 text-[#9aa1ac] hover:text-[#1a1d21] hover:bg-white rounded-full transition-colors border-none bg-transparent cursor-pointer"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
-          <span className="w-20 sm:w-22 text-center capitalize text-slate-700 font-medium text-[0.82rem] select-none">
+          <span className="w-[4.5rem] sm:w-22 text-center capitalize text-[#1a1d21] font-semibold text-[0.72rem] sm:text-[0.82rem] select-none">
             {format(selectedMonth, 'MMM / yyyy', { locale: ptBR })}
           </span>
           <button
+            type="button"
             onClick={() => setSelectedMonth(addMonths(selectedMonth, 1))}
-            className="p-1 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-md transition-colors border-none bg-transparent cursor-pointer"
+            aria-label="Próximo mês"
+            className="p-1.5 text-[#9aa1ac] hover:text-[#1a1d21] hover:bg-white rounded-full transition-colors border-none bg-transparent cursor-pointer"
           >
             <ChevronRight className="w-4 h-4" />
           </button>
@@ -109,7 +114,7 @@ export function Header({
       </div>
 
       <div className="flex gap-2 w-full sm:w-auto items-center">
-        <div className="flex-1 min-w-0 sm:flex-none flex gap-1 p-1 clay-btn overflow-x-auto">
+        <div className="flex-1 min-w-0 sm:flex-none flex gap-1 p-1 bg-[#f6f7f9] rounded-full overflow-x-auto">
           {scopeOptions.map((opt) => {
             const isActive = opt.scope.type === 'PERSONAL'
               ? activeScope.type === 'PERSONAL'
@@ -118,11 +123,12 @@ export function Header({
             return (
               <button
                 key={opt.scope.type === 'PERSONAL' ? 'personal' : (opt.scope as { type: 'ACCOUNT'; accountId: string }).accountId}
+                type="button"
                 onClick={() => handleScopeSwitch(opt)}
-                className={`whitespace-nowrap px-3.5 py-1.5 rounded-md text-[0.8rem] font-medium transition-colors border-none cursor-pointer inline-flex items-center justify-center gap-1.5 shrink-0 ${
+                className={`whitespace-nowrap px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-[0.72rem] sm:text-[0.8rem] font-semibold transition-colors border-none cursor-pointer inline-flex items-center justify-center gap-1.5 shrink-0 ${
                   isActive
-                    ? 'bg-slate-100 text-text-primary font-semibold'
-                    : 'bg-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-50'
+                    ? 'bg-white text-[#1a1d21] shadow-sm'
+                    : 'bg-transparent text-[#9aa1ac] hover:text-[#1a1d21]'
                 }`}
               >
                 {opt.scope.type === 'PERSONAL' ? <User className="w-3.5 h-3.5" /> : <Building2 className="w-3.5 h-3.5" />}
@@ -138,12 +144,13 @@ export function Header({
         </div>
 
         <button
+          type="button"
           onClick={onToggleDashboardValues}
-          className="h-[36px] shrink-0 px-2.5 sm:px-3 clay-btn text-[0.78rem] font-medium text-slate-600 hover:text-slate-800 transition-colors cursor-pointer inline-flex items-center gap-1.5"
+          aria-label={dashboardValuesVisible ? 'Ocultar valores' : 'Mostrar valores'}
+          className="h-9 w-9 sm:h-[40px] sm:w-[40px] shrink-0 bg-[#f6f7f9] hover:bg-[#eef0f2] rounded-full text-[#5f6672] hover:text-[#1a1d21] transition-colors cursor-pointer inline-flex items-center justify-center"
           title={dashboardValuesVisible ? 'Ocultar valores do dashboard' : 'Mostrar valores do dashboard'}
         >
-          {dashboardValuesVisible ? <EyeOff className="w-4 h-4 text-slate-500" /> : <Eye className="w-4 h-4 text-slate-500" />}
-          <span className="hidden md:inline">{dashboardValuesVisible ? 'Ocultar valores' : 'Mostrar valores'}</span>
+          {dashboardValuesVisible ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
         </button>
       </div>
 

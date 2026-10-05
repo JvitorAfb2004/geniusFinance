@@ -3,10 +3,12 @@ import { useFinance } from '../hooks/useFinance';
 import { addMonths, format, isSameMonth, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { formatCurrency, cn } from '../lib/utils';
-import { Trash2, Pencil, Search, Forward, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { Trash2, Pencil, Search, Forward, ArrowUpDown, ArrowUp, ArrowDown, ArrowLeftRight } from 'lucide-react';
 import { TransactionModal } from './TransactionModal';
+import { MoveTransactionModal } from './MoveTransactionModal';
 import ConfirmModal from './ConfirmModal';
 import { Transaction } from '../types';
+import { isRecurringTransaction } from '../lib/transactionActions';
 
 export function TransactionTable({ 
   hideHeaderTitle,
@@ -17,9 +19,11 @@ export function TransactionTable({
   forceFilter?: 'ALL' | 'INCOME' | 'EXPENSE';
   fixedOnly?: boolean;
 }) {
-  const { transactions, activeContext, selectedMonth, toggleStatus, deleteTransaction, updateTransaction, categories, tags } = useFinance();
+  const { transactions, activeContext, activeScope, accounts, selectedMonth, toggleStatus, deleteTransaction, updateTransaction, categories, tags } = useFinance();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTx, setEditingTx] = useState<Transaction | undefined>(undefined);
+  const [moveTx, setMoveTx] = useState<Transaction | undefined>(undefined);
+  const canMove = accounts.length > 0 || activeScope.type === 'ACCOUNT';
   const [filterType, setFilterType] = useState<'ALL' | 'INCOME' | 'EXPENSE'>('ALL');
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilterId, setCategoryFilterId] = useState('');
@@ -91,25 +95,27 @@ export function TransactionTable({
   };
 
   return (
-    <div className="clay flex flex-col flex-1 min-h-[300px]">
-      <div className="px-5 py-4 border-b border-slate-100 flex flex-row items-center justify-between z-10 gap-3">
+    <div className="bg-white flex flex-col flex-1 min-h-[300px]">
+      <div className="px-1 py-3 border-b border-[#f3f4f2] flex flex-col sm:flex-row sm:items-center sm:justify-between z-10 gap-3">
         {!hideHeaderTitle && <span className="text-slate-700 font-bold text-[0.85rem] tracking-tight shrink-0">Transações</span>}
 
-        <div className="flex items-center gap-2 w-full sm:w-auto sm:ml-auto">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-auto sm:ml-auto min-w-0">
           <div className="relative flex-1 sm:flex-none sm:w-32 min-w-[100px]">
              <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
              <input
                type="text"
-               placeholder="Buscar..."
+                aria-label="Buscar lançamentos"
+                placeholder="Buscar..."
                value={searchTerm}
                onChange={(e) => setSearchTerm(e.target.value)}
                 className="clay-input w-full text-[0.78rem] pl-9 pr-3 py-1.5 font-medium text-slate-700 placeholder:text-slate-400"
              />
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
           {!forceFilter && (
             <select
+              aria-label="Filtrar tipo de lançamento"
               className="clay-input text-[0.72rem] px-2 py-1.5 font-medium text-slate-600 cursor-pointer shrink-0"
               value={filterType}
               onChange={(e) => setFilterType(e.target.value as any)}
@@ -121,6 +127,7 @@ export function TransactionTable({
             </select>
           )}
           <select
+            aria-label="Filtrar status"
             className="clay-input text-[0.72rem] px-2 py-1.5 font-medium text-slate-600 cursor-pointer shrink-0"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as 'ALL' | 'PAID' | 'PENDING')}
@@ -130,6 +137,7 @@ export function TransactionTable({
             <option value="PENDING">Pendente</option>
           </select>
           <select
+            aria-label="Filtrar categoria"
             className="clay-input text-[0.72rem] px-2 py-1.5 font-medium text-slate-600 cursor-pointer shrink-0 max-w-[110px]"
             value={categoryFilterId}
             onChange={(e) => setCategoryFilterId(e.target.value)}
@@ -143,7 +151,8 @@ export function TransactionTable({
           </select>
           <button
             onClick={handleCreate}
-            className="clay-btn text-[0.72rem] px-2.5 py-1.5 cursor-pointer font-bold whitespace-nowrap shrink-0"
+            type="button"
+            className="clay-btn-primary text-[0.72rem] px-2.5 py-1.5 cursor-pointer font-bold whitespace-nowrap shrink-0"
           >
             + Lançamento
           </button>
@@ -153,19 +162,23 @@ export function TransactionTable({
 
       {/* Desktop: Table */}
       <div className="overflow-x-auto overflow-y-auto flex-1 hidden md:block">
-        <table className="w-full text-left border-collapse text-[0.85rem] min-w-[600px]">
-          <thead className="sticky top-0 bg-slate-50 z-10">
+        <table className="w-full text-left border-collapse text-[0.9rem] min-w-[640px]">
+          <thead className="sticky top-0 bg-white z-10">
             <tr>
-              <th onClick={() => toggleSort('date')} className="py-3 px-4 font-semibold text-slate-400 text-[0.7rem] uppercase tracking-[0.04em] border-b border-slate-100 whitespace-nowrap cursor-pointer hover:text-slate-600 select-none">
-                <span className="inline-flex items-center gap-1">Data <SortIcon field="date" /></span>
+              <th scope="col" className="py-3.5 pr-4 font-semibold text-[#9aa1ac] text-[0.68rem] uppercase tracking-[0.06em] border-b border-[#f3f4f2] whitespace-nowrap">
+                <button type="button" onClick={() => toggleSort('date')} aria-label={`Ordenar por data, ${sortDir === 'asc' ? 'crescente' : 'decrescente'}`} className="inline-flex items-center gap-1 bg-transparent border-none text-inherit cursor-pointer uppercase">
+                  Data <SortIcon field="date" />
+                </button>
               </th>
-              <th className="py-3 px-4 font-semibold text-slate-400 text-[0.7rem] uppercase tracking-[0.04em] border-b border-slate-100 whitespace-nowrap">Descrição</th>
-              <th className="py-3 px-4 font-semibold text-slate-400 text-[0.7rem] uppercase tracking-[0.04em] border-b border-slate-100 whitespace-nowrap">Categoria</th>
-              <th onClick={() => toggleSort('amount')} className="py-3 px-4 font-semibold text-slate-400 text-[0.7rem] uppercase tracking-[0.04em] border-b border-slate-100 text-right whitespace-nowrap cursor-pointer hover:text-slate-600 select-none">
-                <span className="inline-flex items-center gap-1 justify-end">Valor <SortIcon field="amount" /></span>
+              <th scope="col" className="py-3.5 px-4 font-semibold text-[#9aa1ac] text-[0.68rem] uppercase tracking-[0.06em] border-b border-[#f3f4f2] whitespace-nowrap">Descrição</th>
+              <th scope="col" className="py-3.5 px-4 font-semibold text-[#9aa1ac] text-[0.68rem] uppercase tracking-[0.06em] border-b border-[#f3f4f2] whitespace-nowrap">Categoria</th>
+              <th scope="col" className="py-3.5 px-4 font-semibold text-[#9aa1ac] text-[0.68rem] uppercase tracking-[0.06em] border-b border-[#f3f4f2] text-right whitespace-nowrap">
+                <button type="button" onClick={() => toggleSort('amount')} aria-label={`Ordenar por valor, ${sortDir === 'asc' ? 'crescente' : 'decrescente'}`} className="inline-flex items-center gap-1 justify-end bg-transparent border-none text-inherit cursor-pointer uppercase">
+                  Valor <SortIcon field="amount" />
+                </button>
               </th>
-              <th className="py-3 px-4 font-semibold text-slate-400 text-[0.7rem] uppercase tracking-[0.04em] border-b border-slate-100 whitespace-nowrap">Status</th>
-              <th className="py-3 px-4 font-semibold text-slate-400 text-[0.7rem] uppercase tracking-[0.04em] border-b border-slate-100 text-center w-20 whitespace-nowrap"></th>
+              <th scope="col" className="py-3.5 px-4 font-semibold text-[#9aa1ac] text-[0.68rem] uppercase tracking-[0.06em] border-b border-[#f3f4f2] whitespace-nowrap">Status</th>
+              <th scope="col" aria-label="Ações" className="py-3.5 px-4 font-semibold text-[#9aa1ac] text-[0.68rem] uppercase tracking-[0.06em] border-b border-[#f3f4f2] text-center w-20 whitespace-nowrap"></th>
             </tr>
           </thead>
           <tbody>
@@ -176,11 +189,11 @@ export function TransactionTable({
                 </td>
               </tr>
             ) : visibleTransactions.map((tx) => (
-              <tr key={tx.id} className="hover:bg-slate-50 transition-colors duration-150">
-                <td className="py-2.5 px-4 border-b border-slate-100 font-sans text-slate-500 whitespace-nowrap">
+              <tr key={tx.id} className="hover:bg-[#fafaf9] transition-colors duration-150">
+                <td className="py-4 pr-4 border-b border-[#f3f4f2] text-[#5f6672] whitespace-nowrap text-[0.85rem]">
                   {format(parseISO(tx.date), "dd/MM/yyyy")}
                 </td>
-                <td className="py-2.5 px-4 border-b border-slate-100 font-sans font-medium text-slate-700">
+                <td className="py-4 px-4 border-b border-[#f3f4f2] font-semibold text-[#1a1d21] text-[0.9rem]">
                   {tx.title}
                   {(tx.tagIds && tx.tagIds.length > 0) && (
                     <span className="flex flex-wrap gap-1 mt-1">
@@ -188,7 +201,7 @@ export function TransactionTable({
                         const tag = tags.find((t) => t.id === tid);
                         if (!tag) return null;
                         return (
-                          <span key={tid} className="text-[0.6rem] px-1.5 py-0.5 rounded-full text-white font-medium" style={{ backgroundColor: tag.color }}>
+                            <span key={tid} className="text-[0.6rem] px-1.5 py-0.5 rounded-full text-white font-medium" style={{ backgroundColor: tag.color }}>
                             {tag.name}
                           </span>
                         );
@@ -201,54 +214,69 @@ export function TransactionTable({
                     </span>
                   )}
                 </td>
-                <td className="py-2.5 px-4 border-b border-slate-100 font-sans text-slate-500">
+                <td className="py-4 px-4 border-b border-[#f3f4f2] text-[#5f6672] text-[0.85rem]">
                   {getCategoryName(tx.categoryId)}
                 </td>
-                <td className="py-2.5 px-4 border-b border-slate-100 text-right">
+                <td className="py-4 px-4 border-b border-[#f3f4f2] text-right">
                   <span className={cn(
-                    "font-mono font-bold whitespace-nowrap",
-                    tx.type === 'INCOME' ? 'text-[#10b981]' : 'text-[#ef4444]'
+                    "font-bold whitespace-nowrap tabular-nums text-[0.9rem]",
+                    tx.type === 'INCOME' ? 'text-[#1a1d21]' : 'text-[#1a1d21]'
                   )}>
                     {tx.type === 'INCOME' ? '' : '- '}
                     {formatCurrency(tx.amount)}
                   </span>
                 </td>
-                <td className="py-2.5 px-4 border-b border-slate-100">
-                    <button 
+                <td className="py-4 px-4 border-b border-[#f3f4f2]">
+                    <button
+                    type="button"
+                    aria-label={`Marcar ${tx.title} como ${tx.status === 'PAID' ? 'pendente' : 'pago'}`}
                     onClick={() => toggleStatus(tx.id)}
                     className={cn(
                       "px-2.5 py-0.5 rounded-full text-[0.68rem] font-semibold cursor-pointer border-none transition-all active:scale-95 shadow-[inset_0_1px_2px_rgba(0,0,0,0.06)]",
-                      tx.status === 'PAID' 
-                        ? 'bg-[#dcfce7] text-[#166534]' 
-                        : 'bg-[#fef9c3] text-[#854d0e]'
+                      tx.status === 'PAID'
+                        ? 'bg-success-light text-success-dark'
+                        : 'bg-warning-light text-warning-dark'
                     )}
                   >
                     {tx.status === 'PAID' ? 'Pago' : 'Pendente'}
                   </button>
                 </td>
-                <td className="py-2.5 px-4 border-b border-slate-100 text-center whitespace-nowrap">
+                <td className="py-4 px-4 border-b border-[#f3f4f2] text-center whitespace-nowrap">
+                  {canMove && (
+                    <button
+                      type="button"
+                      onClick={() => setMoveTx(tx)}
+                      title="Mover para outra conta"
+                      aria-label={`Mover ${tx.title} para outra conta`}
+                      className="text-[#9aa1ac] hover:text-[#1a1d21] p-2 cursor-pointer bg-transparent border-none rounded-lg hover:bg-[#f6f7f9]"
+                    >
+                      <ArrowLeftRight className="w-4 h-4" />
+                    </button>
+                  )}
                   <button
+                    type="button"
                     onClick={() => handleMoveToNextMonth(tx)}
                     title="Passar para o próximo mês"
-                    className="clay-btn text-slate-400 hover:text-emerald-600 p-1 cursor-pointer"
+                    aria-label={`Passar ${tx.title} para o próximo mês`}
+                    className="text-[#9aa1ac] hover:text-[#1a1d21] p-2 cursor-pointer bg-transparent border-none rounded-lg hover:bg-[#f6f7f9]"
                   >
                     <Forward className="w-4 h-4" />
                   </button>
                   <button
+                    type="button"
                     onClick={() => handleEdit(tx)}
-                    className="clay-btn text-slate-500 hover:text-primary p-1 cursor-pointer"
+                    aria-label={`Editar ${tx.title}`}
+                    className="text-[#9aa1ac] hover:text-primary p-2 cursor-pointer bg-transparent border-none rounded-lg hover:bg-[#f6f7f9]"
                   >
                     <Pencil className="w-4 h-4" />
                   </button>
                   <button
+                    type="button"
                     onClick={() => {
-                      if (tx.groupId && tx.isFixed) {
-                        setConfirmDelete({ tx, future: true });
-                      } else {
-                        setConfirmDelete({ tx, future: false });
-                      }
+                      setConfirmDelete({ tx, future: isRecurringTransaction(tx) });
                     }}
-                    className="clay-btn text-slate-500 hover:text-[#ef4444] p-1 cursor-pointer ml-1"
+                    aria-label={`Excluir ${tx.title}`}
+                    className="text-[#9aa1ac] hover:text-danger p-2 cursor-pointer ml-1 bg-transparent border-none rounded-lg hover:bg-[#f6f7f9]"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -260,43 +288,42 @@ export function TransactionTable({
       </div>
 
       {/* Mobile: Card List */}
-      <div className="md:hidden flex-1 overflow-y-auto px-4 pb-2">
+      <div className="md:hidden flex-1 overflow-y-auto pb-2">
         {visibleTransactions.length === 0 ? (
           <div className="py-12 text-center">
-            <span className="text-slate-400 text-sm">Nenhum lançamento encontrado.</span>
+            <span className="text-[#9aa1ac] text-sm">Nenhum lançamento encontrado.</span>
           </div>
         ) : (
-          <div className="flex flex-col gap-2 py-3">
+          <div className="flex flex-col gap-3 py-3">
             {visibleTransactions.map((tx) => (
-              <div key={tx.id} className="clay p-3.5">
+              <div key={tx.id} className="bg-[#f7f8f7] rounded-2xl p-4">
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs text-slate-500 font-medium">{format(parseISO(tx.date), "dd/MM/yyyy")}</p>
-                    <p className="text-sm font-semibold text-slate-800 mt-0.5 truncate">{tx.title}</p>
+                    <p className="text-xs text-[#9aa1ac] font-medium">{format(parseISO(tx.date), "dd/MM/yyyy")}</p>
+                    <p className="text-[0.95rem] font-bold text-[#1a1d21] mt-0.5 truncate">{tx.title}</p>
                     {tx.installmentInfo && (
-                      <span className="text-[0.65rem] text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded-md mt-1 inline-block">{tx.installmentInfo}</span>
+                      <span className="text-[0.65rem] text-[#5f6672] bg-white px-2 py-0.5 rounded-full mt-1 inline-block">{tx.installmentInfo}</span>
                     )}
                   </div>
-                  <span className={cn(
-                    "text-sm font-bold font-mono whitespace-nowrap shrink-0",
-                    tx.type === 'INCOME' ? 'text-emerald-600' : 'text-rose-600'
-                  )}>
+                  <span className="text-[0.95rem] font-bold tabular-nums whitespace-nowrap shrink-0 text-[#1a1d21]">
                     {tx.type === 'INCOME' ? '' : '- '}{formatCurrency(tx.amount)}
                   </span>
                 </div>
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-1.5 flex-wrap min-w-0">
-                    <span className="text-[0.65rem] text-slate-500 bg-slate-50 px-1.5 py-0.5 rounded-md truncate max-w-[120px]">{getCategoryName(tx.categoryId)}</span>
+                    <span className="text-[0.7rem] text-[#5f6672] bg-white px-2 py-1 rounded-full truncate max-w-[120px]">{getCategoryName(tx.categoryId)}</span>
                     {tx.tagIds && tx.tagIds.length > 0 && tx.tagIds.slice(0, 2).map((tid) => {
                       const tag = tags.find((t) => t.id === tid);
                       if (!tag) return null;
-                      return (
+                        return (
                         <span key={tid} className="text-[0.55rem] px-1.5 py-0.5 rounded-full text-white font-medium" style={{ backgroundColor: tag.color }}>{tag.name}</span>
                       );
                     })}
                   </div>
                   <div className="flex items-center gap-1 shrink-0">
                     <button
+                      type="button"
+                      aria-label={`Marcar ${tx.title} como ${tx.status === 'PAID' ? 'pendente' : 'pago'}`}
                       onClick={() => toggleStatus(tx.id)}
                       className={cn(
                         "px-2 py-0.5 rounded-full text-[0.6rem] font-semibold cursor-pointer border-none transition-all active:scale-95 shadow-[inset_0_1px_2px_rgba(0,0,0,0.06)]",
@@ -307,19 +334,20 @@ export function TransactionTable({
                     >
                       {tx.status === 'PAID' ? 'Pago' : 'Pendente'}
                     </button>
-                    <button onClick={() => handleMoveToNextMonth(tx)} title="Passar para o próximo mês" className="clay-btn text-slate-400 hover:text-emerald-600 p-1 cursor-pointer">
+                    {canMove && (
+                      <button type="button" onClick={() => setMoveTx(tx)} title="Mover para outra conta" aria-label={`Mover ${tx.title} para outra conta`} className="text-[#9aa1ac] hover:text-[#1a1d21] p-2 cursor-pointer bg-white rounded-full border-none">
+                        <ArrowLeftRight className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                    <button type="button" onClick={() => handleMoveToNextMonth(tx)} title="Passar para o próximo mês" aria-label={`Passar ${tx.title} para o próximo mês`} className="text-[#9aa1ac] hover:text-[#1a1d21] p-2 cursor-pointer bg-white rounded-full border-none">
                       <Forward className="w-3.5 h-3.5" />
                     </button>
-                    <button onClick={() => handleEdit(tx)} className="clay-btn text-slate-400 hover:text-primary p-1 cursor-pointer">
+                    <button type="button" onClick={() => handleEdit(tx)} aria-label={`Editar ${tx.title}`} className="text-[#9aa1ac] hover:text-primary p-2 cursor-pointer bg-white rounded-full border-none">
                       <Pencil className="w-3.5 h-3.5" />
                     </button>
                     <button onClick={() => {
-                      if (tx.groupId && tx.isFixed) {
-                        setConfirmDelete({ tx, future: false });
-                      } else {
-                        setConfirmDelete({ tx, future: false });
-                      }
-                    }} className="clay-btn text-slate-400 hover:text-[#ef4444] p-1 cursor-pointer">
+                      setConfirmDelete({ tx, future: isRecurringTransaction(tx) });
+                    }} type="button" aria-label={`Excluir ${tx.title}`} className="text-[#9aa1ac] hover:text-danger p-2 cursor-pointer bg-white rounded-full border-none">
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </div>
@@ -331,6 +359,8 @@ export function TransactionTable({
       </div>
 
       {isModalOpen && <TransactionModal initialData={editingTx} onClose={() => setIsModalOpen(false)} />}
+
+      {moveTx && <MoveTransactionModal tx={moveTx} onClose={() => setMoveTx(undefined)} />}
 
       {confirmDelete && !confirmDelete.tx.groupId && (
         <ConfirmModal

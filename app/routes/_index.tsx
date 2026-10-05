@@ -12,6 +12,7 @@ export default function Index() {
   const { user } = useFinance();
   const [activeImageIndex, setActiveImageIndex] = useState<number | null>(null);
   const [activeFaqIndex, setActiveFaqIndex] = useState<number | null>(null);
+  const [scrolled, setScrolled] = useState(false);
   const heroRef = useRef<HTMLDivElement>(null);
 
   const topCta = useMemo(() => {
@@ -124,6 +125,14 @@ export default function Index() {
     return () => { isMounted = false; };
   }, []);
 
+  // Encolhe a pílula do header após rolar, como na landing da campanha.
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 140);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   const toggleFaq = (index: number) => {
     setActiveFaqIndex((prev) => (prev === index ? null : index));
   };
@@ -131,17 +140,22 @@ export default function Index() {
   return (
     <div className="min-h-[100dvh] bg-bg text-text-primary overflow-x-hidden selection:bg-primary/20 selection:text-primary">
       {/* Header */}
-      <header className="sticky top-0 z-20 bg-bg border-b border-border transition-colors duration-150">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 py-4 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3 min-w-0">
-            <img src="/icon.svg" alt="Genius Finance" className="w-9 h-9" />
-            <div className="min-w-0">
-              <div className="font-semibold tracking-tight text-base leading-none text-text-primary">
-                Genius Finance
-              </div>
-              <div className="text-[0.7rem] sm:text-[0.75rem] text-text-secondary leading-none mt-1.5 font-medium">Plataforma de Gestão Financeira</div>
+      <header
+        className="fixed top-3 sm:top-5 inset-x-3 sm:inset-x-6 mx-auto z-30 rounded-full bg-white/85 backdrop-blur border border-border shadow-[0_14px_40px_rgba(0,0,0,0.10)] transition-all duration-300"
+        style={{ maxWidth: scrolled ? "56rem" : "72rem" }}
+      >
+        <div className="px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
+          <button
+            type="button"
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            aria-label="Voltar ao topo"
+            className="flex items-center gap-2.5 min-w-0 cursor-pointer bg-transparent border-none p-0"
+          >
+            <span className="w-9 h-9 rounded-xl bg-primary text-white text-base font-bold flex items-center justify-center shrink-0">G</span>
+            <div className="font-bold tracking-tight text-lg leading-none text-text-primary">
+              Genius.
             </div>
-          </div>
+          </button>
 
           <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-text-secondary">
             <a className="hover:text-primary transition-colors relative after:absolute after:bottom-[-22px] after:left-0 after:w-0 hover:after:w-full after:h-0.5 after:bg-primary after:transition-all after:duration-200" href="#features">Recursos</a>
@@ -151,7 +165,7 @@ export default function Index() {
 
           <Link
             to={topCta.to}
-            className="clay-btn-primary font-semibold px-5 py-2.5 text-sm"
+            className="clay-btn-primary font-semibold px-5 py-2.5 text-sm !rounded-full whitespace-nowrap"
           >
             {topCta.label}
           </Link>
@@ -160,27 +174,22 @@ export default function Index() {
 
       <main>
         {/* Hero Section */}
-        <section ref={heroRef} className="relative overflow-hidden pt-8 pb-16 sm:py-24">
+        <section ref={heroRef} className="relative overflow-hidden pt-28 sm:pt-36 pb-16 sm:pb-24">
           <div className="absolute -top-40 -right-40 w-[480px] h-[480px] bg-primary/5 rounded-full blur-3xl pointer-events-none" />
           <div className="absolute -bottom-40 -left-40 w-[480px] h-[480px] bg-primary/5 rounded-full blur-3xl pointer-events-none" />
 
           <div className="mx-auto max-w-6xl px-4 sm:px-6">
-            <div className="grid lg:grid-cols-2 gap-12 items-center">
-              <div>
-                <div className="gsap-hero-badge inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-medium text-text-secondary">
-                  <span className="w-2 h-2 rounded-full bg-primary" />
-                  Plataforma Integrada de Finanças e Projetos
-                </div>
+            <div className="max-w-2xl mx-auto text-center">
                 <h1 className="gsap-hero-title mt-5 text-4xl sm:text-5xl font-extrabold tracking-tight leading-tight text-text-primary">
                   Tome o controle do seu negócio.
                   <span className="block mt-2 text-primary">Gestão simples e profissional.</span>
                 </h1>
-                <p className="gsap-hero-desc mt-6 text-base sm:text-lg text-text-secondary leading-relaxed max-w-xl">
+                <p className="gsap-hero-desc mt-6 text-base sm:text-lg text-text-secondary leading-relaxed max-w-xl mx-auto">
                   O Genius Finance integra controle financeiro, CRM de vendas e projetos Kanban de forma simples. Acompanhe seus números e tome decisões com clareza.
                 </p>
 
                 <div className="gsap-hero-ctas mt-8">
-                  <div className="flex flex-col sm:flex-row gap-4 sm:items-center">
+                  <div className="flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-center">
                     <Link
                       to="/login"
                       className="clay-btn-primary font-semibold px-6 py-3.5 text-sm"
@@ -194,43 +203,7 @@ export default function Index() {
                       Ver demonstrações
                     </a>
                   </div>
-                  <p className="mt-3.5 text-xs text-text-muted flex items-center gap-1.5 justify-start font-medium">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4 text-success">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
-                    </svg>
-                    Teste grátis por 7 dias — sem cartão de crédito.
-                  </p>
                 </div>
-              </div>
-
-              {/* Print em Destaque (Hero) clicável */}
-              <div className="gsap-hero-image lg:pl-4 group">
-                <div 
-                  onClick={() => openLightbox(0)}
-                  className="clay cursor-pointer relative overflow-hidden hover:shadow-md transition-shadow duration-200"
-                >
-                  <div className="relative aspect-[16/10] overflow-hidden">
-                    <img
-                      src={prints[0].src}
-                      alt={prints[0].label}
-                      className="w-full h-full object-cover block"
-                      loading="lazy"
-                    />
-                    <div className="absolute inset-0 bg-black/35 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity duration-200 z-10">
-                      <div className="bg-white text-text-primary px-4 py-2.5 rounded-md text-xs font-semibold shadow-md flex items-center gap-2 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-200">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4 text-primary">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.637 10.637z" />
-                        </svg>
-                        Ampliar Dashboard
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <p className="mt-3 text-center text-xs text-text-muted flex items-center justify-center gap-1.5">
-                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-primary" />
-                  Clique no painel para ver o sistema em tela cheia
-                </p>
-              </div>
             </div>
           </div>
         </section>
@@ -254,10 +227,10 @@ export default function Index() {
                 </p>
               </div>
               <div className="pt-6 md:pt-0 md:px-6">
-                <div className="text-3xl font-bold text-slate-900">7 Dias Grátis</div>
+                <div className="text-3xl font-bold text-slate-900">100% Grátis</div>
                 <h4 className="mt-2 font-semibold text-text-primary">Sem cartão de crédito</h4>
                 <p className="mt-1 text-sm text-text-secondary leading-relaxed max-w-xs mx-auto">
-                  Cadastre-se em menos de um minuto e teste o sistema com acesso completo, sem compromissos.
+                  Cadastre-se em menos de um minuto e use o sistema com acesso completo, sem compromissos.
                 </p>
               </div>
             </div>
@@ -265,7 +238,7 @@ export default function Index() {
         </section>
 
         {/* Features Section */}
-        <section id="features" className="py-16 sm:py-20 relative">
+        <section id="features" className="py-16 sm:py-20 relative scroll-mt-28">
           <div className="mx-auto max-w-6xl px-4 sm:px-6">
             <div className="text-center max-w-2xl mx-auto">
               <div className="text-xs font-semibold tracking-widest text-primary uppercase">Recursos do Sistema</div>
@@ -348,7 +321,7 @@ export default function Index() {
         </section>
 
         {/* Gallery / Interactive Screens Section */}
-        <section id="prints" className="bg-surface border-y border-border py-16 sm:py-20 relative">
+        <section id="prints" className="bg-surface border-y border-border py-16 sm:py-20 relative scroll-mt-28">
           <div className="mx-auto max-w-6xl px-4 sm:px-6">
             <div className="text-center max-w-2xl mx-auto">
               <div className="text-xs font-semibold tracking-widest text-text-secondary uppercase">Por dentro do sistema</div>
@@ -404,7 +377,7 @@ export default function Index() {
         </section>
 
         {/* Accordion FAQ Section */}
-        <section id="faq" className="py-16 sm:py-20 relative max-w-6xl mx-auto px-4 sm:px-6">
+        <section id="faq" className="py-16 sm:py-20 relative max-w-6xl mx-auto px-4 sm:px-6 scroll-mt-28">
           <div className="text-center max-w-2xl mx-auto">
             <div className="text-xs font-semibold tracking-widest text-primary uppercase">FAQ</div>
             <h2 className="mt-2 text-3xl sm:text-4xl font-bold tracking-tight text-text-primary">Dúvidas Frequentes</h2>
@@ -428,8 +401,8 @@ export default function Index() {
                 a: "Sim, segurança é nossa prioridade absoluta. Toda a infraestrutura do Genius Finance roda sobre o Google Firebase, utilizando criptografia avançada de ponta a ponta, autenticação segura de nível bancário e backups automáticos diários." 
               },
               { 
-                q: "Como funciona o teste grátis de 7 dias?", 
-                a: "O teste é 100% gratuito e sem compromissos. Você cria sua conta em menos de 1 minuto e tem acesso total a todas as ferramentas do Genius Finance. Não é necessário inserir dados de cartão de crédito para experimentar." 
+                q: "A plataforma é mesmo gratuita?", 
+                a: "Sim, 100% gratuita e sem pegadinhas. Você cria sua conta em menos de 1 minuto e tem acesso total a todas as ferramentas do Genius Finance. Não pedimos cartão de crédito nem cobramos mensalidade." 
               },
               { 
                 q: "Posso gerenciar mais de uma empresa ou contas pessoais?", 
@@ -437,7 +410,7 @@ export default function Index() {
               },
               { 
                 q: "Existe fidelidade contratual ou custos extras?", 
-                a: "Nenhum. Acreditamos tanto no valor e simplicidade do Genius Finance que você pode assinar no modelo mensal e cancelar a qualquer momento diretamente pelo painel, sem multas, carências ou burocracias de contrato." 
+                a: "Nenhum. O Genius Finance é gratuito: sem mensalidade, sem multas, sem carência e sem burocracia." 
               }
             ].map((item, index) => {
               const isExpanded = activeFaqIndex === index;
@@ -495,7 +468,7 @@ export default function Index() {
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-3.5 h-3.5 text-white/80">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
                   </svg>
-                  7 dias grátis — sem cartão de crédito.
+                  Grátis — sem cartão de crédito.
                 </div>
               </div>
             </div>
@@ -506,10 +479,10 @@ export default function Index() {
       {/* Footer */}
       <footer className="border-t border-border bg-white">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 py-8 flex flex-col sm:flex-row gap-4 items-center justify-between">
-          <div className="flex items-center gap-3">
-            <img src="/icon.svg" alt="Genius Finance" className="w-7 h-7 opacity-80" />
-            <div className="text-sm font-semibold tracking-tight text-text-primary">
-              Genius Finance
+          <div className="flex items-center gap-2.5">
+            <span className="w-7 h-7 rounded-lg bg-primary text-white text-xs font-bold flex items-center justify-center">G</span>
+            <div className="text-sm font-bold tracking-tight text-text-primary">
+              Genius.
             </div>
             <div className="text-xs text-text-muted">
               © {new Date().getFullYear()} Genius Finance. Todos os direitos reservados.
@@ -517,6 +490,9 @@ export default function Index() {
           </div>
           <div className="text-xs font-medium text-text-secondary hover:text-primary transition-colors">
             <a href="https://geniusweb.online" target="_blank" rel="noopener noreferrer" className="hover:underline">geniusweb.online</a>
+          </div>
+          <div className="text-[0.7rem] text-text-muted">
+            Projeto gratuito feito por <a href="https://joaovitorafb.site/" target="_blank" rel="noopener noreferrer" className="hover:underline">João Vitor</a>
           </div>
         </div>
       </footer>
@@ -530,8 +506,7 @@ export default function Index() {
         title="Suporte via WhatsApp"
       >
         <svg viewBox="0 0 24 24" fill="currentColor" className="w-7 h-7">
-          <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.76.45 3.45 1.3 4.94L2.05 22l5.32-1.39c1.45.79 3.08 1.21 4.76 1.21 5.46 0 9.91-4.45 9.91-9.91 0-5.46-4.45-9.91-9.91-9.91zm-3.46 14.29l-.28-1.77-.13-.8-.59.51C6.36 13.08 5.68 12 5.68 10.82c0-3.5 2.84-6.36 6.36-6.36 1.69 0 3.28.66 4.48 1.86a6.3 6.3 0 011.88 4.5c0 3.5-2.84 6.36-6.36 6.36-1.28 0-2.48-.38-3.49-1.05l-.59-.38-.66.18-1.74.46z"/>
-          <path d="M9.54 8.33c-.17-.38-.35-.39-.51-.4h-.44c-.18 0-.46.07-.7.33-.24.26-.92.9-.92 2.2 0 1.3.94 2.56 1.07 2.73.13.18 1.85 2.97 4.58 4.04 2.26.89 2.73.71 3.22.66.49-.04 1.58-.65 1.8-1.27.23-.62.23-1.15.16-1.27-.07-.11-.25-.18-.52-.31-.27-.14-1.58-.78-1.83-.87-.24-.09-.42-.13-.6.13-.17.27-.69.87-.84 1.05-.16.17-.31.2-.58.06-.27-.13-1.14-.42-2.17-1.34-.8-.72-1.34-1.6-1.5-1.87-.16-.27-.02-.42.12-.55.13-.12.27-.31.4-.47.13-.16.18-.27.27-.45.09-.18.04-.34-.02-.47-.07-.14-.6-1.49-.84-2.03z"/>
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
         </svg>
         <span className="absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-slate-800 text-white text-xs font-medium px-3 py-1.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-150 whitespace-nowrap pointer-events-none shadow-lg">
           Suporte WhatsApp

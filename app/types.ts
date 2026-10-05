@@ -344,6 +344,7 @@ export interface FinanceContextState {
   updateTransaction: (id: string, updates: Partial<Transaction>, applyToFuture?: boolean) => Promise<void>;
   deleteTransaction: (id: string, deleteFuture?: boolean) => Promise<void>;
   toggleStatus: (id: string) => Promise<void>;
+  moveTransaction: (id: string, targetScope: ActiveScope, date: string) => Promise<void>;
 
   upsertBudget: (categoryId: string, plannedAmount: number) => Promise<void>;
   seedDefaultCategories: () => Promise<void>;

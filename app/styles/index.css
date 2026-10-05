@@ -1,14 +1,27 @@
-@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Manrope:wght@400;500;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap");
+@import "@astryxdesign/core/reset.css";
+@import "@astryxdesign/core/astryx.css";
 @import "tailwindcss";
 
 @theme {
   --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Fraunces", Georgia, serif;
+  --font-display: "Manrope", ui-sans-serif, system-ui, sans-serif;
 
-  --color-primary: #3b82f6;
-  --color-primary-hover: #2563eb;
-  --color-primary-light: #eff6ff;
-  --color-primary-dark: #1e3a5f;
+  --color-primary: #1a1d21;
+  --color-primary-hover: #000000;
+  --color-primary-light: #eef0f2;
+  --color-primary-dark: #1a1d21;
+
+  --color-blue-50: #f1f2f0;
+  --color-blue-100: #e4e6ea;
+  --color-blue-200: #cfd3d9;
+  --color-blue-300: #9aa1ac;
+  --color-blue-400: #5f6672;
+  --color-blue-500: #1a1d21;
+  --color-blue-600: #1a1d21;
+  --color-blue-700: #000000;
+  --color-blue-800: #000000;
+  --color-blue-900: #000000;
 
   --color-success: #16a34a;
   --color-success-light: #f0fdf4;
@@ -20,32 +33,32 @@
   --color-warning-light: #fffbeb;
   --color-warning-dark: #92400e;
 
-  --color-bg: #f0f4f8;
+  --color-bg: #ffffff;
   --color-surface: #ffffff;
-  --color-surface-strong: #ffffff;
-  --color-border: #e2e8f0;
-  --color-text-primary: #0f172a;
-  --color-text-secondary: #475569;
-  --color-text-muted: #94a3b8;
+  --color-surface-strong: #f7f8f7;
+  --color-border: #f0f1ee;
+  --color-text-primary: #1a1d21;
+  --color-text-secondary: #5f6672;
+  --color-text-muted: #9aa1ac;
 }
 
 :root {
-  --sea-ink: #0f172a;
-  --sea-ink-soft: #475569;
-  --lagoon: #3b82f6;
-  --lagoon-deep: #2563eb;
-  --palm: #16a34a;
-  --sand: #f1f5f9;
-  --foam: #f8fafc;
-  --surface: #ffffff;
-  --surface-strong: #ffffff;
-  --line: #e2e8f0;
-  --inset-glint: #ffffff;
-  --kicker: #16a34a;
-  --bg-base: #f0f4f8;
-  --header-bg: #ffffff;
-  --chip-bg: #ffffff;
-  --chip-line: #e2e8f0;
+  --sea-ink: var(--color-text-primary);
+  --sea-ink-soft: var(--color-text-secondary);
+  --lagoon: var(--color-primary);
+  --lagoon-deep: var(--color-primary-hover);
+  --palm: var(--color-success);
+  --sand: #f7f8f7;
+  --foam: #ffffff;
+  --surface: var(--color-surface);
+  --surface-strong: var(--color-surface-strong);
+  --line: var(--color-border);
+  --inset-glint: var(--color-surface);
+  --kicker: var(--color-success);
+  --bg-base: var(--color-bg);
+  --header-bg: var(--color-surface);
+  --chip-bg: var(--color-surface);
+  --chip-line: var(--color-border);
 }
 
 * {
@@ -76,7 +89,7 @@ input, select, textarea, button {
 input:focus, select:focus, textarea:focus {
   outline: none;
   border-color: var(--lagoon-deep);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary-dark) 20%, transparent);
 }
 
 ::-webkit-scrollbar {
@@ -95,65 +108,67 @@ input:focus, select:focus, textarea:focus {
 }
 
 .clay {
-  border: 1px solid var(--line);
-  background: var(--surface);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-  border-radius: 0.75rem;
+  border: 1px solid transparent;
+  background: var(--sand);
+  box-shadow: none;
+  border-radius: 1rem;
 }
 
 .clay-hover {
-  transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+  transition: background-color 0.2s ease, transform 0.2s ease;
 }
 .clay-hover:hover {
-  border-color: #bfdbfe;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  transform: translateY(-1px);
+  border-color: transparent;
+  box-shadow: none;
+  transform: none;
+  background: #f0f1ee;
 }
 
 .clay-btn {
-  border: 1px solid var(--line);
-  background: var(--surface);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  border-radius: 0.65rem;
-  transition: all 0.18s ease;
+  border: 1px solid transparent;
+  background: #f6f7f9;
+  box-shadow: none;
+  border-radius: 0.9rem;
+  transition: background-color 0.18s ease;
 }
 .clay-btn:hover {
-  background: #f8fafc;
-  border-color: #bfdbfe;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  background: #eef0f2;
+  border-color: transparent;
+  transform: none;
+  box-shadow: none;
 }
 .clay-btn:active {
-  transform: scale(0.98);
+  transform: scale(0.99);
 }
 
 .clay-btn-primary {
-  border: 1px solid var(--lagoon-deep);
+  border: 1px solid transparent;
   background: var(--lagoon);
   color: white;
-  border-radius: 0.65rem;
-  box-shadow: 0 2px 6px rgba(59, 130, 246, 0.2);
-  transition: all 0.18s ease;
+  border-radius: 0.9rem;
+  box-shadow: none;
+  transition: background-color 0.18s ease;
 }
 .clay-btn-primary:hover {
   background: var(--lagoon-deep);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 10px rgba(59, 130, 246, 0.25);
+  transform: none;
+  box-shadow: none;
 }
 .clay-btn-primary:active {
-  transform: scale(0.98);
+  transform: scale(0.99);
 }
 
 .clay-input {
-  border: 1px solid var(--line);
-  background: var(--surface);
+  border: 1px solid transparent;
+  background: #f6f7f9;
   color: var(--sea-ink);
-  border-radius: 0.65rem;
-  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+  border-radius: 0.9rem;
+  transition: border-color 0.18s ease, background-color 0.18s ease;
 }
 .clay-input:focus {
   border-color: var(--lagoon-deep);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+  background: #ffffff;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 18%, transparent);
 }
 
 .card-admin {
@@ -165,7 +180,7 @@ input:focus, select:focus, textarea:focus {
 
 /* Focus visible for keyboard navigation */
 *:focus-visible {
-  outline: 2px solid var(--lagoon);
+  outline: 2px solid var(--color-primary-dark);
   outline-offset: 2px;
   border-radius: 0.25rem;
 }

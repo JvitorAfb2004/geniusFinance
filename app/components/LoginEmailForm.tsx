@@ -1,5 +1,5 @@
 ﻿import React, { useState } from 'react';
-import { Mail, Lock, User, Eye, EyeOff, ShieldCheck } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
 import { resetPassword, signInWithEmail, signUpWithEmail } from '../lib/firebase';
 import { createUserOnboardingDocs } from '../lib/onboarding';
 
@@ -83,16 +83,16 @@ export function LoginEmailForm({ termsAccepted, onTermsChange, onOpenTerms, onOp
 
   return (
     <div>
-      <div className="flex gap-2 mb-3">
+      <div className="flex gap-1 mb-5 p-1 bg-[#f6f7f9] rounded-full">
         <button
           type="button"
           onClick={() => { setMode('login'); setError(''); setResetSent(false); }}
-          className={`flex-1 px-4 py-2 rounded-lg cursor-pointer text-sm font-medium ${mode === 'login' ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
+          className={`flex-1 px-4 py-2 rounded-full cursor-pointer text-sm font-semibold transition-colors ${mode === 'login' ? 'bg-[#1a1d21] text-white' : 'text-text-secondary hover:text-text-primary'}`}
         >Entrar</button>
         <button
           type="button"
           onClick={() => { setMode('register'); setError(''); setResetSent(false); }}
-          className={`flex-1 px-4 py-2 rounded-lg cursor-pointer text-sm font-medium ${mode === 'register' ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
+          className={`flex-1 px-4 py-2 rounded-full cursor-pointer text-sm font-semibold transition-colors ${mode === 'register' ? 'bg-[#1a1d21] text-white' : 'text-text-secondary hover:text-text-primary'}`}
         >Criar conta</button>
       </div>
 
@@ -108,62 +108,68 @@ export function LoginEmailForm({ termsAccepted, onTermsChange, onOpenTerms, onOp
           </button>
         </div>
       ) : (
-        <form onSubmit={handleSubmit} className="flex flex-col gap-2">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           {mode === 'register' && (
-            <label className="clay-input flex items-center gap-2 px-3 py-2">
-              <User className="w-4 h-4 text-text-muted" />
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="login-name" className="text-[13px] text-text-secondary">Nome completo</label>
               <input
+                id="login-name"
                 type="text"
                 placeholder="Nome completo"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
-                className="w-full text-sm outline-none bg-transparent"
+                className="w-full h-12 px-4 border border-[#e5e7eb] rounded-xl text-sm text-text-primary placeholder:text-text-muted outline-none focus:border-[#1a1d21] transition-colors bg-white"
               />
-            </label>
+            </div>
           )}
 
-          <label className="clay-input flex items-center gap-2 px-3 py-2">
-            <Mail className="w-4 h-4 text-text-muted" />
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="login-email" className="text-[13px] text-text-secondary">E-mail</label>
             <input
+              id="login-email"
               type="email"
               placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full text-sm outline-none bg-transparent"
+              className="w-full h-12 px-4 border border-[#e5e7eb] rounded-xl text-sm text-text-primary placeholder:text-text-muted outline-none focus:border-[#1a1d21] transition-colors bg-white"
             />
-          </label>
+          </div>
 
           {mode !== 'forgot' && (
-            <label className="clay-input flex items-center gap-2 px-3 py-2">
-              <Lock className="w-4 h-4 text-text-muted" />
-              <input
-                type={showPassword ? 'text' : 'password'}
-                placeholder="Senha"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                minLength={6}
-                className="w-full text-sm outline-none"
-              />
-              <button type="button" onClick={() => setShowPassword((prev) => !prev)} className="p-2 text-slate-400 hover:text-slate-600 cursor-pointer">{showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}</button>
-            </label>
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="login-password" className="text-[13px] text-text-secondary">Senha</label>
+              <div className="relative">
+                <input
+                  id="login-password"
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="Senha"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  minLength={6}
+                  className="w-full h-12 px-4 pr-12 border border-[#e5e7eb] rounded-xl text-sm text-text-primary placeholder:text-text-muted outline-none focus:border-[#1a1d21] transition-colors bg-white"
+                />
+                <button type="button" onClick={() => setShowPassword((prev) => !prev)} aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'} className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-text-muted hover:text-text-primary cursor-pointer transition-colors">{showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}</button>
+              </div>
+            </div>
           )}
 
           {mode === 'register' && (
-            <label className="clay-input flex items-center gap-2 px-3 py-2">
-              <ShieldCheck className="w-4 h-4 text-text-muted" />
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="login-confirm" className="text-[13px] text-text-secondary">Confirmar senha</label>
               <input
+                id="login-confirm"
                 type={showPassword ? 'text' : 'password'}
                 placeholder="Confirmar senha"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
                 minLength={6}
-                className="w-full text-sm outline-none"
+                className="w-full h-12 px-4 border border-[#e5e7eb] rounded-xl text-sm text-text-primary placeholder:text-text-muted outline-none focus:border-[#1a1d21] transition-colors bg-white"
               />
-            </label>
+            </div>
           )}
 
           {mode === 'login' && (
@@ -204,7 +210,7 @@ export function LoginEmailForm({ termsAccepted, onTermsChange, onOpenTerms, onOp
 
           {error && <p className="text-xs text-red-500 -mt-1 mb-1">{error}</p>}
 
-          <button type="submit" disabled={loading} className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer text-sm font-medium disabled:opacity-50">{loading && <span className="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-1" />}{loading ? 'Processando...' : mode === 'register' ? 'Criar conta' : mode === 'forgot' ? 'Enviar recuperação' : 'Entrar com email'}</button>
+          <button type="submit" disabled={loading} className="w-full h-12 px-4 bg-[#1a1d21] hover:opacity-90 text-white rounded-xl cursor-pointer text-sm font-semibold disabled:opacity-50 transition-opacity mt-1">{loading && <span className="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-1" />}{loading ? 'Processando...' : mode === 'register' ? 'Criar conta' : mode === 'forgot' ? 'Enviar recuperação' : 'Entrar com email'}</button>
         </form>
       )}
     </div>

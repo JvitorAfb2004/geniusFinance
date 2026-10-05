@@ -9,6 +9,7 @@
     "start": "react-router-serve build/server/index.js",
     "lint": "tsc --noEmit",
     "test": "vitest run",
+    "test:e2e": "playwright test",
     "test:watch": "vitest",
     "seed:demo": "tsx scripts/seed-demo.ts"
   },
@@ -39,6 +40,7 @@
   },
   "devDependencies": {
     "@firebase/eslint-plugin-security-rules": "^0.0.1",
+    "@playwright/test": "^1.63.0",
     "@react-router/dev": "^7.15.1",
     "@types/node": "^22.20.1",
     "@types/react": "^19.2.15",

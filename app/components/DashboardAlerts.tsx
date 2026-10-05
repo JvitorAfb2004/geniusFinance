@@ -97,12 +97,14 @@ export function DashboardAlerts({ valuesVisible = true }: { valuesVisible?: bool
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
       {paymentAlerts.length > 0 && (
-        <div className="bg-amber-50/50 border border-amber-200/60 rounded-3xl p-5">
-          <div className="flex items-center justify-between gap-2 text-amber-800 mb-3">
+        <div className="bg-[#fff9ec] rounded-2xl p-5">
+          <div className="flex items-center justify-between gap-2 text-[#7c4a03] mb-3">
             <div className="flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4" />
+              <span className="w-8 h-8 rounded-full bg-white flex items-center justify-center shrink-0">
+                <AlertTriangle className="w-4 h-4" />
+              </span>
               <h3 className="text-sm font-bold">Despesas/Custos próximos do pagamento</h3>
             </div>
             <button
@@ -112,7 +114,7 @@ export function DashboardAlerts({ valuesVisible = true }: { valuesVisible?: bool
                 e.stopPropagation();
                 navigate('/settings');
               }}
-              className="text-amber-700 hover:text-amber-900 cursor-pointer relative z-10 p-1 rounded-md hover:bg-amber-100/50 transition-colors"
+              className="hover:opacity-70 cursor-pointer relative z-10 p-1.5 rounded-full hover:bg-white transition-colors"
               title="Abrir configurações"
             >
               <Settings className="w-4 h-4" />
@@ -123,26 +125,26 @@ export function DashboardAlerts({ valuesVisible = true }: { valuesVisible?: bool
               <div
                 key={tx.id}
                 className={cn(
-                  "bg-white border border-amber-100/70 rounded-2xl px-4 py-2.5 flex items-center justify-between gap-3 transition-all duration-300 shadow-[0_1px_2px_rgba(0,0,0,0.01)]",
-                  closingIds.includes(tx.id) ? "opacity-0 -translate-y-1 scale-[0.98] max-h-0 overflow-hidden py-0 px-0 border-transparent" : "opacity-100 max-h-32"
+                  "bg-white rounded-xl px-4 py-3 flex items-center justify-between gap-3 transition-all duration-300",
+                  closingIds.includes(tx.id) ? "opacity-0 -translate-y-1 scale-[0.98] max-h-0 overflow-hidden py-0 px-0" : "opacity-100 max-h-32"
                 )}
               >
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold text-slate-800 truncate">{tx.title}</p>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-sm font-bold text-[#1a1d21] truncate">{tx.title}</p>
+                  <p className="text-xs text-[#9aa1ac] mt-0.5">
                     {parseISO(tx.date) < startOfDay(new Date()) ? 'Atrasada desde' : 'Vence em'}{' '}
                     {format(parseISO(tx.date), "dd/MM/yyyy (EEE)", { locale: ptBR })}
                   </p>
                 </div>
                 <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-                  <span className="text-xs sm:text-sm font-bold text-red-600 whitespace-nowrap">{valuesVisible ? formatCurrency(tx.amount) : '••••••'}</span>
+                  <span className="text-xs sm:text-sm font-bold text-red-600 whitespace-nowrap tabular-nums">{valuesVisible ? formatCurrency(tx.amount) : '••••••'}</span>
                   <button
                     onClick={() => setConfirmAction({ tx, label: 'pagamento' })}
-                    className="px-2 py-1 sm:px-3 sm:py-1.5 text-[0.6rem] sm:text-xs rounded-xl border border-amber-300/70 text-amber-700 hover:bg-amber-100/70 cursor-pointer font-medium transition-colors whitespace-nowrap"
+                    className="px-3 py-1.5 text-[0.6rem] sm:text-xs rounded-full bg-[#fff9ec] border border-amber-300/70 text-amber-700 hover:bg-amber-100 cursor-pointer font-bold transition-colors whitespace-nowrap"
                   >
                     Pagar
                   </button>
-                  <button onClick={() => closeWithEffect(tx.id)} className="text-slate-400 hover:text-slate-600 cursor-pointer">
+                  <button onClick={() => closeWithEffect(tx.id)} className="text-[#9aa1ac] hover:text-[#1a1d21] cursor-pointer p-1">
                     <X className="w-4 h-4" />
                   </button>
                 </div>
@@ -153,10 +155,12 @@ export function DashboardAlerts({ valuesVisible = true }: { valuesVisible?: bool
       )}
 
       {todayIncomeAlerts.length > 0 && (
-        <div className="bg-emerald-50/50 border border-emerald-200/60 rounded-3xl p-5">
-          <div className="flex items-center justify-between gap-2 text-emerald-800 mb-3">
+        <div className="bg-[#f0faf4] rounded-2xl p-5">
+          <div className="flex items-center justify-between gap-2 text-[#0d5c34] mb-3">
             <div className="flex items-center gap-2">
-              <CalendarClock className="w-4 h-4" />
+              <span className="w-8 h-8 rounded-full bg-white flex items-center justify-center shrink-0">
+                <CalendarClock className="w-4 h-4" />
+              </span>
               <h3 className="text-sm font-bold">Recebimentos para hoje</h3>
             </div>
             <button
@@ -166,7 +170,7 @@ export function DashboardAlerts({ valuesVisible = true }: { valuesVisible?: bool
                 e.stopPropagation();
                 navigate('/settings');
               }}
-              className="text-emerald-700 hover:text-emerald-900 cursor-pointer relative z-10 p-1 rounded-md hover:bg-emerald-100/50 transition-colors"
+              className="hover:opacity-70 cursor-pointer relative z-10 p-1.5 rounded-full hover:bg-white transition-colors"
               title="Abrir configurações"
             >
               <Settings className="w-4 h-4" />
@@ -177,23 +181,23 @@ export function DashboardAlerts({ valuesVisible = true }: { valuesVisible?: bool
               <div
                 key={tx.id}
                 className={cn(
-                  "bg-white border border-emerald-100/70 rounded-2xl px-4 py-2.5 flex items-center justify-between gap-3 transition-all duration-300 shadow-[0_1px_2px_rgba(0,0,0,0.01)]",
+                  "bg-white rounded-xl px-4 py-3 flex items-center justify-between gap-3 transition-all duration-300",
                   closingIds.includes(tx.id) ? "opacity-0 -translate-y-1 scale-[0.98] max-h-0 overflow-hidden py-0 px-0 border-transparent" : "opacity-100 max-h-32"
                 )}
               >
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold text-slate-800 truncate">{tx.title}</p>
-                  <p className="text-xs text-slate-500">Hoje • {valuesVisible ? formatCurrency(tx.amount) : '••••••'}</p>
+                  <p className="text-sm font-bold text-[#1a1d21] truncate">{tx.title}</p>
+                  <p className="text-xs text-[#9aa1ac] mt-0.5">Hoje • {valuesVisible ? formatCurrency(tx.amount) : '••••••'}</p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <button
                     onClick={() => setConfirmAction({ tx, label: 'recebimento' })}
-                    className={cn("px-2 py-1 sm:px-3 sm:py-1.5 text-[0.6rem] sm:text-xs rounded-xl border border-emerald-300/70 text-emerald-700 hover:bg-emerald-100/70 cursor-pointer font-medium transition-colors flex items-center gap-1 whitespace-nowrap")}
+                    className={cn("px-3 py-1.5 text-[0.6rem] sm:text-xs rounded-full bg-[#f0faf4] border border-emerald-300/70 text-emerald-700 hover:bg-emerald-100 cursor-pointer font-bold transition-colors flex items-center gap-1 whitespace-nowrap")}
                   >
                     <CheckCircle2 className="w-3.5 h-3.5" />
                     Confirmar
                   </button>
-                  <button onClick={() => closeWithEffect(tx.id)} className="text-slate-400 hover:text-slate-600 cursor-pointer">
+                  <button onClick={() => closeWithEffect(tx.id)} className="text-[#9aa1ac] hover:text-[#1a1d21] cursor-pointer p-1">
                     <X className="w-4 h-4" />
                   </button>
                 </div>

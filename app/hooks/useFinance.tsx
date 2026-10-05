@@ -8,6 +8,7 @@ import { DEFAULT_CATEGORIES } from '../lib/categories';
 import { ALL_DEFAULT_LEAD_OPTIONS } from '../lib/leadDefaults';
 import { normalizeProjectKanbanSettings } from '../lib/projectKanbanColumns';
 import { resolveDataPath } from '../lib/pathAdapter';
+import { prepareMoveTransaction } from '../lib/transactionActions';
 import type { FinanceCollectionName } from '../lib/pathAdapter';
 import { ensureUserOnboardingDocs } from '../lib/onboarding';
 import { createAccount, getUserAccounts, getAccountMembers, getAccountInvites, migrateUserToAccount, createInvite, getPendingInvites, acceptInvite as acceptInviteSvc, archiveAccount, updateAccountSettings, revokeInvite } from '../lib/accountService';
@@ -385,6 +386,30 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       await updateTransaction(id, { status: tx.status === 'PAID' ? 'PENDING' : 'PAID' });
     } catch (error) {
       console.error(error);
+    }
+  };
+
+  const moveTransaction = async (id: string, targetScope: ActiveScope, date: string) => {
+    if (!user) return;
+    const tx = transactions.find(t => t.id === id);
+    if (!tx) return;
+    const targetContext: ContextType = targetScope.type === 'PERSONAL' ? 'PERSONAL' : 'BUSINESS';
+    const sourcePath = resolveDataPath(activeScope, user.uid, 'transactions');
+    const targetPath = resolveDataPath(targetScope, user.uid, 'transactions');
+    if (sourcePath === targetPath && date === tx.date) return;
+    try {
+      const batch = writeBatch(db);
+      const newRef = doc(collection(db, targetPath));
+      batch.set(newRef, {
+        ...prepareMoveTransaction(tx, targetContext, date),
+        userId: user.uid,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
+      batch.delete(doc(db, sourcePath, id));
+      await batch.commit();
+    } catch (error) {
+      handleFirestoreError(error, 'create', `${targetPath}`, user);
     }
   };
 
@@ -1204,6 +1229,7 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       updateTransaction,
       deleteTransaction,
       toggleStatus,
+      moveTransaction,
       upsertBudget,
       seedDefaultCategories,
       addCategory,

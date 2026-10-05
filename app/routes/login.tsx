@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { useFinance } from "~/hooks/useFinance";
 import { LoginEmailForm } from "~/components/LoginEmailForm";
+import { LoginVisualPanel } from "~/components/LoginVisualPanel";
 import LegalModal from "~/components/LegalModal";
 import { TERMOS_DE_USO } from "~/lib/termos-de-uso";
 import { POLITICA_PRIVACIDADE } from "~/lib/politica-privacidade";
@@ -35,29 +36,29 @@ export default function Login() {
   if (user) return null;
 
   return (
-    <div className="flex flex-col h-[100dvh] items-center justify-center bg-bg px-4 relative overflow-hidden">
-      <div className="clay p-8 text-center max-w-md w-full relative z-10">
-        <div className="w-16 h-16 rounded-lg flex items-center justify-center mx-auto mb-6">
-          <img src="/icon.svg" alt="Genius Finance" className="w-12 h-12" />
-        </div>
-        <h1 className="text-2xl font-bold text-text-primary mb-2 font-sans tracking-tight">
-          Genius Finance
-        </h1>
-        <p className="text-text-secondary mb-6 text-sm">Faça login para acessar seus dados de forma segura na nuvem.</p>
+    <div className="min-h-dvh flex bg-white p-4 sm:p-6 lg:p-0">
+      <div className="w-full overflow-hidden bg-white lg:grid lg:min-h-dvh lg:grid-cols-[0.9fr_1.1fr]">
+        <div className="flex items-center justify-center p-6 sm:p-10 lg:p-14">
+          <div className="w-full max-w-md">
+            <div className="lg:hidden flex items-center gap-2.5">
+              <span className="w-9 h-9 rounded-xl bg-primary text-white text-base font-bold flex items-center justify-center shrink-0">G</span>
+              <span className="font-bold tracking-tight text-lg text-text-primary">Genius.</span>
+            </div>
+            <h1 className="mt-10 mb-8 text-3xl font-bold tracking-tight text-text-primary lg:mt-0">Acesse sua conta</h1>
 
-        <LoginEmailForm 
-          termsAccepted={termsAccepted} 
-          onTermsChange={setTermsAccepted} 
-          onOpenTerms={() => setLegalModal("terms")}
-          onOpenPrivacy={() => setLegalModal("privacy")}
-        />
+            <LoginEmailForm
+              termsAccepted={termsAccepted}
+              onTermsChange={setTermsAccepted}
+              onOpenTerms={() => setLegalModal("terms")}
+              onOpenPrivacy={() => setLegalModal("privacy")}
+            />
 
-        <div className="mt-4 pt-4 border-t border-border">
+            <div className="mt-4">
           <button
             onClick={() => {
               setIsGoogleTermsModalOpen(true);
             }}
-            className="w-full clay-btn font-medium py-3 px-4 flex items-center justify-center gap-3 cursor-pointer"
+            className="w-full h-12 bg-white border border-[#e5e7eb] hover:bg-[#f6f7f9] rounded-xl font-medium px-4 flex items-center justify-center gap-3 cursor-pointer text-sm text-text-primary transition-colors"
           >
             <svg viewBox="0 0 24 24" className="w-5 h-5 text-white" fill="currentColor">
               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -66,14 +67,15 @@ export default function Login() {
               <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 15.02 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
             </svg>
             Entrar com Google
-          </button>
-        </div>
+              </button>
+            </div>
 
-        <div className="mt-8 pt-6 border-t border-border">
-          <p className="text-xs text-text-muted font-medium tracking-wide">
-            Desenvolvido por <a href="https://geniusweb.online" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">geniusweb.online</a>
-          </p>
+            <p className="mt-8 text-center text-[0.7rem] text-text-muted font-medium tracking-wide">
+              Projeto gratuito feito por <a href="https://joaovitorafb.site/" target="_blank" rel="noopener noreferrer" className="hover:underline">João Vitor</a>
+            </p>
+          </div>
         </div>
+        <LoginVisualPanel />
       </div>
 
       {isGoogleTermsModalOpen && (

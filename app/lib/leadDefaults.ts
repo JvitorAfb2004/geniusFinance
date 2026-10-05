@@ -1,7 +1,7 @@
 import type { LeadOption } from '../types';
 
 export const DEFAULT_LEAD_STATUSES: Omit<LeadOption, 'id' | 'userId'>[] = [
-  { field: 'status', value: 'Novo', color: '#3b82f6', order: 0, isDefault: true },
+  { field: 'status', value: 'Novo', color: '#1a1d21', order: 0, isDefault: true },
   { field: 'status', value: 'Em contato', color: '#f59e0b', order: 1, isDefault: true },
   { field: 'status', value: 'Proposta enviada', color: '#8b5cf6', order: 2, isDefault: true },
   { field: 'status', value: 'Em negociação', color: '#ec4899', order: 3, isDefault: true },
