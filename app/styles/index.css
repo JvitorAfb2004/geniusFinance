@@ -92,6 +92,15 @@ input:focus, select:focus, textarea:focus {
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary-dark) 20%, transparent);
 }
 
+/* Evita o zoom automático do Safari no iOS ao focar campos (exige 16px+) */
+@media (max-width: 768px) {
+  input:not([type="checkbox"]):not([type="radio"]),
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;

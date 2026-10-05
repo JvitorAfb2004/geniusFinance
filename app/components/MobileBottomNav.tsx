@@ -22,7 +22,7 @@ export function MobileBottomNav() {
   ];
 
   return (
-    <nav aria-label="Navegação principal" className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-[#f3f4f2] pb-[env(safe-area-inset-bottom,0.5rem)] pt-1.5">
+    <nav aria-label="Navegação principal" className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-[#f3f4f2] pb-[calc(env(safe-area-inset-bottom,0px)+0.75rem)] pt-1.5">
       <div className="flex items-center justify-around max-w-lg mx-auto">
         {items.map((item) => {
           const isActive = location.pathname === item.path;

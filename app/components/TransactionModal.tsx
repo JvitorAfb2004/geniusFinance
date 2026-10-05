@@ -591,7 +591,6 @@ Sugestão pela descrição: <strong className="text-[#1a1d21]">{suggestedCategor
             <label className="text-[0.68rem] font-bold text-[#9aa1ac] uppercase tracking-[0.06em]">Descrição</label>
             <input
               required
-              autoFocus
               type="text"
               placeholder="Ex: Salário, Aluguel, Supermercado..."
               value={title}
