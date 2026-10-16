@@ -15,7 +15,7 @@ export function MobileBottomNav() {
 
   const items: NavItem[] = [
     { path: "/dashboard", label: "Início", icon: PieChart },
-    { path: "/transactions", label: "Transações", icon: List },
+    { path: "/transactions", label: "Lançamentos", icon: List },
     { path: "/dre", label: "DRE", icon: Calculator },
     { path: "/budget", label: "Orçamento", icon: TrendingUp },
     { path: "/projects", label: "Projetos", icon: Kanban },

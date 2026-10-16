@@ -23,6 +23,7 @@ import type {
   AccountInvite,
   ProjectKanbanSettings,
   MonthlyClosing,
+  Supplier,
 } from '../types';
 
 function timestampToISO(ts: unknown): string {
@@ -61,6 +62,10 @@ export const transactionConverter = createConverter<Transaction>(
     installmentInfo: data.installmentInfo,
     categoryId: data.categoryId,
     endDate: data.endDate,
+    issueDate: data.issueDate,
+    supplierId: data.supplierId,
+    supplierName: data.supplierName,
+    payments: data.payments || [],
     tagIds: data.tagIds || [],
     createdAt: timestampToISO(data.createdAt),
     updatedAt: timestampToISO(data.updatedAt),
@@ -78,7 +83,31 @@ export const transactionConverter = createConverter<Transaction>(
     installmentInfo: model.installmentInfo,
     categoryId: model.categoryId,
     endDate: model.endDate,
+    issueDate: model.issueDate,
+    supplierId: model.supplierId,
+    supplierName: model.supplierName,
+    payments: model.payments,
     tagIds: model.tagIds,
+    createdAt: model.createdAt,
+    updatedAt: model.updatedAt,
+  })
+);
+
+export const supplierConverter = createConverter<Supplier>(
+  (data, id) => ({
+    id,
+    userId: data.userId,
+    name: data.name,
+    contact: data.contact,
+    document: data.document,
+    createdAt: timestampToISO(data.createdAt),
+    updatedAt: timestampToISO(data.updatedAt),
+  }),
+  (model) => ({
+    userId: model.userId,
+    name: model.name,
+    contact: model.contact,
+    document: model.document,
     createdAt: model.createdAt,
     updatedAt: model.updatedAt,
   })
@@ -489,6 +518,7 @@ export type FinanceCollectionName =
   | 'budgets'
   | 'sales-targets'
   | 'tags'
+  | 'suppliers'
   | 'goals'
   | 'leads'
   | 'lead-options'
@@ -505,6 +535,7 @@ export const converters: Record<FinanceCollectionName, FirestoreDataConverter<un
   'spending-limits': spendingLimitConverter,
   'sales-targets': salesTargetConverter,
   tags: tagConverter,
+  suppliers: supplierConverter,
   goals: goalConverter,
   leads: leadConverter,
   'lead-options': leadOptionConverter,

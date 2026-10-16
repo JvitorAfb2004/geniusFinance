@@ -9,9 +9,12 @@ interface ConfirmModalProps {
   message: string;
   confirmLabel?: string;
   cancelLabel?: string;
+  /** Ação extra opcional (terceiro botão, ex.: "Todas as parcelas"). */
+  extraLabel?: string;
   variant?: 'danger' | 'warning' | 'info';
   onConfirm: () => void;
   onCancel: () => void;
+  onExtra?: () => void;
 }
 
 export default function ConfirmModal({
@@ -19,9 +22,11 @@ export default function ConfirmModal({
   message,
   confirmLabel = 'Confirmar',
   cancelLabel = 'Cancelar',
+  extraLabel,
   variant = 'danger',
   onConfirm,
   onCancel,
+  onExtra,
 }: ConfirmModalProps) {
   const colorMap = {
     danger: { bg: 'bg-danger-light', text: 'text-danger-dark' },
@@ -57,9 +62,14 @@ export default function ConfirmModal({
             </div>
           </div>
         </div>
-        <div className="flex gap-2.5 px-6 pb-6">
-          <button onClick={onCancel} className="flex-1 px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 cursor-pointer text-sm font-medium">{cancelLabel}</button>
-          <button onClick={onConfirm} className={`flex-1 px-4 py-2 ${variant === 'danger' ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'} text-white rounded-lg cursor-pointer text-sm font-medium`}>{confirmLabel}</button>
+        <div className="flex flex-col gap-2.5 px-6 pb-6">
+          <div className="flex gap-2.5">
+            <button onClick={onCancel} className="flex-1 px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 cursor-pointer text-sm font-medium">{cancelLabel}</button>
+            <button onClick={onConfirm} className={`flex-1 px-4 py-2 ${variant === 'danger' ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'} text-white rounded-lg cursor-pointer text-sm font-medium`}>{confirmLabel}</button>
+          </div>
+          {extraLabel && onExtra && (
+            <button onClick={onExtra} className="w-full px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 cursor-pointer text-sm font-medium">{extraLabel}</button>
+          )}
         </div>
       </motion.div>
     </motion.div>,

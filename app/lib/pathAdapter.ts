@@ -6,6 +6,7 @@ export type FinanceCollectionName =
   | 'budgets'
   | 'sales-targets'
   | 'tags'
+  | 'suppliers'
   | 'goals'
   | 'leads'
   | 'lead-options'

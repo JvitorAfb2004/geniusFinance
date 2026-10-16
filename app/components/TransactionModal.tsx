@@ -1,7 +1,7 @@
 ﻿import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useFinance } from '../hooks/useFinance';
-import { TransactionType, TransactionStatus, Transaction, DRESection } from '../types';
+import { TransactionType, TransactionStatus, Transaction, DRESection, Payment, Supplier } from '../types';
 import { format } from 'date-fns';
 import { SECTION_LABELS } from '../lib/categories';
 import {
@@ -14,8 +14,11 @@ import {
   pressCalculatorEquals,
   pressCalculatorOperator,
 } from '../lib/calculator';
-import { X, Search, Plus, ArrowUpCircle, ArrowDownCircle, CheckCircle, Clock, Calculator } from 'lucide-react';
+import { X, Search, Plus, ArrowUpCircle, ArrowDownCircle, CheckCircle, Clock, Calculator, Trash2 } from 'lucide-react';
 import { motion } from 'motion/react';
+import { parseISO } from 'date-fns';
+import { formatCurrency } from '../lib/utils';
+import { getPaidAmount, getEffectiveStatus } from '../lib/transactionActions';
 
 export function TransactionModal({ 
   onClose, 
@@ -26,7 +29,7 @@ export function TransactionModal({
   initialData?: Transaction;
   onSaved?: (newId: string) => void;
 }) {
-  const { addTransaction, updateTransaction, activeContext, categories, addCategory, selectedMonth, tags, activeScope, transactions, monthlyClosings } = useFinance();
+  const { addTransaction, updateTransaction, activeContext, categories, addCategory, selectedMonth, tags, suppliers, addSupplier, activeScope, transactions, monthlyClosings } = useFinance();
   const [submitting, setSubmitting] = useState(false);
   
   const [title, setTitle] = useState(initialData?.title || '');
@@ -60,6 +63,26 @@ export function TransactionModal({
   const [hasEndDate, setHasEndDate] = useState(!!initialData?.endDate);
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>(initialData?.tagIds || []);
   const [applyToFuture, setApplyToFuture] = useState(false);
+
+  const [issueDate, setIssueDate] = useState(() => {
+    if (initialData?.issueDate) return initialData.issueDate;
+    if (initialData?.createdAt) return format(parseISO(initialData.createdAt), 'yyyy-MM-dd');
+    return format(new Date(), 'yyyy-MM-dd');
+  });
+
+  // Fornecedor / destinatário
+  const [supplierName, setSupplierName] = useState(initialData?.supplierName || '');
+  const [supplierId, setSupplierId] = useState(initialData?.supplierId || '');
+  const [showSupplierDropdown, setShowSupplierDropdown] = useState(false);
+  const [showNewSupplier, setShowNewSupplier] = useState(false);
+  const [newSupplierContact, setNewSupplierContact] = useState('');
+  const [newSupplierDocument, setNewSupplierDocument] = useState('');
+  const supplierDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Pagamentos parciais (apenas edição de lançamento avulso)
+  const [payments, setPayments] = useState<Payment[]>(initialData?.payments || []);
+  const [newPaymentAmount, setNewPaymentAmount] = useState('');
+  const [newPaymentDate, setNewPaymentDate] = useState(format(new Date(), 'yyyy-MM-dd'));
 
   // Calculator state
   const [showCalculator, setShowCalculator] = useState(false);
@@ -113,6 +136,43 @@ export function TransactionModal({
     return categories.filter((c) => c.name.toLowerCase().includes(q));
   }, [categories, categorySearch]);
 
+  const filteredSuppliers = useMemo(() => {
+    const q = supplierName.trim().toLowerCase();
+    if (!q) return suppliers;
+    return suppliers.filter((s) => s.name.toLowerCase().includes(q));
+  }, [suppliers, supplierName]);
+
+  const handleAddPayment = () => {
+    const value = parseFloat(newPaymentAmount.replace(/\./g, '').replace(',', '.'));
+    if (isNaN(value) || value <= 0) return;
+    setPayments(prev => [...prev, { id: `${Date.now()}-${Math.random().toString(36).slice(2)}`, amount: value, date: newPaymentDate }]);
+    setNewPaymentAmount('');
+  };
+
+  const handlePaymentAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const numericValue = e.target.value.replace(/\D/g, '');
+    if (!numericValue) {
+      setNewPaymentAmount('');
+      return;
+    }
+    const formatted = new Intl.NumberFormat('pt-BR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(parseInt(numericValue, 10) / 100);
+    setNewPaymentAmount(formatted);
+  };
+
+  const handleCreateSupplier = async () => {
+    if (!supplierName.trim()) return;
+    const data: Omit<Supplier, 'id' | 'userId' | 'createdAt' | 'updatedAt'> = { name: supplierName.trim() };
+    if (newSupplierContact.trim()) data.contact = newSupplierContact.trim();
+    if (newSupplierDocument.trim()) data.document = newSupplierDocument.trim();
+    await addSupplier(data);
+    setShowNewSupplier(false);
+    setNewSupplierContact('');
+    setNewSupplierDocument('');
+  };
+
   const groupedCategories = useMemo(() => {
     const sections: DRESection[] = ['RECEITA', 'CUSTOS', 'DESPESAS'];
     return sections.map((section) => ({
@@ -136,6 +196,9 @@ export function TransactionModal({
     function handleClickOutside(e: MouseEvent) {
       if (categoryDropdownRef.current && !categoryDropdownRef.current.contains(e.target as Node)) {
         setShowCategoryDropdown(false);
+      }
+      if (supplierDropdownRef.current && !supplierDropdownRef.current.contains(e.target as Node)) {
+        setShowSupplierDropdown(false);
       }
       if (
         showCalculator &&
@@ -238,6 +301,12 @@ export function TransactionModal({
     setCalculatorState(createCalculatorState(stripped));
   };
 
+  // Status efetivo de lançamento avulso em edição (pagamentos governam)
+  const statusEditable = !initialData || Boolean(initialData.groupId);
+  const txAmount = initialData ? (getNumericAmount() || initialData.amount) : 0;
+  const paidAmount = getPaidAmount({ payments });
+  const effectiveStatus = getEffectiveStatus({ amount: txAmount, status: status as 'PAID' | 'PENDING', payments });
+
   const toggleCalculator = () => {
     const nextOpen = !showCalculator;
     setShowCalculator(nextOpen);
@@ -284,6 +353,7 @@ export function TransactionModal({
         title: title.trim(),
         amount: val,
         date,
+        issueDate,
         type,
         status,
         context: activeContext,
@@ -291,6 +361,16 @@ export function TransactionModal({
       };
       if (categoryId) baseTx.categoryId = categoryId;
       if (hasEndDate && endDate) baseTx.endDate = endDate;
+      if (supplierName.trim()) {
+        baseTx.supplierName = supplierName.trim();
+        if (supplierId) baseTx.supplierId = supplierId;
+      }
+
+      // Avulso em edição: pagamentos governam o status salvo (Parcial fica salvo como Pending)
+      if (initialData?.id && !initialData.groupId) {
+        baseTx.payments = payments;
+        baseTx.status = getEffectiveStatus({ amount: val, status: baseTx.status, payments }) === 'PAID' ? 'PAID' : 'PENDING';
+      }
 
       if (initialData?.id) {
         await updateTransaction(initialData.id, baseTx, applyToFuture);
@@ -325,7 +405,7 @@ export function TransactionModal({
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.98, y: 24 }}
         transition={{ type: 'spring', duration: 0.3 }}
-        className="bg-white rounded-t-3xl sm:rounded-2xl shadow-xl w-full sm:max-w-lg max-h-[92dvh] flex flex-col overflow-hidden"
+        className="bg-white rounded-t-3xl sm:rounded-2xl shadow-xl w-full sm:max-w-3xl max-h-[92dvh] flex flex-col overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="px-5 py-4 flex justify-between items-center shrink-0">
@@ -362,6 +442,8 @@ export function TransactionModal({
               </div>
             );
           })()}
+
+          <div className="sm:grid sm:grid-cols-2 sm:gap-x-6 sm:items-start space-y-4 sm:space-y-0">
           <div className="space-y-1.5">
             <label className="text-[0.68rem] font-bold text-[#9aa1ac] uppercase tracking-[0.06em]">Tipo</label>
             <div className="grid grid-cols-2 gap-2">
@@ -386,30 +468,48 @@ export function TransactionModal({
             </div>
           </div>
 
-          <div className="space-y-1.5">
-            <label className="text-[0.68rem] font-bold text-[#9aa1ac] uppercase tracking-[0.06em]">Status</label>
-            <div className="grid grid-cols-2 gap-2">
-              {[
-                { id: 'PAID', label: 'Pago', icon: CheckCircle, activeClass: 'bg-emerald-50 text-emerald-700' },
-                { id: 'PENDING', label: 'Pendente', icon: Clock, activeClass: 'bg-[#fff9ec] text-amber-700' },
-              ].map(opt => (
-                <button
-                  key={opt.id}
-                  type="button"
-                  onClick={() => setStatus(opt.id as TransactionStatus)}
-                   className={`py-3 px-3 text-sm font-bold cursor-pointer transition-colors flex items-center justify-center gap-2 rounded-xl ${
-                     status === opt.id
-                       ? `${opt.activeClass}`
-                       : 'bg-[#f6f7f9] text-[#9aa1ac] hover:text-[#1a1d21]'
-                   }`}
-                >
-                  <opt.icon className="w-4 h-4" />
-                  {opt.label}
-                </button>
-              ))}
+          {(statusEditable ? (
+            <div className="space-y-1.5">
+              <label className="text-[0.68rem] font-bold text-[#9aa1ac] uppercase tracking-[0.06em]">Status</label>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { id: 'PAID', label: 'Pago', icon: CheckCircle, activeClass: 'bg-emerald-50 text-emerald-700' },
+                  { id: 'PENDING', label: 'Pendente', icon: Clock, activeClass: 'bg-[#fff9ec] text-amber-700' },
+                ].map(opt => (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    onClick={() => setStatus(opt.id as TransactionStatus)}
+                     className={`py-3 px-3 text-sm font-bold cursor-pointer transition-colors flex items-center justify-center gap-2 rounded-xl ${
+                       status === opt.id
+                         ? `${opt.activeClass}`
+                         : 'bg-[#f6f7f9] text-[#9aa1ac] hover:text-[#1a1d21]'
+                     }`}
+                  >
+                    <opt.icon className="w-4 h-4" />
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
             </div>
+          ) : (
+            <div className="space-y-1.5">
+              <label className="text-[0.68rem] font-bold text-[#9aa1ac] uppercase tracking-[0.06em]">Situação</label>
+              <div className="px-3 py-3 bg-[#f6f7f9] rounded-xl text-sm font-bold flex items-center justify-between">
+                <span className={effectiveStatus === 'PAID' ? 'text-emerald-700' : effectiveStatus === 'PARTIAL' ? 'text-amber-700' : 'text-[#9aa1ac]'}>
+                  {effectiveStatus === 'PAID' ? 'Pago' : effectiveStatus === 'PARTIAL' ? 'Parcial' : 'Pendente'}
+                </span>
+                <span className="text-xs font-medium text-[#5f6672]" >
+                  Pago {formatCurrency(paidAmount)} de {formatCurrency(txAmount)}
+                </span>
+              </div>
+            </div>
+          ))}
           </div>
+          {/* fim par Tipo | Status */}
 
+          {/* Par Categoria | Tags */}
+          <div className="sm:grid sm:grid-cols-2 sm:gap-x-6 sm:items-start space-y-4 sm:space-y-0">
           {categories.length > 0 && (
             <div className="space-y-1.5">
               <label className="text-[0.68rem] font-bold text-[#9aa1ac] uppercase tracking-[0.06em]">Categoria (DRE)</label>
@@ -586,7 +686,11 @@ Sugestão pela descrição: <strong className="text-[#1a1d21]">{suggestedCategor
               </div>
             </div>
           )}
+          </div>
+          {/* fim par Categoria | Tags */}
 
+          {/* Par Descrição | Fornecedor */}
+          <div className="sm:grid sm:grid-cols-2 sm:gap-x-6 sm:items-start space-y-4 sm:space-y-0">
           <div className="space-y-1.5">
             <label className="text-[0.68rem] font-bold text-[#9aa1ac] uppercase tracking-[0.06em]">Descrição</label>
             <input
@@ -599,7 +703,84 @@ Sugestão pela descrição: <strong className="text-[#1a1d21]">{suggestedCategor
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-1.5 relative" ref={supplierDropdownRef}>
+            <div className="flex items-center justify-between">
+              <label className="text-[0.68rem] font-bold text-[#9aa1ac] uppercase tracking-[0.06em]">Fornecedor / Destinatário</label>
+              <button
+                type="button"
+                onClick={() => setShowNewSupplier(v => !v)}
+                className="text-[0.65rem] font-bold text-[#1a1d21] underline underline-offset-2 cursor-pointer bg-transparent border-none"
+              >
+                {showNewSupplier ? 'Fechar' : 'Cadastrar novo'}
+              </button>
+            </div>
+            <input
+              type="text"
+              placeholder="Ex.: Fornecedor XYZ, Cliente João... (texto livre)"
+              value={supplierName}
+              onChange={(e) => { setSupplierName(e.target.value); setSupplierId(''); setShowSupplierDropdown(true); }}
+              onFocus={() => setShowSupplierDropdown(true)}
+              className="w-full clay-input px-4 py-3 outline-none transition-all placeholder:text-text-muted text-[0.95rem] font-medium"
+            />
+            {showSupplierDropdown && !showNewSupplier && filteredSuppliers.length > 0 && (
+              <div className="absolute z-20 mt-1 w-full bg-white border border-[#f0f1ee] rounded-2xl shadow-xl max-h-48 overflow-y-auto">
+                {filteredSuppliers.map((s) => (
+                  <button
+                    key={s.id}
+                    type="button"
+                    onClick={() => { setSupplierName(s.name); setSupplierId(s.id); setShowSupplierDropdown(false); }}
+                    className={`w-full px-3 py-2 text-sm text-left hover:bg-[#f6f7f9] cursor-pointer transition-colors ${
+                      supplierId === s.id ? 'bg-[#f0f1ee] font-bold text-[#1a1d21]' : 'text-[#1a1d21]'
+                    }`}
+                  >
+                    {s.name}
+                  </button>
+                ))}
+              </div>
+            )}
+            {showNewSupplier && (
+              <div className="border border-[#f0f1ee] rounded-xl p-3 bg-[#f6f7f9] space-y-2">
+                <p className="text-xs text-[#5f6672] font-medium">
+                  Cadastrando: <strong className="text-[#1a1d21]">{supplierName.trim() || 'digite o nome acima'}</strong>
+                </p>
+                <input
+                  type="text"
+                  placeholder="Contato (opcional)"
+                  value={newSupplierContact}
+                  onChange={(e) => setNewSupplierContact(e.target.value)}
+                  className="w-full px-3 py-1.5 bg-white border border-[#f0f1ee] rounded-xl text-sm outline-none"
+                />
+                <input
+                  type="text"
+                  placeholder="CPF/CNPJ (opcional)"
+                  value={newSupplierDocument}
+                  onChange={(e) => setNewSupplierDocument(e.target.value)}
+                  className="w-full px-3 py-1.5 bg-white border border-[#f0f1ee] rounded-xl text-sm outline-none"
+                />
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    disabled={!supplierName.trim()}
+                    onClick={handleCreateSupplier}
+                    className="text-xs px-3 py-1.5 bg-[#1a1d21] text-white rounded-full hover:opacity-90 disabled:opacity-50 cursor-pointer font-bold"
+                  >
+                    Cadastrar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowNewSupplier(false)}
+                    className="text-xs px-3 py-1.5 text-[#9aa1ac] hover:text-[#1a1d21] cursor-pointer font-semibold"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+          </div>
+          {/* fim par Descrição | Fornecedor */}
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-start">
             <div className="space-y-1.5">
               <label className="text-[0.68rem] font-bold text-[#9aa1ac] uppercase tracking-[0.06em]">Valor (R$)</label>
               <div className="relative flex gap-1">
@@ -686,7 +867,7 @@ Sugestão pela descrição: <strong className="text-[#1a1d21]">{suggestedCategor
               </div>
             </div>
             <div className="space-y-1.5">
-              <label className="text-[0.68rem] font-bold text-[#9aa1ac] uppercase tracking-[0.06em]">Data Base</label>
+              <label className="text-[0.68rem] font-bold text-[#9aa1ac] uppercase tracking-[0.06em]">Data de Vencimento</label>
               <input
                 required
                 type="date"
@@ -695,9 +876,69 @@ Sugestão pela descrição: <strong className="text-[#1a1d21]">{suggestedCategor
                 className="w-full clay-input px-4 py-3 outline-none transition-all text-[0.95rem]"
               />
             </div>
+            <div className="space-y-1.5">
+              <label className="text-[0.68rem] font-bold text-[#9aa1ac] uppercase tracking-[0.06em]">Data de Lançamento</label>
+              <input
+                type="date"
+                value={issueDate}
+                onChange={e => setIssueDate(e.target.value)}
+                className="w-full clay-input px-4 py-3 outline-none transition-all text-[0.95rem]"
+              />
+            </div>
           </div>
 
-          {!initialData ? (
+          {initialData && !initialData.groupId ? (
+            <div className="space-y-2">
+              <label className="text-[0.68rem] font-bold text-[#9aa1ac] uppercase tracking-[0.06em]">Pagamentos</label>
+              {payments.length > 0 && (
+                <div className="space-y-2">
+                  {payments.map((p) => (
+                    <div key={p.id} className="flex items-center justify-between bg-[#f6f7f9] rounded-xl px-3 py-2">
+                      <div>
+                        <p className="text-sm font-bold text-[#1a1d21]">{formatCurrency(p.amount)}</p>
+                        <p className="text-xs text-[#9aa1ac]">{format(parseISO(p.date), 'dd/MM/yyyy')}</p>
+                      </div>
+                      <button
+                        type="button"
+                        aria-label="Remover pagamento"
+                        onClick={() => setPayments(prev => prev.filter(x => x.id !== p.id))}
+                        className="text-[#9aa1ac] hover:text-danger p-2 cursor-pointer bg-transparent border-none"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <p className="text-xs text-[#5f6672] bg-[#f6f7f9] p-3 rounded-xl font-medium">
+                Pago {formatCurrency(paidAmount)} de {formatCurrency(txAmount)} — resta {formatCurrency(Math.max(0, txAmount - paidAmount))}.
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto_auto] gap-2">
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  placeholder="Valor do pagamento (R$)"
+                  value={newPaymentAmount}
+                  onChange={handlePaymentAmountChange}
+                  className="clay-input px-4 py-2.5 outline-none transition-all"
+                />
+                <input
+                  type="date"
+                  value={newPaymentDate}
+                  onChange={(e) => setNewPaymentDate(e.target.value)}
+                  className="clay-input px-3 py-2.5 outline-none transition-all text-sm"
+                  aria-label="Data do pagamento"
+                />
+                <button
+                  type="button"
+                  onClick={handleAddPayment}
+                  className="px-4 py-2.5 bg-[#1a1d21] text-white rounded-xl text-xs font-bold cursor-pointer hover:opacity-90"
+                >
+                  Adicionar
+                </button>
+              </div>
+            </div>
+          ) : !initialData ? (
             <div className="space-y-2 pt-1">
               <label className="text-[0.68rem] font-bold text-[#9aa1ac] uppercase tracking-[0.06em]">Recorrência</label>
 <div className="grid grid-cols-3 gap-2">

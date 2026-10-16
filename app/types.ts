@@ -273,13 +273,33 @@ export interface DRERow {
   months: { planned: number; actual: number }[];
 }
 
+// Pagamento registrado dentro de um lançamento avulso (sem groupId)
+export interface Payment {
+  id: string;
+  amount: number;
+  date: string; // ISO date string YYYY-MM-DD
+  note?: string;
+}
+
+// Fornecedor (despesa) / destinatário (entrada). Nome é obrigatório; resto opcional.
+export interface Supplier {
+  id: string;
+  name: string;
+  contact?: string;
+  document?: string; // CPF/CNPJ
+  userId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Transaction {
   id: string;
   context: ContextType;
   type: TransactionType;
   title: string;
   amount: number; // Stored as positive absolute value
-  date: string; // ISO date string YYYY-MM-DD
+  date: string; // ISO date string YYYY-MM-DD (data de vencimento)
+  issueDate?: string; // Data de lançamento (default: hoje)
   status: TransactionStatus;
 
   // For recurring / installments
@@ -287,6 +307,13 @@ export interface Transaction {
   groupId?: string;
   installmentInfo?: string;
   endDate?: string; // Data fim para recorrência fixa
+
+  // Fornecedor (saída) / destinatário (entrada)
+  supplierId?: string;
+  supplierName?: string;
+
+  // Pagamentos parciais (apenas lançamentos avulsos, sem groupId)
+  payments?: Payment[];
 
   categoryId?: string;
   tagIds?: string[];
@@ -342,9 +369,12 @@ export interface FinanceContextState {
   pendingInvites: AccountInvite[];
   addTransaction: (tx: Omit<Transaction, 'id' | 'userId' | 'createdAt' | 'updatedAt'>, generateMultiple?: 'INSTALLMENTS' | 'FIXED', count?: number) => Promise<string | undefined>;
   updateTransaction: (id: string, updates: Partial<Transaction>, applyToFuture?: boolean) => Promise<void>;
-  deleteTransaction: (id: string, deleteFuture?: boolean) => Promise<void>;
+  deleteTransaction: (id: string, deleteFuture?: boolean | 'ALL') => Promise<void>;
   toggleStatus: (id: string) => Promise<void>;
   moveTransaction: (id: string, targetScope: ActiveScope, date: string) => Promise<void>;
+
+  suppliers: Supplier[];
+  addSupplier: (data: Omit<Supplier, 'id' | 'userId' | 'createdAt' | 'updatedAt'>) => Promise<void>;
 
   upsertBudget: (categoryId: string, plannedAmount: number) => Promise<void>;
   seedDefaultCategories: () => Promise<void>;

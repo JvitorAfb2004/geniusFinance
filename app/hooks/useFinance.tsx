@@ -1,9 +1,10 @@
 import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { addMonths, format, parseISO } from 'date-fns';
-import { ContextType, FinanceContextState, Transaction, ViewType, Category, Budget, SpendingLimit, DRESection, SalesTarget, Tag, FinancialGoal, Lead, LeadOption, ServiceType, Project, ProjectKanbanSettings, Task, ActiveScope, Account, AccountMember, AccountInvite, AccountRole, MonthlyClosing } from '../types';
+import { ContextType, FinanceContextState, Transaction, ViewType, Category, Budget, SpendingLimit, DRESection, SalesTarget, Tag, Supplier, FinancialGoal, Lead, LeadOption, ServiceType, Project, ProjectKanbanSettings, Task, ActiveScope, Account, AccountMember, AccountInvite, AccountRole, MonthlyClosing } from '../types';
 import { auth, db, signInWithGoogle, signOut } from '../lib/firebase';
 import { handleFirestoreError } from '../lib/handleFirestoreError';
+import { getEffectiveStatus, getPaidAmount } from '../lib/transactionActions';
 import { DEFAULT_CATEGORIES } from '../lib/categories';
 import { ALL_DEFAULT_LEAD_OPTIONS } from '../lib/leadDefaults';
 import { normalizeProjectKanbanSettings } from '../lib/projectKanbanColumns';
@@ -49,6 +50,7 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
   const [budgets, setBudgets] = useState<Budget[]>([]);
   const [salesTargets, setSalesTargets] = useState<SalesTarget[]>([]);
   const [tags, setTags] = useState<Tag[]>([]);
+  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [goals, setGoals] = useState<FinancialGoal[]>([]);
   const [spendingLimits, setSpendingLimits] = useState<SpendingLimit[]>([]);
   const [monthlyClosings, setMonthlyClosings] = useState<MonthlyClosing[]>([]);
@@ -82,6 +84,7 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
         setBudgets([]);
         setSalesTargets([]);
         setTags([]);
+        setSuppliers([]);
         setGoals([]);
         setSpendingLimits([]);
         setLeads([]);
@@ -178,6 +181,8 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
   useCollectionListener(user, activeScope, 'sales-targets', setSalesTargets);
 
   useCollectionListener(user, activeScope, 'tags', setTags);
+
+  useCollectionListener(user, activeScope, 'suppliers', setSuppliers);
 
   useCollectionListener(user, activeScope, 'goals', setGoals);
 
@@ -352,7 +357,7 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const deleteTransaction = async (id: string, deleteFuture?: boolean) => {
+  const deleteTransaction = async (id: string, deleteFuture?: boolean | 'ALL') => {
     if (!user) return;
     try {
       const tx = transactions.find(t => t.id === id);
@@ -361,11 +366,16 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       const batch = writeBatch(db);
       const colPath = resolveDataPath(activeScope, user.uid, 'transactions');
 
-      if (deleteFuture && tx.groupId) {
+      if (deleteFuture === 'ALL' && tx.groupId) {
+        // Excluir todas as parcelas/ocorrências do grupo, independente da data
+        const groupTxs = transactions.filter(t => t.groupId === tx.groupId);
+        for (const gt of groupTxs) {
+          batch.delete(doc(db, colPath, gt.id));
+        }
+      } else if (deleteFuture && tx.groupId) {
         const futureTxs = transactions.filter(t => t.groupId === tx.groupId && new Date(t.date) >= new Date(tx.date));
         for (const ft of futureTxs) {
-          const docRef = doc(db, colPath, ft.id);
-          batch.delete(docRef);
+          batch.delete(doc(db, colPath, ft.id));
         }
       } else {
         const docRef = doc(db, colPath, id);
@@ -383,6 +393,18 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
     const tx = transactions.find(t => t.id === id);
     if (!tx) return;
     try {
+      // Avulso: em vez de marcar pago/pendente, registra/estorna pagamentos
+      if (!tx.groupId) {
+        const effective = getEffectiveStatus(tx);
+        if (effective === 'PAID') {
+          await updateTransaction(id, { payments: [], status: 'PENDING' });
+        } else {
+          const paid = getPaidAmount(tx);
+          const nextPayments = [...(tx.payments || []), { id: uuidv4(), amount: tx.amount - paid, date: format(new Date(), 'yyyy-MM-dd') }];
+          await updateTransaction(id, { payments: nextPayments, status: 'PAID' });
+        }
+        return;
+      }
       await updateTransaction(id, { status: tx.status === 'PAID' ? 'PENDING' : 'PAID' });
     } catch (error) {
       console.error(error);
@@ -680,6 +702,19 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       await batch.commit();
     } catch (error) {
       handleFirestoreError(error, 'delete', `${resolveDataPath(activeScope, user.uid, 'tags')}/${id}`, user);
+    }
+  };
+
+  const addSupplier = async (data: Omit<Supplier, 'id' | 'userId' | 'createdAt' | 'updatedAt'>) => {
+    if (!user) return;
+    try {
+      const colPath = resolveDataPath(activeScope, user.uid, 'suppliers');
+      const docRef = doc(collection(db, colPath));
+      const batch = writeBatch(db);
+      batch.set(docRef, { ...data, userId: user.uid, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
+      await batch.commit();
+    } catch (error) {
+      handleFirestoreError(error, 'create', resolveDataPath(activeScope, user.uid, 'suppliers'), user);
     }
   };
 
@@ -1193,6 +1228,7 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       budgets,
       salesTargets,
       tags,
+      suppliers,
       goals,
       spendingLimits,
       leads,
@@ -1238,6 +1274,7 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       upsertSalesTarget,
       deleteSalesTarget,
       addTag,
+      addSupplier,
       updateTag,
       deleteTag,
       addGoal,

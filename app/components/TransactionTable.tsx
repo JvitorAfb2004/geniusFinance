@@ -8,7 +8,7 @@ import { TransactionModal } from './TransactionModal';
 import { MoveTransactionModal } from './MoveTransactionModal';
 import ConfirmModal from './ConfirmModal';
 import { Transaction } from '../types';
-import { isRecurringTransaction } from '../lib/transactionActions';
+import { getEffectiveStatus, isRecurringTransaction, isInstallmentTransaction } from '../lib/transactionActions';
 
 export function TransactionTable({ 
   hideHeaderTitle,
@@ -27,7 +27,7 @@ export function TransactionTable({
   const [filterType, setFilterType] = useState<'ALL' | 'INCOME' | 'EXPENSE'>('ALL');
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilterId, setCategoryFilterId] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'ALL' | 'PAID' | 'PENDING'>('ALL');
+  const [statusFilter, setStatusFilter] = useState<'ALL' | 'PAID' | 'PARTIAL' | 'PENDING'>('ALL');
   const [confirmDelete, setConfirmDelete] = useState<{ tx: Transaction; future: boolean } | null>(null);
   const [sortField, setSortField] = useState<'date' | 'amount'>('date');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
@@ -54,7 +54,7 @@ export function TransactionTable({
     .filter(t => forceFilter ? t.type === forceFilter : (filterType === 'ALL' || t.type === filterType))
     .filter(t => fixedOnly ? t.isFixed : true)
     .filter(t => categoryFilterId ? t.categoryId === categoryFilterId : true)
-    .filter(t => statusFilter === 'ALL' ? true : t.status === statusFilter)
+    .filter(t => statusFilter === 'ALL' ? true : getEffectiveStatus(t) === statusFilter)
     .filter(t => t.title.toLowerCase().includes(searchTerm.toLowerCase()))
     .sort((a, b) => {
       if (sortField === 'date') {
@@ -89,6 +89,12 @@ export function TransactionTable({
     return 'Geral';
   };
 
+  const statusLabel = (status: 'PAID' | 'PARTIAL' | 'PENDING') => {
+    if (status === 'PAID') return 'Pago';
+    if (status === 'PARTIAL') return 'Parcial';
+    return 'Pendente';
+  };
+
   const handleCreate = () => {
     setEditingTx(undefined);
     setIsModalOpen(true);
@@ -97,7 +103,7 @@ export function TransactionTable({
   return (
     <div className="bg-white flex flex-col flex-1 min-h-[300px]">
       <div className="px-1 py-3 border-b border-[#f3f4f2] flex flex-col sm:flex-row sm:items-center sm:justify-between z-10 gap-3">
-        {!hideHeaderTitle && <span className="text-slate-700 font-bold text-[0.85rem] tracking-tight shrink-0">Transações</span>}
+        {!hideHeaderTitle && <span className="text-slate-700 font-bold text-[0.85rem] tracking-tight shrink-0">Lançamentos</span>}
 
         <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-auto sm:ml-auto min-w-0">
           <div className="relative flex-1 sm:flex-none sm:w-32 min-w-[100px]">
@@ -130,11 +136,12 @@ export function TransactionTable({
             aria-label="Filtrar status"
             className="clay-input text-[0.72rem] px-2 py-1.5 font-medium text-slate-600 cursor-pointer shrink-0"
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value as 'ALL' | 'PAID' | 'PENDING')}
+            onChange={(e) => setStatusFilter(e.target.value as 'ALL' | 'PAID' | 'PARTIAL' | 'PENDING')}
           >
             <option value="ALL">Status</option>
             <option value="PAID">Pago</option>
             <option value="PENDING">Pendente</option>
+            <option value="PARTIAL">Parcial</option>
           </select>
           <select
             aria-label="Filtrar categoria"
@@ -227,18 +234,18 @@ export function TransactionTable({
                   </span>
                 </td>
                 <td className="py-4 px-4 border-b border-[#f3f4f2]">
-                    <button
+                  <button
                     type="button"
-                    aria-label={`Marcar ${tx.title} como ${tx.status === 'PAID' ? 'pendente' : 'pago'}`}
+                    aria-label={`Status de ${tx.title}: ${statusLabel(getEffectiveStatus(tx))}. Clique para alternar pagamento.`}
                     onClick={() => toggleStatus(tx.id)}
                     className={cn(
                       "px-2.5 py-0.5 rounded-full text-[0.68rem] font-semibold cursor-pointer border-none transition-all active:scale-95 shadow-[inset_0_1px_2px_rgba(0,0,0,0.06)]",
-                      tx.status === 'PAID'
+                      getEffectiveStatus(tx) === 'PAID'
                         ? 'bg-success-light text-success-dark'
                         : 'bg-warning-light text-warning-dark'
                     )}
                   >
-                    {tx.status === 'PAID' ? 'Pago' : 'Pendente'}
+                    {statusLabel(getEffectiveStatus(tx))}
                   </button>
                 </td>
                 <td className="py-4 px-4 border-b border-[#f3f4f2] text-center whitespace-nowrap">
@@ -323,16 +330,16 @@ export function TransactionTable({
                   <div className="flex items-center gap-1 shrink-0">
                     <button
                       type="button"
-                      aria-label={`Marcar ${tx.title} como ${tx.status === 'PAID' ? 'pendente' : 'pago'}`}
+                      aria-label={`Status de ${tx.title}: ${statusLabel(getEffectiveStatus(tx))}. Clique para alternar pagamento.`}
                       onClick={() => toggleStatus(tx.id)}
                       className={cn(
                         "px-2 py-0.5 rounded-full text-[0.6rem] font-semibold cursor-pointer border-none transition-all active:scale-95 shadow-[inset_0_1px_2px_rgba(0,0,0,0.06)]",
-                        tx.status === 'PAID'
+                        getEffectiveStatus(tx) === 'PAID'
                           ? 'bg-emerald-100 text-emerald-700'
                           : 'bg-amber-100 text-amber-700'
                       )}
                     >
-                      {tx.status === 'PAID' ? 'Pago' : 'Pendente'}
+                      {statusLabel(getEffectiveStatus(tx))}
                     </button>
                     {canMove && (
                       <button type="button" onClick={() => setMoveTx(tx)} title="Mover para outra conta" aria-label={`Mover ${tx.title} para outra conta`} className="text-[#9aa1ac] hover:text-[#1a1d21] p-2 cursor-pointer bg-white rounded-full border-none">
@@ -382,6 +389,20 @@ export function TransactionTable({
           variant="warning"
           onConfirm={() => { deleteTransaction(confirmDelete.tx.id, true); setConfirmDelete(null); }}
           onCancel={() => { deleteTransaction(confirmDelete.tx.id, false); setConfirmDelete(null); }}
+        />
+      )}
+
+      {confirmDelete && confirmDelete.tx.groupId && isInstallmentTransaction(confirmDelete.tx) && (
+        <ConfirmModal
+          title="Excluir parcela"
+          message={`"${confirmDelete.tx.title}" (${confirmDelete.tx.installmentInfo || 'parcelado'}) — escolha o que excluir.`}
+          confirmLabel="Esta e as proximas"
+          cancelLabel="Apenas esta parcela"
+          extraLabel="Todas as parcelas"
+          variant="warning"
+          onConfirm={() => { deleteTransaction(confirmDelete.tx.id, true); setConfirmDelete(null); }}
+          onCancel={() => { deleteTransaction(confirmDelete.tx.id, false); setConfirmDelete(null); }}
+          onExtra={() => { deleteTransaction(confirmDelete.tx.id, 'ALL'); setConfirmDelete(null); }}
         />
       )}
     </div>

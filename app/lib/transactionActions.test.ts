@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { isRecurringTransaction, prepareMoveTransaction } from "./transactionActions";
+import {
+  getEffectiveStatus,
+  getPaidAmount,
+  isInstallmentTransaction,
+  isRecurringTransaction,
+  prepareMoveTransaction,
+} from "./transactionActions";
 import type { Transaction } from "../types";
 
 describe("isRecurringTransaction", () => {
@@ -10,6 +16,57 @@ describe("isRecurringTransaction", () => {
   it("does not treat a standalone or non-fixed transaction as a recurrence", () => {
     expect(isRecurringTransaction({ groupId: undefined, isFixed: true })).toBe(false);
     expect(isRecurringTransaction({ groupId: "group-1", isFixed: false })).toBe(false);
+  });
+});
+
+describe("isInstallmentTransaction", () => {
+  it("identifies grouped non-fixed transactions as installments", () => {
+    expect(isInstallmentTransaction({ groupId: "group-1", isFixed: false })).toBe(true);
+    expect(isInstallmentTransaction({ groupId: "group-1" })).toBe(true);
+  });
+
+  it("does not treat standalone or fixed transactions as installments", () => {
+    expect(isInstallmentTransaction({ groupId: undefined, isFixed: false })).toBe(false);
+    expect(isInstallmentTransaction({ groupId: "group-1", isFixed: true })).toBe(false);
+  });
+});
+
+describe("getEffectiveStatus", () => {
+  it("returns stored status for grouped transactions (fixed/installments)", () => {
+    expect(getEffectiveStatus({ groupId: "g", amount: 100, status: "PAID" })).toBe("PAID");
+    expect(getEffectiveStatus({ groupId: "g", amount: 100, status: "PENDING" })).toBe("PENDING");
+  });
+
+  it("derives PAID when payments cover the amount", () => {
+    expect(
+      getEffectiveStatus({
+        amount: 100,
+        status: "PENDING",
+        payments: [{ amount: 60 }, { amount: 40 }],
+      })
+    ).toBe("PAID");
+  });
+
+  it("derives PARTIAL when payments are less than the amount", () => {
+    expect(
+      getEffectiveStatus({ amount: 100, status: "PENDING", payments: [{ amount: 40 }] })
+    ).toBe("PARTIAL");
+  });
+
+  it("derives PENDING when there are no payments and stored status is PENDING", () => {
+    expect(getEffectiveStatus({ amount: 100, status: "PENDING" })).toBe("PENDING");
+    expect(getEffectiveStatus({ amount: 100, status: "PENDING", payments: [] })).toBe("PENDING");
+  });
+
+  it("keeps stored PAID for legacy avulso without payments (backward compatible)", () => {
+    expect(getEffectiveStatus({ amount: 100, status: "PAID" })).toBe("PAID");
+  });
+});
+
+describe("getPaidAmount", () => {
+  it("sums payment amounts", () => {
+    expect(getPaidAmount({ payments: [{ amount: 30 }, { amount: 12 }] })).toBe(42);
+    expect(getPaidAmount({})).toBe(0);
   });
 });
 
