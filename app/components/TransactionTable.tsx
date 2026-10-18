@@ -7,6 +7,7 @@ import { Trash2, Pencil, Search, Forward, ArrowUpDown, ArrowUp, ArrowDown, Arrow
 import { TransactionModal } from './TransactionModal';
 import { MoveTransactionModal } from './MoveTransactionModal';
 import ConfirmModal from './ConfirmModal';
+import PaymentQuickDialog from './PaymentQuickDialog';
 import { Transaction } from '../types';
 import { getEffectiveStatus, isRecurringTransaction, isInstallmentTransaction } from '../lib/transactionActions';
 
@@ -19,7 +20,7 @@ export function TransactionTable({
   forceFilter?: 'ALL' | 'INCOME' | 'EXPENSE';
   fixedOnly?: boolean;
 }) {
-  const { transactions, activeContext, activeScope, accounts, selectedMonth, toggleStatus, deleteTransaction, updateTransaction, categories, tags } = useFinance();
+  const { transactions, activeContext, activeScope, accounts, selectedMonth, toggleStatus, registerPayment, deleteTransaction, updateTransaction, categories, tags } = useFinance();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTx, setEditingTx] = useState<Transaction | undefined>(undefined);
   const [moveTx, setMoveTx] = useState<Transaction | undefined>(undefined);
@@ -29,8 +30,18 @@ export function TransactionTable({
   const [categoryFilterId, setCategoryFilterId] = useState('');
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'PAID' | 'PARTIAL' | 'PENDING'>('ALL');
   const [confirmDelete, setConfirmDelete] = useState<{ tx: Transaction; future: boolean } | null>(null);
+  const [quickPayment, setQuickPayment] = useState<Transaction | null>(null);
   const [sortField, setSortField] = useState<'date' | 'amount'>('date');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
+
+  // Pago = estorna; pendente/parcial = abre dialog rápido para setar o valor pago/recebido
+  const handleStatusClick = (tx: Transaction) => {
+    if (getEffectiveStatus(tx) === 'PAID') {
+      void toggleStatus(tx.id);
+      return;
+    }
+    setQuickPayment(tx);
+  };
 
   const toggleSort = (field: 'date' | 'amount') => {
     if (sortField === field) {
@@ -236,8 +247,8 @@ export function TransactionTable({
                 <td className="py-4 px-4 border-b border-[#f3f4f2]">
                   <button
                     type="button"
-                    aria-label={`Status de ${tx.title}: ${statusLabel(getEffectiveStatus(tx))}. Clique para alternar pagamento.`}
-                    onClick={() => toggleStatus(tx.id)}
+                    aria-label={`Status de ${tx.title}: ${statusLabel(getEffectiveStatus(tx))}. Clique para registrar valor pago/recebido ou estornar.`}
+                    onClick={() => handleStatusClick(tx)}
                     className={cn(
                       "px-2.5 py-0.5 rounded-full text-[0.68rem] font-semibold cursor-pointer border-none transition-all active:scale-95 shadow-[inset_0_1px_2px_rgba(0,0,0,0.06)]",
                       getEffectiveStatus(tx) === 'PAID'
@@ -330,8 +341,8 @@ export function TransactionTable({
                   <div className="flex items-center gap-1 shrink-0">
                     <button
                       type="button"
-                      aria-label={`Status de ${tx.title}: ${statusLabel(getEffectiveStatus(tx))}. Clique para alternar pagamento.`}
-                      onClick={() => toggleStatus(tx.id)}
+                      aria-label={`Status de ${tx.title}: ${statusLabel(getEffectiveStatus(tx))}. Clique para registrar valor pago/recebido ou estornar.`}
+                      onClick={() => handleStatusClick(tx)}
                       className={cn(
                         "px-2 py-0.5 rounded-full text-[0.6rem] font-semibold cursor-pointer border-none transition-all active:scale-95 shadow-[inset_0_1px_2px_rgba(0,0,0,0.06)]",
                         getEffectiveStatus(tx) === 'PAID'
@@ -366,6 +377,14 @@ export function TransactionTable({
       </div>
 
       {isModalOpen && <TransactionModal initialData={editingTx} onClose={() => setIsModalOpen(false)} />}
+
+      {quickPayment && (
+        <PaymentQuickDialog
+          tx={quickPayment}
+          onConfirm={(amount, date) => { void registerPayment(quickPayment.id, { amount, date }); }}
+          onClose={() => setQuickPayment(null)}
+        />
+      )}
 
       {moveTx && <MoveTransactionModal tx={moveTx} onClose={() => setMoveTx(undefined)} />}
 

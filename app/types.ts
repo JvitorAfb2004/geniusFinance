@@ -371,6 +371,7 @@ export interface FinanceContextState {
   updateTransaction: (id: string, updates: Partial<Transaction>, applyToFuture?: boolean) => Promise<void>;
   deleteTransaction: (id: string, deleteFuture?: boolean | 'ALL') => Promise<void>;
   toggleStatus: (id: string) => Promise<void>;
+  registerPayment: (id: string, payment: { amount: number; date: string }) => Promise<void>;
   moveTransaction: (id: string, targetScope: ActiveScope, date: string) => Promise<void>;
 
   suppliers: Supplier[];

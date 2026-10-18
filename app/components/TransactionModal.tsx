@@ -366,8 +366,8 @@ export function TransactionModal({
         if (supplierId) baseTx.supplierId = supplierId;
       }
 
-      // Avulso em edição: pagamentos governam o status salvo (Parcial fica salvo como Pending)
-      if (initialData?.id && !initialData.groupId) {
+      // Em edição: com pagamentos registrados, o status salvo é governado por eles (Parcial fica Pending)
+      if (initialData?.id && payments.length > 0) {
         baseTx.payments = payments;
         baseTx.status = getEffectiveStatus({ amount: val, status: baseTx.status, payments }) === 'PAID' ? 'PAID' : 'PENDING';
       }
@@ -887,7 +887,7 @@ Sugestão pela descrição: <strong className="text-[#1a1d21]">{suggestedCategor
             </div>
           </div>
 
-          {initialData && !initialData.groupId ? (
+          {initialData ? (<>
             <div className="space-y-2">
               <label className="text-[0.68rem] font-bold text-[#9aa1ac] uppercase tracking-[0.06em]">Pagamentos</label>
               {payments.length > 0 && (
@@ -938,7 +938,22 @@ Sugestão pela descrição: <strong className="text-[#1a1d21]">{suggestedCategor
                 </button>
               </div>
             </div>
-          ) : !initialData ? (
+              {initialData.groupId && initialData.isFixed && (
+                <div className="pt-1">
+                  <label className="flex items-center gap-2 cursor-pointer p-3.5 bg-[#f6f7f9] rounded-xl transition-colors">
+                    <input
+                      type="checkbox"
+                      checked={applyToFuture}
+                      onChange={(e) => setApplyToFuture(e.target.checked)}
+                      className="rounded accent-[#1a1d21]"
+                    />
+                    <span className="text-sm font-semibold text-[#1a1d21]">
+                      Aplicar para as próximas recorrências.
+                    </span>
+                  </label>
+                </div>
+              )}
+          </>) : (
             <div className="space-y-2 pt-1">
               <label className="text-[0.68rem] font-bold text-[#9aa1ac] uppercase tracking-[0.06em]">Recorrência</label>
 <div className="grid grid-cols-3 gap-2">
@@ -1004,22 +1019,6 @@ Sugestão pela descrição: <strong className="text-[#1a1d21]">{suggestedCategor
                 </div>
               )}
             </div>
-          ) : (
-            initialData.groupId && initialData.isFixed && (
-              <div className="pt-1">
-                <label className="flex items-center gap-2 cursor-pointer p-3.5 bg-[#f6f7f9] rounded-xl transition-colors">
-                  <input 
-                    type="checkbox" 
-                    checked={applyToFuture}
-                    onChange={(e) => setApplyToFuture(e.target.checked)}
-                    className="rounded accent-[#1a1d21]"
-                  />
-                  <span className="text-sm font-semibold text-[#1a1d21]">
-                    Aplicar para as próximas recorrências.
-                  </span>
-                </label>
-              </div>
-            )
           )}
 
           {initialData && (

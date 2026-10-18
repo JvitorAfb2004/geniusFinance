@@ -2,6 +2,8 @@
 import { useNavigate } from 'react-router';
 import { useFinance } from '../hooks/useFinance';
 import { formatCurrency, cn } from '../lib/utils';
+import { getPaidAmount } from '../lib/transactionActions';
+import type { Transaction } from '../types';
 import { addDays, endOfDay, format, isSameMonth, isWithinInterval, parseISO, startOfDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Settings2, Wallet, TrendingUp, TrendingDown, DollarSign, Percent, ArrowDownToLine, ArrowUpToLine, CalendarDays, CheckCircle2, Clock3 } from 'lucide-react';
@@ -52,20 +54,26 @@ export function DashboardCards({ valuesVisible = true }: { valuesVisible?: boole
     t.type !== 'CREDIT_CARD' && t.context === activeContext && isSameMonth(parseISO(t.date), selectedMonth)
   );
 
+  // Valor pago/recebido considera pagamentos parciais: registrou R$ 40 de R$ 100 → 40 contam como pago
+  const paidPart = (t: Transaction) => {
+    const paid = getPaidAmount(t);
+    if (paid > 0) return Math.min(paid, t.amount);
+    return t.status === 'PAID' ? t.amount : 0;
+  };
   const incomes = currentMonthTxs.filter((t) => t.type === 'INCOME').reduce((s, t) => s + t.amount, 0);
   const expenses = currentMonthTxs.filter((t) => t.type === 'EXPENSE').reduce((s, t) => s + t.amount, 0);
   const incomesReceived = currentMonthTxs
-    .filter((t) => t.type === 'INCOME' && t.status === 'PAID')
-    .reduce((sum, t) => sum + t.amount, 0);
+    .filter((t) => t.type === 'INCOME')
+    .reduce((sum, t) => sum + paidPart(t), 0);
   const incomesPending = currentMonthTxs
-    .filter((t) => t.type === 'INCOME' && t.status === 'PENDING')
-    .reduce((sum, t) => sum + t.amount, 0);
+    .filter((t) => t.type === 'INCOME')
+    .reduce((sum, t) => sum + Math.max(0, t.amount - paidPart(t)), 0);
   const expensesPaid = currentMonthTxs
-    .filter((t) => t.type !== 'INCOME' && t.status === 'PAID')
-    .reduce((sum, t) => sum + t.amount, 0);
+    .filter((t) => t.type !== 'INCOME')
+    .reduce((sum, t) => sum + paidPart(t), 0);
   const expensesPending = currentMonthTxs
-    .filter((t) => t.type !== 'INCOME' && t.status === 'PENDING')
-    .reduce((sum, t) => sum + t.amount, 0);
+    .filter((t) => t.type !== 'INCOME')
+    .reduce((sum, t) => sum + Math.max(0, t.amount - paidPart(t)), 0);
   const totalExpenses = expenses;
   const monthBalance = incomes - totalExpenses;
 
@@ -76,8 +84,8 @@ export function DashboardCards({ valuesVisible = true }: { valuesVisible?: boole
     t.status === 'PENDING' &&
     isWithinInterval(parseISO(t.date), { start: today, end: nextWeek })
   );
-  const payable7d = upcomingTxs.filter((t) => t.type !== 'INCOME').reduce((sum, t) => sum + t.amount, 0);
-  const receivable7d = upcomingTxs.filter((t) => t.type === 'INCOME').reduce((sum, t) => sum + t.amount, 0);
+  const payable7d = upcomingTxs.filter((t) => t.type !== 'INCOME').reduce((sum, t) => sum + Math.max(0, t.amount - paidPart(t)), 0);
+  const receivable7d = upcomingTxs.filter((t) => t.type === 'INCOME').reduce((sum, t) => sum + Math.max(0, t.amount - paidPart(t)), 0);
 
   const toggleWidget = (id: string) => {
     const next = widgets.includes(id) ? widgets.filter((w) => w !== id) : [...widgets, id];

@@ -4,7 +4,7 @@ import { addMonths, format, parseISO } from 'date-fns';
 import { ContextType, FinanceContextState, Transaction, ViewType, Category, Budget, SpendingLimit, DRESection, SalesTarget, Tag, Supplier, FinancialGoal, Lead, LeadOption, ServiceType, Project, ProjectKanbanSettings, Task, ActiveScope, Account, AccountMember, AccountInvite, AccountRole, MonthlyClosing } from '../types';
 import { auth, db, signInWithGoogle, signOut } from '../lib/firebase';
 import { handleFirestoreError } from '../lib/handleFirestoreError';
-import { getEffectiveStatus, getPaidAmount } from '../lib/transactionActions';
+import { getEffectiveStatus } from '../lib/transactionActions';
 import { DEFAULT_CATEGORIES } from '../lib/categories';
 import { ALL_DEFAULT_LEAD_OPTIONS } from '../lib/leadDefaults';
 import { normalizeProjectKanbanSettings } from '../lib/projectKanbanColumns';
@@ -393,19 +393,34 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
     const tx = transactions.find(t => t.id === id);
     if (!tx) return;
     try {
-      // Avulso: em vez de marcar pago/pendente, registra/estorna pagamentos
-      if (!tx.groupId) {
-        const effective = getEffectiveStatus(tx);
-        if (effective === 'PAID') {
-          await updateTransaction(id, { payments: [], status: 'PENDING' });
+      // Estorno: limpa pagamentos (avulso e recorrência) e volta a pendente
+      if (getEffectiveStatus(tx) === 'PAID') {
+        if (tx.groupId && !(tx.payments || []).length) {
+          await updateTransaction(id, { status: 'PENDING' });
         } else {
-          const paid = getPaidAmount(tx);
-          const nextPayments = [...(tx.payments || []), { id: uuidv4(), amount: tx.amount - paid, date: format(new Date(), 'yyyy-MM-dd') }];
-          await updateTransaction(id, { payments: nextPayments, status: 'PAID' });
+          await updateTransaction(id, { payments: [], status: 'PENDING' });
         }
         return;
       }
-      await updateTransaction(id, { status: tx.status === 'PAID' ? 'PENDING' : 'PAID' });
+      if (tx.groupId) {
+        // Recorrência sem pagamentos: alterna direto (fluxo antigo);
+        // com pagamentos parciais, o valor é registrado pelo dialog rápido/modal
+        await updateTransaction(id, { status: tx.status === 'PAID' ? 'PENDING' : 'PAID' });
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  // Registra valor parcial pago/recebido; payments governam o status efetivo
+  const registerPayment = async (id: string, payment: { amount: number; date: string }) => {
+    if (!user) return;
+    const tx = transactions.find(t => t.id === id);
+    if (!tx) return;
+    const nextPayments = [...(tx.payments || []), { id: uuidv4(), amount: payment.amount, date: payment.date }];
+    const nextStatus = getEffectiveStatus({ amount: tx.amount, status: tx.status, payments: nextPayments }) === 'PAID' ? 'PAID' : 'PENDING';
+    try {
+      await updateTransaction(id, { payments: nextPayments, status: nextStatus });
     } catch (error) {
       console.error(error);
     }
@@ -1265,6 +1280,7 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       updateTransaction,
       deleteTransaction,
       toggleStatus,
+      registerPayment,
       moveTransaction,
       upsertBudget,
       seedDefaultCategories,
