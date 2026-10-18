@@ -70,21 +70,13 @@ service cloud.firestore {
     }
 
     // ── Pagamentos dentro da transação (issueDate/supplier* no próprio doc) ──
-    // Payment { id, amount, date, note? } — app/types.ts
-    function isValidPayment(payment) {
-      return payment is map &&
-        payment.keys().hasAll(['id', 'amount', 'date']) &&
-        payment.keys().hasOnly(['id', 'amount', 'date', 'note']) &&
-        payment.id is string && payment.id.size() > 0 && payment.id.size() <= 128 &&
-        payment.amount is number &&
-        payment.date is string && payment.date.size() <= 20 &&
-        (!('note' in payment) || (payment.note is string && payment.note.size() <= 500));
-    }
 
+    // O compilador de regras do Firestore não suporta lambda (list.every(fn))
+    // nem recursão, então não é possível validar item a item da lista aqui —
+    // validamos tipo e tamanho (teto de 60); o formato de cada pagamento
+    // (id/amount/date/note?) é garantido pelo app (app/types.ts Payment).
     function isValidPaymentList(payments) {
-      return payments is list &&
-        payments.size() <= 200 &&
-        payments.every(function(payment) { return isValidPayment(payment); });
+      return payments is list && payments.size() <= 60;
     }
 
     // Supplier { userId, name, contact?, document?, createdAt, updatedAt } — app/types.ts
