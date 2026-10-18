@@ -17,8 +17,10 @@ export function isInstallmentTransaction(transaction: {
 export type EffectiveStatus = 'PAID' | 'PARTIAL' | 'PENDING';
 
 /**
- * Status calculado. Lançamentos com grupo (fixas/parcelas) usam o status
- * salvo; avulsos derivam dos pagamentos registrados (sum >= valor => PAID).
+ * Status calculado. Lançamentos com grupo (fixas/parcelas) SEM pagamentos usam
+ * o status salvo; avulsos derivam dos pagamentos registrados (sum >= valor => PAID).
+ * Grupo COM pagamentos (pagamento parcial em parcelada/recorrente) também deriva:
+ * sum >= valor => PAID, sum parcial => PARTIAL.
  * Avulso sem pagamento algum mantém o status salvo — lança antigo marcado
  * como Pago continua Pago. (compatibilidade com lançamentos anteriores)
  * Ex.: getEffectiveStatus({ groupId: undefined, amount: 100, payments: [{ id: 'p', amount: 40, date: '2026-10-16' }], status: 'PENDING' }) => 'PARTIAL'
@@ -30,7 +32,7 @@ export function getEffectiveStatus(transaction: {
   status: 'PAID' | 'PENDING';
   payments?: { amount: number }[];
 }): EffectiveStatus {
-  if (transaction.groupId) {
+  if (transaction.groupId && !(transaction.payments && transaction.payments.length > 0)) {
     return transaction.status;
   }
   const payments = transaction.payments || [];

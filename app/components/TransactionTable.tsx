@@ -9,7 +9,14 @@ import { MoveTransactionModal } from './MoveTransactionModal';
 import ConfirmModal from './ConfirmModal';
 import PaymentQuickDialog from './PaymentQuickDialog';
 import { Transaction } from '../types';
-import { getEffectiveStatus, isRecurringTransaction, isInstallmentTransaction } from '../lib/transactionActions';
+
+/** Etiqueta pequena do valor pago/recebido exibida sob o valor principal. null = não mostra. */
+function paidBadge(tx: Transaction) {
+  const paid = getPaidAmount(tx);
+  if (paid <= 0) return null;
+  return `${tx.type === 'INCOME' ? 'Recebido' : 'Pago'} ${formatCurrency(Math.min(paid, tx.amount))}`;
+}
+import { getEffectiveStatus, getPaidAmount, isRecurringTransaction, isInstallmentTransaction } from '../lib/transactionActions';
 
 export function TransactionTable({ 
   hideHeaderTitle,
@@ -236,13 +243,18 @@ export function TransactionTable({
                   {getCategoryName(tx.categoryId)}
                 </td>
                 <td className="py-4 px-4 border-b border-[#f3f4f2] text-right">
-                  <span className={cn(
-                    "font-bold whitespace-nowrap tabular-nums text-[0.9rem]",
-                    tx.type === 'INCOME' ? 'text-[#1a1d21]' : 'text-[#1a1d21]'
-                  )}>
-                    {tx.type === 'INCOME' ? '' : '- '}
-                    {formatCurrency(tx.amount)}
-                  </span>
+                  <div className="flex flex-col items-end">
+                    <span className={cn(
+                      "font-bold whitespace-nowrap tabular-nums text-[0.9rem]",
+                      tx.type === 'INCOME' ? 'text-[#1a1d21]' : 'text-[#1a1d21]'
+                    )}>
+                      {tx.type === 'INCOME' ? '' : '- '}
+                      {formatCurrency(tx.amount)}
+                    </span>
+                    {paidBadge(tx) && (
+                      <span className="text-[0.62rem] font-medium text-emerald-600 whitespace-nowrap">{paidBadge(tx)}</span>
+                    )}
+                  </div>
                 </td>
                 <td className="py-4 px-4 border-b border-[#f3f4f2]">
                   <button
@@ -323,9 +335,14 @@ export function TransactionTable({
                       <span className="text-[0.65rem] text-[#5f6672] bg-white px-2 py-0.5 rounded-full mt-1 inline-block">{tx.installmentInfo}</span>
                     )}
                   </div>
-                  <span className="text-[0.95rem] font-bold tabular-nums whitespace-nowrap shrink-0 text-[#1a1d21]">
-                    {tx.type === 'INCOME' ? '' : '- '}{formatCurrency(tx.amount)}
-                  </span>
+                  <div className="flex flex-col items-end shrink-0">
+                    <span className="text-[0.95rem] font-bold tabular-nums whitespace-nowrap text-[#1a1d21]">
+                      {tx.type === 'INCOME' ? '' : '- '}{formatCurrency(tx.amount)}
+                    </span>
+                    {paidBadge(tx) && (
+                      <span className="text-[0.6rem] font-medium text-emerald-600 whitespace-nowrap">{paidBadge(tx)}</span>
+                    )}
+                  </div>
                 </div>
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-1.5 flex-wrap min-w-0">

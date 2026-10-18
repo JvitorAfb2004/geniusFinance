@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { motion } from 'motion/react';
+import { X } from 'lucide-react';
 import { format } from 'date-fns';
 import { formatCurrency } from '../lib/utils';
 
@@ -45,7 +46,6 @@ export default function PaymentQuickDialog({ tx, onConfirm, onClose }: PaymentQu
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       className="fixed inset-0 z-[60] bg-black/35 flex flex-col items-center justify-center p-4"
-      onClick={onClose}
     >
       <motion.div
         initial={{ opacity: 0, scale: 0.96, y: 15 }}
@@ -56,7 +56,14 @@ export default function PaymentQuickDialog({ tx, onConfirm, onClose }: PaymentQu
         onClick={(e) => e.stopPropagation()}
       >
         <div className="p-6">
-          <h3 className="text-[1.05rem] font-bold text-slate-800 tracking-tight">Valor {label}</h3>
+          <button
+            onClick={onClose}
+            aria-label="Fechar"
+            className="absolute top-4 right-4 w-9 h-9 shrink-0 flex items-center justify-center bg-[#f6f7f9] hover:bg-[#eef0f2] rounded-full text-[#5f6672] hover:text-[#1a1d21] transition-colors cursor-pointer"
+          >
+            <X className="w-4 h-4" />
+          </button>
+          <h3 className="text-[1.05rem] font-bold text-slate-800 tracking-tight pr-10">Valor {label}</h3>
           <p className="text-[0.85rem] text-slate-500 mt-1 leading-relaxed">
             {tx.title} — {label} {formatCurrency(paid)} de {formatCurrency(tx.amount)} · resta {formatCurrency(remaining)}
           </p>

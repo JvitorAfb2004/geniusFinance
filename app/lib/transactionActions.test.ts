@@ -37,6 +37,18 @@ describe("getEffectiveStatus", () => {
     expect(getEffectiveStatus({ groupId: "g", amount: 100, status: "PENDING" })).toBe("PENDING");
   });
 
+  it("grouped transactions with partial payments derive PARTIAL/PAID instead of stored status", () => {
+    expect(
+      getEffectiveStatus({ groupId: "g", amount: 463, status: "PENDING", payments: [{ amount: 200 }] })
+    ).toBe("PARTIAL");
+    expect(
+      getEffectiveStatus({ groupId: "g", amount: 463, status: "PENDING", payments: [{ amount: 463 }] })
+    ).toBe("PAID");
+    expect(
+      getEffectiveStatus({ groupId: "g", amount: 100, status: "PAID", payments: [{ amount: 30 }] })
+    ).toBe("PARTIAL");
+  });
+
   it("derives PAID when payments cover the amount", () => {
     expect(
       getEffectiveStatus({

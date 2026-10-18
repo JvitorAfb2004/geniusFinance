@@ -6,6 +6,7 @@ import { computeDRE } from '../lib/dre';
 import { startOfYear, endOfYear, parseISO, isWithinInterval, eachMonthOfInterval, format, isSameMonth } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { AnimatedNumber } from './AnimatedNumber';
+import { CashFlowCard } from './CashFlowCard';
 
 function formatTooltipCurrency(value: unknown) {
   const numeric = Array.isArray(value) ? Number(value[0]) : Number(value);
@@ -16,6 +17,11 @@ const COLORS = ['#4fb8b2', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'
 
 export function ReportsView() {
   const { transactions, categories, budgets, activeContext, selectedMonth } = useFinance();
+
+  const contextTransactions = useMemo(
+    () => transactions.filter((tx) => tx.context === activeContext),
+    [transactions, activeContext],
+  );
 
   const pieData = useMemo(() => {
     const start = startOfYear(selectedMonth);
@@ -114,6 +120,8 @@ export function ReportsView() {
           <p className="text-lg font-bold font-mono text-slate-700"><AnimatedNumber value={yearTotals.count} kind="number" /></p>
         </div>
       </div>
+
+      <CashFlowCard transactions={contextTransactions} />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         <div className="clay p-6 min-w-0">
