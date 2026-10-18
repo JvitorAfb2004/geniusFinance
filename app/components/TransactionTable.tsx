@@ -27,7 +27,7 @@ export function TransactionTable({
   forceFilter?: 'ALL' | 'INCOME' | 'EXPENSE';
   fixedOnly?: boolean;
 }) {
-  const { transactions, activeContext, activeScope, accounts, selectedMonth, toggleStatus, registerPayment, deleteTransaction, updateTransaction, categories, tags } = useFinance();
+  const { transactions, activeContext, activeScope, accounts, selectedMonth, registerPayment, deleteTransaction, updateTransaction, categories, tags } = useFinance();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTx, setEditingTx] = useState<Transaction | undefined>(undefined);
   const [moveTx, setMoveTx] = useState<Transaction | undefined>(undefined);
@@ -41,12 +41,10 @@ export function TransactionTable({
   const [sortField, setSortField] = useState<'date' | 'amount'>('date');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
 
-  // Pago = estorna; pendente/parcial = abre dialog rápido para setar o valor pago/recebido
+  // Pago: clicar não faz nada (reverter só apagando o pagamento no modal de edição).
+  // Pendente/parcial: abre dialog rápido para setar o valor pago/recebido.
   const handleStatusClick = (tx: Transaction) => {
-    if (getEffectiveStatus(tx) === 'PAID') {
-      void toggleStatus(tx.id);
-      return;
-    }
+    if (getEffectiveStatus(tx) === 'PAID') return;
     setQuickPayment(tx);
   };
 
@@ -257,19 +255,26 @@ export function TransactionTable({
                   </div>
                 </td>
                 <td className="py-4 px-4 border-b border-[#f3f4f2]">
+                  {getEffectiveStatus(tx) === 'PAID' ? (
+                    <span
+                      aria-label={`Status de ${tx.title}: pago.`}
+                      className="px-2.5 py-0.5 rounded-full text-[0.68rem] font-semibold cursor-default border-none bg-success-light text-success-dark shadow-[inset_0_1px_2px_rgba(0,0,0,0.06)]"
+                    >
+                      {statusLabel('PAID')}
+                    </span>
+                  ) : (
                   <button
                     type="button"
-                    aria-label={`Status de ${tx.title}: ${statusLabel(getEffectiveStatus(tx))}. Clique para registrar valor pago/recebido ou estornar.`}
+                    aria-label={`Status de ${tx.title}: ${statusLabel(getEffectiveStatus(tx))}. Clique para registrar valor pago/recebido.`}
                     onClick={() => handleStatusClick(tx)}
                     className={cn(
                       "px-2.5 py-0.5 rounded-full text-[0.68rem] font-semibold cursor-pointer border-none transition-all active:scale-95 shadow-[inset_0_1px_2px_rgba(0,0,0,0.06)]",
-                      getEffectiveStatus(tx) === 'PAID'
-                        ? 'bg-success-light text-success-dark'
-                        : 'bg-warning-light text-warning-dark'
+                      'bg-warning-light text-warning-dark'
                     )}
                   >
                     {statusLabel(getEffectiveStatus(tx))}
                   </button>
+                  )}
                 </td>
                 <td className="py-4 px-4 border-b border-[#f3f4f2] text-center whitespace-nowrap">
                   {canMove && (
@@ -356,19 +361,23 @@ export function TransactionTable({
                     })}
                   </div>
                   <div className="flex items-center gap-1 shrink-0">
+                    {getEffectiveStatus(tx) === 'PAID' ? (
+                      <span
+                        aria-label={`Status de ${tx.title}: pago.`}
+                        className="px-2 py-0.5 rounded-full text-[0.6rem] font-semibold cursor-default border-none bg-emerald-100 text-emerald-700 shadow-[inset_0_1px_2px_rgba(0,0,0,0.06)]"
+                      >
+                        {statusLabel('PAID')}
+                      </span>
+                    ) : (
                     <button
                       type="button"
-                      aria-label={`Status de ${tx.title}: ${statusLabel(getEffectiveStatus(tx))}. Clique para registrar valor pago/recebido ou estornar.`}
+                      aria-label={`Status de ${tx.title}: ${statusLabel(getEffectiveStatus(tx))}. Clique para registrar valor pago/recebido.`}
                       onClick={() => handleStatusClick(tx)}
-                      className={cn(
-                        "px-2 py-0.5 rounded-full text-[0.6rem] font-semibold cursor-pointer border-none transition-all active:scale-95 shadow-[inset_0_1px_2px_rgba(0,0,0,0.06)]",
-                        getEffectiveStatus(tx) === 'PAID'
-                          ? 'bg-emerald-100 text-emerald-700'
-                          : 'bg-amber-100 text-amber-700'
-                      )}
+                      className="px-2 py-0.5 rounded-full text-[0.6rem] font-semibold cursor-pointer border-none transition-all active:scale-95 shadow-[inset_0_1px_2px_rgba(0,0,0,0.06)] bg-amber-100 text-amber-700"
                     >
                       {statusLabel(getEffectiveStatus(tx))}
                     </button>
+                    )}
                     {canMove && (
                       <button type="button" onClick={() => setMoveTx(tx)} title="Mover para outra conta" aria-label={`Mover ${tx.title} para outra conta`} className="text-[#9aa1ac] hover:text-[#1a1d21] p-2 cursor-pointer bg-white rounded-full border-none">
                         <ArrowLeftRight className="w-3.5 h-3.5" />

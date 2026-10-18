@@ -366,10 +366,14 @@ export function TransactionModal({
         if (supplierId) baseTx.supplierId = supplierId;
       }
 
-      // Em edição: com pagamentos registrados, o status salvo é governado por eles (Parcial fica Pending)
-      if (initialData?.id && payments.length > 0) {
+      // Em edição: pagamentos governam o status. Apagar todos no modal e salvar
+      // grava payments:[] e volta a pendente. Avulso antigo pago SEM pagamentos
+      // não é afetado (compatibilidade com lançamentos anteriores).
+      if (initialData?.id && (payments.length > 0 || (initialData.payments || []).length > 0)) {
         baseTx.payments = payments;
-        baseTx.status = getEffectiveStatus({ amount: val, status: baseTx.status, payments }) === 'PAID' ? 'PAID' : 'PENDING';
+        baseTx.status = payments.length === 0
+          ? 'PENDING'
+          : (getEffectiveStatus({ amount: val, status: baseTx.status, payments }) === 'PAID' ? 'PAID' : 'PENDING');
       }
 
       if (initialData?.id) {
