@@ -58,6 +58,18 @@ export function Header({
 
   const pageTitle = pageTitles[location.pathname] || 'Genius Finance';
 
+  // Nav do mês só nas telas cujo conteúdo muda com o mês selecionado.
+  // Switcher de perfil oculto nas telas cujo conteúdo não depende do escopo.
+  const MONTH_NAV_PATHS = new Set([
+    '/dashboard', '/transactions', '/cash-calendar', '/fixed-monthly',
+    '/monthly-closing', '/budget', '/spending-limits', '/sales', '/dre', '/reports',
+  ]);
+  const SCOPE_INDEPENDENT_PATHS = new Set([
+    '/templates', '/subscription', '/report-issue', '/admin/plans', '/admin/subscriptions', '/admin/reports',
+  ]);
+  const showMonthNav = MONTH_NAV_PATHS.has(location.pathname);
+  const showScopeSwitcher = !SCOPE_INDEPENDENT_PATHS.has(location.pathname);
+
   const scopeOptions: { label: string; scope: ActiveScope; role?: string }[] = [
     { label: 'Pessoal', scope: { type: 'PERSONAL', userId: user?.uid || '' } },
   ];
@@ -91,7 +103,8 @@ export function Header({
           )}
         </div>
 
-        <div className="flex items-center gap-1 text-sm font-medium bg-[#f6f7f9] rounded-full px-1.5 sm:px-2 py-1 sm:py-1.5 ml-auto sm:ml-0 shrink-0">
+        {showMonthNav && (
+          <div className="flex items-center gap-1 text-sm font-medium bg-[#f6f7f9] rounded-full px-1.5 sm:px-2 py-1 sm:py-1.5 ml-auto sm:ml-0 shrink-0">
           <button
             type="button"
             onClick={() => setSelectedMonth(subMonths(selectedMonth, 1))}
@@ -112,10 +125,10 @@ export function Header({
             <ChevronRight className="w-4 h-4" />
           </button>
         </div>
-      </div>
+        )}
 
-      <div className="flex gap-2 w-full sm:w-auto items-center">
-        <div className="flex-1 min-w-0 sm:flex-none flex gap-1 p-1 bg-[#f6f7f9] rounded-full overflow-x-auto">
+        {showScopeSwitcher && (
+        <div className="flex-1 min-w-0 sm:flex-none flex gap-1 p-1 ml-auto bg-[#f6f7f9] rounded-full overflow-x-auto">
           {scopeOptions.map((opt) => {
             const isActive = opt.scope.type === 'PERSONAL'
               ? activeScope.type === 'PERSONAL'
@@ -143,16 +156,19 @@ export function Header({
             );
           })}
         </div>
+        )}
 
-        <button
-          type="button"
-          onClick={onToggleDashboardValues}
-          aria-label={dashboardValuesVisible ? 'Ocultar valores' : 'Mostrar valores'}
-          className="h-9 w-9 sm:h-[40px] sm:w-[40px] shrink-0 bg-[#f6f7f9] hover:bg-[#eef0f2] rounded-full text-[#5f6672] hover:text-[#1a1d21] transition-colors cursor-pointer inline-flex items-center justify-center"
-          title={dashboardValuesVisible ? 'Ocultar valores do dashboard' : 'Mostrar valores do dashboard'}
-        >
-          {dashboardValuesVisible ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-        </button>
+        {location.pathname === '/dashboard' && (
+          <button
+            type="button"
+            onClick={onToggleDashboardValues}
+            aria-label={dashboardValuesVisible ? 'Ocultar valores' : 'Mostrar valores'}
+            className="h-9 w-9 sm:h-[40px] sm:w-[40px] shrink-0 bg-[#f6f7f9] hover:bg-[#eef0f2] rounded-full text-[#5f6672] hover:text-[#1a1d21] transition-colors cursor-pointer inline-flex items-center justify-center"
+            title={dashboardValuesVisible ? 'Ocultar valores do dashboard' : 'Mostrar valores do dashboard'}
+          >
+            {dashboardValuesVisible ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+          </button>
+        )}
       </div>
 
       {switchingLabel && <ScopeSwitchModal targetLabel={switchingLabel} />}

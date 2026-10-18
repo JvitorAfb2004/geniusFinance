@@ -41,11 +41,7 @@ export default function TemplatesManager() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-[1.3rem] font-bold text-slate-800 tracking-tight">Modelos de Documentos</h1>
-          <p className="text-[0.82rem] text-slate-500 mt-0.5">Crie modelos com variáveis e gere documentos preenchidos em segundos.</p>
-        </div>
+      <div className="flex justify-end">
         <button onClick={() => setCreating(true)} className="flex items-center gap-2 px-4 py-2.5 bg-primary text-white rounded-xl text-sm font-semibold cursor-pointer hover:bg-primary-dark shadow-sm"><Plus size={16} /> Novo modelo</button>
       </div>
 
