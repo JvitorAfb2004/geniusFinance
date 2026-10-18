@@ -24,6 +24,8 @@ import type {
   ProjectKanbanSettings,
   MonthlyClosing,
   Supplier,
+  DocTemplate,
+  GeneratedDocument,
 } from '../types';
 
 function timestampToISO(ts: unknown): string {
@@ -108,6 +110,50 @@ export const supplierConverter = createConverter<Supplier>(
     name: model.name,
     contact: model.contact,
     document: model.document,
+    createdAt: model.createdAt,
+    updatedAt: model.updatedAt,
+  })
+);
+
+export const templateConverter = createConverter<DocTemplate>(
+  (data, id) => ({
+    id,
+    userId: data.userId,
+    name: data.name,
+    description: data.description,
+    body: data.body || '',
+    createdAt: timestampToISO(data.createdAt),
+    updatedAt: timestampToISO(data.updatedAt),
+  }),
+  (model) => ({
+    userId: model.userId,
+    name: model.name,
+    description: model.description,
+    body: model.body,
+    createdAt: model.createdAt,
+    updatedAt: model.updatedAt,
+  })
+);
+
+export const generatedDocumentConverter = createConverter<GeneratedDocument>(
+  (data, id) => ({
+    id,
+    userId: data.userId,
+    templateId: data.templateId,
+    templateName: data.templateName || '',
+    title: data.title,
+    values: data.values || {},
+    bodyHtml: data.bodyHtml || '',
+    createdAt: timestampToISO(data.createdAt),
+    updatedAt: timestampToISO(data.updatedAt),
+  }),
+  (model) => ({
+    userId: model.userId,
+    templateId: model.templateId,
+    templateName: model.templateName,
+    title: model.title,
+    values: model.values,
+    bodyHtml: model.bodyHtml,
     createdAt: model.createdAt,
     updatedAt: model.updatedAt,
   })
@@ -519,6 +565,8 @@ export type FinanceCollectionName =
   | 'sales-targets'
   | 'tags'
   | 'suppliers'
+  | 'templates'
+  | 'documents'
   | 'goals'
   | 'leads'
   | 'lead-options'
@@ -536,6 +584,8 @@ export const converters: Record<FinanceCollectionName, FirestoreDataConverter<un
   'sales-targets': salesTargetConverter,
   tags: tagConverter,
   suppliers: supplierConverter,
+  templates: templateConverter,
+  documents: generatedDocumentConverter,
   goals: goalConverter,
   leads: leadConverter,
   'lead-options': leadOptionConverter,

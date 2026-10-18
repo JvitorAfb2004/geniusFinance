@@ -198,3 +198,50 @@ input:focus, select:focus, textarea:focus {
 button, .clay, a {
   transition: background-color 180ms ease, color 180ms ease, border-color 180ms ease, transform 180ms ease;
 }
+
+/* -- Gerador de documentos (Modelos) -- */
+.gh-var {
+  background: #eef2ff;
+  color: #3730a6;
+  border-radius: 6px;
+  padding: 0 6px;
+  font-weight: 600;
+  font-size: 0.85em;
+}
+.gh-var-missing { background: #fef3c7; color: #92400e; }
+.gh-var-filled {
+  background: #ecfdf5;
+  color: #065f46;
+  border-radius: 6px;
+  padding: 0 3px;
+}
+.gh-doc-body { line-height: 1.7; color: #1e293b; }
+.gh-doc-body:focus { outline: none; }
+.gh-doc-body h1 { font-size: 1.35em; font-weight: 700; margin: 0.6em 0 0.3em; }
+.gh-doc-body h2 { font-size: 1.15em; font-weight: 700; margin: 0.55em 0 0.25em; }
+.gh-doc-body h3 { font-size: 1em; font-weight: 700; margin: 0.5em 0 0.2em; }
+.gh-doc-body p { margin: 0.35em 0; }
+.gh-doc-body ul, .gh-doc-body ol { margin: 0.35em 0 0.35em 1.4em; }
+.gh-doc-body ul { list-style: disc; }
+.gh-doc-body ol { list-style: decimal; }
+.gh-doc-body a { color: #1d4ed8; text-decoration: underline; }
+
+[contenteditable="true"]:empty::before {
+  content: attr(data-placeholder);
+  color: #94a3b8;
+  pointer-events: none;
+}
+
+@media print {
+  body * { visibility: hidden !important; }
+  .gh-print-area, .gh-print-area * { visibility: visible !important; }
+  .gh-print-area {
+    position: absolute;
+    inset: 0 auto auto 0;
+    width: 100%;
+    padding: 0 !important;
+    background: #fff !important;
+    overflow: visible !important;
+  }
+  .gh-no-print { display: none !important; }
+}

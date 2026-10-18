@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { addMonths, format, parseISO } from 'date-fns';
-import { ContextType, FinanceContextState, Transaction, ViewType, Category, Budget, SpendingLimit, DRESection, SalesTarget, Tag, Supplier, FinancialGoal, Lead, LeadOption, ServiceType, Project, ProjectKanbanSettings, Task, ActiveScope, Account, AccountMember, AccountInvite, AccountRole, MonthlyClosing } from '../types';
+import { ContextType, FinanceContextState, Transaction, ViewType, Category, Budget, SpendingLimit, DRESection, SalesTarget, Tag, Supplier, FinancialGoal, Lead, LeadOption, ServiceType, Project, ProjectKanbanSettings, Task, ActiveScope, Account, AccountMember, AccountInvite, AccountRole, MonthlyClosing, DocTemplate, GeneratedDocument } from '../types';
 import { auth, db, signInWithGoogle, signOut } from '../lib/firebase';
 import { handleFirestoreError } from '../lib/handleFirestoreError';
 import { getEffectiveStatus } from '../lib/transactionActions';
@@ -51,6 +51,8 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
   const [salesTargets, setSalesTargets] = useState<SalesTarget[]>([]);
   const [tags, setTags] = useState<Tag[]>([]);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
+  const [templates, setTemplates] = useState<DocTemplate[]>([]);
+  const [documents, setDocuments] = useState<GeneratedDocument[]>([]);
   const [goals, setGoals] = useState<FinancialGoal[]>([]);
   const [spendingLimits, setSpendingLimits] = useState<SpendingLimit[]>([]);
   const [monthlyClosings, setMonthlyClosings] = useState<MonthlyClosing[]>([]);
@@ -85,6 +87,8 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
         setSalesTargets([]);
         setTags([]);
         setSuppliers([]);
+        setTemplates([]);
+        setDocuments([]);
         setGoals([]);
         setSpendingLimits([]);
         setLeads([]);
@@ -183,6 +187,10 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
   useCollectionListener(user, activeScope, 'tags', setTags);
 
   useCollectionListener(user, activeScope, 'suppliers', setSuppliers);
+
+  useCollectionListener(user, activeScope, 'templates', setTemplates);
+
+  useCollectionListener(user, activeScope, 'documents', setDocuments);
 
   useCollectionListener(user, activeScope, 'goals', setGoals);
 
@@ -730,6 +738,66 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       await batch.commit();
     } catch (error) {
       handleFirestoreError(error, 'create', resolveDataPath(activeScope, user.uid, 'suppliers'), user);
+    }
+  };
+
+  // Templates e documentos gerados — mesmas regras de escopo (personal/account) que suppliers
+  const addTemplate = async (data: Omit<DocTemplate, 'id' | 'userId' | 'createdAt' | 'updatedAt'>) => {
+    if (!user) return;
+    try {
+      const colPath = resolveDataPath(activeScope, user.uid, 'templates');
+      const docRef = doc(collection(db, colPath));
+      const batch = writeBatch(db);
+      batch.set(docRef, { ...data, userId: user.uid, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
+      await batch.commit();
+    } catch (error) {
+      handleFirestoreError(error, 'create', resolveDataPath(activeScope, user.uid, 'templates'), user);
+    }
+  };
+
+  const updateTemplate = async (id: string, updates: Partial<Pick<DocTemplate, 'name' | 'description' | 'body'>>) => {
+    if (!user) return;
+    try {
+      const batch = writeBatch(db);
+      batch.update(doc(db, resolveDataPath(activeScope, user.uid, 'templates'), id), { ...updates, updatedAt: serverTimestamp() });
+      await batch.commit();
+    } catch (error) {
+      handleFirestoreError(error, 'update', `${resolveDataPath(activeScope, user.uid, 'templates')}/${id}`, user);
+    }
+  };
+
+  const deleteTemplate = async (id: string) => {
+    if (!user) return;
+    try {
+      const batch = writeBatch(db);
+      batch.delete(doc(db, resolveDataPath(activeScope, user.uid, 'templates'), id));
+      await batch.commit();
+    } catch (error) {
+      handleFirestoreError(error, 'delete', `${resolveDataPath(activeScope, user.uid, 'templates')}/${id}`, user);
+    }
+  };
+
+  const addGeneratedDocument = async (data: Omit<GeneratedDocument, 'id' | 'userId' | 'createdAt' | 'updatedAt'>) => {
+    if (!user) return;
+    try {
+      const colPath = resolveDataPath(activeScope, user.uid, 'documents');
+      const docRef = doc(collection(db, colPath));
+      const batch = writeBatch(db);
+      batch.set(docRef, { ...data, userId: user.uid, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
+      await batch.commit();
+    } catch (error) {
+      handleFirestoreError(error, 'create', resolveDataPath(activeScope, user.uid, 'documents'), user);
+    }
+  };
+
+  const deleteGeneratedDocument = async (id: string) => {
+    if (!user) return;
+    try {
+      const batch = writeBatch(db);
+      batch.delete(doc(db, resolveDataPath(activeScope, user.uid, 'documents'), id));
+      await batch.commit();
+    } catch (error) {
+      handleFirestoreError(error, 'delete', `${resolveDataPath(activeScope, user.uid, 'documents')}/${id}`, user);
     }
   };
 
@@ -1291,6 +1359,13 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       deleteSalesTarget,
       addTag,
       addSupplier,
+      templates,
+      documents,
+      addTemplate,
+      updateTemplate,
+      deleteTemplate,
+      addGeneratedDocument,
+      deleteGeneratedDocument,
       updateTag,
       deleteTag,
       addGoal,

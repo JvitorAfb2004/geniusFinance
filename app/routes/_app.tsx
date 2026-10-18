@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
-import { Outlet, useNavigate, useLocation, useOutletContext } from "react-router";
+import { Link, Outlet, useNavigate, useLocation, useOutletContext } from "react-router";
 import { useFinance } from "~/hooks/useFinance";
 import { Header } from "~/components/Header";
 import { MobileBottomNav } from "~/components/MobileBottomNav";
 import { getProtectedLoginPath } from "~/lib/authRedirect";
 import {
-  PieChart, List, Calendar, Settings, FileBarChart, X,
+  PieChart, List, Calendar, Settings, FileBarChart, FileText, X,
    Calculator, TrendingUp, Target, Users, Kanban, Layers,
    Bug, Gauge, PanelLeftClose, PanelLeftOpen,
 } from "lucide-react";
@@ -42,7 +42,10 @@ function SidebarItem({ item, isCollapsed, isActive, onClick, badge }: {
   badge?: number;
 }) {
   return (
-    <button onClick={onClick}
+    <Link
+      to={item.path}
+      prefetch="intent"
+      onClick={onClick}
       title={isCollapsed ? item.label : undefined}
       aria-current={isActive ? "page" : undefined}
       className={cn(
@@ -59,7 +62,7 @@ function SidebarItem({ item, isCollapsed, isActive, onClick, badge }: {
           {badge}
         </span>
       )}
-    </button>
+    </Link>
   );
 }
 
@@ -192,6 +195,9 @@ export default function AppLayout() {
               <SidebarItem key={item.path} item={item} isCollapsed={isCollapsed} isActive={isActive(item.path)} onClick={() => navigateTo(item.path)} />
             ))}
           </div>
+
+          <SidebarSection label="Documentos" isCollapsed={isCollapsed} />
+          <SidebarItem item={{ path: "/templates", label: "Modelos", icon: FileText }} isCollapsed={isCollapsed} isActive={isActive("/templates")} onClick={() => navigateTo("/templates")} />
 
           <SidebarSection label="Suporte" isCollapsed={isCollapsed} />
           <SidebarItem item={{ path: "/report-issue", label: "Reportar Problema", icon: Bug }} isCollapsed={isCollapsed} isActive={isActive("/report-issue")} onClick={() => navigateTo("/report-issue")} />

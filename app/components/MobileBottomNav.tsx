@@ -1,4 +1,4 @@
-import { useNavigate, useLocation } from "react-router";
+import { Link, useLocation } from "react-router";
 import { PieChart, List, Calculator, TrendingUp, Kanban } from "lucide-react";
 import { motion } from "motion/react";
 import { cn } from "~/lib/utils";
@@ -10,7 +10,6 @@ interface NavItem {
 }
 
 export function MobileBottomNav() {
-  const navigate = useNavigate();
   const location = useLocation();
 
   const items: NavItem[] = [
@@ -27,10 +26,10 @@ export function MobileBottomNav() {
         {items.map((item) => {
           const isActive = location.pathname === item.path;
           return (
-            <button
+            <Link
               key={item.label}
-              type="button"
-              onClick={() => navigate(item.path)}
+              to={item.path}
+              prefetch="intent"
               aria-current={isActive ? "page" : undefined}
               className={cn(
                 "flex flex-col items-center gap-1 py-1.5 px-4 min-w-0 relative transition-colors duration-200 cursor-pointer border-none bg-transparent rounded-xl",
@@ -53,7 +52,7 @@ export function MobileBottomNav() {
               )}>
                 {item.label}
               </span>
-            </button>
+            </Link>
           );
         })}
       </div>

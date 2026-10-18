@@ -7,6 +7,8 @@ export type FinanceCollectionName =
   | 'sales-targets'
   | 'tags'
   | 'suppliers'
+  | 'templates'
+  | 'documents'
   | 'goals'
   | 'leads'
   | 'lead-options'

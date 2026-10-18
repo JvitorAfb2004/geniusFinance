@@ -34,6 +34,7 @@ export function Header({
   const pageTitles: Record<string, string> = {
     '/dashboard': 'Visão Geral',
     '/transactions': 'Entradas / Saídas',
+    '/templates': 'Modelos de Documentos',
     '/cash-calendar': 'Calendário',
     '/fixed-monthly': 'Fixos Mensais',
     '/credit-cards': 'Cartões de Crédito',

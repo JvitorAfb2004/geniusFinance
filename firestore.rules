@@ -88,6 +88,28 @@ service cloud.firestore {
         (!('document' in data) || (data.document is string && data.document.size() <= 20));
     }
 
+    // DocTemplate { userId, name, description?, body, createdAt, updatedAt } — app/types.ts
+    // (rules-lang sem iteração: corpo do rich text validado por tipo + teto de tamanho)
+    function isValidTemplate(data) {
+      return data.keys().hasAll(['userId', 'name', 'body', 'createdAt', 'updatedAt']) &&
+        data.keys().hasOnly(['userId', 'name', 'description', 'body', 'createdAt', 'updatedAt']) &&
+        data.name is string && data.name.size() > 0 && data.name.size() <= 120 &&
+        (!('description' in data) || (data.description is string && data.description.size() <= 300)) &&
+        data.body is string && data.body.size() > 0 && data.body.size() <= 100000;
+    }
+
+    // GeneratedDocument { userId, templateId?, templateName, title, values(map), bodyHtml, createdAt, updatedAt }
+    // values: mapa nome→string; sem iteração no rules-lang, limitamos a 60 chaves via keys().size().
+    function isValidGeneratedDocument(data) {
+      return data.keys().hasAll(['userId', 'templateName', 'title', 'values', 'bodyHtml', 'createdAt', 'updatedAt']) &&
+        data.keys().hasOnly(['userId', 'templateId', 'templateName', 'title', 'values', 'bodyHtml', 'createdAt', 'updatedAt']) &&
+        (!('templateId' in data) || (data.templateId is string && data.templateId.size() <= 128)) &&
+        data.templateName is string && data.templateName.size() <= 120 &&
+        data.title is string && data.title.size() > 0 && data.title.size() <= 200 &&
+        data.values is map && data.values.keys().size() <= 60 &&
+        data.bodyHtml is string && data.bodyHtml.size() > 0 && data.bodyHtml.size() <= 100000;
+    }
+
     // ── Account-scoped schema validators (no userId==auth.uid requirement) ──
 
     function isValidAccountTransactionKeysSize(data) {
@@ -391,6 +413,42 @@ service cloud.firestore {
         userId == request.auth.uid &&
         isValidId(supplierId) &&
         isValidSupplier(incoming()) &&
+        incoming().userId == existing().userId;
+
+      allow delete: if isSignedIn() && userId == request.auth.uid;
+    }
+
+    match /users/{userId}/templates/{templateId} {
+      allow read: if isSignedIn() && userId == request.auth.uid && resource.data.userId == request.auth.uid;
+
+      allow create: if isSignedIn() &&
+        userId == request.auth.uid &&
+        isValidId(templateId) &&
+        isValidTemplate(incoming()) &&
+        incoming().userId == request.auth.uid;
+
+      allow update: if isSignedIn() &&
+        userId == request.auth.uid &&
+        isValidId(templateId) &&
+        isValidTemplate(incoming()) &&
+        incoming().userId == existing().userId;
+
+      allow delete: if isSignedIn() && userId == request.auth.uid;
+    }
+
+    match /users/{userId}/documents/{documentId} {
+      allow read: if isSignedIn() && userId == request.auth.uid && resource.data.userId == request.auth.uid;
+
+      allow create: if isSignedIn() &&
+        userId == request.auth.uid &&
+        isValidId(documentId) &&
+        isValidGeneratedDocument(incoming()) &&
+        incoming().userId == request.auth.uid;
+
+      allow update: if isSignedIn() &&
+        userId == request.auth.uid &&
+        isValidId(documentId) &&
+        isValidGeneratedDocument(incoming()) &&
         incoming().userId == existing().userId;
 
       allow delete: if isSignedIn() && userId == request.auth.uid;
@@ -845,6 +903,42 @@ service cloud.firestore {
       allow update: if isAccountMember(accountId) &&
         isValidId(supplierId) &&
         isValidSupplier(incoming()) &&
+        incoming().userId == existing().userId &&
+        incoming().createdAt == existing().createdAt;
+
+      allow delete: if isAccountMember(accountId) &&
+        (isAccountOwnerOrAdmin(accountId) || existing().userId == request.auth.uid);
+    }
+
+    match /accounts/{accountId}/templates/{templateId} {
+      allow read: if isAccountMember(accountId);
+
+      allow create: if isAccountMember(accountId) &&
+        isValidId(templateId) &&
+        isValidTemplate(incoming()) &&
+        incoming().userId == request.auth.uid;
+
+      allow update: if isAccountMember(accountId) &&
+        isValidId(templateId) &&
+        isValidTemplate(incoming()) &&
+        incoming().userId == existing().userId &&
+        incoming().createdAt == existing().createdAt;
+
+      allow delete: if isAccountMember(accountId) &&
+        (isAccountOwnerOrAdmin(accountId) || existing().userId == request.auth.uid);
+    }
+
+    match /accounts/{accountId}/documents/{documentId} {
+      allow read: if isAccountMember(accountId);
+
+      allow create: if isAccountMember(accountId) &&
+        isValidId(documentId) &&
+        isValidGeneratedDocument(incoming()) &&
+        incoming().userId == request.auth.uid;
+
+      allow update: if isAccountMember(accountId) &&
+        isValidId(documentId) &&
+        isValidGeneratedDocument(incoming()) &&
         incoming().userId == existing().userId &&
         incoming().createdAt == existing().createdAt;
 

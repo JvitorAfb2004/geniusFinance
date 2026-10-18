@@ -292,6 +292,30 @@ export interface Supplier {
   updatedAt: string;
 }
 
+// Modelo de documento rich text com variáveis {{nome}} — ex.: {{cliente}}, {{valor}}, {{data}}
+export interface DocTemplate {
+  id: string;
+  userId: string;
+  name: string;
+  description?: string;
+  body: string; // HTML rich text (contentEditable) com tokens {{variavel}}
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Documento gerado a partir de um modelo: snapshot do HTML renderizado.
+export interface GeneratedDocument {
+  id: string;
+  userId: string;
+  templateId?: string;
+  templateName: string;
+  title: string;
+  values: Record<string, string>;
+  bodyHtml: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Transaction {
   id: string;
   context: ContextType;
@@ -376,6 +400,14 @@ export interface FinanceContextState {
 
   suppliers: Supplier[];
   addSupplier: (data: Omit<Supplier, 'id' | 'userId' | 'createdAt' | 'updatedAt'>) => Promise<void>;
+
+  templates: DocTemplate[];
+  documents: GeneratedDocument[];
+  addTemplate: (data: Omit<DocTemplate, 'id' | 'userId' | 'createdAt' | 'updatedAt'>) => Promise<void>;
+  updateTemplate: (id: string, updates: Partial<Pick<DocTemplate, 'name' | 'description' | 'body'>>) => Promise<void>;
+  deleteTemplate: (id: string) => Promise<void>;
+  addGeneratedDocument: (data: Omit<GeneratedDocument, 'id' | 'userId' | 'createdAt' | 'updatedAt'>) => Promise<void>;
+  deleteGeneratedDocument: (id: string) => Promise<void>;
 
   upsertBudget: (categoryId: string, plannedAmount: number) => Promise<void>;
   seedDefaultCategories: () => Promise<void>;
