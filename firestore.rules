@@ -69,6 +69,33 @@ service cloud.firestore {
           settings.dashboardAlertsVisibility in ['EVERYONE', 'ADMIN']);
     }
 
+    // ── Pagamentos dentro da transação (issueDate/supplier* no próprio doc) ──
+    // Payment { id, amount, date, note? } — app/types.ts
+    function isValidPayment(payment) {
+      return payment is map &&
+        payment.keys().hasAll(['id', 'amount', 'date']) &&
+        payment.keys().hasOnly(['id', 'amount', 'date', 'note']) &&
+        payment.id is string && payment.id.size() > 0 && payment.id.size() <= 128 &&
+        payment.amount is number &&
+        payment.date is string && payment.date.size() <= 20 &&
+        (!('note' in payment) || (payment.note is string && payment.note.size() <= 500));
+    }
+
+    function isValidPaymentList(payments) {
+      return payments is list &&
+        payments.size() <= 200 &&
+        payments.every(function(payment) { return isValidPayment(payment); });
+    }
+
+    // Supplier { userId, name, contact?, document?, createdAt, updatedAt } — app/types.ts
+    function isValidSupplier(data) {
+      return data.keys().hasAll(['userId', 'name', 'createdAt', 'updatedAt']) &&
+        data.keys().hasOnly(['userId', 'name', 'contact', 'document', 'createdAt', 'updatedAt']) &&
+        data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
+        (!('contact' in data) || (data.contact is string && data.contact.size() <= 200)) &&
+        (!('document' in data) || (data.document is string && data.document.size() <= 20));
+    }
+
     // ── Account-scoped schema validators (no userId==auth.uid requirement) ──
 
     function isValidAccountTransactionKeysSize(data) {
@@ -79,7 +106,11 @@ service cloud.firestore {
       let s4 = s3 + ('categoryId' in data ? 1 : 0);
       let s5 = s4 + ('endDate' in data ? 1 : 0);
       let s6 = s5 + ('tagIds' in data ? 1 : 0);
-      return data.keys().size() == s6;
+      let s7 = s6 + ('issueDate' in data ? 1 : 0);
+      let s8 = s7 + ('supplierId' in data ? 1 : 0);
+      let s9 = s8 + ('supplierName' in data ? 1 : 0);
+      let s10 = s9 + ('payments' in data ? 1 : 0);
+      return data.keys().size() == s10;
     }
 
     function isValidAccountTransaction(data) {
@@ -98,7 +129,11 @@ service cloud.firestore {
       (!('groupId' in data) || (data.groupId is string && data.groupId.size() <= 128)) &&
       (!('installmentInfo' in data) || (data.installmentInfo is string && data.installmentInfo.size() <= 32)) &&
       (!('categoryId' in data) || (data.categoryId is string && data.categoryId.size() <= 128)) &&
-      (!('endDate' in data) || (data.endDate is string && data.endDate.size() <= 20));
+      (!('endDate' in data) || (data.endDate is string && data.endDate.size() <= 20)) &&
+      (!('issueDate' in data) || (data.issueDate is string && data.issueDate.size() <= 20)) &&
+      (!('supplierId' in data) || (data.supplierId is string && data.supplierId.size() <= 128)) &&
+      (!('supplierName' in data) || (data.supplierName is string && data.supplierName.size() <= 200)) &&
+      (!('payments' in data) || isValidPaymentList(data.payments));
     }
 
     function isValidAccountCategory(data) {
@@ -237,7 +272,11 @@ service cloud.firestore {
       let s4 = s3 + ('categoryId' in data ? 1 : 0);
       let s5 = s4 + ('endDate' in data ? 1 : 0);
       let s6 = s5 + ('tagIds' in data ? 1 : 0);
-      return data.keys().size() == s6;
+      let s7 = s6 + ('issueDate' in data ? 1 : 0);
+      let s8 = s7 + ('supplierId' in data ? 1 : 0);
+      let s9 = s8 + ('supplierName' in data ? 1 : 0);
+      let s10 = s9 + ('payments' in data ? 1 : 0);
+      return data.keys().size() == s10;
     }
 
     function isValidTransaction(data) {
@@ -256,7 +295,11 @@ service cloud.firestore {
       (!('groupId' in data) || (data.groupId is string && data.groupId.size() <= 128)) &&
       (!('installmentInfo' in data) || (data.installmentInfo is string && data.installmentInfo.size() <= 32)) &&
       (!('categoryId' in data) || (data.categoryId is string && data.categoryId.size() <= 128)) &&
-      (!('endDate' in data) || (data.endDate is string && data.endDate.size() <= 20));
+      (!('endDate' in data) || (data.endDate is string && data.endDate.size() <= 20)) &&
+      (!('issueDate' in data) || (data.issueDate is string && data.issueDate.size() <= 20)) &&
+      (!('supplierId' in data) || (data.supplierId is string && data.supplierId.size() <= 128)) &&
+      (!('supplierName' in data) || (data.supplierName is string && data.supplierName.size() <= 200)) &&
+      (!('payments' in data) || isValidPaymentList(data.payments));
     }
 
     function isValidCategory(data) {
@@ -319,7 +362,8 @@ service cloud.firestore {
         incoming().createdAt == existing().createdAt &&
         incoming().diff(existing()).affectedKeys().hasOnly([
           'context', 'type', 'title', 'amount', 'date', 'status',
-          'isFixed', 'groupId', 'installmentInfo', 'categoryId', 'endDate', 'tagIds', 'updatedAt'
+          'isFixed', 'groupId', 'installmentInfo', 'categoryId', 'endDate', 'tagIds',
+          'issueDate', 'supplierId', 'supplierName', 'payments', 'updatedAt'
         ]);
 
       allow delete: if isSignedIn() && userId == request.auth.uid;
@@ -340,6 +384,24 @@ service cloud.firestore {
       allow delete: if isSignedIn() &&
         userId == request.auth.uid &&
         existing().isDefault == false;
+    }
+
+    match /users/{userId}/suppliers/{supplierId} {
+      allow read: if isSignedIn() && userId == request.auth.uid && resource.data.userId == request.auth.uid;
+
+      allow create: if isSignedIn() &&
+        userId == request.auth.uid &&
+        isValidId(supplierId) &&
+        isValidSupplier(incoming()) &&
+        incoming().userId == request.auth.uid;
+
+      allow update: if isSignedIn() &&
+        userId == request.auth.uid &&
+        isValidId(supplierId) &&
+        isValidSupplier(incoming()) &&
+        incoming().userId == existing().userId;
+
+      allow delete: if isSignedIn() && userId == request.auth.uid;
     }
 
     function isValidSalesTarget(data) {
@@ -756,7 +818,8 @@ service cloud.firestore {
         incoming().createdAt == existing().createdAt &&
         incoming().diff(existing()).affectedKeys().hasOnly([
           'context', 'type', 'title', 'amount', 'date', 'status',
-          'isFixed', 'groupId', 'installmentInfo', 'categoryId', 'endDate', 'tagIds', 'updatedAt'
+          'isFixed', 'groupId', 'installmentInfo', 'categoryId', 'endDate', 'tagIds',
+          'issueDate', 'supplierId', 'supplierName', 'payments', 'updatedAt'
         ]);
 
       allow delete: if isAccountOwnerOrAdmin(accountId) ||
@@ -776,6 +839,24 @@ service cloud.firestore {
 
       allow delete: if isAccountMember(accountId) &&
         existing().isDefault == false &&
+        (isAccountOwnerOrAdmin(accountId) || existing().userId == request.auth.uid);
+    }
+
+    match /accounts/{accountId}/suppliers/{supplierId} {
+      allow read: if isAccountMember(accountId);
+
+      allow create: if isAccountMember(accountId) &&
+        isValidId(supplierId) &&
+        isValidSupplier(incoming()) &&
+        incoming().userId == request.auth.uid;
+
+      allow update: if isAccountMember(accountId) &&
+        isValidId(supplierId) &&
+        isValidSupplier(incoming()) &&
+        incoming().userId == existing().userId &&
+        incoming().createdAt == existing().createdAt;
+
+      allow delete: if isAccountMember(accountId) &&
         (isAccountOwnerOrAdmin(accountId) || existing().userId == request.auth.uid);
     }
 
