@@ -169,16 +169,16 @@ export function Header({
             {dashboardValuesVisible ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
           </button>
         )}
-
-        {location.pathname === '/templates' && (
-          <Link
-            to="/templates?new=1"
-            className="ml-auto self-end sm:self-auto inline-flex items-center gap-2 px-4 py-2.5 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary-dark shadow-sm shrink-0"
-          >
-            <Plus size={16} /> Novo modelo
-          </Link>
-        )}
       </div>
+
+      {location.pathname === '/templates' && (
+        <Link
+          to="/templates?new=1"
+          className="ml-auto self-end sm:self-auto inline-flex items-center gap-2 px-4 py-2.5 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary-dark shadow-sm shrink-0"
+        >
+          <Plus size={16} /> Novo modelo
+        </Link>
+      )}
 
       {switchingLabel && <ScopeSwitchModal targetLabel={switchingLabel} />}
     </header>
