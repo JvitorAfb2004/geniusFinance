@@ -144,6 +144,7 @@ export const generatedDocumentConverter = createConverter<GeneratedDocument>(
     title: data.title,
     values: data.values || {},
     bodyHtml: data.bodyHtml || '',
+    validationCode: data.validationCode,
     createdAt: timestampToISO(data.createdAt),
     updatedAt: timestampToISO(data.updatedAt),
   }),
@@ -154,6 +155,7 @@ export const generatedDocumentConverter = createConverter<GeneratedDocument>(
     title: model.title,
     values: model.values,
     bodyHtml: model.bodyHtml,
+    validationCode: model.validationCode,
     createdAt: model.createdAt,
     updatedAt: model.updatedAt,
   })

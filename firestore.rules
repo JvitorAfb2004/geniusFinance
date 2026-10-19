@@ -102,8 +102,9 @@ service cloud.firestore {
     // values: mapa nome→string; sem iteração no rules-lang, limitamos a 60 chaves via keys().size().
     function isValidGeneratedDocument(data) {
       return data.keys().hasAll(['userId', 'templateName', 'title', 'values', 'bodyHtml', 'createdAt', 'updatedAt']) &&
-        data.keys().hasOnly(['userId', 'templateId', 'templateName', 'title', 'values', 'bodyHtml', 'createdAt', 'updatedAt']) &&
+        data.keys().hasOnly(['userId', 'templateId', 'templateName', 'title', 'values', 'bodyHtml', 'validationCode', 'createdAt', 'updatedAt']) &&
         (!('templateId' in data) || (data.templateId is string && data.templateId.size() <= 128)) &&
+        (!('validationCode' in data) || (data.validationCode is string && data.validationCode.matches('^[ABCDEFGHJKMNPQRSTUVWXYZ23456789]{5}$'))) &&
         data.templateName is string && data.templateName.size() <= 120 &&
         data.title is string && data.title.size() > 0 && data.title.size() <= 200 &&
         data.values is map && data.values.keys().size() <= 60 &&
@@ -710,6 +711,46 @@ service cloud.firestore {
     match /plans/{planId} {
       allow read: if isSignedIn();
       allow write: if false;
+    }
+
+    // ── Validação pública de documentos (QRCode) ──
+    // get liberado para a página /validar/:code (sem login); list bloqueado para
+    // impedir varredura da coleção. Só metadados — nunca CPF, valores ou corpo.
+    function isValidValidationCode(code) {
+      return code is string && code.matches('^[ABCDEFGHJKMNPQRSTUVWXYZ23456789]{5}$');
+    }
+
+    function isValidDocumentValidation(data) {
+      return data.keys().hasAll(['code', 'documentId', 'title', 'templateName', 'issuedAt', 'createdBy', 'status', 'createdAt']) &&
+        data.keys().hasOnly(['code', 'documentId', 'title', 'templateName', 'issuedAt', 'createdBy', 'issuerName', 'status', 'createdAt']) &&
+        isValidValidationCode(data.code) &&
+        data.documentId is string && data.documentId.size() > 0 && data.documentId.size() <= 128 &&
+        data.title is string && data.title.size() > 0 && data.title.size() <= 200 &&
+        data.templateName is string && data.templateName.size() <= 120 &&
+        data.issuedAt is string && data.issuedAt.size() <= 40 &&
+        data.createdBy is string &&
+        data.status in ['VALID', 'REVOKED'] &&
+        (!('issuerName' in data) || (data.issuerName is string && data.issuerName.size() <= 120));
+    }
+
+    match /document_validations/{code} {
+      allow get: if true;
+      allow list: if false;
+
+      allow create: if isSignedIn() &&
+        isValidValidationCode(code) &&
+        isValidDocumentValidation(incoming()) &&
+        incoming().code == code &&
+        incoming().createdBy == request.auth.uid;
+
+      allow update: if isSignedIn() &&
+        isValidValidationCode(code) &&
+        isValidDocumentValidation(incoming()) &&
+        incoming().code == code &&
+        resource.data.createdBy == request.auth.uid &&
+        incoming().createdBy == resource.data.createdBy;
+
+      allow delete: if isSignedIn() && resource.data.createdBy == request.auth.uid;
     }
 
     // ═══════════════════════════════════════════════════════════

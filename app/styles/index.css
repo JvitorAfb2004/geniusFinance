@@ -226,6 +226,29 @@ button, .clay, a {
 .gh-doc-body ol { list-style: decimal; }
 .gh-doc-body a { color: #1d4ed8; text-decoration: underline; }
 
+/* Rodapé de validação (QRCode + código) — imprime junto com o documento */
+.gh-validation {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 28px;
+  padding-top: 14px;
+  border-top: 1px solid #e2e8f0;
+  color: #475569;
+  font-size: 0.72rem;
+  line-height: 1.45;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+.gh-validation svg { flex-shrink: 0; }
+.gh-validation p { margin: 0; }
+.gh-validation-code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: #1a1d21;
+}
+
 [contenteditable="true"]:empty::before {
   content: attr(data-placeholder);
   color: #94a3b8;
@@ -242,6 +265,19 @@ button, .clay, a {
     padding: 0 !important;
     background: #fff !important;
     overflow: visible !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
   }
   .gh-no-print { display: none !important; }
+
+  /* Impressão: variáveis viram texto puro; sem realce de cor/fundo. */
+  .gh-var, .gh-var-filled {
+    background: transparent !important;
+    color: inherit !important;
+    padding: 0 !important;
+    font-weight: inherit !important;
+  }
+  /* Variável sem valor não imprime nada. */
+  .gh-var-missing { display: none !important; }
 }

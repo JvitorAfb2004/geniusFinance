@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router';
+import { Link, useLocation } from 'react-router';
 import { useFinance } from '../hooks/useFinance';
 import { ActiveScope } from '../types';
-import { ChevronLeft, ChevronRight, Eye, EyeOff, Menu, Building2, User } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Eye, EyeOff, Menu, Building2, User, Plus } from 'lucide-react';
 import { format, addMonths, subMonths } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { ScopeSwitchModal } from './ScopeSwitchModal';
@@ -168,6 +168,15 @@ export function Header({
           >
             {dashboardValuesVisible ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
           </button>
+        )}
+
+        {location.pathname === '/templates' && (
+          <Link
+            to="/templates?new=1"
+            className="ml-auto self-end sm:self-auto inline-flex items-center gap-2 px-4 py-2.5 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary-dark shadow-sm shrink-0"
+          >
+            <Plus size={16} /> Novo modelo
+          </Link>
         )}
       </div>
 

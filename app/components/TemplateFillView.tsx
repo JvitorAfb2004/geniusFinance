@@ -4,6 +4,8 @@ import { motion } from 'motion/react';
 import { ArrowLeft, Copy, FileDown, Loader2, Save } from 'lucide-react';
 import { useFinance } from '../hooks/useFinance';
 import { extractTemplateVars, renderTemplate } from '../lib/docTemplates';
+import { buildValidationUrl, newValidationCode } from '../lib/documentValidation';
+import DocumentValidationFooter from './DocumentValidationFooter';
 import type { DocTemplate } from '../types';
 
 interface TemplateFillViewProps {
@@ -21,24 +23,38 @@ export default function TemplateFillView({ template, onClose }: TemplateFillView
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [copied, setCopied] = useState(false);
+  // Código do QRCode definido uma vez ao abrir: o mesmo vale na impressão e no histórico.
+  const [validationCode] = useState(() => newValidationCode());
+  const [savedId, setSavedId] = useState<string | null>(null);
 
   const renderedHtml = useMemo(() => renderTemplate(template.body, values), [template.body, values]);
+  const origin = typeof window !== 'undefined' ? window.location.origin : '';
+  const validationUrl = useMemo(() => buildValidationUrl(validationCode, origin), [validationCode, origin]);
 
   function setValue(variable: string, value: string) {
     setValues((prev) => ({ ...prev, [variable]: value }));
   }
 
+  // Cria o documento + registro público de validação uma única vez.
+  async function persistDocument(): Promise<string | undefined> {
+    const id = await addGeneratedDocument({
+      templateId: template.id,
+      templateName: template.name,
+      title: title.trim() || template.name,
+      values,
+      bodyHtml: renderedHtml,
+      validationCode,
+    });
+    if (id) setSavedId(id);
+    return id;
+  }
+
   async function handleSave() {
+    if (savedId) { onClose(); return; }
     setSaving(true);
     setError('');
     try {
-      await addGeneratedDocument({
-        templateId: template.id,
-        templateName: template.name,
-        title: title.trim() || template.name,
-        values,
-        bodyHtml: renderedHtml,
-      });
+      await persistDocument();
       onClose();
     } catch (e) {
       setError((e as Error).message);
@@ -47,8 +63,25 @@ export default function TemplateFillView({ template, onClose }: TemplateFillView
     }
   }
 
+  // Impressão só é fiel se o QR existir no registro público: salva antes (uma vez).
+  async function handlePrint() {
+    setError('');
+    if (!savedId) {
+      setSaving(true);
+      try {
+        await persistDocument();
+      } catch (e) {
+        setError((e as Error).message);
+        return;
+      } finally {
+        setSaving(false);
+      }
+    }
+    window.print();
+  }
+
   async function handleCopy() {
-    const preview = document.querySelector('.gh-print-area');
+    const preview = document.querySelector('.gh-doc-content');
     await navigator.clipboard.writeText(preview?.textContent ?? '');
     setCopied(true);
     window.setTimeout(() => setCopied(false), 1500);
@@ -72,8 +105,8 @@ export default function TemplateFillView({ template, onClose }: TemplateFillView
         </div>
         <div className="flex items-center gap-2 gh-no-print">
           <button onClick={handleCopy} className="flex items-center gap-1.5 px-3 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl text-sm font-medium cursor-pointer hover:bg-slate-50"><Copy size={15} />{copied ? 'Copiado!' : 'Copiar'}</button>
-          <button onClick={() => window.print()} className="flex items-center gap-1.5 px-3 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl text-sm font-medium cursor-pointer hover:bg-slate-50"><FileDown size={15} /> Imprimir / PDF</button>
-          <button onClick={handleSave} disabled={saving} className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl text-sm font-semibold cursor-pointer disabled:opacity-60"><Save size={16} />{saving ? 'Salvando...' : 'Salvar histórico'}</button>
+          <button onClick={handlePrint} className="flex items-center gap-1.5 px-3 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl text-sm font-medium cursor-pointer hover:bg-slate-50"><FileDown size={15} /> Imprimir / PDF</button>
+          <button onClick={handleSave} disabled={saving} className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl text-sm font-semibold cursor-pointer disabled:opacity-60"><Save size={16} />{saving ? 'Salvando...' : savedId ? 'Salvo' : 'Salvar histórico'}</button>
         </div>
       </div>
 
@@ -107,9 +140,11 @@ export default function TemplateFillView({ template, onClose }: TemplateFillView
           <div className="mx-auto max-w-3xl">
             <div
               className="gh-print-area gh-doc-body bg-white px-8 py-10 min-h-[60vh] rounded-2xl border border-slate-100 shadow-sm"
-              // HTML gerado pelo próprio app: tokens do modelo + valores escapados em renderTemplate().
-              dangerouslySetInnerHTML={{ __html: renderedHtml }}
-            />
+            >
+              {/* HTML gerado pelo próprio app: tokens do modelo + valores escapados em renderTemplate(). */}
+              <div className="gh-doc-content" dangerouslySetInnerHTML={{ __html: renderedHtml }} />
+              <DocumentValidationFooter code={validationCode} url={validationUrl} />
+            </div>
           </div>
         </div>
       </div>

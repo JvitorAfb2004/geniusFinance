@@ -13,9 +13,11 @@ import { prepareMoveTransaction } from '../lib/transactionActions';
 import type { FinanceCollectionName } from '../lib/pathAdapter';
 import { ensureUserOnboardingDocs } from '../lib/onboarding';
 import { createAccount, getUserAccounts, getAccountMembers, getAccountInvites, migrateUserToAccount, createInvite, getPendingInvites, acceptInvite as acceptInviteSvc, archiveAccount, updateAccountSettings, revokeInvite } from '../lib/accountService';
+import { removeUndefinedFields } from '../lib/removeUndefinedFields';
+import { isValidValidationCode, newValidationCode, normalizeValidationCode } from '../lib/documentValidation';
 import { User, onAuthStateChanged } from 'firebase/auth';
 import {
-  collection, doc, writeBatch, serverTimestamp, onSnapshot, query,
+  collection, doc, getDoc, writeBatch, serverTimestamp, onSnapshot, query,
 } from 'firebase/firestore';
 import { useCollectionListener } from './useCollectionListener';
 import { taskConverter } from '../lib/firestoreConverters';
@@ -748,7 +750,7 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       const colPath = resolveDataPath(activeScope, user.uid, 'templates');
       const docRef = doc(collection(db, colPath));
       const batch = writeBatch(db);
-      batch.set(docRef, { ...data, userId: user.uid, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
+      batch.set(docRef, { ...removeUndefinedFields(data), userId: user.uid, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
       await batch.commit();
     } catch (error) {
       handleFirestoreError(error, 'create', resolveDataPath(activeScope, user.uid, 'templates'), user);
@@ -759,7 +761,7 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
     if (!user) return;
     try {
       const batch = writeBatch(db);
-      batch.update(doc(db, resolveDataPath(activeScope, user.uid, 'templates'), id), { ...updates, updatedAt: serverTimestamp() });
+      batch.update(doc(db, resolveDataPath(activeScope, user.uid, 'templates'), id), { ...removeUndefinedFields(updates), updatedAt: serverTimestamp() });
       await batch.commit();
     } catch (error) {
       handleFirestoreError(error, 'update', `${resolveDataPath(activeScope, user.uid, 'templates')}/${id}`, user);
@@ -782,9 +784,32 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
     try {
       const colPath = resolveDataPath(activeScope, user.uid, 'documents');
       const docRef = doc(collection(db, colPath));
+      const code = normalizeValidationCode(data.validationCode ?? newValidationCode());
+      if (!isValidValidationCode(code)) {
+        throw new Error(`Código de validação inválido: "${code}" (esperado 5 caracteres A-Z/2-9, sem I/L/O/0/1).`);
+      }
       const batch = writeBatch(db);
-      batch.set(docRef, { ...data, userId: user.uid, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
+      batch.set(docRef, {
+        ...removeUndefinedFields(data),
+        validationCode: code,
+        userId: user.uid,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
+      // Registro público enxuto (só metadados) consultado pela página /validar/:code.
+      batch.set(doc(db, 'document_validations', code), removeUndefinedFields({
+        code,
+        documentId: docRef.id,
+        title: data.title,
+        templateName: data.templateName,
+        issuedAt: new Date().toISOString(),
+        createdBy: user.uid,
+        issuerName: user.displayName || undefined,
+        status: 'VALID',
+        createdAt: serverTimestamp(),
+      }));
       await batch.commit();
+      return docRef.id;
     } catch (error) {
       handleFirestoreError(error, 'create', resolveDataPath(activeScope, user.uid, 'documents'), user);
     }
@@ -793,8 +818,14 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
   const deleteGeneratedDocument = async (id: string) => {
     if (!user) return;
     try {
+      const docPath = resolveDataPath(activeScope, user.uid, 'documents');
+      const docRef = doc(db, docPath, id);
+      // Apaga o registro de validação junto: QR órfão não pode continuar "válido".
+      const snapshot = await getDoc(docRef);
+      const code = normalizeValidationCode(String(snapshot.data()?.validationCode ?? ''));
       const batch = writeBatch(db);
-      batch.delete(doc(db, resolveDataPath(activeScope, user.uid, 'documents'), id));
+      batch.delete(docRef);
+      if (isValidValidationCode(code)) batch.delete(doc(db, 'document_validations', code));
       await batch.commit();
     } catch (error) {
       handleFirestoreError(error, 'delete', `${resolveDataPath(activeScope, user.uid, 'documents')}/${id}`, user);

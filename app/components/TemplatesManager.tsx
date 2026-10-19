@@ -1,11 +1,14 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router';
 import { motion } from 'motion/react';
-import { FileText, Plus, Trash2, Edit3, Sparkles, Trash } from 'lucide-react';
+import { FileText, Trash2, Edit3, Sparkles, Trash } from 'lucide-react';
 import { useFinance } from '../hooks/useFinance';
 import TemplateEditor from './TemplateEditor';
 import TemplateFillView from './TemplateFillView';
 import ConfirmModal from './ConfirmModal';
 import { extractTemplateVars } from '../lib/docTemplates';
+import { buildValidationUrl, isValidValidationCode } from '../lib/documentValidation';
+import DocumentValidationFooter from './DocumentValidationFooter';
 import type { DocTemplate } from '../types';
 
 type PendingDelete = { kind: 'template'; item: DocTemplate; name: string } | { kind: 'document'; item: { id: string }; name: string };
@@ -14,11 +17,23 @@ type PendingDelete = { kind: 'template'; item: DocTemplate; name: string } | { k
 // preenchendo as variáveis e mantém o histórico dos documentos criados.
 export default function TemplatesManager() {
   const { templates, documents, addTemplate, updateTemplate, deleteTemplate, deleteGeneratedDocument, loading } = useFinance();
-  const [creating, setCreating] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [creating, setCreating] = useState(searchParams.get('new') === '1');
   const [editing, setEditing] = useState<DocTemplate | null>(null);
   const [filling, setFilling] = useState<DocTemplate | null>(null);
-  const [viewingDoc, setViewingDoc] = useState<{ title: string; bodyHtml: string } | null>(null);
+  const [viewingDoc, setViewingDoc] = useState<{ title: string; bodyHtml: string; validationCode?: string } | null>(null);
   const [pendingDelete, setPendingDelete] = useState<PendingDelete | null>(null);
+
+  // O botão "Novo modelo" vive no Header e sinaliza a ação por ?new=1.
+  useEffect(() => {
+    if (searchParams.get('new') === '1') setCreating(true);
+  }, [searchParams]);
+
+  function closeEditor() {
+    setCreating(false);
+    setEditing(null);
+    if (searchParams.has('new')) setSearchParams({}, { replace: true });
+  }
 
   const sortedDocs = [...documents].sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, 10);
   // Modelos inválidos/vazios não quebram a listagem (body pode faltar em dados antigos).
@@ -41,10 +56,6 @@ export default function TemplatesManager() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex justify-end">
-        <button onClick={() => setCreating(true)} className="flex items-center gap-2 px-4 py-2.5 bg-primary text-white rounded-xl text-sm font-semibold cursor-pointer hover:bg-primary-dark shadow-sm"><Plus size={16} /> Novo modelo</button>
-      </div>
-
       {usableTemplates.length === 0 && !loading && (
         <div className="rounded-2xl border border-slate-100 bg-white p-10 text-center">
           <div className="w-12 h-12 rounded-2xl bg-primary-light flex items-center justify-center mx-auto mb-3"><FileText className="text-primary-dark" size={22} /></div>
@@ -92,7 +103,7 @@ export default function TemplatesManager() {
                   <p className="text-[0.85rem] font-semibold text-slate-800 truncate">{doc.title}</p>
                   <p className="text-[0.7rem] text-slate-500 truncate">{doc.templateName} · {new Date(doc.createdAt).toLocaleString('pt-BR')}</p>
                 </div>
-                <button onClick={() => setViewingDoc({ title: doc.title, bodyHtml: doc.bodyHtml })} className="px-3 py-1.5 text-[0.75rem] font-semibold text-primary-dark bg-primary-light rounded-lg cursor-pointer hover:opacity-80">Ver</button>
+                <button onClick={() => setViewingDoc({ title: doc.title, bodyHtml: doc.bodyHtml, validationCode: doc.validationCode })} className="px-3 py-1.5 text-[0.75rem] font-semibold text-primary-dark bg-primary-light rounded-lg cursor-pointer hover:opacity-80">Ver</button>
                 <button onClick={() => setPendingDelete({ kind: 'document', item: doc, name: doc.title })} aria-label={`Excluir ${doc.title}`} className="w-8 h-8 rounded-lg text-slate-400 hover:bg-danger-light hover:text-danger-dark flex items-center justify-center cursor-pointer"><Trash size={14} /></button>
               </div>
             ))}
@@ -103,7 +114,7 @@ export default function TemplatesManager() {
       {(creating || editing !== null) && (
         <TemplateEditor
           initial={editing}
-          onClose={() => { setCreating(false); setEditing(null); }}
+          onClose={closeEditor}
         />
       )}
 
@@ -117,7 +128,15 @@ export default function TemplatesManager() {
             </div>
           </div>
           <div className="overflow-y-auto p-5 sm:p-8 bg-white">
-            <div className="gh-print-area gh-doc-body mx-auto max-w-3xl bg-white px-8 py-10 min-h-[60vh]" dangerouslySetInnerHTML={{ __html: viewingDoc.bodyHtml }} />
+            <div className="gh-print-area gh-doc-body mx-auto max-w-3xl bg-white px-8 py-10 min-h-[60vh]">
+              <div className="gh-doc-content" dangerouslySetInnerHTML={{ __html: viewingDoc.bodyHtml }} />
+              {viewingDoc.validationCode && isValidValidationCode(viewingDoc.validationCode) && (
+                <DocumentValidationFooter
+                  code={viewingDoc.validationCode}
+                  url={buildValidationUrl(viewingDoc.validationCode, typeof window !== 'undefined' ? window.location.origin : '')}
+                />
+              )}
+            </div>
           </div>
         </div>
       )}

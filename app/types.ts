@@ -312,8 +312,22 @@ export interface GeneratedDocument {
   title: string;
   values: Record<string, string>;
   bodyHtml: string;
+  validationCode?: string; // código público lido pelo QRCode (document_validations/{code})
   createdAt: string;
   updatedAt: string;
+}
+
+// Registro público (sem login) consultado pelo QRCode impresso no documento.
+// Guarda só metadados de autenticidade — nunca CPF, valores ou o corpo do documento.
+export interface DocumentValidation {
+  code: string;
+  documentId: string;
+  title: string;
+  templateName: string;
+  issuedAt: string;
+  createdBy: string;
+  issuerName?: string;
+  status: 'VALID' | 'REVOKED';
 }
 
 export interface Transaction {
@@ -406,7 +420,7 @@ export interface FinanceContextState {
   addTemplate: (data: Omit<DocTemplate, 'id' | 'userId' | 'createdAt' | 'updatedAt'>) => Promise<void>;
   updateTemplate: (id: string, updates: Partial<Pick<DocTemplate, 'name' | 'description' | 'body'>>) => Promise<void>;
   deleteTemplate: (id: string) => Promise<void>;
-  addGeneratedDocument: (data: Omit<GeneratedDocument, 'id' | 'userId' | 'createdAt' | 'updatedAt'>) => Promise<void>;
+  addGeneratedDocument: (data: Omit<GeneratedDocument, 'id' | 'userId' | 'createdAt' | 'updatedAt'>) => Promise<string | undefined>;
   deleteGeneratedDocument: (id: string) => Promise<void>;
 
   upsertBudget: (categoryId: string, plannedAmount: number) => Promise<void>;
