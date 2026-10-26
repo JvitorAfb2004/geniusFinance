@@ -312,6 +312,7 @@ export interface GeneratedDocument {
   title: string;
   values: Record<string, string>;
   bodyHtml: string;
+  notes?: string; // observação livre digitada ao criar/editar (vai no fim do corpo)
   validationCode?: string; // código público lido pelo QRCode (document_validations/{code})
   createdAt: string;
   updatedAt: string;
@@ -421,6 +422,7 @@ export interface FinanceContextState {
   updateTemplate: (id: string, updates: Partial<Pick<DocTemplate, 'name' | 'description' | 'body'>>) => Promise<void>;
   deleteTemplate: (id: string) => Promise<void>;
   addGeneratedDocument: (data: Omit<GeneratedDocument, 'id' | 'userId' | 'createdAt' | 'updatedAt'>) => Promise<string | undefined>;
+  updateGeneratedDocument: (id: string, updates: Partial<Pick<GeneratedDocument, 'title' | 'values' | 'bodyHtml' | 'notes'>>) => Promise<void>;
   deleteGeneratedDocument: (id: string) => Promise<void>;
 
   upsertBudget: (categoryId: string, plannedAmount: number) => Promise<void>;

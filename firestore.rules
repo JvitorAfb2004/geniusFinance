@@ -98,12 +98,13 @@ service cloud.firestore {
         data.body is string && data.body.size() > 0 && data.body.size() <= 100000;
     }
 
-    // GeneratedDocument { userId, templateId?, templateName, title, values(map), bodyHtml, createdAt, updatedAt }
+    // GeneratedDocument { userId, templateId?, templateName, title, values(map), bodyHtml, notes?, createdAt, updatedAt }
     // values: mapa nome→string; sem iteração no rules-lang, limitamos a 60 chaves via keys().size().
     function isValidGeneratedDocument(data) {
       return data.keys().hasAll(['userId', 'templateName', 'title', 'values', 'bodyHtml', 'createdAt', 'updatedAt']) &&
-        data.keys().hasOnly(['userId', 'templateId', 'templateName', 'title', 'values', 'bodyHtml', 'validationCode', 'createdAt', 'updatedAt']) &&
+        data.keys().hasOnly(['userId', 'templateId', 'templateName', 'title', 'values', 'bodyHtml', 'notes', 'validationCode', 'createdAt', 'updatedAt']) &&
         (!('templateId' in data) || (data.templateId is string && data.templateId.size() <= 128)) &&
+        (!('notes' in data) || (data.notes is string && data.notes.size() <= 4000)) &&
         (!('validationCode' in data) || (data.validationCode is string && data.validationCode.matches('^[ABCDEFGHJKMNPQRSTUVWXYZ23456789]{5}$'))) &&
         data.templateName is string && data.templateName.size() <= 120 &&
         data.title is string && data.title.size() > 0 && data.title.size() <= 200 &&

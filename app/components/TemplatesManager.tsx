@@ -9,7 +9,7 @@ import ConfirmModal from './ConfirmModal';
 import { extractTemplateVars } from '../lib/docTemplates';
 import { buildValidationUrl, isValidValidationCode } from '../lib/documentValidation';
 import DocumentValidationFooter from './DocumentValidationFooter';
-import type { DocTemplate } from '../types';
+import type { DocTemplate, GeneratedDocument } from '../types';
 
 type PendingDelete = { kind: 'template'; item: DocTemplate; name: string } | { kind: 'document'; item: { id: string }; name: string };
 
@@ -22,6 +22,7 @@ export default function TemplatesManager() {
   const [editing, setEditing] = useState<DocTemplate | null>(null);
   const [filling, setFilling] = useState<DocTemplate | null>(null);
   const [viewingDoc, setViewingDoc] = useState<{ title: string; bodyHtml: string; validationCode?: string } | null>(null);
+  const [editingDoc, setEditingDoc] = useState<{ doc: GeneratedDocument; template: DocTemplate } | null>(null);
   const [pendingDelete, setPendingDelete] = useState<PendingDelete | null>(null);
 
   // O botão "Novo modelo" vive no Header e sinaliza a ação por ?new=1.
@@ -35,9 +36,17 @@ export default function TemplatesManager() {
     if (searchParams.has('new')) setSearchParams({}, { replace: true });
   }
 
-  const sortedDocs = [...documents].sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, 10);
+  const sortedDocs = [...documents].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   // Modelos inválidos/vazios não quebram a listagem (body pode faltar em dados antigos).
   const usableTemplates = templates.filter((model) => !!model && typeof model.body === 'string');
+
+  // Reabre um documento criado para corrigir variáveis (ex.: local e data).
+  // Sem o modelo original não há tokens para editar: cai no visualizador.
+  function openDocumentEdit(doc: GeneratedDocument) {
+    const model = usableTemplates.find((candidate) => candidate.id === doc.templateId);
+    if (model) setEditingDoc({ doc, template: model });
+    else setViewingDoc({ title: doc.title, bodyHtml: doc.bodyHtml, validationCode: doc.validationCode });
+  }
 
   async function createDemo() {
     await addTemplate({
@@ -53,6 +62,7 @@ export default function TemplatesManager() {
   }
 
   if (filling) return <TemplateFillView key={filling.id} template={filling} onClose={() => setFilling(null)} />;
+  if (editingDoc) return <TemplateFillView key={editingDoc.doc.id} template={editingDoc.template} document={editingDoc.doc} onClose={() => setEditingDoc(null)} />;
 
   return (
     <div className="flex flex-col gap-6">
@@ -103,6 +113,7 @@ export default function TemplatesManager() {
                   <p className="text-[0.85rem] font-semibold text-slate-800 truncate">{doc.title}</p>
                   <p className="text-[0.7rem] text-slate-500 truncate">{doc.templateName} · {new Date(doc.createdAt).toLocaleString('pt-BR')}</p>
                 </div>
+                <button onClick={() => openDocumentEdit(doc)} aria-label={`Editar ${doc.title}`} className="w-8 h-8 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 flex items-center justify-center cursor-pointer"><Edit3 size={14} /></button>
                 <button onClick={() => setViewingDoc({ title: doc.title, bodyHtml: doc.bodyHtml, validationCode: doc.validationCode })} className="px-3 py-1.5 text-[0.75rem] font-semibold text-primary-dark bg-primary-light rounded-lg cursor-pointer hover:opacity-80">Ver</button>
                 <button onClick={() => setPendingDelete({ kind: 'document', item: doc, name: doc.title })} aria-label={`Excluir ${doc.title}`} className="w-8 h-8 rounded-lg text-slate-400 hover:bg-danger-light hover:text-danger-dark flex items-center justify-center cursor-pointer"><Trash size={14} /></button>
               </div>

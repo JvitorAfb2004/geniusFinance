@@ -815,6 +815,29 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  // Edita um documento já criado: regrava valores/título/corpo e mantém o QR
+  // existente (o registro público só troca o título exibido na validação).
+  const updateGeneratedDocument = async (
+    id: string,
+    updates: Partial<Pick<GeneratedDocument, 'title' | 'values' | 'bodyHtml' | 'notes'>>,
+  ) => {
+    if (!user) return;
+    const docPath = resolveDataPath(activeScope, user.uid, 'documents');
+    try {
+      const docRef = doc(db, docPath, id);
+      const snapshot = await getDoc(docRef);
+      const code = normalizeValidationCode(String(snapshot.data()?.validationCode ?? ''));
+      const batch = writeBatch(db);
+      batch.update(docRef, { ...removeUndefinedFields(updates), updatedAt: serverTimestamp() });
+      if (isValidValidationCode(code) && updates.title) {
+        batch.update(doc(db, 'document_validations', code), { title: updates.title });
+      }
+      await batch.commit();
+    } catch (error) {
+      handleFirestoreError(error, 'update', `${docPath}/${id}`, user);
+    }
+  };
+
   const deleteGeneratedDocument = async (id: string) => {
     if (!user) return;
     try {
@@ -1396,6 +1419,7 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       updateTemplate,
       deleteTemplate,
       addGeneratedDocument,
+      updateGeneratedDocument,
       deleteGeneratedDocument,
       updateTag,
       deleteTag,

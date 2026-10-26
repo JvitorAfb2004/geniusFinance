@@ -22,4 +22,9 @@ describe('firestore document validation rules', () => {
   it('aceita validationCode no documento gerado', () => {
     expect(rules).toContain('validationCode');
   });
+
+  it('aceita observação opcional no documento gerado', () => {
+    expect(rules).toContain(`'notes'`);
+    expect(rules).toContain(`data.notes is string && data.notes.size() <= 4000`);
+  });
 });
