@@ -16,6 +16,34 @@ function paidBadge(tx: Transaction) {
   if (paid <= 0) return null;
   return `${tx.type === 'INCOME' ? 'Recebido' : 'Pago'} ${formatCurrency(Math.min(paid, tx.amount))}`;
 }
+
+/** Valor em destaque + nota. Pagamento parcial destaca o saldo em aberto e mostra a conta total - pago. */
+function amountDisplay(tx: Transaction): { main: number; note: string | null; noteClass: string } {
+  const paid = Math.min(getPaidAmount(tx), tx.amount);
+  if (paid > 0 && paid < tx.amount) {
+    return {
+      main: tx.amount - paid,
+      note: `${formatCurrency(tx.amount)} - ${formatCurrency(paid)}`,
+      noteClass: 'text-[#9aa1ac]',
+    };
+  }
+  return { main: tx.amount, note: paidBadge(tx), noteClass: 'text-emerald-600' };
+}
+
+/** Valor principal da linha com a nota abaixo (conta do parcial ou pago/recebido). */
+function TransactionAmount({ tx, compact }: { tx: Transaction; compact?: boolean }) {
+  const { main, note, noteClass } = amountDisplay(tx);
+  return (
+    <div className="flex flex-col items-end">
+      <span className={cn('font-bold whitespace-nowrap tabular-nums text-[#1a1d21]', compact ? 'text-[0.9rem]' : 'text-[0.95rem]')}>
+        {tx.type === 'INCOME' ? '' : '- '}{formatCurrency(main)}
+      </span>
+      {note && (
+        <span className={cn('font-medium whitespace-nowrap', compact ? 'text-[0.62rem]' : 'text-[0.6rem]', noteClass)}>{note}</span>
+      )}
+    </div>
+  );
+}
 import { getEffectiveStatus, getPaidAmount, isRecurringTransaction, isInstallmentTransaction } from '../lib/transactionActions';
 
 export function TransactionTable({ 
@@ -214,7 +242,7 @@ export function TransactionTable({
             ) : visibleTransactions.map((tx) => (
               <tr key={tx.id} className="hover:bg-[#fafaf9] transition-colors duration-150">
                 <td className="py-4 pr-4 border-b border-[#f3f4f2] text-[#5f6672] whitespace-nowrap text-[0.85rem]">
-                  {format(parseISO(tx.date), "dd/MM/yyyy")}
+                  {format(parseISO(tx.date), "dd/MM")}
                 </td>
                 <td className="py-4 px-4 border-b border-[#f3f4f2] font-semibold text-[#1a1d21] text-[0.9rem]">
                   {tx.title}
@@ -241,18 +269,7 @@ export function TransactionTable({
                   {getCategoryName(tx.categoryId)}
                 </td>
                 <td className="py-4 px-4 border-b border-[#f3f4f2] text-right">
-                  <div className="flex flex-col items-end">
-                    <span className={cn(
-                      "font-bold whitespace-nowrap tabular-nums text-[0.9rem]",
-                      tx.type === 'INCOME' ? 'text-[#1a1d21]' : 'text-[#1a1d21]'
-                    )}>
-                      {tx.type === 'INCOME' ? '' : '- '}
-                      {formatCurrency(tx.amount)}
-                    </span>
-                    {paidBadge(tx) && (
-                      <span className="text-[0.62rem] font-medium text-emerald-600 whitespace-nowrap">{paidBadge(tx)}</span>
-                    )}
-                  </div>
+                  <TransactionAmount tx={tx} compact />
                 </td>
                 <td className="py-4 px-4 border-b border-[#f3f4f2]">
                   {getEffectiveStatus(tx) === 'PAID' ? (
@@ -334,19 +351,14 @@ export function TransactionTable({
               <div key={tx.id} className="bg-[#f7f8f7] rounded-2xl p-4">
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs text-[#9aa1ac] font-medium">{format(parseISO(tx.date), "dd/MM/yyyy")}</p>
+                    <p className="text-xs text-[#9aa1ac] font-medium">{format(parseISO(tx.date), "dd/MM")}</p>
                     <p className="text-[0.95rem] font-bold text-[#1a1d21] mt-0.5 truncate">{tx.title}</p>
                     {tx.installmentInfo && (
                       <span className="text-[0.65rem] text-[#5f6672] bg-white px-2 py-0.5 rounded-full mt-1 inline-block">{tx.installmentInfo}</span>
                     )}
                   </div>
                   <div className="flex flex-col items-end shrink-0">
-                    <span className="text-[0.95rem] font-bold tabular-nums whitespace-nowrap text-[#1a1d21]">
-                      {tx.type === 'INCOME' ? '' : '- '}{formatCurrency(tx.amount)}
-                    </span>
-                    {paidBadge(tx) && (
-                      <span className="text-[0.6rem] font-medium text-emerald-600 whitespace-nowrap">{paidBadge(tx)}</span>
-                    )}
+                    <TransactionAmount tx={tx} />
                   </div>
                 </div>
                 <div className="flex items-center justify-between gap-2">
