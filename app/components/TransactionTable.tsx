@@ -98,7 +98,12 @@ export function TransactionTable({
     .filter(t => forceFilter ? t.type === forceFilter : (filterType === 'ALL' || t.type === filterType))
     .filter(t => fixedOnly ? t.isFixed : true)
     .filter(t => categoryFilterId ? t.categoryId === categoryFilterId : true)
-    .filter(t => statusFilter === 'ALL' ? true : getEffectiveStatus(t) === statusFilter)
+    .filter(t => {
+      if (statusFilter === 'ALL') return true;
+      // "Pendente" inclui parciais: ainda há saldo em aberto.
+      if (statusFilter === 'PENDING') return getEffectiveStatus(t) !== 'PAID';
+      return getEffectiveStatus(t) === statusFilter;
+    })
     .filter(t => t.title.toLowerCase().includes(searchTerm.toLowerCase()))
     .sort((a, b) => {
       if (sortField === 'date') {
